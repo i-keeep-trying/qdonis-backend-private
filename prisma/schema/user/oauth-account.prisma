@@ -1,0 +1,20 @@
+/// An external identity (e.g. a Google account) linked to a local user.
+///
+/// `providerAccountId` is the provider's stable subject identifier (`sub`),
+/// never the email: emails can change hands, subjects cannot.
+model OAuthAccount {
+  id                String        @id @default(uuid()) @db.Uuid
+  userId            String        @map("user_id") @db.Uuid
+  provider          OAuthProvider
+  providerAccountId String        @map("provider_account_id")
+  /// Email reported by the provider at the last sign-in, for display/audit.
+  email             String?
+  createdAt         DateTime      @default(now()) @map("created_at")
+  updatedAt         DateTime      @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@unique([userId, provider])
+  @@map("oauth_accounts")
+}

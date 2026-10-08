@@ -1,0 +1,412 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Backend Boilerplate — connection test</title>
+    <style>
+      :root {
+        --bg: #0f1115;
+        --panel: #171a21;
+        --border: #272b35;
+        --text: #e6e8ee;
+        --muted: #9aa3b2;
+        --accent: #5b9dff;
+        --ok: #3fb950;
+        --fail: #f85149;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        padding: 1.5rem;
+        background: var(--bg);
+        color: var(--text);
+        font: 15px/1.5 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+      }
+      h1 { font-size: 1.25rem; margin: 0 0 0.25rem; }
+      p.sub { color: var(--muted); margin: 0 0 1.5rem; }
+      .layout {
+        display: grid;
+        grid-template-columns: minmax(320px, 420px) 1fr;
+        gap: 1.25rem;
+        align-items: start;
+      }
+      @media (max-width: 900px) { .layout { grid-template-columns: 1fr; } }
+      fieldset {
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: var(--panel);
+        padding: 1rem;
+        margin: 0 0 1rem;
+      }
+      legend {
+        padding: 0 0.4rem;
+        color: var(--muted);
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+      label { display: block; margin-bottom: 0.75rem; font-size: 0.85rem; color: var(--muted); }
+      input {
+        width: 100%;
+        margin-top: 0.25rem;
+        padding: 0.5rem 0.6rem;
+        background: #0d0f13;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        color: var(--text);
+        font: inherit;
+      }
+      input:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+      .row { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+      button {
+        padding: 0.5rem 0.75rem;
+        background: #232833;
+        color: var(--text);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        font: inherit;
+        cursor: pointer;
+      }
+      button:hover:not(:disabled) { background: #2c323f; border-color: #3a4150; }
+      button:disabled { opacity: 0.5; cursor: not-allowed; }
+      button.primary { background: var(--accent); border-color: var(--accent); color: #08101f; font-weight: 600; }
+      dl.state { display: grid; grid-template-columns: auto 1fr; gap: 0.35rem 0.75rem; margin: 0; font-size: 0.85rem; }
+      dt { color: var(--muted); }
+      dd { margin: 0; font-family: ui-monospace, "Cascadia Code", Consolas, monospace; word-break: break-all; }
+      #log {
+        display: block;
+        background: #0a0c10;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 0.75rem;
+        height: 70vh;
+        overflow-y: auto;
+        margin: 0;
+        font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
+        font-size: 12.5px;
+        white-space: pre-wrap;
+      }
+      .entry { padding: 0.4rem 0; border-bottom: 1px solid #1b1f27; }
+      .entry:last-child { border-bottom: none; }
+      .ok { color: var(--ok); }
+      .fail { color: var(--fail); }
+      .dim { color: var(--muted); }
+    </style>
+  </head>
+  <body>
+    <h1>Backend Boilerplate — connection test</h1>
+    <p class="sub">
+      Served from a different origin to the API, so this page exercises credentialed
+      CORS, the httpOnly refresh cookie and the full auth flow for real.
+    </p>
+
+    <div class="layout">
+      <div>
+        <fieldset>
+          <legend>Connection</legend>
+          <label>
+            API base URL
+            <input id="apiBase" value="http://localhost:3000/api/v1" />
+          </label>
+          <div class="row">
+            <button id="btnHealth">Check health</button>
+            <button id="btnRunAll" class="primary">Run full flow</button>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Credentials</legend>
+          <label>
+            Email
+            <input id="email" type="email" autocomplete="username" />
+          </label>
+          <label>
+            Password
+            <input id="password" type="password" value="demo-password-123" autocomplete="current-password" />
+          </label>
+          <div class="row">
+            <button id="btnRegister">Register</button>
+            <button id="btnLogin">Log in</button>
+            <button id="btnMe">Who am I</button>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Session</legend>
+          <div class="row">
+            <button id="btnRefresh">Refresh tokens</button>
+            <button id="btnSessions">List sessions</button>
+            <button id="btnLogout">Log out</button>
+            <button id="btnExpire">Forget access token</button>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>pgvector</legend>
+          <div class="row">
+            <button id="btnCreateDoc">Create document</button>
+            <button id="btnSearchDoc">Similarity search</button>
+            <button id="btnListDocs">List documents</button>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Client state</legend>
+          <dl class="state">
+            <dt>Access token</dt>
+            <dd id="stateToken" class="dim">none</dd>
+            <dt>User</dt>
+            <dd id="stateUser" class="dim">not signed in</dd>
+            <dt>Refresh cookie</dt>
+            <dd class="dim">httpOnly — not readable here, by design</dd>
+          </dl>
+        </fieldset>
+      </div>
+
+      <output id="log" aria-live="polite" aria-label="Request log"></output>
+    </div>
+
+    <script type="module">
+      // The access token is held in memory only. Putting it in localStorage would
+      // expose it to any XSS on the page; the refresh token is an httpOnly cookie
+      // for the same reason, and the browser attaches it automatically.
+      let accessToken = null;
+      let currentUser = null;
+
+      const el = (id) => document.getElementById(id);
+      const log = el('log');
+
+      const EMBEDDING_DIMENSIONS = 1536;
+
+      function write(title, detail, kind = 'dim') {
+        const entry = document.createElement('div');
+        entry.className = 'entry';
+        const head = document.createElement('div');
+        head.className = kind;
+        head.textContent = `${new Date().toLocaleTimeString()}  ${title}`;
+        entry.appendChild(head);
+        if (detail !== undefined) {
+          const body = document.createElement('div');
+          body.textContent =
+            typeof detail === 'string' ? detail : JSON.stringify(detail, null, 2);
+          entry.appendChild(body);
+        }
+        log.appendChild(entry);
+        log.scrollTop = log.scrollHeight;
+      }
+
+      function renderState() {
+        el('stateToken').textContent = accessToken
+          ? `${accessToken.slice(0, 24)}…(${accessToken.length} chars)`
+          : 'none';
+        el('stateUser').textContent = currentUser
+          ? `${currentUser.email} (${currentUser.role})`
+          : 'not signed in';
+      }
+
+      const base = () => el('apiBase').value.replace(/\/+$/, '');
+
+      /**
+       * Single request helper.
+       *
+       * `credentials: 'include'` is what lets the refresh cookie travel
+       * cross-origin; without it the browser drops the cookie and /auth/refresh
+       * always fails. On a 401 it transparently refreshes once and retries, which
+       * is the pattern a real frontend would use.
+       */
+      async function api(path, { method = 'GET', body, auth = true, retry = true } = {}) {
+        const headers = {};
+        if (body !== undefined) headers['Content-Type'] = 'application/json';
+        if (auth && accessToken) headers.Authorization = `Bearer ${accessToken}`;
+
+        const response = await fetch(`${base()}${path}`, {
+          method,
+          headers,
+          credentials: 'include',
+          ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
+        });
+
+        if (response.status === 401 && auth && retry && path !== '/auth/refresh') {
+          write(`${method} ${path} -> 401, attempting refresh`, undefined, 'dim');
+          const refreshed = await doRefresh({ quiet: true });
+          if (refreshed) return api(path, { method, body, auth, retry: false });
+        }
+
+        const text = await response.text();
+        let payload = text;
+        try {
+          payload = text ? JSON.parse(text) : null;
+        } catch {
+          /* non-JSON body, keep as text */
+        }
+
+        write(
+          `${method} ${path} -> ${response.status} ${response.statusText}`,
+          payload ?? '(empty body)',
+          response.ok ? 'ok' : 'fail',
+        );
+
+        if (!response.ok) {
+          throw Object.assign(new Error(`HTTP ${response.status}`), {
+            status: response.status,
+            payload,
+          });
+        }
+        return payload;
+      }
+
+      function applyAuth(result) {
+        accessToken = result.accessToken;
+        currentUser = result.user;
+        renderState();
+      }
+
+      async function doRefresh({ quiet = false } = {}) {
+        try {
+          const result = await api('/auth/refresh', {
+            method: 'POST',
+            auth: false,
+            retry: false,
+          });
+          applyAuth(result);
+          return true;
+        } catch {
+          if (!quiet) write('Refresh failed', 'No valid refresh cookie.', 'fail');
+          return false;
+        }
+      }
+
+      /** Deterministic unit vector, so repeated searches score consistently. */
+      function makeEmbedding(seed) {
+        const values = Array.from({ length: EMBEDDING_DIMENSIONS }, (_, i) =>
+          Math.sin((i + 1) * seed * 0.017),
+        );
+        let magnitude = Math.sqrt(values.reduce((sum, v) => sum + v * v, 0));
+        if (magnitude === 0) magnitude = 1;
+        return values.map((v) => v / magnitude);
+      }
+
+      function randomEmail() {
+        return `tester-${Date.now().toString(36)}@example.com`;
+      }
+
+      // --- wiring ----------------------------------------------------------
+      el('email').value = randomEmail();
+      renderState();
+
+      el('btnHealth').onclick = async () => {
+        // /health sits outside the API prefix.
+        const root = base().replace(/\/api\/v\d+$/, '');
+        const response = await fetch(`${root}/health`);
+        const payload = await response.json().catch(() => null);
+        write(`GET /health -> ${response.status}`, payload, response.ok ? 'ok' : 'fail');
+      };
+
+      el('btnRegister').onclick = async () => {
+        const result = await api('/auth/register', {
+          method: 'POST',
+          auth: false,
+          body: {
+            email: el('email').value,
+            password: el('password').value,
+            name: 'Connection Tester',
+          },
+        });
+        applyAuth(result);
+      };
+
+      el('btnLogin').onclick = async () => {
+        const result = await api('/auth/login', {
+          method: 'POST',
+          auth: false,
+          body: { email: el('email').value, password: el('password').value },
+        });
+        applyAuth(result);
+      };
+
+      el('btnMe').onclick = () => api('/auth/me');
+      el('btnSessions').onclick = () => api('/auth/sessions');
+      el('btnRefresh').onclick = () => doRefresh();
+
+      el('btnExpire').onclick = () => {
+        accessToken = null;
+        renderState();
+        write(
+          'Access token discarded',
+          'The next authenticated call should 401 then silently refresh.',
+          'dim',
+        );
+      };
+
+      el('btnLogout').onclick = async () => {
+        await api('/auth/logout', { method: 'POST' });
+        accessToken = null;
+        currentUser = null;
+        renderState();
+      };
+
+      el('btnCreateDoc').onclick = () =>
+        api('/documents', {
+          method: 'POST',
+          body: {
+            title: `Test document ${new Date().toLocaleTimeString()}`,
+            content: 'Created by the connection test page.',
+            embedding: makeEmbedding(1),
+            metadata: { source: 'client-test' },
+          },
+        });
+
+      el('btnSearchDoc').onclick = () =>
+        api('/documents/search', {
+          method: 'POST',
+          body: { embedding: makeEmbedding(1), limit: 5 },
+        });
+
+      el('btnListDocs').onclick = () => api('/documents?skip=0&take=10');
+
+      el('btnRunAll').onclick = async () => {
+        const buttons = [...document.querySelectorAll('button')];
+        buttons.forEach((b) => (b.disabled = true));
+        log.replaceChildren();
+
+        try {
+          write('=== Full flow starting ===', undefined, 'dim');
+          el('email').value = randomEmail();
+
+          await el('btnHealth').onclick();
+          await el('btnRegister').onclick();
+          await el('btnMe').onclick();
+          await el('btnCreateDoc').onclick();
+          await el('btnSearchDoc').onclick();
+          await el('btnListDocs').onclick();
+
+          write('--- testing silent refresh ---', undefined, 'dim');
+          el('btnExpire').onclick();
+          await el('btnMe').onclick();
+
+          write('--- testing explicit rotation ---', undefined, 'dim');
+          await doRefresh();
+          await el('btnSessions').onclick();
+
+          write('--- logging out ---', undefined, 'dim');
+          await el('btnLogout').onclick();
+
+          write('--- verifying access is revoked ---', undefined, 'dim');
+          try {
+            await api('/auth/me', { retry: false });
+            write('Unexpected: /auth/me succeeded after logout', undefined, 'fail');
+          } catch {
+            write('Access correctly refused after logout', undefined, 'ok');
+          }
+
+          write('=== Full flow complete ===', undefined, 'ok');
+        } catch (error) {
+          write('Flow aborted', error?.payload ?? String(error), 'fail');
+        } finally {
+          buttons.forEach((b) => (b.disabled = false));
+        }
+      };
+    </script>
+  </body>
+</html>

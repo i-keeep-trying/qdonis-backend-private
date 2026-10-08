@@ -1,0 +1,26 @@
+/// A purchasable size of a plan, e.g. Pro Basic. Prices are integer cents.
+///
+/// `tokenAllocation` is per month; a yearly purchase grants twelve times it.
+model PlanPackage {
+  /// Stable slug, e.g. `pro-basic`.
+  id                   String   @id
+  planId               String   @map("plan_id")
+  name                 String
+  tokenAllocation      Int      @map("token_allocation")
+  monthlyPriceCents    Int      @map("monthly_price_cents")
+  yearlyPriceCents     Int      @map("yearly_price_cents")
+  stripePriceIdMonthly String?  @unique @map("stripe_price_id_monthly")
+  stripePriceIdYearly  String?  @unique @map("stripe_price_id_yearly")
+  isDefault            Boolean  @default(false) @map("is_default")
+  isActive             Boolean  @default(true) @map("is_active")
+  sortOrder            Int      @default(0) @map("sort_order")
+  createdAt            DateTime @default(now()) @map("created_at")
+  updatedAt            DateTime @updatedAt @map("updated_at")
+
+  plan                   Plan           @relation(fields: [planId], references: [id], onDelete: Restrict)
+  subscriptions          Subscription[] @relation("SubscriptionPackage")
+  scheduledSubscriptions Subscription[] @relation("SubscriptionScheduledPackage")
+
+  @@index([planId])
+  @@map("plan_packages")
+}

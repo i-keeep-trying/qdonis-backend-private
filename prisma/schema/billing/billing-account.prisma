@@ -1,0 +1,14 @@
+/// Per-user billing state. Created lazily on first billing access; its
+/// creation is what grants the one-time signup trial, so a user can never
+/// receive the trial twice.
+model BillingAccount {
+  userId           String    @id @map("user_id") @db.Uuid
+  stripeCustomerId String?   @unique @map("stripe_customer_id")
+  trialGrantedAt   DateTime? @map("trial_granted_at")
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("billing_accounts")
+}

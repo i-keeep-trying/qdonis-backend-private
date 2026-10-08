@@ -1,0 +1,12 @@
+/// Admin-editable runtime settings, keyed by name. Each key has a validated
+/// shape in `src/settings/settings.schema.ts`; unknown keys are rejected.
+model AppSetting {
+  key         String   @id
+  value       Json
+  updatedById String?  @map("updated_by_id") @db.Uuid
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  updatedBy User? @relation(fields: [updatedById], references: [id], onDelete: SetNull)
+
+  @@map("app_settings")
+}

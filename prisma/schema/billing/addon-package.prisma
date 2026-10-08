@@ -1,0 +1,15 @@
+/// A one-time token top-up, sold only to users on an active paid plan.
+model AddonPackage {
+  id            String   @id
+  name          String
+  description   String?
+  tokenAmount   Int      @map("token_amount")
+  priceCents    Int      @map("price_cents")
+  stripePriceId String?  @unique @map("stripe_price_id")
+  isActive      Boolean  @default(true) @map("is_active")
+  sortOrder     Int      @default(0) @map("sort_order")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  @@map("addon_packages")
+}

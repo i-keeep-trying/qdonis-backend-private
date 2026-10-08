@@ -1,0 +1,18 @@
+/// Human-readable subscription history (created, upgraded, renewed, ...).
+model SubscriptionEvent {
+  id             String   @id @default(uuid()) @db.Uuid
+  userId         String   @map("user_id") @db.Uuid
+  subscriptionId String?  @map("subscription_id") @db.Uuid
+  type           String
+  fromPackageId  String?  @map("from_package_id")
+  toPackageId    String?  @map("to_package_id")
+  tokensDelta    Int      @default(0) @map("tokens_delta")
+  metadata       Json     @default("{}")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subscription Subscription? @relation(fields: [subscriptionId], references: [id], onDelete: SetNull)
+
+  @@index([userId, createdAt])
+  @@map("subscription_events")
+}

@@ -1,0 +1,35 @@
+/// A user's plan over time. At most one row per user is ACTIVE or PAST_DUE
+/// (enforced by a partial unique index in the migration).
+///
+/// Stripe is the source of truth for paid subscriptions; this row is updated
+/// only from verified webhooks. Manual/free subscriptions have no Stripe id.
+model Subscription {
+  id                   String             @id @default(uuid()) @db.Uuid
+  userId               String             @map("user_id") @db.Uuid
+  planId               String             @map("plan_id")
+  packageId            String?            @map("package_id")
+  interval             BillingInterval?
+  status               SubscriptionStatus
+  /// Tokens granted per billing period (yearly = 12 × monthly allocation).
+  tokenAllocation      Int                @map("token_allocation")
+  stripeSubscriptionId String?            @unique @map("stripe_subscription_id")
+  currentPeriodStart   DateTime?          @map("current_period_start")
+  currentPeriodEnd     DateTime?          @map("current_period_end")
+  cancelAtPeriodEnd    Boolean            @default(false) @map("cancel_at_period_end")
+  cancelledAt          DateTime?          @map("cancelled_at")
+  /// Downgrade that takes effect at the next renewal.
+  scheduledPackageId   String?            @map("scheduled_package_id")
+  scheduledInterval    BillingInterval?   @map("scheduled_interval")
+  createdAt            DateTime           @default(now()) @map("created_at")
+  updatedAt            DateTime           @updatedAt @map("updated_at")
+
+  user             User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan             Plan                @relation(fields: [planId], references: [id], onDelete: Restrict)
+  package          PlanPackage?        @relation("SubscriptionPackage", fields: [packageId], references: [id], onDelete: Restrict)
+  scheduledPackage PlanPackage?        @relation("SubscriptionScheduledPackage", fields: [scheduledPackageId], references: [id], onDelete: SetNull)
+  tokenBatches     TokenBatch[]
+  events           SubscriptionEvent[]
+
+  @@index([userId, status])
+  @@map("subscriptions")
+}

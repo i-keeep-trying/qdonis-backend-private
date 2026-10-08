@@ -1,0 +1,15 @@
+enum TokenBatchSource {
+  /// Signup bonus, expires after the trial window.
+  TRIAL
+  /// First period of a paid plan.
+  PLAN_PURCHASE
+  RENEWAL
+  /// Token difference granted when upgrading mid-period.
+  UPGRADE
+  /// One-time top-up purchase.
+  ADDON
+  /// Granted manually by an administrator.
+  ADMIN_GRANT
+
+  @@map("token_batch_source")
+}

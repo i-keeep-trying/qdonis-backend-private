@@ -1,0 +1,21 @@
+/// A product tier (free, pro, teams, enterprise). Prices live on its packages.
+model Plan {
+  /// Stable slug, e.g. `pro`.
+  id            String   @id
+  name          String
+  tier          PlanTier
+  /// Marketing bullet points: string[].
+  features      Json     @default("[]")
+  isPopular     Boolean  @default(false) @map("is_popular")
+  /// Sold through sales, never through checkout.
+  isContactOnly Boolean  @default(false) @map("is_contact_only")
+  isActive      Boolean  @default(true) @map("is_active")
+  sortOrder     Int      @default(0) @map("sort_order")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  packages      PlanPackage[]
+  subscriptions Subscription[]
+
+  @@map("plans")
+}

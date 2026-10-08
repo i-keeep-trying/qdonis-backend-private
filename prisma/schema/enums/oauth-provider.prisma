@@ -1,0 +1,5 @@
+enum OAuthProvider {
+  GOOGLE
+
+  @@map("oauth_provider")
+}

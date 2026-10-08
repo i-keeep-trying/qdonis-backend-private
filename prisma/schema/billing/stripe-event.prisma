@@ -1,0 +1,11 @@
+/// Stripe webhook events that have been applied. The row is written in the
+/// same transaction as the event's effects, so an event is applied exactly
+/// once no matter how often Stripe redelivers it.
+model StripeEvent {
+  /// Stripe event id (`evt_...`).
+  id          String   @id
+  type        String
+  processedAt DateTime @default(now()) @map("processed_at")
+
+  @@map("stripe_events")
+}

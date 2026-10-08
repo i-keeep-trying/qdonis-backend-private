@@ -1,0 +1,7 @@
+/// Coarse-grained authorisation level, checked by RolesGuard.
+enum Role {
+  USER
+  ADMIN
+
+  @@map("role")
+}

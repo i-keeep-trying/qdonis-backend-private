@@ -1,0 +1,8 @@
+enum PlanTier {
+  FREE
+  PRO
+  TEAMS
+  ENTERPRISE
+
+  @@map("plan_tier")
+}

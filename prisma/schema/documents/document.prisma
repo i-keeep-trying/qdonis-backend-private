@@ -1,0 +1,25 @@
+/// Demonstrates the pgvector integration end to end.
+///
+/// `embedding` is typed `Unsupported` because Prisma has no native mapping for
+/// pgvector's `vector` type. Consequences worth knowing:
+///   * The column is invisible to Prisma Client selects.
+///   * Reads and writes of the embedding go through parameterised raw SQL —
+///     see DocumentsRepository.
+/// It is nullable so rows can be created with Prisma Client first and embedded
+/// afterwards.
+model Document {
+  id        String                       @id @default(uuid()) @db.Uuid
+  userId    String?                      @map("user_id") @db.Uuid
+  title     String
+  content   String
+  /// vector(1536) — dimension must match EMBEDDING_DIMENSIONS.
+  embedding Unsupported("vector(1536)")?
+  metadata  Json                         @default("{}")
+  createdAt DateTime                     @default(now()) @map("created_at")
+  updatedAt DateTime                     @updatedAt @map("updated_at")
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@map("documents")
+}

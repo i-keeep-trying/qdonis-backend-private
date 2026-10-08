@@ -1,0 +1,24 @@
+{
+  "extends": "./tsconfig.json",
+  // The root tsconfig also covers prisma.config.ts, prisma/seed.ts and tests so
+  // the editor and `npm run typecheck` see them. Including them here would push
+  // the inferred root directory up and emit dist/src/main.js instead of
+  // dist/main.js, which is what `start:prod` expects. Those files run through
+  // ts-node and are never part of the build output.
+  "compilerOptions": {
+    "rootDir": "./src",
+    // `nest build` wipes dist/ first (deleteOutDir); an incremental build
+    // info file outside dist/ would then tell tsc nothing changed and emit
+    // nothing, producing an empty build that still exits 0.
+    "incremental": false
+  },
+  "include": ["src/**/*"],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "test",
+    "prisma",
+    "prisma.config.ts",
+    "**/*.spec.ts"
+  ]
+}

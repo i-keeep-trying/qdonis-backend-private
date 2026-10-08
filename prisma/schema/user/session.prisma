@@ -1,0 +1,40 @@
+/// A single refresh-token generation, created on login and replaced on refresh.
+///
+/// The short-lived access token is a stateless JWT bound to this row through
+/// its `sid` claim, so revoking the row ends access on the next request. Only
+/// the SHA-256 hash of the refresh token is stored, so a database leak does not
+/// yield usable tokens.
+///
+/// Every rotation creates a new row sharing the same `familyId`. Presenting a
+/// refresh token whose row was already rotated (outside the short grace window)
+/// is treated as theft and revokes the whole family.
+model Session {
+  id               String    @id @default(uuid()) @db.Uuid
+  userId           String    @map("user_id") @db.Uuid
+  /// Shared by every rotation descending from one login.
+  familyId         String    @map("family_id") @db.Uuid
+  refreshTokenHash String    @unique @map("refresh_token_hash")
+  /// When the user originally authenticated. Carried across rotations so the
+  /// family has an absolute lifetime no matter how often it is refreshed.
+  authenticatedAt  DateTime  @default(now()) @map("authenticated_at")
+  /// Set when the session is rotated, revoked or logged out.
+  revokedAt        DateTime? @map("revoked_at")
+  /// Why the session ended — useful for auditing and reuse detection.
+  revokedReason    String?   @map("revoked_reason")
+  /// Points at the session that superseded this one during refresh rotation.
+  replacedById     String?   @unique @map("replaced_by_id") @db.Uuid
+  expiresAt        DateTime  @map("expires_at")
+  userAgent        String?   @map("user_agent")
+  ipAddress        String?   @map("ip_address")
+  lastUsedAt       DateTime  @default(now()) @map("last_used_at")
+  createdAt        DateTime  @default(now()) @map("created_at")
+
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  replacedBy Session? @relation("SessionRotation", fields: [replacedById], references: [id], onDelete: SetNull)
+  replaces   Session? @relation("SessionRotation")
+
+  @@index([userId, revokedAt])
+  @@index([familyId])
+  @@index([expiresAt])
+  @@map("sessions")
+}

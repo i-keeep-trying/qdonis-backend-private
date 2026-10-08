@@ -1,0 +1,33 @@
+// ---------------------------------------------------------------------------
+// Datasource and generator — the only file in this folder that is not a model.
+//
+// Prisma 7 reads every *.prisma file under the folder pointed at by `schema` in
+// prisma.config.ts (including subfolders) and concatenates them into one schema
+// before validating. Consequences of that:
+//   * `generator` and `datasource` may be declared exactly once across the
+//     whole folder, which is why they are isolated here.
+//   * Model, enum and type names share a single namespace regardless of file,
+//     so no imports are needed — and no two files may declare the same name.
+// The leading underscore is only a naming convention to keep this file sorted
+// first; Prisma attaches no meaning to file names.
+//
+// Prisma 7 notes:
+//   * The generator provider is `prisma-client` (not the legacy
+//     `prisma-client-js`) and `output` is mandatory. The client is emitted into
+//     src/generated/prisma and imported from there, never from @prisma/client.
+//   * `moduleFormat = "cjs"` keeps the generated client compatible with the
+//     CommonJS output that `nest build` produces.
+//   * The connection URL lives in prisma.config.ts, not in this file.
+// ---------------------------------------------------------------------------
+
+generator client {
+  provider     = "prisma-client"
+  output       = "../../src/generated/prisma"
+  moduleFormat = "cjs"
+  runtime      = "nodejs"
+}
+
+datasource db {
+  provider = "postgresql"
+  // Connection URLs are configured in prisma.config.ts (Prisma 7).
+}

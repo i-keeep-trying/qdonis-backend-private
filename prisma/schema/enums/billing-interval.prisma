@@ -1,0 +1,6 @@
+enum BillingInterval {
+  MONTHLY
+  YEARLY
+
+  @@map("billing_interval")
+}

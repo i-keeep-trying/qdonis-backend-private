@@ -1,0 +1,25 @@
+/// A grant of tokens. The balance is the sum of `granted - used` over batches
+/// that have not expired. Usage drains batches that expire soonest first,
+/// then non-expiring ones oldest first.
+///
+/// A batch from the current billing period has no `expiresAt`; when the
+/// period rolls over (renewal, downgrade, cancellation) it starts expiring on
+/// `scheduledExpiryAt`. A CHECK constraint keeps 0 <= used <= granted.
+model TokenBatch {
+  id                String           @id @default(uuid()) @db.Uuid
+  userId            String           @map("user_id") @db.Uuid
+  subscriptionId    String?          @map("subscription_id") @db.Uuid
+  source            TokenBatchSource
+  tokensGranted     Int              @map("tokens_granted")
+  tokensUsed        Int              @default(0) @map("tokens_used")
+  grantedAt         DateTime         @default(now()) @map("granted_at")
+  expiresAt         DateTime?        @map("expires_at")
+  scheduledExpiryAt DateTime?        @map("scheduled_expiry_at")
+  note              String?
+
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subscription Subscription? @relation(fields: [subscriptionId], references: [id], onDelete: SetNull)
+
+  @@index([userId, expiresAt])
+  @@map("token_batches")
+}

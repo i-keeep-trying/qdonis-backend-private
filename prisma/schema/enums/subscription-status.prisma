@@ -1,0 +1,11 @@
+/// Local view of a subscription. Mirrors the Stripe states that matter here.
+enum SubscriptionStatus {
+  /// Paid up (or a free/manual plan).
+  ACTIVE
+  /// Latest renewal failed; Stripe is retrying. Tokens remain usable.
+  PAST_DUE
+  /// Ended. Tokens left over start expiring on their scheduled date.
+  CANCELLED
+
+  @@map("subscription_status")
+}

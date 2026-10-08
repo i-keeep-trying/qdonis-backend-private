@@ -1,0 +1,40 @@
+/// An application user.
+///
+/// `passwordHash` holds an Argon2id digest and is null for accounts that only
+/// sign in through an OAuth provider (see `OAuthAccount`). Such a user can
+/// set a password later through the password-reset flow.
+model User {
+  id                  String    @id @default(uuid()) @db.Uuid
+  /// Stored trimmed and lower-cased, so uniqueness is case-insensitive.
+  email               String    @unique
+  passwordHash        String?   @map("password_hash")
+  name                String?
+  avatarUrl           String?   @map("avatar_url")
+  role                Role      @default(USER)
+  isActive            Boolean   @default(true) @map("is_active")
+  /// Null until the user proves inbox ownership (verification link, password
+  /// reset, or a verified Google identity).
+  emailVerifiedAt     DateTime? @map("email_verified_at")
+  /// Consecutive failed password checks since the last success or lock.
+  failedLoginAttempts Int       @default(0) @map("failed_login_attempts")
+  /// Password logins are refused until this instant.
+  lockedUntil         DateTime? @map("locked_until")
+  passwordChangedAt   DateTime? @map("password_changed_at")
+  lastLoginAt         DateTime? @map("last_login_at")
+  createdAt           DateTime  @default(now()) @map("created_at")
+  updatedAt           DateTime  @updatedAt @map("updated_at")
+
+  sessions      Session[]
+  authTokens    AuthToken[]
+  oauthAccounts OAuthAccount[]
+  documents     Document[]
+
+  billingAccount     BillingAccount?
+  subscriptions      Subscription[]
+  tokenBatches       TokenBatch[]
+  tokenLedger        TokenLedgerEntry[]
+  subscriptionEvents SubscriptionEvent[]
+  updatedSettings    AppSetting[]
+
+  @@map("users")
+}

@@ -1,0 +1,33 @@
+# dependencies
+/node_modules
+
+# build output
+/dist
+/build
+*.tsbuildinfo
+
+# Prisma generated client (regenerated via `npm run prisma:generate`)
+/src/generated
+
+# environment / secrets
+.env
+.env.*
+!.env.example
+
+# test + coverage
+/coverage
+/.nyc_output
+
+# logs
+*.log
+logs/
+.pgvector-install.log
+
+# editor / OS
+.DS_Store
+Thumbs.db
+.idea/
+*.swp
+
+# misc
+.eslintcache

@@ -1,0 +1,6 @@
+enum AuthTokenType {
+  EMAIL_VERIFICATION
+  PASSWORD_RESET
+
+  @@map("auth_token_type")
+}
