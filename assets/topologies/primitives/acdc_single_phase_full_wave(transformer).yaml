@@ -1,0 +1,147 @@
+id: acdc_single_phase_full_wave(transformer)
+name: Single Phase Full Wave (Transformer) Rectifier
+description: Full wave bridge rectifier utilizing an isolation transformer.
+components:
+- ref: GND
+  type: node
+  params:
+    node_type: ground
+- ref: VAC
+  type: node
+  role: voltage_source
+  params:
+    node_type: voltage_source
+    source: sine
+    offset: 0
+    amplitude: 24
+    frequency: 160
+- ref: R_PRI
+  type: resistor
+  params:
+    resistance: 0.001
+- ref: TX
+  type: transformer
+  params:
+    Lm_primary: 0.01
+    turns_ratio: 1.0
+    k_coupling: 1.0
+    phase: same
+- ref: R_SEC
+  type: resistor
+  params:
+    resistance: 0.001
+- ref: D1
+  type: diode
+  params:
+    Is: 3.17e-05
+    Rs: 0.051
+    n: 1.373
+    Cjo: 1.6e-10
+    Tt: 0
+- ref: D2
+  type: diode
+  params:
+    Is: 3.17e-05
+    Rs: 0.051
+    n: 1.373
+    Cjo: 1.6e-10
+    Tt: 0
+- ref: D3
+  type: diode
+  params:
+    Is: 3.17e-05
+    Rs: 0.051
+    n: 1.373
+    Cjo: 1.6e-10
+    Tt: 0
+- ref: D4
+  type: diode
+  params:
+    Is: 3.17e-05
+    Rs: 0.051
+    n: 1.373
+    Cjo: 1.6e-10
+    Tt: 0
+- ref: R_LOAD
+  type: resistor
+  params:
+    resistance: 9.0
+- ref: C_OUT
+  type: capacitor
+  params:
+    capacitance: 0.0022
+nets:
+- - - GND
+    - pin
+  - - TX
+    - S2
+  - - D2
+    - cathode
+  - - D4
+    - anode
+- - - D1
+    - anode
+  - - D2
+    - anode
+  - - R_LOAD
+    - neg
+  - - C_OUT
+    - neg
+- - - D1
+    - cathode
+  - - D3
+    - anode
+  - - R_SEC
+    - pin1
+- - - D3
+    - cathode
+  - - D4
+    - cathode
+  - - R_LOAD
+    - pos
+  - - C_OUT
+    - pos
+- - - VAC
+    - +
+  - - R_PRI
+    - neg
+- - - VAC
+    - '-'
+  - - TX
+    - P1
+- - - TX
+    - P2
+  - - R_PRI
+    - pos
+- - - TX
+    - S1
+  - - R_SEC
+    - pin2
+analysis:
+  transient:
+    requirements:
+    - rid: tr_single_phase_fw
+      requirement: Verify full wave rectification via isolated transformer.
+      environment:
+      - ref: time_domain
+        t_step: 1.0e-06
+        t_stop: 0.1
+        t_start: 0.05
+        t_max_step: 1.0e-06
+      measurement:
+      - ref: VOUT
+        plot: true
+        quantity: voltage
+        nets:
+        - - R_LOAD
+          - pos
+        - - R_LOAD
+          - neg
+        data:
+        - name: Vout_avg
+          spice_command: avg
+          description: Average Output Voltage in steady state
+      outputs:
+      - var: vout_avg_v
+        formula: abs([Vout_avg])
+        description: Average Output Voltage

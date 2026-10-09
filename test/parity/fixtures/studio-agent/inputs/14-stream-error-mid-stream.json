@@ -1,0 +1,12 @@
+{
+  "name": "14-stream-error-mid-stream",
+  "description": "The provider fails after two events: the text already streamed stays, then one error event (no tool_call, no done).",
+  "messages": [{ "role": "user", "content": [{ "type": "text", "text": "Simulate it." }] }],
+  "project_state": {},
+  "bedrock_stream": [
+    { "messageStart": { "role": "assistant" } },
+    { "contentBlockDelta": { "contentBlockIndex": 0, "delta": { "text": "Starting" } } },
+    { "contentBlockDelta": { "contentBlockIndex": 0, "delta": { "text": " never sent" } } }
+  ],
+  "bedrock_error": { "after_events": 2, "message": "ModelStreamErrorException: stream broke" }
+}

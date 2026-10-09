@@ -1,0 +1,8 @@
+{
+  "name": "15-error-on-call",
+  "description": "The ConverseStream call itself fails (e.g. throttling): a single error event.",
+  "messages": [{ "role": "user", "content": [{ "type": "text", "text": "Hello" }] }],
+  "project_state": {},
+  "bedrock_stream": [],
+  "bedrock_error": { "on_call": true, "message": "ThrottlingException: Too many requests" }
+}

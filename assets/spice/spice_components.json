@@ -1,0 +1,360 @@
+{
+  "resistor": {
+    "parameters": {
+      "name":                { "type": "string", "required": true },
+      "resistance":          { "type": "number", "required": true,  "description": "Ohms",
+                               "scale":"log", "bounds_global":[1e-2, 1e9], "default_factor":[0.3, 3.0] },
+      "tolerance":           { "type": "number", "required": false, "description": "± fraction",
+                               "scale":"lin", "bounds_global":[1e-4, 0.5], "default_factor":[0.7, 1.3] },
+      "temp_coefficient":    { "type": "number", "required": false, "description": "ppm/K (express as fraction per K)",
+                               "scale":"lin", "bounds_global":[0.0, 5e-3], "default_factor":[0.5, 1.5] },
+      "parasitic_inductance":{ "type": "number", "required": false, "description": "H",
+                               "scale":"log", "bounds_global":[1e-10, 1e-7], "default_factor":[0.5, 2.0] }
+    },
+    "pin_allocation": { "pin1": ["pos","anode"], "pin2": ["neg","cathode"] },
+    "spice_models": ["R"]
+  },
+
+  "capacitor": {
+    "parameters": {
+        "name":            { "type": "string", "required": true },
+        "capacitance":     { "type": "number", "required": true,  "description": "F",
+                             "scale":"log", "bounds_global":[1e-9, 5e-3], "default_factor":[0.3, 3.0] },
+        "polarized":       { "type": "boolean","required": false },
+        "voltage_rating":  { "type": "number", "required": false, "description": "V",
+                             "scale":"lin", "bounds_global":[1.0, 1000.0], "default_factor":[0.9, 1.1] },
+        "tolerance":       { "type": "number", "required": false, "description": "± fraction",
+                             "scale":"lin", "bounds_global":[1e-3, 0.5], "default_factor":[0.7, 1.3] },
+        "esr":             { "type": "number", "required": false, "description": "Ohms",
+                             "scale":"log", "bounds_global":[5e-3, 5e-1], "default_factor":[0.3, 3.0] },
+        "esl":             { "type": "number", "required": false, "description": "H",
+                             "scale":"log", "bounds_global":[5e-10, 5e-8], "default_factor":[0.5, 2.0] },
+        "leakage_resistance": { "type": "number", "required": false, "description": "Ohms (parallel)",
+                                "scale":"log", "bounds_global":[1e3, 1e9], "default_factor":[0.5, 2.0] },
+        "leakage_current": { "type": "number", "required": false, "description": "A",
+                             "scale":"log", "bounds_global":[1e-12, 1e-3], "default_factor":[0.3, 3.0] },
+        "ic":              { "type": "number", "required": false, "description": "Initial voltage (V)",
+                             "scale":"lin", "bounds_global":[-100.0, 100.0], "default_factor":[0.5, 1.5] }
+    },
+    "pin_allocation": { "pin1": ["pos","anode"], "pin2": ["neg","cathode"] },
+    "spice_models": ["C"]
+  },
+
+  "inductor": {
+    "parameters": {
+      "name":                  { "type": "string", "required": true },
+      "inductance":            { "type": "number", "required": true,  "description": "H",
+                                 "scale":"log", "bounds_global":[1e-6, 1e-2], "default_factor":[0.3, 3.0] },
+      "series_resistance":     { "type": "number", "required": false, "description": "Ohms (use external R)",
+                                 "scale":"log", "bounds_global":[1e-3, 1.0], "default_factor":[0.5, 2.0] },
+      "saturation_current":    { "type": "number", "required": false, "description": "A (info)",
+                                 "scale":"log", "bounds_global":[0.1, 100.0], "default_factor":[0.7, 1.3] },
+      "core_loss_resistance":  { "type": "number", "required": false, "description": "Ohms (parallel Rp)",
+                                 "scale":"log", "bounds_global":[1e2, 1e9], "default_factor":[0.5, 2.0] },
+      "parasitic_capacitance": { "type": "number", "required": false, "description": "F",
+                                 "scale":"log", "bounds_global":[1e-12, 1e-9], "default_factor":[0.5, 2.0] },
+      "ic":                    { "type": "number", "required": false, "description": "Initial current (A)",
+                                 "scale":"lin", "bounds_global":[-10.0, 10.0], "default_factor":[0.5, 1.5] }
+    },
+    "pin_allocation": { "pin1": ["pos","anode"], "pin2": ["neg","cathode"] },
+    "spice_models": ["L"]
+  },
+
+  "diode": {
+    "parameters": {
+      "name":                   { "type": "string", "required": true },
+      "reverse_voltage":        { "type": "number", "required": false, "description": "V (info)",
+                                  "scale":"lin", "bounds_global":[20.0, 1200.0], "default_factor":[0.9, 1.1] },
+      "current_rating":         { "type": "number", "required": false, "description": "A (info)",
+                                  "scale":"lin", "bounds_global":[0.1, 100.0], "default_factor":[0.8, 1.2] },
+      "Is":                     { "type": "number", "required": false, "description": "Saturation current (A)",
+                                  "scale":"log", "bounds_global":[1e-15, 1e-6], "default_factor":[0.3, 3.0] },
+      "n":                      { "type": "number", "required": false, "description": "Emission coeff",
+                                  "scale":"lin", "bounds_global":[1.0, 2.5], "default_factor":[0.7, 1.3] },
+      "Rs":                     { "type": "number", "required": false, "description": "Series resistance (Ohms)",
+                                  "scale":"log", "bounds_global":[0.01, 1.0], "default_factor":[0.3, 3.0] },
+      "Cjo":                    { "type": "number", "required": false, "description": "Zero-bias junction cap (F)",
+                                  "scale":"log", "bounds_global":[1e-12, 1e-9], "default_factor":[0.3, 3.0] },
+      "Tt":                     { "type": "number", "required": false, "description": "Transit time (s)",
+                                  "scale":"log", "bounds_global":[1e-9, 1e-6], "default_factor":[0.3, 3.0] },
+      "Bv":                     { "type": "number", "required": false, "description": "Breakdown voltage (V)",
+                                  "scale":"lin", "bounds_global":[20.0, 1200.0], "default_factor":[0.9, 1.1] },
+      "Ibv":                    { "type": "number", "required": false, "description": "Current at breakdown (A)",
+                                  "scale":"log", "bounds_global":[1e-8, 1e-2], "default_factor":[0.3, 3.0] }
+    },
+    "pin_allocation": { "pin1": ["anode"], "pin2": ["cathode"] },
+    "spice_models": ["D"]
+  },
+
+  "led": {
+    "parameters": {
+      "name":             { "type": "string", "required": true },
+      "color":            { "type": "string", "required": false },
+      "Is":               { "type": "number", "required": false,
+                            "scale":"log", "bounds_global":[1e-15, 1e-8], "default_factor":[0.3, 3.0] },
+      "n":                { "type": "number", "required": false,
+                            "scale":"lin", "bounds_global":[1.5, 3.0], "default_factor":[0.7, 1.3] },
+      "Rs":               { "type": "number", "required": false,
+                            "scale":"log", "bounds_global":[1.0, 50.0], "default_factor":[0.5, 2.0] },
+      "Cjo":              { "type": "number", "required": false,
+                            "scale":"log", "bounds_global":[1e-12, 5e-10], "default_factor":[0.3, 3.0] },
+      "Tt":               { "type": "number", "required": false,
+                            "scale":"log", "bounds_global":[1e-9, 1e-7], "default_factor":[0.3, 3.0] }
+    },
+    "pin_allocation": { "pin1": ["anode"], "pin2": ["cathode"] },
+    "spice_models": ["D"]
+  },
+
+  "transistor": {
+    "parameters": {
+      "name":           { "type": "string", "required": true },
+      "family":         { "type": "enum",   "required": true, "enum": ["bjt","mosfet","jfet","igbt"] },
+      "voltage_rating": { "type": "number", "required": false, "description": "V (info)",
+                          "scale":"lin", "bounds_global":[20.0, 1000.0], "default_factor":[0.9, 1.1] },
+      "current_rating": { "type": "number", "required": false, "description": "A (info)",
+                          "scale":"lin", "bounds_global":[0.1, 100.0], "default_factor":[0.8, 1.2] }
+    },
+    "family_specific": {
+      "bjt": {
+        "type":        { "type": "enum", "required": true, "enum": ["npn","pnp"] },
+        "Is":          { "type": "number", "required": false,
+                         "scale":"log", "bounds_global":[1e-16, 1e-12], "default_factor":[0.3, 3.0] },
+        "Bf":          { "type": "number", "required": false,
+                         "scale":"lin", "bounds_global":[50.0, 300.0], "default_factor":[0.7, 1.3] },
+        "Vaf":         { "type": "number", "required": false,
+                         "scale":"lin", "bounds_global":[20.0, 300.0], "default_factor":[0.7, 1.3] },
+        "Cje":         { "type": "number", "required": false,
+                         "scale":"log", "bounds_global":[1e-13, 1e-9], "default_factor":[0.3, 3.0] },
+        "Cjc":         { "type": "number", "required": false,
+                         "scale":"log", "bounds_global":[1e-13, 1e-9], "default_factor":[0.3, 3.0] },
+        "Tf":          { "type": "number", "required": false,
+                         "scale":"log", "bounds_global":[1e-10, 1e-7], "default_factor":[0.3, 3.0] },
+        "Tr":          { "type": "number", "required": false,
+                         "scale":"log", "bounds_global":[1e-9, 5e-7], "default_factor":[0.3, 3.0] },
+        "Rb":          { "type": "number", "required": false,
+                         "scale":"log", "bounds_global":[1.0, 500.0], "default_factor":[0.5, 2.0] },
+        "Ikf":         { "type": "number", "required": false,
+                         "scale":"log", "bounds_global":[0.01, 10.0], "default_factor":[0.7, 1.3] },
+        "pin_allocation": { "pin1": ["collector"], "pin2": ["emitter"], "pin3": ["base"] },
+        "spice_models": ["Q"]
+      },
+      "mosfet": {
+        "type": { "type": "enum", "required": true, "enum": ["nmos","pmos"], "description": "MOSFET type: nmos (N-channel MOSFET) or pmos (P-channel MOSFET)" },
+        "mode":  { "type": "enum", "required": true, "enum": ["enhancement","depletion"], "description": "Enhancement or depletion mode" },
+        "Vto":         { "type": "number", "required": false, "description": "Threshold voltage (V)",
+                         "scale":"lin", "bounds_global":[-4.0, 4.0], "default_factor":[0.8, 1.2] },
+        "Kp":          { "type": "number", "required": false, "description": "Transconductance parameter (A/V²)",
+                         "scale":"log", "bounds_global":[1e-6, 1e-2], "default_factor":[0.3, 3.0] },
+        "Lambda":      { "type": "number", "required": false, "description": "Channel-length modulation (1/V)",
+                         "scale":"lin", "bounds_global":[0.0, 0.1], "default_factor":[0.5, 1.5] },
+        "Gamma":       { "type": "number", "required": false, "description": "Bulk threshold parameter (√V)",
+                         "scale":"lin", "bounds_global":[0.0, 1.0], "default_factor":[0.5, 1.5] },
+        "Phi":         { "type": "number", "required": false, "description": "Surface potential (V)",
+                         "scale":"lin", "bounds_global":[0.1, 1.0], "default_factor":[0.8, 1.2] },
+        "RD":          { "type": "number", "required": false, "description": "Drain ohmic resistance (Ω)",
+                         "scale":"log", "bounds_global":[1e-4, 1.0], "default_factor":[0.3, 3.0] },
+        "RS":          { "type": "number", "required": false, "description": "Source ohmic resistance (Ω)",
+                         "scale":"log", "bounds_global":[1e-4, 1.0], "default_factor":[0.3, 3.0] },
+        "CBD":         { "type": "number", "required": false, "description": "B-D junction capacitance (F)",
+                         "scale":"log", "bounds_global":[1e-12, 1e-9], "default_factor":[0.3, 3.0] },
+        "CBS":         { "type": "number", "required": false, "description": "B-S junction capacitance (F)",
+                         "scale":"log", "bounds_global":[1e-12, 1e-9], "default_factor":[0.3, 3.0] },
+        "IS":          { "type": "number", "required": false, "description": "Bulk junction saturation current (A)",
+                         "scale":"log", "bounds_global":[1e-15, 1e-6], "default_factor":[0.3, 3.0] },
+        "PB":          { "type": "number", "required": false, "description": "Bulk junction potential (V)",
+                         "scale":"lin", "bounds_global":[0.3, 1.0], "default_factor":[0.8, 1.2] },
+        "CGSO":        { "type": "number", "required": false, "description": "Gate-source overlap cap/width (F/m)",
+                         "scale":"log", "bounds_global":[1e-11, 1e-8], "default_factor":[0.3, 3.0] },
+        "CGDO":        { "type": "number", "required": false, "description": "Gate-drain overlap cap/width (F/m)",
+                         "scale":"log", "bounds_global":[1e-11, 1e-8], "default_factor":[0.3, 3.0] },
+        "pin_allocation": { "pin1": ["drain"], "pin2": ["source"], "pin3": ["gate"], "pin4_optional": ["bulk","body"] },
+        "spice_models": ["M"]
+      },
+      "jfet": {
+        "polarity":    { "type": "enum", "required": true, "enum": ["n","p"], "description": "JFET polarity: n for N-channel, p for P-channel" },
+        "Vto":         { "type": "number", "required": false, "description": "Pinch-off voltage (V) - called Vto in NgSpice",
+                         "scale":"lin", "bounds_global":[-10.0, 10.0], "default_factor":[0.8, 1.2] },
+        "Beta":        { "type": "number", "required": false, "description": "Transconductance parameter (A/V²)",
+                         "scale":"log", "bounds_global":[1e-6, 1e-2], "default_factor":[0.3, 3.0] },
+        "Lambda":      { "type": "number", "required": false, "description": "Channel-length modulation (1/V)",
+                         "scale":"lin", "bounds_global":[0.0, 0.1], "default_factor":[0.5, 1.5] },
+        "RD":          { "type": "number", "required": false, "description": "Drain ohmic resistance (Ω)",
+                         "scale":"log", "bounds_global":[1e-4, 1.0], "default_factor":[0.3, 3.0] },
+        "RS":          { "type": "number", "required": false, "description": "Source ohmic resistance (Ω)",
+                         "scale":"log", "bounds_global":[1e-4, 1.0], "default_factor":[0.3, 3.0] },
+        "CGS":         { "type": "number", "required": false, "description": "Gate-source junction cap (F)",
+                         "scale":"log", "bounds_global":[1e-12, 1e-9], "default_factor":[0.3, 3.0] },
+        "CGD":         { "type": "number", "required": false, "description": "Gate-drain junction cap (F)",
+                         "scale":"log", "bounds_global":[1e-12, 1e-9], "default_factor":[0.3, 3.0] },
+        "IS":          { "type": "number", "required": false, "description": "Gate junction saturation current (A)",
+                         "scale":"log", "bounds_global":[1e-15, 1e-6], "default_factor":[0.3, 3.0] },
+        "PB":          { "type": "number", "required": false, "description": "Gate junction potential (V)",
+                         "scale":"lin", "bounds_global":[0.3, 1.0], "default_factor":[0.8, 1.2] },
+        "pin_allocation": { "pin1": ["drain"], "pin2": ["source"], "pin3": ["gate"] },
+        "spice_models": ["J"]
+      }
+    }
+  },
+
+  "transformer": {
+    "parameters": {
+      "name":                  { "type": "string", "required": true },
+      "Lm_primary":            { "type": "number", "required": true,  "description": "Primary magnetizing inductance (H)",
+                                 "scale":"log", "bounds_global":[1e-6, 1.0], "default_factor":[0.3, 3.0] },
+      "turns_ratio":           { "type": "number", "required": true,  "description": "Ns/Np (secondary to primary turns ratio, step-up ratio)",
+                                 "scale":"log", "bounds_global":[0.01, 100.0], "default_factor":[0.7, 1.3] },
+      "k_coupling":            { "type": "number", "required": true,  "description": "Mutual coupling coefficient (0–1)",
+                                 "scale":"lin", "bounds_global":[0.8, 0.9999], "default_factor":[0.98, 1.02] },
+      "phase":                 { "type": "enum",   "required": true,  "enum": ["same","opposite"], "description": "Dot relation P vs S" },
+      "Rp":                    { "type": "number", "required": false,
+                                 "scale":"log", "bounds_global":[1.0, 1e9], "default_factor":[0.5, 2.0] },
+      "Rs":                    { "type": "number", "required": false,
+                                 "scale":"log", "bounds_global":[1e-3, 100.0], "default_factor":[0.5, 2.0] },
+      "core_loss_resistance":  { "type": "number", "required": false, "description": "Parallel Rp across magnetizing branch (Ohms)",
+                                 "scale":"log", "bounds_global":[1e2, 1e9], "default_factor":[0.5, 2.0] }
+    },
+    "pin_allocation": { "pin1": ["P1"], "pin2": ["P2"], "pin3": ["S1"], "pin4": ["S2"] },
+    "spice_models": ["L","K"]
+  },
+
+  "ct_transformer": {
+    "parameters": {
+      "name":                  { "type": "string", "required": true },
+      "Lm_primary":            { "type": "number", "required": true,
+                                 "scale":"log", "bounds_global":[1e-6, 1.0], "default_factor":[0.3, 3.0] },
+      "turns_ratio":           { "type": "number", "required": true,  "description": "Ns/Np (secondary to primary turns ratio, step-up ratio)",
+                                 "scale":"log", "bounds_global":[0.01, 100.0], "default_factor":[0.7, 1.3] },
+      "k_coupling":            { "type": "number", "required": true,
+                                 "scale":"lin", "bounds_global":[0.8, 0.9999], "default_factor":[0.98, 1.02] },
+      "phase_s1":              { "type": "enum",   "required": true,  "enum": ["same","opposite"] },
+      "phase_s2":              { "type": "enum",   "required": true,  "enum": ["same","opposite"] },
+      "Rp":                    { "type": "number", "required": false,
+                                 "scale":"log", "bounds_global":[1.0, 1e9], "default_factor":[0.5, 2.0] },
+      "Rs1":                   { "type": "number", "required": false,
+                                 "scale":"log", "bounds_global":[1e-3, 100.0], "default_factor":[0.5, 2.0] },
+      "Rs2":                   { "type": "number", "required": false,
+                                 "scale":"log", "bounds_global":[1e-3, 100.0], "default_factor":[0.5, 2.0] },
+      "core_loss_resistance":  { "type": "number", "required": false,
+                                 "scale":"log", "bounds_global":[1e2, 1e9], "default_factor":[0.5, 2.0] },
+      "center_tap_resistance": { "type": "number", "required": false,
+                                 "scale":"log", "bounds_global":[1e-1, 1e6], "default_factor":[0.5, 2.0] },
+      "center_tap_capacitance": { "type": "number", "required": false,
+                                  "scale":"log", "bounds_global":[1e-12, 1e-6], "default_factor":[0.5, 2.0] },
+      "interwinding_capacitance_s1": { "type": "number", "required": false,
+                                       "scale":"log", "bounds_global":[1e-12, 1e-9], "default_factor":[0.5, 2.0] },
+      "interwinding_capacitance_s2": { "type": "number", "required": false,
+                                       "scale":"log", "bounds_global":[1e-12, 1e-9], "default_factor":[0.5, 2.0] }
+    },
+    "pin_allocation": { "pin1": ["P1"], "pin2": ["P2"], "pin3": ["S1"], "pin4": ["S2"], "pin5": ["CT"] },
+    "spice_models": ["L","K"]
+  },
+
+  "dual_ct_transformer": {
+    "parameters": {
+      "name":                      { "type": "string", "required": true },
+      "Lm_primary":                { "type": "number", "required": true,  "description": "Primary magnetizing inductance (H)",
+                                     "scale":"log", "bounds_global":[1e-6, 1.0], "default_factor":[0.3, 3.0] },
+      "turns_ratio":               { "type": "number", "required": true,  "description": "Ns/Np (secondary to primary turns ratio, step-up ratio)",
+                                     "scale":"log", "bounds_global":[0.01, 100.0], "default_factor":[0.7, 1.3] },
+      "k_coupling":                { "type": "number", "required": true,  "description": "Mutual coupling coefficient (0–1)",
+                                     "scale":"lin", "bounds_global":[0.8, 0.9999], "default_factor":[0.98, 1.02] },
+      "phase_p1":                  { "type": "enum",   "required": true,  "enum": ["same","opposite"], "description": "Phase relation for P1 half" },
+      "phase_p2":                  { "type": "enum",   "required": true,  "enum": ["same","opposite"], "description": "Phase relation for P2 half" },
+      "phase_s1":                  { "type": "enum",   "required": true,  "enum": ["same","opposite"], "description": "Phase relation for S1 half" },
+      "phase_s2":                  { "type": "enum",   "required": true,  "enum": ["same","opposite"], "description": "Phase relation for S2 half" },
+      "Rp1":                       { "type": "number", "required": false, "description": "Primary P1 winding resistance (Ohms)",
+                                     "scale":"log", "bounds_global":[1.0, 1e9], "default_factor":[0.5, 2.0] },
+      "Rp2":                       { "type": "number", "required": false, "description": "Primary P2 winding resistance (Ohms)",
+                                     "scale":"log", "bounds_global":[1.0, 1e9], "default_factor":[0.5, 2.0] },
+      "Rs1":                       { "type": "number", "required": false, "description": "Secondary S1 winding resistance (Ohms)",
+                                     "scale":"log", "bounds_global":[1e-3, 100.0], "default_factor":[0.5, 2.0] },
+      "Rs2":                       { "type": "number", "required": false, "description": "Secondary S2 winding resistance (Ohms)",
+                                     "scale":"log", "bounds_global":[1e-3, 100.0], "default_factor":[0.5, 2.0] },
+      "core_loss_resistance":      { "type": "number", "required": false, "description": "Core loss resistance (Ohms)",
+                                     "scale":"log", "bounds_global":[1e2, 1e9], "default_factor":[0.5, 2.0] },
+      "primary_center_tap_resistance": { "type": "number", "required": false, "description": "Primary CT resistance (Ohms)",
+                                         "scale":"log", "bounds_global":[1e-1, 1e6], "default_factor":[0.5, 2.0] },
+      "secondary_center_tap_resistance": { "type": "number", "required": false, "description": "Secondary CT resistance (Ohms)",
+                                           "scale":"log", "bounds_global":[1e-1, 1e6], "default_factor":[0.5, 2.0] },
+      "primary_center_tap_capacitance": { "type": "number", "required": false, "description": "Primary CT capacitance (F)",
+                                          "scale":"log", "bounds_global":[1e-12, 1e-6], "default_factor":[0.5, 2.0] },
+      "secondary_center_tap_capacitance": { "type": "number", "required": false, "description": "Secondary CT capacitance (F)",
+                                            "scale":"log", "bounds_global":[1e-12, 1e-6], "default_factor":[0.5, 2.0] },
+      "interwinding_capacitance_pp": { "type": "number", "required": false, "description": "Primary interwinding capacitance (F)",
+                                       "scale":"log", "bounds_global":[1e-12, 1e-9], "default_factor":[0.5, 2.0] },
+      "interwinding_capacitance_ss": { "type": "number", "required": false, "description": "Secondary interwinding capacitance (F)",
+                                       "scale":"log", "bounds_global":[1e-12, 1e-9], "default_factor":[0.5, 2.0] },
+      "interwinding_capacitance_ps": { "type": "number", "required": false, "description": "Primary-Secondary interwinding capacitance (F)",
+                                       "scale":"log", "bounds_global":[1e-12, 1e-9], "default_factor":[0.5, 2.0] }
+    },
+    "pin_allocation": { "pin1": ["P1"], "pin2": ["CT_P"], "pin3": ["P2"], "pin4": ["S1"], "pin5": ["CT_S"], "pin6": ["S2"] },
+    "spice_models": ["L","K"]
+  },
+
+  "node": {
+    "parameters": {
+      "name": { "type": "string", "required": true },
+      "node_type": { "type": "enum", "required": true, "enum": ["voltage_source","pwm_control","ground"] }
+    },
+    "type_specific": {
+      "voltage_source": {
+        "parameters": {
+            "voltage": { "type": "number", "required": true, "description": "Voltage magnitude (V)",
+                         "scale":"lin", "bounds_global":[0.0, 1000.0], "default_factor":[0.8, 1.2] },
+            "source":  { "type": "enum", "required": true, "enum": ["ac","dc"], "description": "AC or DC" },
+            "series_resistance": { "type": "number", "required": false, "description": "Ω, small Rin to avoid ideal-source issues",
+                                   "scale":"log", "bounds_global":[1e-3, 1.0], "default_factor":[0.5, 2.0] },
+            "ramp_rise":         { "type": "number", "required": false, "description": "s, ramp from 0→V over this time (PWL)",
+                                   "scale":"lin", "bounds_global":[0.0, 0.1], "default_factor":[0.5, 1.5] }
+        },
+        "pin_allocation": { "pin1": ["pos", "+"], "pin2": ["neg", "-"] },
+        "spice_models": ["V"]
+        },
+
+      "pwm_control": {
+        "parameters": {
+          "frequency":  { "type": "number", "required": true,  "description": "Hz",
+                          "scale":"log", "bounds_global":[2e4, 5e5], "default_factor":[0.5, 2.0] },
+          "duty_cycle": { "type": "number", "required": true,  "description": "0–1",
+                          "scale":"lin", "bounds_global":[0.05, 0.95], "default_factor":[0.7, 1.3] },
+          "vhigh":      { "type": "number", "required": true,  "description": "V (high level)",
+                          "scale":"lin", "bounds_global":[0.0, 100.0], "default_factor":[0.8, 1.2] },
+          "vlow":       { "type": "number", "required": false, "description": "V (default 0.0)",
+                          "scale":"lin", "bounds_global":[0.0, 10.0], "default_factor":[0.8, 1.2] },
+          "trise":      { "type": "number", "required": false, "description": "s (default small)",
+                          "scale":"log", "bounds_global":[1e-9, 1e-6], "default_factor":[0.3, 3.0] },
+          "tfall":      { "type": "number", "required": false, "description": "s (default small)",
+                          "scale":"log", "bounds_global":[1e-9, 1e-6], "default_factor":[0.3, 3.0] },
+          "tdelay":     { "type": "number", "required": false, "description": "s (default 0)",
+                          "scale":"lin", "bounds_global":[0.0, 2e-7], "default_factor":[0.5, 1.5] },
+          "drive_resistance": { "type": "number", "required": false, "description": "Ω, output drive resistor",
+                                "scale":"log", "bounds_global":[1.0, 200.0], "default_factor":[0.5, 2.0] }
+        },
+        "pin_allocation": { "pin1": ["pos", "output", "+"], "pin2": ["neg", "return", "-"] },
+        "spice_models": ["V"]
+      },
+
+      "ground": {
+        "parameters": {
+          "description": { "type": "string", "required": false, "description": "Ground node description (e.g., 'System ground', 'Digital ground')" }
+        },
+        "pin_allocation": { "pin1": [""] },
+        "spice_models": []
+      }
+    }
+  },
+
+  "switch": {
+    "parameters": {
+      "name": { "type": "string", "required": true }
+    },
+    "pin_allocation": {
+      "pos": ["pos", "drain", "plus", "+"],
+      "neg": ["neg", "source", "minus", "-"],
+      "ctrl+": ["ctrl+", "gate", "ctrl_pos"],
+      "ctrl-": ["ctrl-", "ctrl_neg", "source_ctrl"]
+    },
+    "spice_models": ["S"]
+  }
+}
+

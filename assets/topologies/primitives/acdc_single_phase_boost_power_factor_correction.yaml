@@ -1,0 +1,613 @@
+id: acdc_single_phase_boost_power_factor_correction
+name: Single Phase Boost Power Factor Correction Rectifier
+description: A closed-loop single-phase boost Power Factor Correction (PFC) rectifier converting 230V RMS AC (325V peak) to a regulated 385V DC bus with high power factor using average current mode control.
+
+models:
+  - ".model dmodel1 D(Rs=0.01)"
+  - ".model dmodel2 VDMOS(Ron=0.01 Vto=3.0 Cgdmax=100p Cgdmin=10p Cgs=1n)"
+
+components:
+  # Reference and semantic net labels
+  - ref: GND
+    type: node
+    params:
+      node_type: ground
+
+  - ref: a
+    type: node
+    params:
+      node_type: label
+
+  - ref: b
+    type: node
+    params:
+      node_type: label
+
+  - ref: d
+    type: node
+    params:
+      node_type: label
+
+  - ref: L_node
+    type: node
+    params:
+      node_type: label
+
+  - ref: e
+    type: node
+    params:
+      node_type: label
+
+  - ref: ctrl_gate
+    type: node
+    params:
+      node_type: label
+
+  - ref: ctrl
+    type: node
+    params:
+      node_type: label
+
+  - ref: VOUT
+    type: node
+    params:
+      node_type: label
+
+  - ref: VFB
+    type: node
+    params:
+      node_type: label
+
+  - ref: VREF_NODE
+    type: node
+    params:
+      node_type: label
+
+  - ref: V_RAW
+    type: node
+    params:
+      node_type: label
+
+  - ref: V_CLAMP
+    type: node
+    params:
+      node_type: label
+
+  - ref: V_COMP
+    type: node
+    params:
+      node_type: label
+
+  - ref: I_TARGET
+    type: node
+    params:
+      node_type: label
+
+  - ref: I_ACT
+    type: node
+    params:
+      node_type: label
+
+  - ref: C_RAW
+    type: node
+    params:
+      node_type: label
+
+  - ref: C_CLAMP
+    type: node
+    params:
+      node_type: label
+
+  - ref: C_COMP
+    type: node
+    params:
+      node_type: label
+
+  - ref: VTRI
+    type: node
+    params:
+      node_type: label
+
+  # AC Input Source (230V RMS = 325V peak, 50Hz)
+  - ref: VAC
+    type: node
+    role: voltage_source
+    params:
+      node_type: voltage_source
+      source: sine
+      offset: 0
+      amplitude: 325
+      frequency: 50
+      delay: 0
+      damping: 0
+      phase: 0
+      series_resistance: 0
+
+  # High impedance ground reference resistors for floating AC input
+  - ref: Ra
+    type: resistor
+    params:
+      resistance: 10000000.0
+      sense: false
+
+  - ref: Rb
+    type: resistor
+    params:
+      resistance: 10000000.0
+      sense: false
+
+  # Full-Bridge Rectifier Diodes
+  - ref: D1
+    type: diode
+    params:
+      model: dmodel1
+      sense: false
+
+  - ref: D2
+    type: diode
+    params:
+      model: dmodel1
+      sense: false
+
+  - ref: D3
+    type: diode
+    params:
+      model: dmodel1
+      sense: false
+
+  - ref: D4
+    type: diode
+    params:
+      model: dmodel1
+      sense: false
+
+  # High-frequency bypass capacitor
+  - ref: C_BYPASS
+    type: capacitor
+    params:
+      capacitance: 2.0e-08
+      sense: false
+
+  # Boost Inductor (3mH)
+  - ref: L1
+    type: inductor
+    params:
+      inductance: 0.003
+      sense: false
+
+  # Current sensing 0V source
+  - ref: VSENSE
+    type: node
+    role: voltage_source
+    params:
+      node_type: voltage_source
+      source: dc
+      voltage: 0
+      series_resistance: 0
+
+  # Snubber circuit across switch
+  - ref: C_S
+    type: capacitor
+    params:
+      capacitance: 1.0e-09
+      sense: false
+
+  - ref: R_S
+    type: resistor
+    params:
+      resistance: 1000000.0
+      sense: false
+
+  # Power Switch (VDMOS)
+  - ref: M1
+    type: transistor
+    params:
+      family: vdmos
+      model: dmodel2
+      sense: false
+
+  # Gate resistor
+  - ref: R_gate
+    type: resistor
+    params:
+      resistance: 10.0
+      sense: false
+
+  # Boost diode
+  - ref: D6
+    type: diode
+    params:
+      model: dmodel1
+      sense: false
+
+  # Output bulk capacitor (470uF)
+  - ref: C1
+    type: capacitor
+    params:
+      capacitance: 0.00047
+      sense: false
+
+  # DC Load resistor (400 Ohm, drawing ~370W at 385V)
+  - ref: R1
+    type: resistor
+    role: load
+    params:
+      resistance: 400.0
+      sense: false
+
+  # Control Loop 1: Voltage Divider (Target 385V -> 5V FB)
+  - ref: R2
+    type: resistor
+    params:
+      resistance: 760000.0
+      sense: false
+
+  - ref: R3
+    type: resistor
+    params:
+      resistance: 10000.0
+      sense: false
+
+  # Control Loop 2: Voltage Error Amp & Comp Filter
+  - ref: VREF
+    type: node
+    role: voltage_source
+    params:
+      node_type: voltage_source
+      source: dc
+      voltage: 5.0
+      series_resistance: 0
+
+  - ref: E_V
+    type: e_source
+    params:
+      gain: 100.0
+
+  - ref: B_V_CLAMP
+    type: b_source
+    params:
+      expression: "max(min(V(V_RAW), 5), 0)"
+
+  - ref: R_V
+    type: resistor
+    params:
+      resistance: 10000.0
+      sense: false
+
+  - ref: C_V
+    type: capacitor
+    params:
+      capacitance: 1.0e-06
+      sense: false
+
+  # Control Loop 3: Analog Multiplier
+  - ref: B_MULT
+    type: b_source
+    params:
+      expression: "V(d) * V(V_COMP) * 0.003"
+
+  # Control Loop 4: Current Error Amp & Comp Filter
+  - ref: B_I_ACT
+    type: b_source
+    params:
+      expression: "I(VSENSE)"
+
+  - ref: E_C
+    type: e_source
+    params:
+      gain: 100.0
+
+  - ref: B_C_CLAMP
+    type: b_source
+    params:
+      expression: "max(min(V(C_RAW), 4.8), 0.1)"
+
+  - ref: R_C
+    type: resistor
+    params:
+      resistance: 1000.0
+      sense: false
+
+  - ref: C_C
+    type: capacitor
+    params:
+      capacitance: 4.7e-09
+      sense: false
+
+  # Control Loop 5: PWM Generator (50kHz Sawtooth)
+  - ref: V_TRI
+    type: node
+    role: voltage_source
+    params:
+      node_type: voltage_source
+      source: pulse
+      v1: 0
+      v2: 5
+      td: 0
+      tr: 1.9e-05
+      tf: 1.0e-06
+      pw: 0
+      per: 2.0e-05
+      series_resistance: 0
+
+  - ref: B_PWM
+    type: b_source
+    params:
+      expression: "V(C_COMP) > V(VTRI) ? 5 : 0"
+
+nets:
+  # Ground reference net (0)
+  - - - GND
+      - pin
+    - - Ra
+      - neg
+    - - Rb
+      - neg
+    - - D1
+      - anode
+    - - D3
+      - anode
+    - - C_BYPASS
+      - neg
+    - - C_S
+      - neg
+    - - R_S
+      - neg
+    - - M1
+      - source
+    - - C1
+      - neg
+    - - R1
+      - neg
+    - - R3
+      - neg
+    - - VREF
+      - '-'
+    - - E_V
+      - '-'
+    - - B_V_CLAMP
+      - '-'
+    - - C_V
+      - neg
+    - - B_MULT
+      - '-'
+    - - B_I_ACT
+      - '-'
+    - - E_C
+      - '-'
+    - - B_C_CLAMP
+      - '-'
+    - - C_C
+      - neg
+    - - V_TRI
+      - '-'
+    - - B_PWM
+      - '-'
+
+  # Net a (AC input L)
+  - - - a
+      - pin
+    - - VAC
+      - +
+    - - Ra
+      - pos
+    - - D1
+      - cathode
+    - - D2
+      - anode
+
+  # Net b (AC input N)
+  - - - b
+      - pin
+    - - VAC
+      - '-'
+    - - Rb
+      - pos
+    - - D3
+      - cathode
+    - - D4
+      - anode
+
+  # Net d (Rectified DC bus before inductor)
+  - - - d
+      - pin
+    - - D2
+      - cathode
+    - - D4
+      - cathode
+    - - C_BYPASS
+      - pos
+    - - L1
+      - pos
+
+  # Net L_node (Inductor to current sense)
+  - - - L_node
+      - pin
+    - - L1
+      - neg
+    - - VSENSE
+      - +
+
+  # Net e (Switch drain / diode anode)
+  - - - e
+      - pin
+    - - VSENSE
+      - '-'
+    - - C_S
+      - pos
+    - - R_S
+      - pos
+    - - M1
+      - drain
+    - - D6
+      - anode
+
+  # Net ctrl_gate (MOSFET gate after series resistor)
+  - - - ctrl_gate
+      - pin
+    - - M1
+      - gate
+    - - R_gate
+      - neg
+
+  # Net ctrl (PWM comparator output before gate resistor)
+  - - - ctrl
+      - pin
+    - - R_gate
+      - pos
+    - - B_PWM
+      - +
+
+  # Net VOUT (Regulated 385V DC output)
+  - - - VOUT
+      - pin
+    - - D6
+      - cathode
+    - - C1
+      - pos
+    - - R1
+      - pos
+    - - R2
+      - pos
+
+  # Net VFB (Feedback voltage ~5V)
+  - - - VFB
+      - pin
+    - - R2
+      - neg
+    - - R3
+      - pos
+    - - E_V
+      - ctrl-
+
+  # Net VREF_NODE (Reference 5V)
+  - - - VREF_NODE
+      - pin
+    - - VREF
+      - +
+    - - E_V
+      - ctrl+
+
+  # Net V_RAW (Voltage error amp unconstrained output)
+  - - - V_RAW
+      - pin
+    - - E_V
+      - +
+    - - B_V_CLAMP
+      - ctrl+
+
+  # Net V_CLAMP (Voltage error amp clamped output)
+  - - - V_CLAMP
+      - pin
+    - - B_V_CLAMP
+      - +
+    - - R_V
+      - pos
+
+  # Net V_COMP (Voltage error compensation filtered output)
+  - - - V_COMP
+      - pin
+    - - R_V
+      - neg
+    - - C_V
+      - pos
+
+  # Net I_TARGET (Multiplier current demand reference)
+  - - - I_TARGET
+      - pin
+    - - B_MULT
+      - +
+    - - E_C
+      - ctrl+
+
+  # Net I_ACT (Actual sensed inductor current signal)
+  - - - I_ACT
+      - pin
+    - - B_I_ACT
+      - +
+    - - E_C
+      - ctrl-
+
+  # Net C_RAW (Current error amp unconstrained output)
+  - - - C_RAW
+      - pin
+    - - E_C
+      - +
+    - - B_C_CLAMP
+      - ctrl+
+
+  # Net C_CLAMP (Current error amp clamped output)
+  - - - C_CLAMP
+      - pin
+    - - B_C_CLAMP
+      - +
+    - - R_C
+      - pos
+
+  # Net C_COMP (Current error compensation filtered output)
+  - - - C_COMP
+      - pin
+    - - R_C
+      - neg
+    - - C_C
+      - pos
+
+  # Net VTRI (PWM triangle/sawtooth carrier)
+  - - - VTRI
+      - pin
+    - - V_TRI
+      - +
+
+analysis:
+  spice_settings:
+    reltol: 0.01
+    method: gear
+    initial_conditions: "v(VOUT)=385 v(V_COMP)=2.5 v(C_COMP)=2.5"
+  transient:
+    requirements:
+      - rid: tr_boost_pfc
+        requirement: Verify 385V DC output and active PFC boosting operation
+        environment:
+          - ref: time_domain
+            t_step: 1.0e-06
+            t_stop: 0.1
+            t_max_step: 5.0e-07
+        measurement:
+          - ref: VOUT
+            plot: true
+            quantity: voltage
+            nets:
+              - - R1
+                - pos
+              - - R1
+                - neg
+            data:
+              - name: Vout_avg
+                spice_command: avg
+                description: Average Output Voltage in steady state (last 20ms)
+              - name: Vout_ripple_vpp
+                spice_command: pp
+                description: Output Ripple peak-to-peak in steady state
+          - ref: VIN
+            plot: true
+            quantity: voltage
+            nets:
+              - - VAC
+                - +
+              - - VAC
+                - '-'
+          - ref: IL1
+            plot: true
+            quantity: current
+            component: VSENSE
+            data:
+              - name: IL1_avg
+                spice_command: avg
+                description: Average Inductor Current
+        outputs:
+          - var: vout_avg_v
+            formula: abs([Vout_avg])
+            description: Average Output Voltage
+          - var: vout_ripple_vpp
+            formula: '[Vout_ripple_vpp]'
+            description: Output Voltage Ripple peak-to-peak

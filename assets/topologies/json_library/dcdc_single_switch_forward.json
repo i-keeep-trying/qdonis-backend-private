@@ -1,0 +1,703 @@
+{
+  "components": [
+    {
+      "id": "VIN",
+      "type": "V",
+      "x": -540,
+      "y": 40,
+      "rotation": 0,
+      "parameters": {
+        "value": "48.0"
+      },
+      "label": "Input DC (48V)",
+      "lastClickTime": 1783167537602
+    },
+    {
+      "id": "SW1",
+      "type": "MOSFET",
+      "x": -380,
+      "y": 180,
+      "rotation": 0,
+      "parameters": {
+        "Ron": "10m",
+        "Roff": "1M"
+      },
+      "label": "Main Switch"
+    },
+    {
+      "id": "D_FWD",
+      "type": "D",
+      "x": -180,
+      "y": 0,
+      "rotation": 270,
+      "parameters": {
+        "Ron": "5m",
+        "Roff": "1M"
+      },
+      "label": "Forward Diode"
+    },
+    {
+      "id": "D_FW",
+      "type": "D",
+      "x": -80,
+      "y": 60,
+      "rotation": 180,
+      "parameters": {
+        "Ron": "5m",
+        "Roff": "1M"
+      },
+      "label": "Freewheeling Diode",
+      "lastClickTime": 1783167442556
+    },
+    {
+      "id": "L_OUT",
+      "type": "L",
+      "x": 0,
+      "y": 0,
+      "rotation": 270,
+      "parameters": {
+        "L": "1m",
+        "esr": "10m"
+      },
+      "label": "Output Inductor",
+      "lastClickTime": 1783167589737
+    },
+    {
+      "id": "Cout",
+      "type": "C",
+      "x": 80,
+      "y": 100,
+      "rotation": 0,
+      "parameters": {
+        "C": "470u",
+        "vC0": "0"
+      },
+      "label": "Filter Capacitor"
+    },
+    {
+      "id": "R_LOAD",
+      "type": "R",
+      "x": 180,
+      "y": 100,
+      "rotation": 0,
+      "parameters": {
+        "value": "2.0"
+      },
+      "label": "Load"
+    },
+    {
+      "id": "VM1",
+      "type": "VM",
+      "x": 260,
+      "y": 100,
+      "rotation": 0,
+      "parameters": {},
+      "label": "V_out Sensor"
+    },
+    {
+      "id": "T1",
+      "type": "XFMR",
+      "x": -280,
+      "y": 60,
+      "rotation": 0,
+      "parameters": {
+        "primary_turns": "[100]",
+        "secondary_turns": "[75]"
+      },
+      "lastClickTime": 1783167693234
+    },
+    {
+      "id": "GOTO_SIG1",
+      "type": "GOTO_SIG",
+      "x": 940,
+      "y": 660,
+      "rotation": 0,
+      "parameters": {
+        "tag": "S1"
+      },
+      "lastClickTime": 1789386139951,
+      "params": {
+        "tag": "A"
+      }
+    },
+    {
+      "id": "COMP1",
+      "type": "COMP",
+      "x": 820,
+      "y": 660,
+      "rotation": 0,
+      "parameters": {
+        "hysteresis": "0"
+      },
+      "lastClickTime": 1789384090790,
+      "params": {
+        "hysteresis": "0"
+      }
+    },
+    {
+      "id": "TRI1",
+      "type": "TRI",
+      "x": 720,
+      "y": 680,
+      "rotation": 0,
+      "parameters": {
+        "frequency": "100k",
+        "min": "0",
+        "max": "1"
+      },
+      "lastClickTime": 1789198539722,
+      "params": {
+        "frequency": "100k",
+        "min": "0",
+        "max": "1"
+      }
+    },
+    {
+      "id": "PID1",
+      "type": "PID",
+      "x": 660,
+      "y": 640,
+      "rotation": 0,
+      "parameters": {
+        "Kp": "0.1",
+        "Ki": "60",
+        "Kd": "0",
+        "limit_output": "true",
+        "upper_limit": "0.9",
+        "lower_limit": "0.01",
+        "anti_windup": "true"
+      },
+      "lastClickTime": 1789263836256,
+      "params": {
+        "Kp": "0.01",
+        "Ki": "1",
+        "Kd": "0",
+        "limit_output": "true",
+        "upper_limit": "0.9",
+        "lower_limit": "0.01",
+        "anti_windup": "true"
+      }
+    },
+    {
+      "id": "FROM_SIG1",
+      "type": "FROM_SIG",
+      "x": 420,
+      "y": 660,
+      "rotation": 0,
+      "parameters": {
+        "tag": "Vo"
+      },
+      "lastClickTime": 1789198548677,
+      "params": {
+        "tag": "Vo"
+      }
+    },
+    {
+      "id": "SUBTRACT1",
+      "type": "SUBTRACT",
+      "x": 540,
+      "y": 640,
+      "rotation": 0,
+      "parameters": {
+        "signs": "+-"
+      },
+      "lastClickTime": 1789198084179,
+      "params": {
+        "signs": "+-"
+      }
+    },
+    {
+      "id": "CONST1",
+      "type": "CONST",
+      "x": 420,
+      "y": 620,
+      "rotation": 0,
+      "parameters": {
+        "value": "12"
+      },
+      "lastClickTime": 1789385085664,
+      "params": {
+        "value": "5"
+      }
+    },
+    {
+      "id": "SCOPE1",
+      "type": "SCOPE",
+      "x": 900,
+      "y": 560,
+      "rotation": 0,
+      "parameters": {
+        "channels": "3"
+      },
+      "lastClickTime": 1789383335428,
+      "params": {
+        "channels": "3"
+      }
+    },
+    {
+      "id": "GOTO_SIG2",
+      "type": "GOTO_SIG",
+      "x": 360,
+      "y": 100,
+      "rotation": 0,
+      "parameters": {
+        "tag": "Vo"
+      },
+      "lastClickTime": 1789386127419,
+      "params": {
+        "tag": "Vo"
+      }
+    },
+    {
+      "id": "FROM_SIG2",
+      "type": "FROM_SIG",
+      "x": -480,
+      "y": 180,
+      "rotation": 0,
+      "parameters": {
+        "tag": "S1"
+      },
+      "lastClickTime": 1789386189295,
+      "params": {
+        "tag": "A"
+      }
+    }
+  ],
+  "wires": [
+    {
+      "id": "W3",
+      "from": {
+        "type": "pin",
+        "compId": "SW1",
+        "terminal": "S"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "VIN",
+        "terminal": "B"
+      }
+    },
+    {
+      "id": "W11",
+      "from": {
+        "type": "pin",
+        "compId": "L_OUT",
+        "terminal": "B"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "Cout",
+        "terminal": "A"
+      }
+    },
+    {
+      "id": "W12",
+      "from": {
+        "type": "wire",
+        "wireId": "W11",
+        "x": 80,
+        "y": 40
+      },
+      "to": {
+        "type": "pin",
+        "compId": "R_LOAD",
+        "terminal": "A"
+      },
+      "manualPath": [
+        {
+          "x": 80,
+          "y": 40
+        },
+        {
+          "x": 80,
+          "y": 0
+        },
+        {
+          "x": 180,
+          "y": 0
+        },
+        {
+          "x": 180,
+          "y": 60
+        }
+      ]
+    },
+    {
+      "id": "W14",
+      "from": {
+        "type": "pin",
+        "compId": "Cout",
+        "terminal": "B"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "R_LOAD",
+        "terminal": "B"
+      }
+    },
+    {
+      "id": "W15",
+      "from": {
+        "type": "wire",
+        "wireId": "W12",
+        "x": 180,
+        "y": 40
+      },
+      "to": {
+        "type": "pin",
+        "compId": "VM1",
+        "terminal": "A"
+      },
+      "manualPath": [
+        {
+          "x": 180,
+          "y": 40
+        },
+        {
+          "x": 180,
+          "y": 0
+        },
+        {
+          "x": 260,
+          "y": 0
+        },
+        {
+          "x": 260,
+          "y": 60
+        }
+      ]
+    },
+    {
+      "id": "W16",
+      "from": {
+        "type": "wire",
+        "wireId": "W14",
+        "x": 180,
+        "y": 160
+      },
+      "to": {
+        "type": "pin",
+        "compId": "VM1",
+        "terminal": "B"
+      }
+    },
+    {
+      "id": "W4",
+      "from": {
+        "type": "pin",
+        "compId": "D_FW",
+        "terminal": "B"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "L_OUT",
+        "terminal": "A"
+      },
+      "manualPath": null
+    },
+    {
+      "id": "W8",
+      "from": {
+        "type": "pin",
+        "compId": "D_FWD",
+        "terminal": "B"
+      },
+      "to": {
+        "type": "wire",
+        "wireId": "W4",
+        "x": -40,
+        "y": 0
+      },
+      "manualPath": null
+    },
+    {
+      "id": "W1",
+      "from": {
+        "type": "pin",
+        "compId": "T1",
+        "terminal": "S1A"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "D_FWD",
+        "terminal": "A"
+      },
+      "manualPath": null
+    },
+    {
+      "id": "W2",
+      "from": {
+        "type": "pin",
+        "compId": "T1",
+        "terminal": "S1B"
+      },
+      "to": {
+        "type": "wire",
+        "wireId": "W14",
+        "x": 80,
+        "y": 160
+      },
+      "manualPath": [
+        {
+          "x": -260,
+          "y": 80
+        },
+        {
+          "x": -240,
+          "y": 80
+        },
+        {
+          "x": -240,
+          "y": 160
+        },
+        {
+          "x": 80,
+          "y": 160
+        }
+      ]
+    },
+    {
+      "id": "W7",
+      "from": {
+        "type": "pin",
+        "compId": "D_FW",
+        "terminal": "A"
+      },
+      "to": {
+        "type": "wire",
+        "wireId": "W2",
+        "x": 80,
+        "y": 160
+      },
+      "manualPath": null
+    },
+    {
+      "id": "W5",
+      "from": {
+        "type": "pin",
+        "compId": "SW1",
+        "terminal": "D"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "T1",
+        "terminal": "P1B"
+      },
+      "manualPath": null
+    },
+    {
+      "id": "W6",
+      "from": {
+        "type": "pin",
+        "compId": "VIN",
+        "terminal": "A"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "T1",
+        "terminal": "P1A"
+      },
+      "manualPath": null
+    },
+    {
+      "id": "W9",
+      "from": {
+        "type": "pin",
+        "compId": "COMP1",
+        "terminal": "Out"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "GOTO_SIG1",
+        "terminal": "In"
+      },
+      "manualPath": null,
+      "fromComp": "COMP1",
+      "fromTerm": "Out",
+      "toComp": "GOTO_SIG1",
+      "toTerm": "In"
+    },
+    {
+      "id": "W10",
+      "from": {
+        "type": "pin",
+        "compId": "SUBTRACT1",
+        "terminal": "Out"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "PID1",
+        "terminal": "In"
+      },
+      "manualPath": null,
+      "fromComp": "SUBTRACT1",
+      "fromTerm": "Out",
+      "toComp": "PID1",
+      "toTerm": "In"
+    },
+    {
+      "id": "W13",
+      "from": {
+        "type": "pin",
+        "compId": "PID1",
+        "terminal": "Out"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "COMP1",
+        "terminal": "Plus"
+      },
+      "manualPath": null,
+      "fromComp": "PID1",
+      "fromTerm": "Out",
+      "toComp": "COMP1",
+      "toTerm": "Plus"
+    },
+    {
+      "id": "W17",
+      "from": {
+        "type": "pin",
+        "compId": "TRI1",
+        "terminal": "Out"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "COMP1",
+        "terminal": "Minus"
+      },
+      "manualPath": null,
+      "fromComp": "TRI1",
+      "fromTerm": "Out",
+      "toComp": "COMP1",
+      "toTerm": "Minus"
+    },
+    {
+      "id": "W18",
+      "from": {
+        "type": "pin",
+        "compId": "CONST1",
+        "terminal": "Out"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "SUBTRACT1",
+        "terminal": "A"
+      },
+      "manualPath": null,
+      "fromComp": "CONST1",
+      "fromTerm": "Out",
+      "toComp": "SUBTRACT1",
+      "toTerm": "A"
+    },
+    {
+      "id": "W19",
+      "from": {
+        "type": "pin",
+        "compId": "FROM_SIG1",
+        "terminal": "Out"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "SUBTRACT1",
+        "terminal": "B"
+      },
+      "manualPath": null,
+      "fromComp": "FROM_SIG1",
+      "fromTerm": "Out",
+      "toComp": "SUBTRACT1",
+      "toTerm": "B"
+    },
+    {
+      "id": "W20",
+      "from": {
+        "type": "wire",
+        "wireId": "W9",
+        "x": 880,
+        "y": 660
+      },
+      "to": {
+        "type": "pin",
+        "compId": "SCOPE1",
+        "terminal": "In3"
+      },
+      "manualPath": null
+    },
+    {
+      "id": "W21",
+      "from": {
+        "type": "wire",
+        "wireId": "W13",
+        "x": 760,
+        "y": 640
+      },
+      "to": {
+        "type": "pin",
+        "compId": "SCOPE1",
+        "terminal": "In2"
+      },
+      "manualPath": null
+    },
+    {
+      "id": "W22",
+      "from": {
+        "type": "wire",
+        "wireId": "W10",
+        "x": 620,
+        "y": 640
+      },
+      "to": {
+        "type": "pin",
+        "compId": "SCOPE1",
+        "terminal": "In1"
+      },
+      "manualPath": null
+    },
+    {
+      "id": "W23",
+      "from": {
+        "type": "pin",
+        "compId": "VM1",
+        "terminal": "Out"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "GOTO_SIG2",
+        "terminal": "In"
+      },
+      "manualPath": null
+    },
+    {
+      "id": "W24",
+      "from": {
+        "type": "pin",
+        "compId": "FROM_SIG2",
+        "terminal": "Out"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "SW1",
+        "terminal": "G"
+      },
+      "manualPath": null
+    }
+  ],
+  "plotConfiguration": {
+    "plots": [
+      {
+        "title": "Waveform analysis",
+        "variables": [
+          "INTERNAL_VAR1.Out",
+          "V_R_LOAD",
+          "I_L_OUT",
+          "V_Cout"
+        ]
+      }
+    ]
+  },
+  "simulationSettings": {
+    "stopTime": "0.04",
+    "stepSize": "1e-6",
+    "stepType": "fixed",
+    "solver": "euler"
+  }
+}

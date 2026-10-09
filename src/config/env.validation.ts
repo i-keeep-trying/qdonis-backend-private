@@ -74,6 +74,9 @@ const DURATION_MESSAGE = 'must look like 900, 900s, 15m, 2h or 7d';
 /** Minimum secret length: 32 chars of base64url is ~192 bits of entropy. */
 const SECRET_MIN_LENGTH = 32;
 
+/** An AWS region id, e.g. `us-east-1` or `us-gov-west-1`. */
+const REGION_PATTERN = /^[a-z]{2}(-gov)?-[a-z]+-\d$/;
+
 /** Values from `.env.example` that must never reach production. */
 const PLACEHOLDER_PATTERN = /replace-me|changeme|change-me|example|secret123/i;
 
@@ -310,16 +313,39 @@ export class EnvironmentVariables {
   STRIPE_WEBHOOK_SECRET?: string;
 
   // --- AI (AWS Bedrock) ------------------------------------------------------
-  /** Bedrock API key (bearer). AI endpoints answer 503 while unset. */
+  /**
+   * Auth: the AWS key pair (SigV4) wins when both are set; otherwise
+   * BEDROCK_API_KEY (bearer); with neither, AI endpoints answer 503.
+   */
+  @IsOptional()
+  @IsString()
+  @Matches(/^[A-Z0-9]{16,128}$/, {
+    message: 'AWS_ACCESS_KEY_ID must be 16-128 uppercase letters or digits',
+  })
+  AWS_ACCESS_KEY_ID?: string;
+
+  @IsOptional()
+  @IsString()
+  @MinLength(16)
+  AWS_SECRET_ACCESS_KEY?: string;
+
+  /** Region fallback for Bedrock when BEDROCK_REGION is unset. */
+  @IsOptional()
+  @Matches(REGION_PATTERN, { message: 'AWS_REGION must look like us-east-1' })
+  AWS_REGION?: string;
+
+  /** Bedrock API key (bearer), used only when the AWS key pair is unset. */
   @IsOptional()
   @IsString()
   @MinLength(20)
   BEDROCK_API_KEY?: string;
 
-  @Matches(/^[a-z]{2}(-gov)?-[a-z]+-\d$/, {
+  /** Region precedence: BEDROCK_REGION, then AWS_REGION, then us-east-1. */
+  @IsOptional()
+  @Matches(REGION_PATTERN, {
     message: 'BEDROCK_REGION must look like us-east-1',
   })
-  BEDROCK_REGION: string = 'us-east-1';
+  BEDROCK_REGION?: string;
 
   /** Comma-separated allowlist; the first is the default model. */
   @IsString()
@@ -510,9 +536,17 @@ export function crossValidate(env: EnvironmentVariables): string[] {
     problems.push('BEDROCK_ALLOWED_MODELS must list at least one model id');
   }
 
+  if (Boolean(env.AWS_ACCESS_KEY_ID) !== Boolean(env.AWS_SECRET_ACCESS_KEY)) {
+    problems.push(
+      'Set both AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY, or neither',
+    );
+  }
+
   if (isProduction) {
-    if (!env.BEDROCK_API_KEY) {
-      problems.push('BEDROCK_API_KEY is required in production');
+    if (!env.BEDROCK_API_KEY && !env.AWS_ACCESS_KEY_ID) {
+      problems.push(
+        'Bedrock credentials are required in production: AWS_ACCESS_KEY_ID + AWS_SECRET_ACCESS_KEY, or BEDROCK_API_KEY',
+      );
     }
     if (!env.STRIPE_SECRET_KEY) {
       problems.push(

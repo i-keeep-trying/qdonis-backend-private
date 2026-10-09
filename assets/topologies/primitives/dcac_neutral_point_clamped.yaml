@@ -1,0 +1,987 @@
+id: dcac_neutral_point_clamped
+name: 3-Level NPC (Closed-Loop AC Inverter via PD PWM)
+description: 'Single-phase three-level Neutral Point Clamped (NPC) inverter with closed-loop
+  AC voltage regulation via Phase Disposition (PD) PWM and continuous-time PI control with
+  voltage feed-forward. Converts a stiff 1000V split-rail DC link (two 500V rails anchored at
+  midpoint neutral n6) to a clean 400V peak 50Hz sinusoidal AC output across a 1.6 Ohm load.
+  Four NMOS switches (SW1-SW4) and two clamping diodes (D_CLAMP_P, D_CLAMP_N) produce three
+  voltage levels (+500V, 0V, -500V) at switch node n5 relative to midpoint n6, with 10kHz
+  carrier triangle modulation and 500ns interlocking dead-time delay.'
+
+models:
+  - "* Removed Tt from models to prevent infinite di/dt matrix singularities during hard switching"
+  - ".model SCTHC250N120G_NMOS NMOS(Vto=3 Lambda=0.01 Kp=14.706 Cbd=0.6n Cbs=0.6n Cgdo=0.6n Is=1e-14 Rs=0.0085)"
+  - ".model Dmodel D(Is=1e-12 n=1.1 Rs=0.001 Cjo=5e-11 Bv=750 Ibv=1e-06)"
+
+components:
+  # Semantic node labels for explicit net naming
+  - ref: GND
+    type: node
+    params:
+      node_type: ground
+
+  - ref: n0
+    type: node
+    params:
+      node_type: label
+
+  - ref: n1
+    type: node
+    params:
+      node_type: label
+
+  - ref: n2
+    type: node
+    params:
+      node_type: label
+
+  - ref: n3
+    type: node
+    params:
+      node_type: label
+
+  - ref: n4
+    type: node
+    params:
+      node_type: label
+
+  - ref: n5
+    type: node
+    params:
+      node_type: label
+
+  - ref: n6
+    type: node
+    params:
+      node_type: label
+
+  - ref: n7
+    type: node
+    params:
+      node_type: label
+
+  - ref: n8
+    type: node
+    params:
+      node_type: label
+
+  - ref: n9
+    type: node
+    params:
+      node_type: label
+
+  - ref: n10
+    type: node
+    params:
+      node_type: label
+
+  - ref: n_ref_target
+    type: node
+    params:
+      node_type: label
+
+  - ref: n_err
+    type: node
+    params:
+      node_type: label
+
+  - ref: n_pi_int
+    type: node
+    params:
+      node_type: label
+
+  - ref: n_ctrl_raw
+    type: node
+    params:
+      node_type: label
+
+  - ref: n_ref
+    type: node
+    params:
+      node_type: label
+
+  - ref: n_tri_up
+    type: node
+    params:
+      node_type: label
+
+  - ref: n_tri_low
+    type: node
+    params:
+      node_type: label
+
+  - ref: n_PWM1_int
+    type: node
+    params:
+      node_type: label
+
+  - ref: n_PWM2_int
+    type: node
+    params:
+      node_type: label
+
+  - ref: n_PWM3_int
+    type: node
+    params:
+      node_type: label
+
+  - ref: n_PWM4_int
+    type: node
+    params:
+      node_type: label
+
+  - ref: n1_drv
+    type: node
+    params:
+      node_type: label
+
+  - ref: n4_drv
+    type: node
+    params:
+      node_type: label
+
+  - ref: n7_drv
+    type: node
+    params:
+      node_type: label
+
+  - ref: n9_drv
+    type: node
+    params:
+      node_type: label
+
+  # --- Stiff Split-Rail DC Link ---
+  - ref: COMMENT_DC_LINK
+    type: custom_spice
+    params:
+      spice_line: "* --- Stiff Split-Rail DC Link ---"
+
+  - ref: VDC_TOP
+    type: node
+    role: input_source
+    params:
+      node_type: voltage_source
+      source: dc
+      voltage: 500
+      series_resistance: 0.001
+      src_node: VDC_src_top
+
+  - ref: VDC_BOT
+    type: node
+    role: input_source
+    params:
+      node_type: voltage_source
+      source: dc
+      voltage: 500
+      series_resistance: 0
+
+  # CRITICAL FIX: Anchor the NPC midpoint to control ground to prevent floating matrix singularities
+  - ref: COMMENT_GND_ANCHOR
+    type: custom_spice
+    params:
+      spice_line: "* CRITICAL FIX: Anchor the NPC midpoint to control ground to prevent floating matrix singularities"
+
+  - ref: R_GND_ANCHOR
+    type: resistor
+    params:
+      resistance: 1m
+      sense: false
+
+  # --- Closed-Loop AC Voltage Controller (PI + Feed-forward) ---
+  - ref: COMMENT_CTRL_1
+    type: custom_spice
+    params:
+      spice_line: "* --- Closed-Loop AC Voltage Controller (PI + Feed-forward) ---"
+
+  - ref: COMMENT_CTRL_2
+    type: custom_spice
+    params:
+      spice_line: "* Target 400V peak, 50Hz sine wave"
+
+  - ref: V_ref_target
+    type: node
+    role: reference_source
+    params:
+      node_type: voltage_source
+      source: sine
+      offset: 0
+      amplitude: 400
+      frequency: 50
+      series_resistance: 0
+
+  - ref: COMMENT_ERR
+    type: custom_spice
+    params:
+      spice_line: "* Error calculation (Reference - Actual Load Voltage relative to midpoint)"
+
+  - ref: B_err
+    type: b_source
+    params:
+      expression: "V(n_ref_target) - (V(n10) - V(n6))"
+
+  - ref: COMMENT_PI
+    type: custom_spice
+    params:
+      spice_line: "* Continuous-Time PI Controller (Aggressive Tuning)"
+
+  - ref: G_PI
+    type: g_source
+    params:
+      gain: 100
+
+  - ref: C_PI
+    type: capacitor
+    params:
+      capacitance: 1
+      sense: false
+
+  - ref: R_PI
+    type: resistor
+    params:
+      resistance: 10Meg
+      sense: false
+
+  - ref: IC_PI
+    type: custom_spice
+    params:
+      spice_line: ".ic V(n_pi_int)=0"
+
+  - ref: COMMENT_CTRL_EFFORT
+    type: custom_spice
+    params:
+      spice_line: "* Control Effort: PI Output + Voltage Feed-forward (normalized to +/- 1)"
+
+  - ref: B_ctrl
+    type: b_source
+    params:
+      expression: "(V(n_err)*2.0 + V(n_pi_int) + V(n_ref_target))/500"
+
+  - ref: COMMENT_ANTI_WINDUP
+    type: custom_spice
+    params:
+      spice_line: "* Anti-Windup / Modulation Clamp"
+
+  - ref: B_ref
+    type: b_source
+    params:
+      expression: "max(-0.98, min(0.98, V(n_ctrl_raw)))"
+
+  - ref: COMMENT_TRI
+    type: custom_spice
+    params:
+      spice_line: "* 10kHz Triangle Carriers (Upper: 0 to 1, Lower: -1 to 0)"
+
+  - ref: V_tri_upper
+    type: node
+    role: carrier_source
+    params:
+      node_type: voltage_source
+      source: pulse
+      v1: 0
+      v2: 1
+      td: 0
+      tr: 50u
+      tf: 50u
+      pw: 0
+      per: 100u
+      series_resistance: 0
+
+  - ref: V_tri_lower
+    type: node
+    role: carrier_source
+    params:
+      node_type: voltage_source
+      source: pulse
+      v1: -1
+      v2: 0
+      td: 0
+      tr: 50u
+      tf: 50u
+      pw: 0
+      per: 100u
+      series_resistance: 0
+
+  - ref: COMMENT_PWM_1
+    type: custom_spice
+    params:
+      spice_line: "* Smooth PWM Generation (Phase Disposition) with 500ns Dead-Time"
+
+  - ref: COMMENT_PWM_2
+    type: custom_spice
+    params:
+      spice_line: "* 10kHz Carrier slope is 20,000 V/s. A 0.01V offset mathematically creates a robust 500ns interlocking delay."
+
+  - ref: B_SW1
+    type: b_source
+    params:
+      expression: "7.5 * (1 + tanh((V(n_ref) - V(n_tri_up) - 0.01)*5000))"
+
+  - ref: B_SW3
+    type: b_source
+    params:
+      expression: "7.5 * (1 + tanh((V(n_tri_up) - V(n_ref) - 0.01)*5000))"
+
+  - ref: B_SW2
+    type: b_source
+    params:
+      expression: "7.5 * (1 + tanh((V(n_ref) - V(n_tri_low) - 0.01)*5000))"
+
+  - ref: B_SW4
+    type: b_source
+    params:
+      expression: "7.5 * (1 + tanh((V(n_tri_low) - V(n_ref) - 0.01)*5000))"
+
+  # Perfect Floating Gate Drives
+  - ref: COMMENT_GATE_DRV
+    type: custom_spice
+    params:
+      spice_line: "* Perfect Floating Gate Drives"
+
+  - ref: E_PWM1
+    type: e_source
+    params:
+      gain: 1
+
+  - ref: PWM1_drive
+    type: resistor
+    params:
+      resistance: 100
+      sense: false
+
+  - ref: E_PWM2
+    type: e_source
+    params:
+      gain: 1
+
+  - ref: PWM2_drive
+    type: resistor
+    params:
+      resistance: 100
+      sense: false
+
+  - ref: E_PWM3
+    type: e_source
+    params:
+      gain: 1
+
+  - ref: PWM3_drive
+    type: resistor
+    params:
+      resistance: 100
+      sense: false
+
+  - ref: E_PWM4
+    type: e_source
+    params:
+      gain: 1
+
+  - ref: PWM4_drive
+    type: resistor
+    params:
+      resistance: 100
+      sense: false
+
+  # --- NPC Power Stage ---
+  - ref: COMMENT_POWER_STAGE
+    type: custom_spice
+    params:
+      spice_line: "* --- NPC Power Stage ---"
+
+  - ref: C1
+    type: capacitor
+    role: upper_dc_cap
+    params:
+      capacitance: 0.001
+      esr: 0.005
+      esl: 1e-10
+      ic: 500
+      leakage_resistance: 6.5e+06
+
+  - ref: C2
+    type: capacitor
+    role: lower_dc_cap
+    params:
+      capacitance: 0.001
+      esr: 0.005
+      esl: 1e-10
+      ic: 500
+      leakage_resistance: 6.5e+06
+
+  - ref: SW1
+    type: transistor
+    role: outer_upper_switch
+    params:
+      family: mosfet
+      type: nmos
+      model: SCTHC250N120G_NMOS
+
+  - ref: SW2
+    type: transistor
+    role: inner_upper_switch
+    params:
+      family: mosfet
+      type: nmos
+      model: SCTHC250N120G_NMOS
+
+  - ref: SW3
+    type: transistor
+    role: inner_lower_switch
+    params:
+      family: mosfet
+      type: nmos
+      model: SCTHC250N120G_NMOS
+
+  - ref: SW4
+    type: transistor
+    role: outer_lower_switch
+    params:
+      family: mosfet
+      type: nmos
+      model: SCTHC250N120G_NMOS
+
+  - ref: D_CLAMP_P
+    type: diode
+    role: upper_clamp_diode
+    params:
+      model: Dmodel
+
+  - ref: D_CLAMP_N
+    type: diode
+    role: lower_clamp_diode
+    params:
+      model: Dmodel
+
+  # --- LC Filter and Load ---
+  - ref: COMMENT_FILTER_LOAD
+    type: custom_spice
+    params:
+      spice_line: "* --- LC Filter and Load ---"
+
+  - ref: L_FILT
+    type: inductor
+    role: output_filter_inductor
+    params:
+      inductance: 0.002
+      series_resistance: 0.0005
+      parasitic_capacitance: 5e-11
+      core_loss_resistance: 1e+06
+
+  - ref: C_FILT
+    type: capacitor
+    role: output_filter_cap
+    params:
+      capacitance: 4.7e-05
+      esr: 0.01
+      esl: 1e-10
+      leakage_resistance: 6e+11
+
+  - ref: R_LOAD
+    type: resistor
+    role: ac_load
+    params:
+      resistance: 1.6
+      parasitic_inductance: 1e-08
+
+nets:
+  # Net n0: Positive DC rail
+  - - - n0
+      - pin
+    - - VDC_TOP
+      - +
+    - - C1
+      - pos
+    - - SW1
+      - drain
+
+  # Net n1: SW1 Gate
+  - - - n1
+      - pin
+    - - PWM1_drive
+      - neg
+    - - SW1
+      - gate
+
+  # Net n2: Negative DC rail
+  - - - n2
+      - pin
+    - - VDC_BOT
+      - '-'
+    - - C2
+      - neg
+    - - E_PWM4
+      - '-'
+    - - SW4
+      - source
+
+  # Net n3: SW1-SW2 midpoint & upper clamping cathode
+  - - - n3
+      - pin
+    - - SW1
+      - source
+    - - SW2
+      - drain
+    - - D_CLAMP_P
+      - cathode
+    - - E_PWM1
+      - '-'
+
+  # Net n4: SW2 Gate
+  - - - n4
+      - pin
+    - - PWM2_drive
+      - neg
+    - - SW2
+      - gate
+
+  # Net n5: Switch node (AC out before filter)
+  - - - n5
+      - pin
+    - - SW2
+      - source
+    - - SW3
+      - drain
+    - - L_FILT
+      - pos
+    - - E_PWM2
+      - '-'
+
+  # Net n6: Midpoint neutral point (NP)
+  - - - n6
+      - pin
+    - - VDC_TOP
+      - '-'
+    - - VDC_BOT
+      - +
+    - - R_GND_ANCHOR
+      - pos
+    - - C1
+      - neg
+    - - C2
+      - pos
+    - - D_CLAMP_P
+      - anode
+    - - D_CLAMP_N
+      - cathode
+    - - C_FILT
+      - neg
+    - - R_LOAD
+      - neg
+
+  # Net n7: SW3 Gate
+  - - - n7
+      - pin
+    - - PWM3_drive
+      - neg
+    - - SW3
+      - gate
+
+  # Net n8: SW3-SW4 midpoint & lower clamping anode
+  - - - n8
+      - pin
+    - - SW3
+      - source
+    - - SW4
+      - drain
+    - - D_CLAMP_N
+      - anode
+    - - E_PWM3
+      - '-'
+
+  # Net n9: SW4 Gate
+  - - - n9
+      - pin
+    - - PWM4_drive
+      - neg
+    - - SW4
+      - gate
+
+  # Net n10: Filtered AC Output
+  - - - n10
+      - pin
+    - - L_FILT
+      - neg
+    - - C_FILT
+      - pos
+    - - R_LOAD
+      - pos
+
+  # Reference Ground Net (0)
+  - - - GND
+      - pin
+    - - R_GND_ANCHOR
+      - neg
+    - - V_ref_target
+      - '-'
+    - - B_err
+      - '-'
+    - - G_PI
+      - +
+    - - G_PI
+      - ctrl-
+    - - C_PI
+      - neg
+    - - R_PI
+      - neg
+    - - B_ctrl
+      - '-'
+    - - B_ref
+      - '-'
+    - - V_tri_upper
+      - '-'
+    - - V_tri_lower
+      - '-'
+    - - B_SW1
+      - '-'
+    - - B_SW3
+      - '-'
+    - - B_SW2
+      - '-'
+    - - B_SW4
+      - '-'
+    - - E_PWM1
+      - ctrl-
+    - - E_PWM2
+      - ctrl-
+    - - E_PWM3
+      - ctrl-
+    - - E_PWM4
+      - ctrl-
+
+  # Net n_ref_target
+  - - - n_ref_target
+      - pin
+    - - V_ref_target
+      - +
+
+  # Net n_err
+  - - - n_err
+      - pin
+    - - B_err
+      - +
+    - - G_PI
+      - ctrl+
+
+  # Net n_pi_int
+  - - - n_pi_int
+      - pin
+    - - G_PI
+      - '-'
+    - - C_PI
+      - pos
+    - - R_PI
+      - pos
+
+  # Net n_ctrl_raw
+  - - - n_ctrl_raw
+      - pin
+    - - B_ctrl
+      - +
+
+  # Net n_ref
+  - - - n_ref
+      - pin
+    - - B_ref
+      - +
+
+  # Net n_tri_up
+  - - - n_tri_up
+      - pin
+    - - V_tri_upper
+      - +
+
+  # Net n_tri_low
+  - - - n_tri_low
+      - pin
+    - - V_tri_lower
+      - +
+
+  # Net n_PWM1_int
+  - - - n_PWM1_int
+      - pin
+    - - B_SW1
+      - +
+    - - E_PWM1
+      - ctrl+
+
+  # Net n_PWM2_int
+  - - - n_PWM2_int
+      - pin
+    - - B_SW2
+      - +
+    - - E_PWM2
+      - ctrl+
+
+  # Net n_PWM3_int
+  - - - n_PWM3_int
+      - pin
+    - - B_SW3
+      - +
+    - - E_PWM3
+      - ctrl+
+
+  # Net n_PWM4_int
+  - - - n_PWM4_int
+      - pin
+    - - B_SW4
+      - +
+    - - E_PWM4
+      - ctrl+
+
+  # Net n1_drv
+  - - - n1_drv
+      - pin
+    - - E_PWM1
+      - +
+    - - PWM1_drive
+      - pos
+
+  # Net n4_drv
+  - - - n4_drv
+      - pin
+    - - E_PWM2
+      - +
+    - - PWM2_drive
+      - pos
+
+  # Net n7_drv
+  - - - n7_drv
+      - pin
+    - - E_PWM3
+      - +
+    - - PWM3_drive
+      - pos
+
+  # Net n9_drv
+  - - - n9_drv
+      - pin
+    - - E_PWM4
+      - +
+    - - PWM4_drive
+      - pos
+
+analysis:
+  spice_settings:
+    rshunt: 1.0e+12
+    cshunt: 1.0e-12
+    reltol: 0.01
+    abstol: 1.0e-09
+    vntol: 1.0e-05
+    chgtol: 1.0e-11
+    gmin: 1.0e-10
+    method: gear
+    maxord: 2
+    trtol: 4
+  transient:
+    spice_settings:
+      tstop: 0.1
+      use_ic: true
+      reltol: 0.01
+      abstol: 1.0e-09
+      vntol: 1.0e-05
+      chgtol: 1.0e-11
+      gmin: 1.0e-10
+      method: gear
+      maxord: 2
+      trtol: 4
+    requirements:
+      - rid: tr_vout
+        requirement: Three-level AC output voltage at load; verify +VDC/2, 0, -VDC/2 levels relative to NPC midpoint
+        criteria:
+          vdc_half_v: 500
+          fundamental_freq_hz: 50
+        environment:
+          - ref: time_domain
+            t_step: 4.0e-06
+            t_stop: 0.1
+            t_max_step: 1.0e-05
+        measurement:
+          - ref: VOUT
+            plot:
+              x_axis: time
+              title: Filtered AC Output vs Target Reference
+            component: R_LOAD
+            quantity: voltage
+            nets:
+              - - R_LOAD
+                - pos
+              - - R_LOAD
+                - neg
+            data:
+              - name: Vout_max
+                spice_command: max
+                description: Peak positive output voltage
+              - name: Vout_min
+                spice_command: min
+                description: Peak negative output voltage
+              - name: Vout_pp
+                spice_command: pp
+                description: Peak-to-peak output voltage
+          - ref: VOUT_RAW
+            plot:
+              x_axis: time
+              title: Raw Switch Node Voltage (Shows +500V, 0V, -500V)
+            component: L_FILT
+            quantity: voltage
+            nets:
+              - - L_FILT
+                - pos
+              - - C1
+                - neg
+            data:
+              - name: Vraw_max
+                spice_command: max
+                description: Peak raw output voltage vs NPC midpoint
+              - name: Vraw_min
+                spice_command: min
+                description: Minimum raw output voltage vs NPC midpoint
+        outputs:
+          - var: vout_peak_v
+            formula: '[Vout_max]'
+            description: Peak AC output voltage after LC filter
+          - var: vout_pp_v
+            formula: '[Vout_pp]'
+            description: Peak-to-peak output voltage
+      - rid: tr_clamp
+        requirement: Clamping diode and DC bus capacitor balance
+        criteria:
+          vc_target_v: 500
+          balance_limit_pct: 5
+        environment:
+          - ref: time_domain
+            t_step: 4.0e-06
+            t_stop: 0.1
+            t_max_step: 1.0e-05
+        measurement:
+          - ref: ID_CLAMP_P
+            plot:
+              x_axis: time
+              title: Upper Clamping Diode Current
+            component: D_CLAMP_P
+            quantity: current
+            data:
+              - name: Id_clamp_p_max
+                spice_command: max
+                description: Peak upper clamping diode forward current
+          - ref: ID_CLAMP_N
+            plot:
+              x_axis: time
+              title: Lower Clamping Diode Current
+            component: D_CLAMP_N
+            quantity: current
+            data:
+              - name: Id_clamp_n_max
+                spice_command: max
+                description: Peak lower clamping diode forward current
+          - ref: VC1
+            plot:
+              x_axis: time
+              title: Upper Bus Capacitor Voltage
+            component: C1
+            quantity: voltage
+            nets:
+              - - C1
+                - pos
+              - - C1
+                - neg
+            data:
+              - name: Vc1_avg
+                spice_command: avg
+                description: Average upper bus capacitor voltage
+          - ref: VC2
+            plot:
+              x_axis: time
+              title: Lower Bus Capacitor Voltage
+            component: C2
+            quantity: voltage
+            nets:
+              - - C2
+                - pos
+              - - C2
+                - neg
+            data:
+              - name: Vc2_avg
+                spice_command: avg
+                description: Average lower bus capacitor voltage
+        outputs:
+          - var: id_clamp_p_peak_a
+            formula: '[Id_clamp_p_max]'
+            description: Peak upper clamping diode current
+          - var: id_clamp_n_peak_a
+            formula: '[Id_clamp_n_max]'
+            description: Peak lower clamping diode current
+          - var: vc_balance_pct
+            formula: 100*abs([Vc1_avg] - [Vc2_avg])/([Vc1_avg] + [Vc2_avg])*2
+            description: DC bus voltage imbalance percentage
+      - rid: tr_stress
+        requirement: Switch voltage stress; outer devices (SW1, SW4) should see at most 500V
+        criteria:
+          outer_sw_voltage_max_v: 500
+        environment:
+          - ref: time_domain
+            t_step: 4.0e-06
+            t_stop: 0.1
+            t_max_step: 1.0e-05
+        measurement:
+          - ref: VSW1_DS
+            plot:
+              x_axis: time
+              title: SW1 Drain-Source Voltage Stress
+            component: SW1
+            quantity: voltage
+            nets:
+              - - SW1
+                - drain
+              - - SW1
+                - source
+            data:
+              - name: Vsw1_max
+                spice_command: max
+                description: Peak SW1 drain-source voltage
+          - ref: VSW4_DS
+            plot:
+              x_axis: time
+              title: SW4 Drain-Source Voltage Stress
+            component: SW4
+            quantity: voltage
+            nets:
+              - - SW4
+                - drain
+              - - SW4
+                - source
+            data:
+              - name: Vsw4_max
+                spice_command: max
+                description: Peak SW4 drain-source voltage
+          - ref: ILOAD
+            plot:
+              x_axis: time
+              title: Output Load Current
+            component: R_LOAD
+            quantity: current
+            data:
+              - name: Iload_rms
+                spice_command: rms
+                description: RMS load current
+        outputs:
+          - var: vsw1_max_v
+            formula: '[Vsw1_max]'
+            description: Peak outer upper switch voltage stress
+          - var: vsw4_max_v
+            formula: '[Vsw4_max]'
+            description: Peak outer lower switch voltage stress
+
+metadata:
+  stage:
+    - power_switch
+    - filter
+    - control
+  topology: inverter
+  control: closed-loop_pd_pwm
+  tags:
+    - NPC
+    - neutral-point-clamped
+    - three-level
+    - multilevel
+    - closed-loop
+    - pd-pwm
+    - inverter

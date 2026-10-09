@@ -65,7 +65,12 @@ export interface AppConfiguration {
     webhookSecret?: string;
   };
   bedrock: {
+    /** `sigv4` = AWS key pair, `bearer` = BEDROCK_API_KEY, `none` = AI off. */
+    authMode: BedrockAuthMode;
+    accessKeyId?: string;
+    secretAccessKey?: string;
     apiKey?: string;
+    /** BEDROCK_REGION, else AWS_REGION, else `us-east-1`. */
     region: string;
     allowedModels: string[];
     maxOutputTokens: number;
@@ -106,7 +111,20 @@ export interface AppConfiguration {
   };
 }
 
+export type BedrockAuthMode = 'sigv4' | 'bearer' | 'none';
+
 const trimSlashes = (value: string): string => value.replace(/^\/+|\/+$/g, '');
+
+/** The AWS key pair wins over the bearer API key; neither means AI is off. */
+function bedrockAuthMode(env: {
+  AWS_ACCESS_KEY_ID?: string;
+  AWS_SECRET_ACCESS_KEY?: string;
+  BEDROCK_API_KEY?: string;
+}): BedrockAuthMode {
+  if (env.AWS_ACCESS_KEY_ID && env.AWS_SECRET_ACCESS_KEY) return 'sigv4';
+  if (env.BEDROCK_API_KEY) return 'bearer';
+  return 'none';
+}
 
 /**
  * Maps the environment onto {@link AppConfiguration}.
@@ -165,8 +183,11 @@ export function configuration(): AppConfiguration {
       webhookSecret: env.STRIPE_WEBHOOK_SECRET,
     },
     bedrock: {
+      authMode: bedrockAuthMode(env),
+      accessKeyId: env.AWS_ACCESS_KEY_ID,
+      secretAccessKey: env.AWS_SECRET_ACCESS_KEY,
       apiKey: env.BEDROCK_API_KEY,
-      region: env.BEDROCK_REGION,
+      region: env.BEDROCK_REGION ?? env.AWS_REGION ?? 'us-east-1',
       allowedModels: env.BEDROCK_ALLOWED_MODELS.split(',')
         .map((m) => m.trim())
         .filter(Boolean),

@@ -1,0 +1,924 @@
+id: acdc_interleaved_boost_power_factor_correction
+name: Interleaved Boost Power Factor Correction Rectifier
+description: A 100kHz interleaved dual-phase boost Power Factor Correction (PFC) rectifier converting 230V RMS AC (325V peak) to 385V DC at ~370W load with input LC EMI filter, dual interleaved switching branches operating 180 degrees out-of-phase, and closed-loop average current mode control.
+
+models:
+  - ".model dmodel1 D(Rs=0.01)"
+  - ".model power_nmos VDMOS(Ron=0.04 Vto=3.5 Kp=60 Cgdmax=15p Cgdmin=1p Cgs=150p)"
+
+components:
+  # Ground reference and semantic net labels
+  - ref: GND
+    type: node
+    params:
+      node_type: ground
+
+  - ref: a
+    type: node
+    params:
+      node_type: label
+
+  - ref: b
+    type: node
+    params:
+      node_type: label
+
+  - ref: a_filt
+    type: node
+    params:
+      node_type: label
+
+  - ref: d
+    type: node
+    params:
+      node_type: label
+
+  - ref: L1_node
+    type: node
+    params:
+      node_type: label
+
+  - ref: e1
+    type: node
+    params:
+      node_type: label
+
+  - ref: ctrl_gate1
+    type: node
+    params:
+      node_type: label
+
+  - ref: ctrl1
+    type: node
+    params:
+      node_type: label
+
+  - ref: L2_node
+    type: node
+    params:
+      node_type: label
+
+  - ref: e2
+    type: node
+    params:
+      node_type: label
+
+  - ref: ctrl_gate2
+    type: node
+    params:
+      node_type: label
+
+  - ref: ctrl2
+    type: node
+    params:
+      node_type: label
+
+  - ref: VOUT
+    type: node
+    params:
+      node_type: label
+
+  - ref: VFB
+    type: node
+    params:
+      node_type: label
+
+  - ref: VREF_NODE
+    type: node
+    params:
+      node_type: label
+
+  - ref: V_RAW
+    type: node
+    params:
+      node_type: label
+
+  - ref: V_CLAMP
+    type: node
+    params:
+      node_type: label
+
+  - ref: V_COMP
+    type: node
+    params:
+      node_type: label
+
+  - ref: I_TARGET
+    type: node
+    params:
+      node_type: label
+
+  - ref: I_ACT1
+    type: node
+    params:
+      node_type: label
+
+  - ref: C_RAW1
+    type: node
+    params:
+      node_type: label
+
+  - ref: C_CLAMP1
+    type: node
+    params:
+      node_type: label
+
+  - ref: C_COMP1
+    type: node
+    params:
+      node_type: label
+
+  - ref: I_ACT2
+    type: node
+    params:
+      node_type: label
+
+  - ref: C_RAW2
+    type: node
+    params:
+      node_type: label
+
+  - ref: C_CLAMP2
+    type: node
+    params:
+      node_type: label
+
+  - ref: C_COMP2
+    type: node
+    params:
+      node_type: label
+
+  - ref: VTRI1
+    type: node
+    params:
+      node_type: label
+
+  - ref: VTRI2
+    type: node
+    params:
+      node_type: label
+
+  # AC Input Source (230V RMS = 325V peak, 50Hz)
+  - ref: VAC
+    type: node
+    role: voltage_source
+    params:
+      node_type: voltage_source
+      source: sine
+      offset: 0
+      amplitude: 325
+      frequency: 50
+      delay: 0
+      damping: 0
+      phase: 0
+      series_resistance: 0
+
+  # High impedance ground reference resistors for floating AC input
+  - ref: Ra
+    type: resistor
+    params:
+      resistance: 10000000.0
+      sense: false
+
+  - ref: Rb
+    type: resistor
+    params:
+      resistance: 10000000.0
+      sense: false
+
+  # LC EMI Filter
+  - ref: L_EMI
+    type: inductor
+    params:
+      inductance: 0.002
+      sense: false
+
+  - ref: C_EMI
+    type: capacitor
+    params:
+      capacitance: 4.7e-07
+      sense: false
+
+  - ref: R_filt
+    type: resistor
+    params:
+      resistance: 10000000.0
+      sense: false
+
+  # Bridge Rectifier
+  - ref: D1
+    type: diode
+    params:
+      model: dmodel1
+      sense: false
+
+  - ref: D2
+    type: diode
+    params:
+      model: dmodel1
+      sense: false
+
+  - ref: D3
+    type: diode
+    params:
+      model: dmodel1
+      sense: false
+
+  - ref: D4
+    type: diode
+    params:
+      model: dmodel1
+      sense: false
+
+  - ref: C_BYPASS
+    type: capacitor
+    params:
+      capacitance: 1.0e-08
+      sense: false
+
+  # === Interleaved Phase 1 ===
+  - ref: L1
+    type: inductor
+    params:
+      inductance: 0.003
+      sense: false
+
+  - ref: VSENSE1
+    type: node
+    role: voltage_source
+    params:
+      node_type: voltage_source
+      source: dc
+      voltage: 0
+      series_resistance: 0
+
+  - ref: C_S1
+    type: capacitor
+    params:
+      capacitance: 1.0e-09
+      sense: false
+
+  - ref: R_S1
+    type: resistor
+    params:
+      resistance: 1000000.0
+      sense: false
+
+  - ref: M1
+    type: transistor
+    params:
+      family: vdmos
+      model: power_nmos
+      sense: false
+
+  - ref: R_gate1
+    type: resistor
+    params:
+      resistance: 10.0
+      sense: false
+
+  - ref: R_GS1
+    type: resistor
+    params:
+      resistance: 100000.0
+      sense: false
+
+  - ref: D5
+    type: diode
+    params:
+      model: dmodel1
+      sense: false
+
+  # === Interleaved Phase 2 ===
+  - ref: L2
+    type: inductor
+    params:
+      inductance: 0.003
+      sense: false
+
+  - ref: VSENSE2
+    type: node
+    role: voltage_source
+    params:
+      node_type: voltage_source
+      source: dc
+      voltage: 0
+      series_resistance: 0
+
+  - ref: C_S2
+    type: capacitor
+    params:
+      capacitance: 1.0e-09
+      sense: false
+
+  - ref: R_S2
+    type: resistor
+    params:
+      resistance: 1000000.0
+      sense: false
+
+  - ref: M2
+    type: transistor
+    params:
+      family: vdmos
+      model: power_nmos
+      sense: false
+
+  - ref: R_gate2
+    type: resistor
+    params:
+      resistance: 10.0
+      sense: false
+
+  - ref: R_GS2
+    type: resistor
+    params:
+      resistance: 100000.0
+      sense: false
+
+  - ref: D6
+    type: diode
+    params:
+      model: dmodel1
+      sense: false
+
+  # Output bulk capacitor (470uF) & Load (400 Ohm)
+  - ref: C1
+    type: capacitor
+    params:
+      capacitance: 0.00047
+      sense: false
+
+  - ref: R1
+    type: resistor
+    role: load
+    params:
+      resistance: 400.0
+      sense: false
+
+  # Control Loop 1: Voltage Divider (Target 385V -> 5V FB)
+  - ref: R2
+    type: resistor
+    params:
+      resistance: 760000.0
+      sense: false
+
+  - ref: R3
+    type: resistor
+    params:
+      resistance: 10000.0
+      sense: false
+
+  # Control Loop 2: Voltage Error Amp & Filter
+  - ref: VREF
+    type: node
+    role: voltage_source
+    params:
+      node_type: voltage_source
+      source: dc
+      voltage: 5.0
+      series_resistance: 0
+
+  - ref: E_V
+    type: e_source
+    params:
+      gain: 100.0
+
+  - ref: B_V_CLAMP
+    type: b_source
+    params:
+      expression: "max(min(V(V_RAW), 5), 0)"
+
+  - ref: R_V
+    type: resistor
+    params:
+      resistance: 10000.0
+      sense: false
+
+  - ref: C_V
+    type: capacitor
+    params:
+      capacitance: 1.0e-06
+      sense: false
+
+  # Control Loop 3: Multiplier
+  - ref: B_MULT
+    type: b_source
+    params:
+      expression: "abs(V(a,b)) * V(V_COMP) * 0.0015"
+
+  - ref: R_DUMMY
+    type: resistor
+    params:
+      resistance: 1000000000.0
+      sense: false
+
+  # Control Loop 4: Phase 1 Current Error Amp
+  - ref: B_I_ACT1
+    type: b_source
+    params:
+      expression: "I(VSENSE1)"
+
+  - ref: E_C1
+    type: e_source
+    params:
+      gain: 100.0
+
+  - ref: B_C_CLAMP1
+    type: b_source
+    params:
+      expression: "max(min(V(C_RAW1), 4.8), 0.1)"
+
+  - ref: R_C1
+    type: resistor
+    params:
+      resistance: 1000.0
+      sense: false
+
+  - ref: C_C1
+    type: capacitor
+    params:
+      capacitance: 2.2e-08
+      sense: false
+
+  # Control Loop 4: Phase 2 Current Error Amp
+  - ref: B_I_ACT2
+    type: b_source
+    params:
+      expression: "I(VSENSE2)"
+
+  - ref: E_C2
+    type: e_source
+    params:
+      gain: 100.0
+
+  - ref: B_C_CLAMP2
+    type: b_source
+    params:
+      expression: "max(min(V(C_RAW2), 4.8), 0.1)"
+
+  - ref: R_C2
+    type: resistor
+    params:
+      resistance: 1000.0
+      sense: false
+
+  - ref: C_C2
+    type: capacitor
+    params:
+      capacitance: 2.2e-08
+      sense: false
+
+  # Control Loop 5: Interleaved 100kHz PWM (Carrier 1: 0 delay, Carrier 2: 5µs delay = 180 deg)
+  - ref: V_TRI1
+    type: node
+    role: voltage_source
+    params:
+      node_type: voltage_source
+      source: pulse
+      v1: 0
+      v2: 5
+      td: 0
+      tr: 9.5e-06
+      tf: 5.0e-07
+      pw: 0
+      per: 1.0e-05
+      series_resistance: 0
+
+  - ref: V_TRI2
+    type: node
+    role: voltage_source
+    params:
+      node_type: voltage_source
+      source: pulse
+      v1: 0
+      v2: 5
+      td: 5.0e-06
+      tr: 9.5e-06
+      tf: 5.0e-07
+      pw: 0
+      per: 1.0e-05
+      series_resistance: 0
+
+  - ref: B_PWM1
+    type: b_source
+    params:
+      expression: "V(C_COMP1) > V(VTRI1) ? 15 : 0"
+
+  - ref: B_PWM2
+    type: b_source
+    params:
+      expression: "V(C_COMP2) > V(VTRI2) ? 15 : 0"
+
+nets:
+  # Ground reference net (0)
+  - - - GND
+      - pin
+    - - Ra
+      - neg
+    - - Rb
+      - neg
+    - - R_filt
+      - neg
+    - - D1
+      - anode
+    - - D3
+      - anode
+    - - C_BYPASS
+      - neg
+    - - C_S1
+      - neg
+    - - R_S1
+      - neg
+    - - M1
+      - source
+    - - R_GS1
+      - neg
+    - - C_S2
+      - neg
+    - - R_S2
+      - neg
+    - - M2
+      - source
+    - - R_GS2
+      - neg
+    - - C1
+      - neg
+    - - R1
+      - neg
+    - - R3
+      - neg
+    - - VREF
+      - '-'
+    - - E_V
+      - '-'
+    - - B_V_CLAMP
+      - '-'
+    - - C_V
+      - neg
+    - - B_MULT
+      - '-'
+    - - R_DUMMY
+      - neg
+    - - B_I_ACT1
+      - '-'
+    - - E_C1
+      - '-'
+    - - B_C_CLAMP1
+      - '-'
+    - - C_C1
+      - neg
+    - - B_I_ACT2
+      - '-'
+    - - E_C2
+      - '-'
+    - - B_C_CLAMP2
+      - '-'
+    - - C_C2
+      - neg
+    - - V_TRI1
+      - '-'
+    - - V_TRI2
+      - '-'
+    - - B_PWM1
+      - '-'
+    - - B_PWM2
+      - '-'
+
+  # Net a (AC input L before filter)
+  - - - a
+      - pin
+    - - VAC
+      - +
+    - - Ra
+      - pos
+    - - L_EMI
+      - pos
+
+  # Net b (AC input N)
+  - - - b
+      - pin
+    - - VAC
+      - '-'
+    - - Rb
+      - pos
+    - - C_EMI
+      - neg
+    - - D3
+      - cathode
+    - - D4
+      - anode
+
+  # Net a_filt (Filtered AC input L)
+  - - - a_filt
+      - pin
+    - - L_EMI
+      - neg
+    - - C_EMI
+      - pos
+    - - R_filt
+      - pos
+    - - D1
+      - cathode
+    - - D2
+      - anode
+
+  # Net d (Rectified bus)
+  - - - d
+      - pin
+    - - D2
+      - cathode
+    - - D4
+      - cathode
+    - - C_BYPASS
+      - pos
+    - - L1
+      - pos
+    - - L2
+      - pos
+
+  # Net L1_node (Phase 1 inductor to sense)
+  - - - L1_node
+      - pin
+    - - L1
+      - neg
+    - - VSENSE1
+      - +
+
+  # Net e1 (Phase 1 switch drain)
+  - - - e1
+      - pin
+    - - VSENSE1
+      - '-'
+    - - C_S1
+      - pos
+    - - R_S1
+      - pos
+    - - M1
+      - drain
+    - - D5
+      - anode
+
+  # Net ctrl_gate1 (Phase 1 gate)
+  - - - ctrl_gate1
+      - pin
+    - - M1
+      - gate
+    - - R_gate1
+      - neg
+    - - R_GS1
+      - pos
+
+  # Net ctrl1 (Phase 1 PWM output)
+  - - - ctrl1
+      - pin
+    - - R_gate1
+      - pos
+    - - B_PWM1
+      - +
+
+  # Net L2_node (Phase 2 inductor to sense)
+  - - - L2_node
+      - pin
+    - - L2
+      - neg
+    - - VSENSE2
+      - +
+
+  # Net e2 (Phase 2 switch drain)
+  - - - e2
+      - pin
+    - - VSENSE2
+      - '-'
+    - - C_S2
+      - pos
+    - - R_S2
+      - pos
+    - - M2
+      - drain
+    - - D6
+      - anode
+
+  # Net ctrl_gate2 (Phase 2 gate)
+  - - - ctrl_gate2
+      - pin
+    - - M2
+      - gate
+    - - R_gate2
+      - neg
+    - - R_GS2
+      - pos
+
+  # Net ctrl2 (Phase 2 PWM output)
+  - - - ctrl2
+      - pin
+    - - R_gate2
+      - pos
+    - - B_PWM2
+      - +
+
+  # Net VOUT (Regulated 385V DC output)
+  - - - VOUT
+      - pin
+    - - D5
+      - cathode
+    - - D6
+      - cathode
+    - - C1
+      - pos
+    - - R1
+      - pos
+    - - R2
+      - pos
+
+  # Net VFB (Feedback voltage ~5V)
+  - - - VFB
+      - pin
+    - - R2
+      - neg
+    - - R3
+      - pos
+    - - E_V
+      - ctrl-
+
+  # Net VREF_NODE (Reference 5V)
+  - - - VREF_NODE
+      - pin
+    - - VREF
+      - +
+    - - E_V
+      - ctrl+
+
+  # Net V_RAW (Voltage error amp unconstrained output)
+  - - - V_RAW
+      - pin
+    - - E_V
+      - +
+    - - B_V_CLAMP
+      - ctrl+
+
+  # Net V_CLAMP (Voltage error amp clamped output)
+  - - - V_CLAMP
+      - pin
+    - - B_V_CLAMP
+      - +
+    - - R_V
+      - pos
+
+  # Net V_COMP (Voltage error compensation filtered output)
+  - - - V_COMP
+      - pin
+    - - R_V
+      - neg
+    - - C_V
+      - pos
+
+  # Net I_TARGET (Multiplier current demand reference)
+  - - - I_TARGET
+      - pin
+    - - B_MULT
+      - +
+    - - R_DUMMY
+      - pos
+    - - E_C1
+      - ctrl+
+    - - E_C2
+      - ctrl+
+
+  # Net I_ACT1 (Phase 1 sensed current signal)
+  - - - I_ACT1
+      - pin
+    - - B_I_ACT1
+      - +
+    - - E_C1
+      - ctrl-
+
+  # Net C_RAW1 (Phase 1 current error amp unconstrained output)
+  - - - C_RAW1
+      - pin
+    - - E_C1
+      - +
+    - - B_C_CLAMP1
+      - ctrl+
+
+  # Net C_CLAMP1 (Phase 1 current error amp clamped output)
+  - - - C_CLAMP1
+      - pin
+    - - B_C_CLAMP1
+      - +
+    - - R_C1
+      - pos
+
+  # Net C_COMP1 (Phase 1 current error compensation filtered output)
+  - - - C_COMP1
+      - pin
+    - - R_C1
+      - neg
+    - - C_C1
+      - pos
+
+  # Net I_ACT2 (Phase 2 sensed current signal)
+  - - - I_ACT2
+      - pin
+    - - B_I_ACT2
+      - +
+    - - E_C2
+      - ctrl-
+
+  # Net C_RAW2 (Phase 2 current error amp unconstrained output)
+  - - - C_RAW2
+      - pin
+    - - E_C2
+      - +
+    - - B_C_CLAMP2
+      - ctrl+
+
+  # Net C_CLAMP2 (Phase 2 current error amp clamped output)
+  - - - C_CLAMP2
+      - pin
+    - - B_C_CLAMP2
+      - +
+    - - R_C2
+      - pos
+
+  # Net C_COMP2 (Phase 2 current error compensation filtered output)
+  - - - C_COMP2
+      - pin
+    - - R_C2
+      - neg
+    - - C_C2
+      - pos
+
+  # Net VTRI1 (Phase 1 PWM carrier)
+  - - - VTRI1
+      - pin
+    - - V_TRI1
+      - +
+
+  # Net VTRI2 (Phase 2 PWM carrier, 180 deg out of phase)
+  - - - VTRI2
+      - pin
+    - - V_TRI2
+      - +
+
+analysis:
+  spice_settings:
+    reltol: 0.01
+    method: gear
+    initial_conditions: "v(VOUT)=385 v(V_COMP)=2.5 v(C_COMP1)=2.5 v(C_COMP2)=2.5"
+  transient:
+    requirements:
+      - rid: tr_interleaved_pfc
+        requirement: Verify 385V DC output and interleaved dual-phase PFC boosting operation
+        environment:
+          - ref: time_domain
+            t_step: 1.0e-06
+            t_stop: 0.1
+            t_max_step: 1.0e-07
+        measurement:
+          - ref: VOUT
+            plot: true
+            quantity: voltage
+            nets:
+              - - R1
+                - pos
+              - - R1
+                - neg
+            data:
+              - name: Vout_avg
+                spice_command: avg
+                description: Average Output Voltage in steady state (last 20ms)
+              - name: Vout_ripple_vpp
+                spice_command: pp
+                description: Output Ripple peak-to-peak in steady state
+          - ref: VIN
+            plot: true
+            quantity: voltage
+            nets:
+              - - VAC
+                - +
+              - - VAC
+                - '-'
+          - ref: IL1
+            plot: true
+            quantity: current
+            component: VSENSE1
+            data:
+              - name: IL1_avg
+                spice_command: avg
+                description: Average Phase 1 Inductor Current
+          - ref: IL2
+            plot: true
+            quantity: current
+            component: VSENSE2
+            data:
+              - name: IL2_avg
+                spice_command: avg
+                description: Average Phase 2 Inductor Current
+        outputs:
+          - var: vout_avg_v
+            formula: abs([Vout_avg])
+            description: Average Output Voltage
+          - var: vout_ripple_vpp
+            formula: '[Vout_ripple_vpp]'
+            description: Output Voltage Ripple peak-to-peak

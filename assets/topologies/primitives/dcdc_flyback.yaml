@@ -1,0 +1,583 @@
+id: dcdc_flyback
+name: Flyback DC-DC Converter
+description: Isolated DC-DC converter using a transformer for energy storage and transfer.
+  Converts 12V input to 12V isolated output with galvanic isolation using a step-up
+  transformer (Ns=1.6).
+components:
+  - ref: VIN
+    type: node
+    role: input_source
+    params:
+      node_type: voltage_source
+      source: dc
+      voltage: 12
+      series_resistance: 0.05
+      ramp_rise: 3e-3
+  - ref: PWM
+    type: node
+    role: pwm_control
+    params:
+      node_type: pwm_control
+      frequency: 1e5
+      duty_cycle: 0.48
+      vhigh: 12.0
+      vlow: 0.0
+      trise: 1e-7
+      tfall: 1e-7
+      tdelay: 0
+      drive_resistance: 100
+  - ref: SW
+    type: transistor
+    role: power_switch
+    params:
+      family: mosfet
+      type: nmos
+      mode: enhancement
+      voltage_rating: 100
+      current_rating: 5
+      Vto: 2.0
+      Kn: 50e-3
+      Lambda: 0.01
+      Cgs: 500e-12
+      Cgd: 100e-12
+      Cdb: 100e-12
+    layout:
+      schX: 0.0
+      schY: 0.0
+      rotation: 270deg
+  - ref: T1
+    type: transformer
+    role: flyback_transformer
+    params:
+      Lm_primary: 40e-6
+      turns_ratio: 2.0
+      k_coupling: 0.985
+      phase: opposite
+      Rp: 0.5
+      Rs: 0.1
+      core_loss_resistance: 1e6
+    layout:
+      schX: 0.5
+      schY: 2.0
+      configuration: left-to-right
+    internal:
+      - ref: RSN_P
+        type: resistor
+        role: primary_snubber
+        params:
+          resistance: 22
+        connections:
+          pos:
+            - T1
+            - P2
+          neg:
+            - CSN_P
+            - pos
+      - ref: CSN_P
+        type: capacitor
+        role: primary_snubber
+        params:
+          capacitance: 22e-9
+        connections:
+          pos:
+            - RSN_P
+            - neg
+          neg:
+            - T1
+            - P1
+      - ref: RSN_S
+        type: resistor
+        role: secondary_snubber
+        params:
+          resistance: 100
+        connections:
+          pos:
+            - T1
+            - S1
+          neg:
+            - CSN_S
+            - pos
+      - ref: CSN_S
+        type: capacitor
+        role: secondary_snubber
+        params:
+          capacitance: 1e-9
+        connections:
+          pos:
+            - RSN_S
+            - neg
+          neg:
+            - T1
+            - S2
+      - ref: CWW
+        type: capacitor
+        role: interwinding_cap
+        params:
+          capacitance: 2e-11
+        connections:
+          pos:
+            - T1
+            - P1
+          neg:
+            - T1
+            - S1
+      - ref: R_ISO
+        type: resistor
+        role: secondary_ground_anchor
+        params:
+          resistance: 100e6
+        connections:
+          pos:
+            - T1
+            - S2
+          neg:
+            - VIN
+            - '-'
+  - ref: D
+    type: diode
+    role: output_rectifier
+    params:
+      reverse_voltage: 5
+      current_rating: 1
+      Is: 1e-12
+      n: 1.1
+      Rs: 0.1
+      Cjo: 10e-12
+      Tt: 10e-9
+      Bv: 100
+      Ibv: 1e-6
+    layout:
+      schX: 1.5
+      schY: 3.0
+      orientation: horizontal
+  - ref: Cout
+    type: capacitor
+    role: output_filter
+    params:
+      capacitance: 100e-6
+      polarized: true
+      voltage_rating: 25
+      tolerance: 0.1
+      esr: 0.02
+      esl: 5e-9
+      leakage_current: 1e-6
+      ic: 0
+    layout:
+      schX: 2.5
+      schY: 2.0
+      orientation: vertical
+  - ref: R_LOAD
+    type: resistor
+    role: load
+    params:
+      resistance: 50
+      tolerance: 0.05
+      temp_coefficient: 100e-6
+      parasitic_inductance: 10e-9
+    layout:
+      schX: 4.5
+      schY: 2.0
+      orientation: vertical
+nets:
+  - - - VIN
+      - +
+    - - T1
+      - P1
+  - - - VIN
+      - '-'
+    - - SW
+      - source
+    - - PWM
+      - neg
+  - - - PWM
+      - pos
+    - - SW
+      - gate
+  - - - SW
+      - drain
+    - - T1
+      - P2
+  - - - T1
+      - S1
+    - - D
+      - anode
+  - - - D
+      - cathode
+    - - Cout
+      - pos
+    - - R_LOAD
+      - pos
+  - - - T1
+      - S2
+    - - Cout
+      - neg
+    - - R_LOAD
+      - neg
+analysis:
+  transient:
+    requirements:
+      - rid: tr_reg
+        requirement: Meet target Vout across line (Vin) and load changes
+        criteria:
+          target_vout: 12.0
+          regulation_limit_pct: 3
+        measurement:
+          - ref: VOUT
+            plot:
+              x_axis: time
+              title: Regulation Response Output Voltage
+            component: R_LOAD
+            quantity: voltage
+            nets:
+              - - R_LOAD
+                - pos
+              - - R_LOAD
+                - neg
+            data:
+              - name: Vout_avg
+                spice_command: avg
+                description: Average output voltage
+              - name: Vout_ripple_vpp
+                spice_command: pp
+                description: Peak-to-peak ripple at output
+          - ref: VIN
+            plot:
+              x_axis: time
+              title: Regulation Response Input Voltage
+            component: VIN
+            quantity: voltage
+            nets:
+              - - VIN
+                - +
+              - - VIN
+                - '-'
+            data:
+              - name: Vin_avg
+                spice_command: avg
+                description: Average input voltage
+          - ref: IIN
+            plot:
+              x_axis: time
+              title: Regulation Response Input Current
+            component: VIN
+            quantity: current
+            data:
+              - name: Iin_avg
+                spice_command: avg
+                description: Average input current
+          - ref: IOUT
+            plot: false
+            component: R_LOAD
+            quantity: current
+            data:
+              - name: Iout_avg
+                spice_command: avg
+                description: Average load current
+        outputs:
+          - var: line_regulation_pct
+            formula: 100*([Vout_avg]/[Vin_avg])
+            description: Line regulation percentage
+          - var: load_regulation_pct
+            formula: 100*abs([Vout_avg] - {criteria.target_vout})/{criteria.target_vout}
+            description: Load regulation deviation from target
+          - var: vout_avg_v
+            formula: '[Vout_avg]'
+            description: Average output voltage
+          - var: vout_ripple_vpp_v
+            formula: '[Vout_ripple_vpp]'
+            description: Peak-to-peak output voltage ripple
+      - rid: tr_dyn
+        requirement: 'Dynamic response: step changes (line/load) with minimal overshoot
+          and fast settling'
+        criteria:
+          target_vout: 12.0
+          overshoot_limit_pct: 3
+          undershoot_limit_pct: 3
+          settle_band_pct: 0.5
+          settle_time_limit: 0.0005
+        environment:
+          - ref: time_domain
+            t_step: '1e-6'
+            description: Time domain simulation settings
+            t_stop: 0.015
+            t_start: 0.0135
+        measurement:
+          - ref: VIN
+            plot: false
+            quantity: voltage
+            nets:
+              - - VIN
+                - +
+              - - VIN
+                - '-'
+          - ref: VOUT
+            plot: false
+            component: R_LOAD
+            quantity: voltage
+            nets:
+              - - R_LOAD
+                - pos
+              - - R_LOAD
+                - neg
+            data:
+              - name: Vout_max
+                spice_command: max
+                description: Max output voltage during step
+              - name: Vout_min
+                spice_command: min
+                description: Min output voltage during step
+              - name: rise_time_10_90
+                spice_command: TRIG [VOUT] VAL={{{{0.1*{criteria.target_vout}}}}}
+                  RISE=1 TARG [VOUT] VAL={{{{0.9*{criteria.target_vout}}}}} RISE=1
+                description: 10% to 90% rise time
+              - name: settle_to_upper
+                spice_command: TRIG AT={{{{environment.time_domain.t_step}}}} TARG
+                  [VOUT] VAL={{{{criteria.target_vout}}*(1+{{criteria.settle_band_pct}}/100)}}
+                  CROSS=LAST
+                description: Time to upper settling band
+              - name: settle_to_lower
+                spice_command: TRIG AT={{{{environment.time_domain.t_step}}}} TARG
+                  [VOUT] VAL={{{{criteria.target_vout}}*(1-{{criteria.settle_band_pct}}/100)}}
+                  CROSS=LAST
+                description: Time to lower settling band
+          - ref: ISW
+            plot:
+              x_axis: time
+              title: Dynamic Response Switch Current
+            component: SW
+            quantity: current
+            data:
+              - name: Isw_peak
+                spice_command: max
+                description: Peak switch current
+              - name: Isw_ripple
+                spice_command: pp
+                description: Switch current ripple (p-p)
+          - ref: ID
+            plot:
+              x_axis: time
+              title: Dynamic Response Diode Current
+            component: D
+            quantity: current
+            data:
+              - name: demag_done_time
+                spice_command: TRIG AT={{{{environment.time_domain.t_step}}}} TARG
+                  [ID] VAL=0 CROSS=LAST
+                description: Demagnetization completion time
+          - ref: VSW
+            plot:
+              x_axis: time
+              title: Dynamic Response Switch Voltage
+            component: SW
+            quantity: voltage
+            nets:
+              - - SW
+                - drain
+              - - VIN
+                - '-'
+            data:
+              - name: Vsw_overshoot
+                spice_command: max
+                description: Max primary switch-node voltage
+        outputs:
+          - var: overshoot_pct
+            formula: 100*([Vout_max] - {criteria.target_vout})/{criteria.target_vout}
+            description: Overshoot percentage
+          - var: undershoot_pct
+            formula: 100*({criteria.target_vout} - [Vout_min])/{criteria.target_vout}
+            description: Undershoot percentage
+          - var: settle_time
+            formula: max([settle_to_upper], [settle_to_lower])
+            description: Settling time to within band
+          - var: demag_margin
+            formula: (1/{components.PWM.frequency})*(1-{components.PWM.duty_cycle})
+              - [demag_done_time]
+            description: Time margin between end of demagnetization and next cycle
+      - rid: tr_eff
+        requirement: Efficiency across load points with loss breakdown
+        criteria:
+          efficiency_target_pct: 90
+        measurement:
+          - ref: IIN
+            plot: false
+            component: VIN
+            quantity: current
+            data:
+              - name: Iin_avg
+                spice_command: avg
+                description: Average input current
+          - ref: IOUT
+            plot: false
+            component: R_LOAD
+            quantity: current
+            data:
+              - name: Iout_avg
+                spice_command: avg
+                description: Average load current
+          - ref: VOUT
+            plot: false
+            component: R_LOAD
+            quantity: voltage
+            nets:
+              - - R_LOAD
+                - pos
+              - - R_LOAD
+                - neg
+            data:
+              - name: Vout_avg
+                spice_command: avg
+                description: Average output voltage
+          - ref: VIN
+            plot: false
+            component: VIN
+            quantity: voltage
+            nets:
+              - - VIN
+                - +
+              - - VIN
+                - '-'
+            data:
+              - name: Vin_avg
+                spice_command: avg
+                description: Average input voltage
+          - ref: VSW
+            plot: false
+            component: SW
+            quantity: voltage
+            nets:
+              - - SW
+                - drain
+              - - VIN
+                - '-'
+            data:
+              - name: Vsw_avg
+                spice_command: avg
+                description: Average drain node voltage
+          - ref: ISW
+            plot: false
+            component: SW
+            quantity: current
+            data:
+              - name: Isw_avg
+                spice_command: avg
+                description: Average switch current
+              - name: Isw_rms
+                spice_command: rms
+                description: RMS switch/primary current
+          - ref: VD
+            plot: false
+            component: D
+            quantity: voltage
+            nets:
+              - - D
+                - cathode
+              - - Cout
+                - neg
+            data:
+              - name: Vd_avg
+                spice_command: avg
+                description: Average diode cathode voltage
+          - ref: ID
+            plot: false
+            component: D
+            quantity: current
+            data:
+              - name: Id_avg
+                spice_command: avg
+                description: Average diode current
+              - name: Id_rms
+                spice_command: rms
+                description: RMS diode/secondary current
+        outputs:
+          - var: Pin_avg
+            formula: abs([Vin_avg]*[Iin_avg])
+            description: Average input power
+          - var: Pout_avg
+            formula: abs([Vout_avg]*[Iout_avg])
+            description: Average output power
+          - var: P_switch_avg
+            formula: '[Vsw_avg]*[Isw_avg]'
+            description: Average switch loss
+          - var: P_diode_avg
+            formula: '[Vd_avg]*[Id_avg]'
+            description: Average diode loss
+          - var: P_primary_cu
+            formula: '[Isw_rms]**2*{components.T1.Rp}'
+            description: Primary copper loss
+          - var: P_secondary_cu
+            formula: '[Id_rms]**2*{components.T1.Rs}'
+            description: Secondary copper loss
+          - var: efficiency_pct
+            formula: 100*[Pout_avg]/[Pin_avg]
+            description: Efficiency percentage
+      - rid: tr_stress
+        requirement: Stress & thermal margins for key devices
+        criteria:
+          SW_voltage_margin_pct: 20
+          SW_current_margin_pct: 30
+          D_current_margin_pct: 30
+          T1_current_margin_pct: 30
+        measurement:
+          - ref: VIN
+            plot: false
+            quantity: voltage
+            nets:
+              - - VIN
+                - +
+              - - VIN
+                - '-'
+          - ref: VSW
+            plot: false
+            component: SW
+            quantity: voltage
+            nets:
+              - - SW
+                - drain
+              - - VIN
+                - '-'
+            data:
+              - name: Vsw_max
+                spice_command: max
+                description: Max primary switch-node voltage
+          - ref: ISW
+            plot: false
+            component: SW
+            quantity: current
+            data:
+              - name: Isw_peak
+                spice_command: max
+                description: Peak switch current
+              - name: Isw_rms
+                spice_command: rms
+                description: RMS switch/primary current
+          - ref: ID
+            plot: false
+            component: D
+            quantity: current
+            data:
+              - name: Id_peak
+                spice_command: max
+                description: Peak diode/secondary current
+              - name: Id_rms
+                spice_command: rms
+                description: RMS diode/secondary current
+          - ref: VOUT
+            plot: false
+            quantity: voltage
+            nets:
+              - - R_LOAD
+                - pos
+              - - R_LOAD
+                - neg
+        outputs: []
+metadata:
+  stage:
+    - energy_storage
+    - isolation
+    - rectification
+    - filter
+  topology: isolated
+  control: discontinuous_or_continuous
+  tags:
+    - flyback
+    - isolated

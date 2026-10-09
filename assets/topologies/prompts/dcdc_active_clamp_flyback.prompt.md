@@ -1,0 +1,11 @@
+## Topology-Specific Rules: Active Clamp Flyback Converter
+- **MOSFET Selection**: Account for leakage inductance spikes: `Vds_max = Vin + (Vout / turns_ratio) + Vspike`. Choose MOSFET with Vds rating >= 1.2 * Vds_max.
+- **Turns Ratio & Duty Cycle**: 
+  - Calculate transformer turns ratio (Ns / Np) based on a nominal duty cycle (e.g. 0.45): `turns_ratio = (Vout / Vin) * ((1 - D) / D)`.
+  - CCM Duty Cycle check: `D = Vout / (Vout + Vin * turns_ratio)`.
+- **Magnetizing Inductance (L_m) Sizing (CCM)**:
+  - Average magnetizing current `I_Lm = (Iout * Vout) / (Vin * D)`.
+  - ON-time volt-seconds: `L_m = Vin * D / (Delta_I_L * fsw)` where `Delta_I_L = 0.30 * I_Lm`.
+  - Check if CCM (`I_Lm > Delta_I_L / 2`).
+- **Diode Breakdown Margin**: Set `Bv >= 1.5 * (Vout + (turns_ratio * Vin))`.
+- **Active Clamp Tank**: Size the clamp capacitor to resonate with the leakage inductance at a frequency slightly lower than the switching frequency to achieve ZVS.

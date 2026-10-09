@@ -1,0 +1,416 @@
+{
+  "components": [
+    {
+      "id": "VIN",
+      "type": "V",
+      "x": -180,
+      "y": 120,
+      "rotation": 0,
+      "parameters": {
+        "value": "24"
+      }
+    },
+    {
+      "id": "C2",
+      "type": "C",
+      "x": -40,
+      "y": 240,
+      "rotation": 0,
+      "parameters": {
+        "C": "100u",
+        "esr": "10m",
+        "vC0": "0"
+      }
+    },
+    {
+      "id": "SW1",
+      "type": "MOSFET",
+      "x": 100,
+      "y": 0,
+      "rotation": 0,
+      "parameters": {
+        "Ron": "10m",
+        "Roff": "1M"
+      }
+    },
+    {
+      "id": "SW2",
+      "type": "MOSFET",
+      "x": 100,
+      "y": 240,
+      "rotation": 0,
+      "parameters": {
+        "Ron": "10m",
+        "Roff": "1M"
+      }
+    },
+    {
+      "id": "DR1",
+      "type": "D",
+      "x": 340,
+      "y": -40,
+      "rotation": 270,
+      "parameters": {
+        "Vd": "0.7",
+        "Ron": "1m",
+        "Roff": "1M"
+      }
+    },
+    {
+      "id": "DR2",
+      "type": "D",
+      "x": 360,
+      "y": 240,
+      "rotation": 270,
+      "parameters": {
+        "Vd": "0.7",
+        "Ron": "1m",
+        "Roff": "1M"
+      }
+    },
+    {
+      "id": "L_OUT",
+      "type": "L",
+      "x": 540,
+      "y": -40,
+      "rotation": 90,
+      "parameters": {
+        "L": "10m",
+        "esr": "50m",
+        "iL0": "0"
+      }
+    },
+    {
+      "id": "C_OUT",
+      "type": "C",
+      "x": 660,
+      "y": 40,
+      "rotation": 0,
+      "parameters": {
+        "C": "100u",
+        "esr": "10m",
+        "vC0": "0"
+      }
+    },
+    {
+      "id": "R_LOAD",
+      "type": "R",
+      "x": 760,
+      "y": 40,
+      "rotation": 0,
+      "parameters": {
+        "value": "10",
+        "esr": "0"
+      }
+    },
+    {
+      "id": "T1",
+      "type": "XFMR_CT",
+      "x": 240,
+      "y": 120,
+      "rotation": 0,
+      "mirrorX": false,
+      "mirrorY": false,
+      "parameters": {
+        "N": "1",
+        "Lp": "10m",
+        "Rw": "10m"
+      }
+    },
+    {
+      "id": "C1",
+      "type": "C",
+      "x": -40,
+      "y": 0,
+      "rotation": 0,
+      "parameters": {
+        "C": "100u",
+        "esr": "10m",
+        "vC0": "0"
+      }
+    }
+  ],
+  "wires": [
+    {
+      "id": "W7",
+      "from": {
+        "type": "pin",
+        "compId": "SW2",
+        "terminal": "S"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "C2",
+        "terminal": "B"
+      }
+    },
+    {
+      "id": "W10",
+      "from": {
+        "type": "pin",
+        "compId": "DR1",
+        "terminal": "B"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "L_OUT",
+        "terminal": "B"
+      }
+    },
+    {
+      "id": "W11",
+      "from": {
+        "type": "pin",
+        "compId": "L_OUT",
+        "terminal": "B"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "DR2",
+        "terminal": "B"
+      }
+    },
+    {
+      "id": "W14",
+      "from": {
+        "type": "pin",
+        "compId": "L_OUT",
+        "terminal": "A"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "C_OUT",
+        "terminal": "A"
+      }
+    },
+    {
+      "id": "W16",
+      "from": {
+        "type": "pin",
+        "compId": "R_LOAD",
+        "terminal": "A"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "L_OUT",
+        "terminal": "A"
+      }
+    },
+    {
+      "id": "W21",
+      "from": {
+        "type": "pin",
+        "compId": "T1",
+        "terminal": "S1"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "DR1",
+        "terminal": "A"
+      }
+    },
+    {
+      "id": "W22",
+      "from": {
+        "type": "pin",
+        "compId": "T1",
+        "terminal": "S2"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "DR2",
+        "terminal": "A"
+      }
+    },
+    {
+      "id": "W23",
+      "from": {
+        "type": "pin",
+        "compId": "C_OUT",
+        "terminal": "B"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "T1",
+        "terminal": "SCT"
+      }
+    },
+    {
+      "id": "W24",
+      "from": {
+        "type": "pin",
+        "compId": "R_LOAD",
+        "terminal": "B"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "C_OUT",
+        "terminal": "B"
+      },
+      "manualPath": [
+        {
+          "x": 760,
+          "y": 80
+        },
+        {
+          "x": 760,
+          "y": 120
+        },
+        {
+          "x": 660,
+          "y": 120
+        },
+        {
+          "x": 660,
+          "y": 80
+        }
+      ]
+    },
+    {
+      "id": "W25",
+      "from": {
+        "type": "pin",
+        "compId": "VIN",
+        "terminal": "B"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "C2",
+        "terminal": "B"
+      },
+      "manualPath": [
+        {
+          "x": -180,
+          "y": 160
+        },
+        {
+          "x": -180,
+          "y": 300
+        },
+        {
+          "x": -40,
+          "y": 300
+        },
+        {
+          "x": -40,
+          "y": 280
+        }
+      ]
+    },
+    {
+      "id": "W26",
+      "from": {
+        "type": "pin",
+        "compId": "SW1",
+        "terminal": "S"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "SW2",
+        "terminal": "D"
+      }
+    },
+    {
+      "id": "W27",
+      "from": {
+        "type": "pin",
+        "compId": "C1",
+        "terminal": "B"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "C2",
+        "terminal": "A"
+      }
+    },
+    {
+      "id": "W28",
+      "from": {
+        "type": "pin",
+        "compId": "C1",
+        "terminal": "A"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "VIN",
+        "terminal": "A"
+      },
+      "manualPath": [
+        {
+          "x": -40,
+          "y": -40
+        },
+        {
+          "x": -40,
+          "y": -60
+        },
+        {
+          "x": -180,
+          "y": -60
+        },
+        {
+          "x": -180,
+          "y": 60
+        },
+        {
+          "x": -180,
+          "y": 60
+        },
+        {
+          "x": -180,
+          "y": 80
+        }
+      ]
+    },
+    {
+      "id": "W29",
+      "from": {
+        "type": "pin",
+        "compId": "SW1",
+        "terminal": "D"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "C1",
+        "terminal": "A"
+      }
+    },
+    {
+      "id": "W30",
+      "from": {
+        "type": "pin",
+        "compId": "T1",
+        "terminal": "P2"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "SW2",
+        "terminal": "D"
+      }
+    },
+    {
+      "id": "W31",
+      "from": {
+        "type": "pin",
+        "compId": "T1",
+        "terminal": "P1"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "C1",
+        "terminal": "B"
+      }
+    }
+  ],
+  "plotConfiguration": {
+    "plots": []
+  },
+  "simulationSettings": {
+    "stopTime": "0.05",
+    "stepSize": "1e-5",
+    "stepType": "fixed",
+    "solver": "euler"
+  },
+  "id": "dcdc_half_bridge",
+  "name": "Half Bridge DC-DC Converter"
+}

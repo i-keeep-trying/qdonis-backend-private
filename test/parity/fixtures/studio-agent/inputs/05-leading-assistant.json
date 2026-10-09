@@ -1,0 +1,17 @@
+{
+  "name": "05-leading-assistant",
+  "description": "History trimmed mid-pair: leading assistant turn, then a user turn made only of tool results, then assistant; all are dropped up to the first real user turn.",
+  "messages": [
+    {
+      "role": "assistant",
+      "content": [
+        { "type": "text", "text": "Welcome back." },
+        { "type": "tool_use", "id": "tu_open", "name": "open_view", "input": { "stage": "design" } }
+      ]
+    },
+    { "role": "user", "content": [{ "type": "tool_result", "tool_use_id": "tu_open", "content": { "focused": "design" } }] },
+    { "role": "assistant", "content": [{ "type": "text", "text": "The design view is open." }] },
+    { "role": "user", "content": [{ "type": "text", "text": "Why is the inductor so large?" }] }
+  ],
+  "project_state": { "workspace_focus": "design" }
+}

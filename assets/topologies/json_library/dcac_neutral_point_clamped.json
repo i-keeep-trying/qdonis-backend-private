@@ -1,0 +1,995 @@
+{
+  "components": [
+    {
+      "id": "SW1",
+      "type": "MOSFET",
+      "x": -140,
+      "y": -600,
+      "rotation": 0,
+      "parameters": {
+        "Ron": "10m",
+        "Roff": "1M"
+      }
+    },
+    {
+      "id": "SW2",
+      "type": "MOSFET",
+      "x": -140,
+      "y": -480,
+      "rotation": 0,
+      "parameters": {
+        "Ron": "10m",
+        "Roff": "1M"
+      }
+    },
+    {
+      "id": "SW3",
+      "type": "MOSFET",
+      "x": -140,
+      "y": -360,
+      "rotation": 0,
+      "parameters": {
+        "Ron": "10m",
+        "Roff": "1M"
+      }
+    },
+    {
+      "id": "SW4",
+      "type": "MOSFET",
+      "x": -140,
+      "y": -220,
+      "rotation": 0,
+      "parameters": {
+        "Ron": "10m",
+        "Roff": "1M"
+      }
+    },
+    {
+      "id": "D_CLAMP_P",
+      "type": "D",
+      "x": -280,
+      "y": -480,
+      "rotation": 180,
+      "parameters": {
+        "Vd": "0.7",
+        "Ron": "1m",
+        "Roff": "1M"
+      }
+    },
+    {
+      "id": "D_CLAMP_N",
+      "type": "D",
+      "x": -280,
+      "y": -340,
+      "rotation": 180,
+      "parameters": {
+        "Vd": "0.7",
+        "Ron": "1m",
+        "Roff": "1M"
+      }
+    },
+    {
+      "id": "MOSFET5",
+      "type": "MOSFET",
+      "x": 140,
+      "y": -600,
+      "rotation": 0,
+      "parameters": {
+        "Ron": "10m",
+        "Roff": "1M"
+      }
+    },
+    {
+      "id": "MOSFET6",
+      "type": "MOSFET",
+      "x": 140,
+      "y": -480,
+      "rotation": 0,
+      "parameters": {
+        "Ron": "10m",
+        "Roff": "1M"
+      }
+    },
+    {
+      "id": "MOSFET7",
+      "type": "MOSFET",
+      "x": 140,
+      "y": -360,
+      "rotation": 0,
+      "parameters": {
+        "Ron": "10m",
+        "Roff": "1M"
+      }
+    },
+    {
+      "id": "MOSFET8",
+      "type": "MOSFET",
+      "x": 140,
+      "y": -220,
+      "rotation": 0,
+      "parameters": {
+        "Ron": "10m",
+        "Roff": "1M"
+      }
+    },
+    {
+      "id": "D3",
+      "type": "D",
+      "x": 0,
+      "y": -480,
+      "rotation": 180,
+      "parameters": {
+        "Vd": "0.7",
+        "Ron": "1m",
+        "Roff": "1M"
+      }
+    },
+    {
+      "id": "D4",
+      "type": "D",
+      "x": 0,
+      "y": -340,
+      "rotation": 180,
+      "parameters": {
+        "Vd": "0.7",
+        "Ron": "1m",
+        "Roff": "1M"
+      }
+    },
+    {
+      "id": "MOSFET9",
+      "type": "MOSFET",
+      "x": 380,
+      "y": -600,
+      "rotation": 0,
+      "parameters": {
+        "Ron": "10m",
+        "Roff": "1M"
+      }
+    },
+    {
+      "id": "MOSFET10",
+      "type": "MOSFET",
+      "x": 380,
+      "y": -480,
+      "rotation": 0,
+      "parameters": {
+        "Ron": "10m",
+        "Roff": "1M"
+      }
+    },
+    {
+      "id": "MOSFET11",
+      "type": "MOSFET",
+      "x": 380,
+      "y": -360,
+      "rotation": 0,
+      "parameters": {
+        "Ron": "10m",
+        "Roff": "1M"
+      }
+    },
+    {
+      "id": "MOSFET12",
+      "type": "MOSFET",
+      "x": 380,
+      "y": -220,
+      "rotation": 0,
+      "parameters": {
+        "Ron": "10m",
+        "Roff": "1M"
+      }
+    },
+    {
+      "id": "D5",
+      "type": "D",
+      "x": 240,
+      "y": -480,
+      "rotation": 180,
+      "parameters": {
+        "Vd": "0.7",
+        "Ron": "1m",
+        "Roff": "1M"
+      }
+    },
+    {
+      "id": "D6",
+      "type": "D",
+      "x": 240,
+      "y": -340,
+      "rotation": 180,
+      "parameters": {
+        "Vd": "0.7",
+        "Ron": "1m",
+        "Roff": "1M"
+      }
+    },
+    {
+      "id": "C1",
+      "type": "C",
+      "x": -380,
+      "y": -520,
+      "rotation": 0,
+      "parameters": {
+        "C": "100u",
+        "esr": "10m",
+        "vC0": "0"
+      }
+    },
+    {
+      "id": "C2",
+      "type": "C",
+      "x": -380,
+      "y": -340,
+      "rotation": 0,
+      "parameters": {
+        "C": "100u",
+        "esr": "10m",
+        "vC0": "0"
+      }
+    },
+    {
+      "id": "VDC",
+      "type": "V",
+      "x": -460,
+      "y": -440,
+      "rotation": 0,
+      "parameters": {
+        "value": "24"
+      }
+    },
+    {
+      "id": "R_LOAD",
+      "type": "R",
+      "x": -60,
+      "y": -100,
+      "rotation": 0,
+      "parameters": {
+        "value": "10",
+        "esr": "0"
+      }
+    },
+    {
+      "id": "R2",
+      "type": "R",
+      "x": 220,
+      "y": -80,
+      "rotation": 0,
+      "parameters": {
+        "value": "10",
+        "esr": "0"
+      }
+    },
+    {
+      "id": "R3",
+      "type": "R",
+      "x": 460,
+      "y": -120,
+      "rotation": 0,
+      "parameters": {
+        "value": "10",
+        "esr": "0"
+      }
+    }
+  ],
+  "wires": [
+    {
+      "id": "W1",
+      "from": {
+        "type": "pin",
+        "compId": "SW1",
+        "terminal": "S"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "SW2",
+        "terminal": "D"
+      }
+    },
+    {
+      "id": "W2",
+      "from": {
+        "type": "pin",
+        "compId": "SW2",
+        "terminal": "S"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "SW3",
+        "terminal": "D"
+      }
+    },
+    {
+      "id": "W3",
+      "from": {
+        "type": "pin",
+        "compId": "SW3",
+        "terminal": "S"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "SW4",
+        "terminal": "D"
+      }
+    },
+    {
+      "id": "W4",
+      "from": {
+        "type": "pin",
+        "compId": "D_CLAMP_P",
+        "terminal": "B"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "SW1",
+        "terminal": "S"
+      }
+    },
+    {
+      "id": "W5",
+      "from": {
+        "type": "pin",
+        "compId": "D_CLAMP_P",
+        "terminal": "A"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "D_CLAMP_N",
+        "terminal": "B"
+      }
+    },
+    {
+      "id": "W6",
+      "from": {
+        "type": "pin",
+        "compId": "D_CLAMP_N",
+        "terminal": "A"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "SW4",
+        "terminal": "D"
+      }
+    },
+    {
+      "id": "W7",
+      "from": {
+        "type": "pin",
+        "compId": "MOSFET5",
+        "terminal": "S"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "MOSFET6",
+        "terminal": "D"
+      }
+    },
+    {
+      "id": "W8",
+      "from": {
+        "type": "pin",
+        "compId": "MOSFET6",
+        "terminal": "S"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "MOSFET7",
+        "terminal": "D"
+      }
+    },
+    {
+      "id": "W9",
+      "from": {
+        "type": "pin",
+        "compId": "MOSFET7",
+        "terminal": "S"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "MOSFET8",
+        "terminal": "D"
+      }
+    },
+    {
+      "id": "W10",
+      "from": {
+        "type": "pin",
+        "compId": "D3",
+        "terminal": "B"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "MOSFET5",
+        "terminal": "S"
+      }
+    },
+    {
+      "id": "W11",
+      "from": {
+        "type": "pin",
+        "compId": "D3",
+        "terminal": "A"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "D4",
+        "terminal": "B"
+      }
+    },
+    {
+      "id": "W12",
+      "from": {
+        "type": "pin",
+        "compId": "D4",
+        "terminal": "A"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "MOSFET8",
+        "terminal": "D"
+      }
+    },
+    {
+      "id": "W13",
+      "from": {
+        "type": "pin",
+        "compId": "MOSFET9",
+        "terminal": "S"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "MOSFET10",
+        "terminal": "D"
+      }
+    },
+    {
+      "id": "W14",
+      "from": {
+        "type": "pin",
+        "compId": "MOSFET10",
+        "terminal": "S"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "MOSFET11",
+        "terminal": "D"
+      }
+    },
+    {
+      "id": "W15",
+      "from": {
+        "type": "pin",
+        "compId": "MOSFET11",
+        "terminal": "S"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "MOSFET12",
+        "terminal": "D"
+      }
+    },
+    {
+      "id": "W16",
+      "from": {
+        "type": "pin",
+        "compId": "D5",
+        "terminal": "B"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "MOSFET9",
+        "terminal": "S"
+      }
+    },
+    {
+      "id": "W17",
+      "from": {
+        "type": "pin",
+        "compId": "D5",
+        "terminal": "A"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "D6",
+        "terminal": "B"
+      }
+    },
+    {
+      "id": "W18",
+      "from": {
+        "type": "pin",
+        "compId": "D6",
+        "terminal": "A"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "MOSFET12",
+        "terminal": "D"
+      }
+    },
+    {
+      "id": "W19",
+      "from": {
+        "type": "pin",
+        "compId": "VDC",
+        "terminal": "A"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "SW1",
+        "terminal": "D"
+      },
+      "manualPath": [
+        {
+          "x": -460,
+          "y": -480
+        },
+        {
+          "x": -460,
+          "y": -640
+        },
+        {
+          "x": -140,
+          "y": -640
+        },
+        {
+          "x": -140,
+          "y": -640
+        }
+      ]
+    },
+    {
+      "id": "W20",
+      "from": {
+        "type": "pin",
+        "compId": "C1",
+        "terminal": "A"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "SW1",
+        "terminal": "D"
+      },
+      "manualPath": [
+        {
+          "x": -380,
+          "y": -560
+        },
+        {
+          "x": -380,
+          "y": -640
+        },
+        {
+          "x": -140,
+          "y": -640
+        },
+        {
+          "x": -140,
+          "y": -640
+        }
+      ]
+    },
+    {
+      "id": "W21",
+      "from": {
+        "type": "pin",
+        "compId": "C1",
+        "terminal": "B"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "C2",
+        "terminal": "A"
+      }
+    },
+    {
+      "id": "W22",
+      "from": {
+        "type": "pin",
+        "compId": "C2",
+        "terminal": "B"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "SW4",
+        "terminal": "S"
+      },
+      "manualPath": [
+        {
+          "x": -380,
+          "y": -300
+        },
+        {
+          "x": -380,
+          "y": -180
+        },
+        {
+          "x": -140,
+          "y": -180
+        },
+        {
+          "x": -140,
+          "y": -180
+        }
+      ]
+    },
+    {
+      "id": "W23",
+      "from": {
+        "type": "pin",
+        "compId": "VDC",
+        "terminal": "B"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "C2",
+        "terminal": "B"
+      },
+      "manualPath": [
+        {
+          "x": -460,
+          "y": -400
+        },
+        {
+          "x": -460,
+          "y": -180
+        },
+        {
+          "x": -380,
+          "y": -180
+        },
+        {
+          "x": -380,
+          "y": -300
+        }
+      ]
+    },
+    {
+      "id": "W24",
+      "from": {
+        "type": "pin",
+        "compId": "C1",
+        "terminal": "B"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "D_CLAMP_P",
+        "terminal": "A"
+      }
+    },
+    {
+      "id": "W25",
+      "from": {
+        "type": "pin",
+        "compId": "D_CLAMP_P",
+        "terminal": "A"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "D3",
+        "terminal": "A"
+      },
+      "manualPath": [
+        {
+          "x": -280,
+          "y": -440
+        },
+        {
+          "x": -280,
+          "y": -440
+        },
+        {
+          "x": 0,
+          "y": -440
+        },
+        {
+          "x": 0,
+          "y": -440
+        }
+      ]
+    },
+    {
+      "id": "W26",
+      "from": {
+        "type": "pin",
+        "compId": "D3",
+        "terminal": "A"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "D5",
+        "terminal": "A"
+      },
+      "manualPath": [
+        {
+          "x": 0,
+          "y": -440
+        },
+        {
+          "x": 0,
+          "y": -440
+        },
+        {
+          "x": 240,
+          "y": -440
+        },
+        {
+          "x": 240,
+          "y": -440
+        }
+      ]
+    },
+    {
+      "id": "W27",
+      "from": {
+        "type": "pin",
+        "compId": "MOSFET5",
+        "terminal": "D"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "SW1",
+        "terminal": "D"
+      },
+      "manualPath": [
+        {
+          "x": 140,
+          "y": -640
+        },
+        {
+          "x": 140,
+          "y": -640
+        },
+        {
+          "x": -140,
+          "y": -640
+        },
+        {
+          "x": -140,
+          "y": -640
+        }
+      ]
+    },
+    {
+      "id": "W28",
+      "from": {
+        "type": "pin",
+        "compId": "MOSFET9",
+        "terminal": "D"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "MOSFET5",
+        "terminal": "D"
+      },
+      "manualPath": [
+        {
+          "x": 380,
+          "y": -640
+        },
+        {
+          "x": 380,
+          "y": -640
+        },
+        {
+          "x": 140,
+          "y": -640
+        },
+        {
+          "x": 140,
+          "y": -640
+        }
+      ]
+    },
+    {
+      "id": "W29",
+      "from": {
+        "type": "pin",
+        "compId": "MOSFET8",
+        "terminal": "S"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "SW4",
+        "terminal": "S"
+      },
+      "manualPath": [
+        {
+          "x": 140,
+          "y": -180
+        },
+        {
+          "x": 140,
+          "y": -180
+        },
+        {
+          "x": -140,
+          "y": -180
+        },
+        {
+          "x": -140,
+          "y": -180
+        }
+      ]
+    },
+    {
+      "id": "W30",
+      "from": {
+        "type": "pin",
+        "compId": "MOSFET12",
+        "terminal": "S"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "MOSFET8",
+        "terminal": "S"
+      },
+      "manualPath": [
+        {
+          "x": 380,
+          "y": -180
+        },
+        {
+          "x": 380,
+          "y": -180
+        },
+        {
+          "x": 140,
+          "y": -180
+        },
+        {
+          "x": 140,
+          "y": -180
+        }
+      ]
+    },
+    {
+      "id": "W31",
+      "from": {
+        "type": "pin",
+        "compId": "R_LOAD",
+        "terminal": "A"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "SW2",
+        "terminal": "S"
+      },
+      "manualPath": [
+        {
+          "x": -60,
+          "y": -140
+        },
+        {
+          "x": -60,
+          "y": -420
+        },
+        {
+          "x": -140,
+          "y": -420
+        },
+        {
+          "x": -140,
+          "y": -440
+        }
+      ]
+    },
+    {
+      "id": "W32",
+      "from": {
+        "type": "pin",
+        "compId": "R2",
+        "terminal": "A"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "MOSFET6",
+        "terminal": "S"
+      },
+      "manualPath": [
+        {
+          "x": 220,
+          "y": -120
+        },
+        {
+          "x": 220,
+          "y": -420
+        },
+        {
+          "x": 140,
+          "y": -420
+        },
+        {
+          "x": 140,
+          "y": -440
+        }
+      ]
+    },
+    {
+      "id": "W33",
+      "from": {
+        "type": "pin",
+        "compId": "R3",
+        "terminal": "A"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "MOSFET10",
+        "terminal": "S"
+      },
+      "manualPath": [
+        {
+          "x": 460,
+          "y": -160
+        },
+        {
+          "x": 460,
+          "y": -420
+        },
+        {
+          "x": 380,
+          "y": -420
+        },
+        {
+          "x": 380,
+          "y": -440
+        }
+      ]
+    },
+    {
+      "id": "W34",
+      "from": {
+        "type": "pin",
+        "compId": "R3",
+        "terminal": "B"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "R2",
+        "terminal": "B"
+      }
+    },
+    {
+      "id": "W35",
+      "from": {
+        "type": "pin",
+        "compId": "R_LOAD",
+        "terminal": "B"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "R2",
+        "terminal": "B"
+      },
+      "manualPath": [
+        {
+          "x": -60,
+          "y": -60
+        },
+        {
+          "x": -60,
+          "y": -40
+        },
+        {
+          "x": 220,
+          "y": -40
+        },
+        {
+          "x": 220,
+          "y": -40
+        }
+      ]
+    }
+  ],
+  "plotConfiguration": {
+    "plots": []
+  },
+  "simulationSettings": {
+    "stopTime": "0.05",
+    "stepSize": "1e-5",
+    "stepType": "fixed",
+    "solver": "euler"
+  },
+  "id": "dcac_neutral_point_clamped",
+  "name": "Neutral Point Clamped Inverter"
+}

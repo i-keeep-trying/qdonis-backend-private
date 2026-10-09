@@ -149,6 +149,8 @@ const DEFAULT_STEPS = [
   'magnetics_extraction',
   'magnetics_design',
   'component_evaluation',
+  // POST /studio/agent (one Studio chat agent step).
+  'studio_agent',
 ];
 
 /** Every known setting key, its value class and its default. */

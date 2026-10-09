@@ -1,0 +1,38 @@
+{
+  "name": "08-multiple-tool-calls",
+  "description": "Several tool uses in one assistant turn, results returned out of order with one is_error, text after the results, and every tool_result content shape (object, array, string, empty string, number, float, boolean, null, missing).",
+  "messages": [
+    { "role": "user", "content": [{ "type": "text", "text": "Run the whole flow with assumed values." }] },
+    {
+      "role": "assistant",
+      "content": [
+        { "type": "text", "text": "Running the stages." },
+        { "type": "tool_use", "id": "tu_1", "name": "update_specs", "input": { "rows": [], "approved": true } },
+        { "type": "tool_use", "id": "tu_2", "name": "select_topology", "input": { "topology_id": "dcdc_synchronous_buck", "reason": "non-isolated step-down" } },
+        { "type": "tool_use", "id": "tu_3", "name": "run_design", "input": { "notes": "minimise ripple" } },
+        { "type": "tool_use", "id": "tu_4", "name": "run_simulation", "input": { "analyses": ["dc", "transient"] } },
+        { "type": "tool_use", "id": "tu_5", "name": "design_magnetics", "input": { "parts": [{ "ref": "L1", "kind": "inductor", "inductance_uh": 22, "i_dc_a": 3, "fsw_khz": 400 }] } },
+        { "type": "tool_use", "id": "tu_6", "name": "run_thermal", "input": { "devices": [{ "ref": "Q1", "loss_w": 0.75 }] } },
+        { "type": "tool_use", "id": "tu_7", "name": "open_view", "input": { "stage": "thermal" } },
+        { "type": "tool_use", "id": "tu_8", "name": "manage_branch", "input": { "action": "rename", "name": "assumed" } },
+        { "type": "tool_use", "id": "tu_9", "name": "select_devices", "input": {} }
+      ]
+    },
+    {
+      "role": "user",
+      "content": [
+        { "type": "tool_result", "tool_use_id": "tu_3", "content": { "ok": true, "parameters": ["L1.L = 22u", "C1.C = 47u"], "duty": 0.4167 } },
+        { "type": "tool_result", "tool_use_id": "tu_1", "content": [{ "name": "Input Voltage", "value": "12" }, 5, "x"] },
+        { "type": "tool_result", "tool_use_id": "tu_2", "content": "Schematic shown", "is_error": false },
+        { "type": "tool_result", "tool_use_id": "tu_4", "content": "", "is_error": true },
+        { "type": "tool_result", "tool_use_id": "tu_5", "content": 42 },
+        { "type": "tool_result", "tool_use_id": "tu_6", "content": 0.00001 },
+        { "type": "tool_result", "tool_use_id": "tu_7", "content": true },
+        { "type": "tool_result", "tool_use_id": "tu_8", "content": null },
+        { "type": "tool_result", "tool_use_id": "tu_9" },
+        { "type": "text", "text": "[Workspace events]\n- Edited Output Voltage to 5 V" }
+      ]
+    }
+  ],
+  "project_state": { "design": { "status": "done", "topology_id": "dcdc_synchronous_buck", "parameters": ["L1.L = 22u"] } }
+}

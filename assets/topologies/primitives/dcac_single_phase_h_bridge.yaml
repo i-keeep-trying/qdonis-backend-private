@@ -1,0 +1,627 @@
+id: dcac_single_phase_h_bridge
+name: Single-Phase Full-Bridge (H-Bridge) Inverter
+description: Single-phase full-bridge (H-bridge) PWM voltage-source inverter with
+  unipolar/bipolar sine-triangle modulation. Converts a 380V DC bus to a 50Hz sinusoidal
+  AC output voltage (approx 215V RMS) filtered through a 5mH/10uF LC filter across
+  a 20 Ohm resistive load. Uses four voltage-controlled switches (S1-S4) with anti-parallel
+  freewheeling diodes (D1-D4) and 15V gate drivers driven by a 16kHz triangle carrier.
+models:
+- .model sw_mod SW(Ron=0.003 Roff=1Meg Vt=7.5 Vh=1)
+- .model Dmodel D(Is=1e-12 n=1.1 Rs=0.01 Cjo=10p Tt=0 Bv=1000 Ibv=1e-06)
+components:
+- ref: GND
+  type: node
+  params:
+    node_type: ground
+- ref: NTOP
+  type: node
+  params:
+    node_type: label
+- ref: TRI
+  type: node
+  params:
+    node_type: label
+- ref: ControlA
+  type: node
+  params:
+    node_type: label
+- ref: ControlB
+  type: node
+  params:
+    node_type: label
+- ref: nb1
+  type: node
+  params:
+    node_type: label
+- ref: ne1
+  type: node
+  params:
+    node_type: label
+- ref: g1
+  type: node
+  params:
+    node_type: label
+- ref: OUT1
+  type: node
+  params:
+    node_type: label
+- ref: nb3
+  type: node
+  params:
+    node_type: label
+- ref: ne2
+  type: node
+  params:
+    node_type: label
+- ref: g2
+  type: node
+  params:
+    node_type: label
+- ref: nb6
+  type: node
+  params:
+    node_type: label
+- ref: ne5
+  type: node
+  params:
+    node_type: label
+- ref: g3
+  type: node
+  params:
+    node_type: label
+- ref: OUT2
+  type: node
+  params:
+    node_type: label
+- ref: nb5
+  type: node
+  params:
+    node_type: label
+- ref: ne4
+  type: node
+  params:
+    node_type: label
+- ref: g4
+  type: node
+  params:
+    node_type: label
+- ref: out_filt
+  type: node
+  params:
+    node_type: label
+- ref: VIN
+  type: node
+  role: input_source
+  params:
+    node_type: voltage_source
+    source: dc
+    voltage: 380
+    series_resistance: 0.01
+- ref: VTRI
+  type: node
+  role: carrier_source
+  params:
+    node_type: voltage_source
+    source: pulse
+    v1: -10
+    v2: 10
+    td: 0
+    tr: 0.03124m
+    tf: 0.03124m
+    pw: 0.00002m
+    per: 0.0625m
+    series_resistance: 0
+- ref: VREF
+  type: node
+  role: reference_source
+  params:
+    node_type: voltage_source
+    source: sine
+    offset: 0
+    amplitude: 8
+    frequency: 50
+    series_resistance: 0
+- ref: B2
+  type: b_source
+  params:
+    expression: -V(ControlA)
+- ref: B1
+  type: b_source
+  params:
+    expression: 0.5 * (1 + tanh((V(ControlA) - V(TRI)) * 1000))
+- ref: E1
+  type: e_source
+  params:
+    gain: 15
+- ref: R1
+  type: resistor
+  params:
+    resistance: 1000
+    sense: false
+- ref: R3
+  type: resistor
+  params:
+    resistance: 50000
+    sense: false
+- ref: S1
+  type: switch
+  role: high_side_switch_a
+  params:
+    model: sw_mod
+- ref: D1
+  type: diode
+  role: freewheeling_diode_1
+  params:
+    model: Dmodel
+    sense: false
+- ref: B3
+  type: b_source
+  params:
+    expression: 0.5 * (1 + tanh((V(TRI) - V(ControlA)) * 1000))
+- ref: E2
+  type: e_source
+  params:
+    gain: 15
+- ref: R2
+  type: resistor
+  params:
+    resistance: 1000
+    sense: false
+- ref: R9
+  type: resistor
+  params:
+    resistance: 50000
+    sense: false
+- ref: S2
+  type: switch
+  role: low_side_switch_a
+  params:
+    model: sw_mod
+- ref: D2
+  type: diode
+  role: freewheeling_diode_2
+  params:
+    model: Dmodel
+    sense: false
+- ref: B6
+  type: b_source
+  params:
+    expression: 0.5 * (1 + tanh((V(ControlB) - V(TRI)) * 1000))
+- ref: E5
+  type: e_source
+  params:
+    gain: 15
+- ref: R8
+  type: resistor
+  params:
+    resistance: 1000
+    sense: false
+- ref: R10
+  type: resistor
+  params:
+    resistance: 50000
+    sense: false
+- ref: S3
+  type: switch
+  role: high_side_switch_b
+  params:
+    model: sw_mod
+- ref: D3
+  type: diode
+  role: freewheeling_diode_3
+  params:
+    model: Dmodel
+    sense: false
+- ref: B5
+  type: b_source
+  params:
+    expression: 0.5 * (1 + tanh((V(TRI) - V(ControlB)) * 1000))
+- ref: E4
+  type: e_source
+  params:
+    gain: 15
+- ref: R4
+  type: resistor
+  params:
+    resistance: 1000
+    sense: false
+- ref: R11
+  type: resistor
+  params:
+    resistance: 50000
+    sense: false
+- ref: S4
+  type: switch
+  role: low_side_switch_b
+  params:
+    model: sw_mod
+- ref: D4
+  type: diode
+  role: freewheeling_diode_4
+  params:
+    model: Dmodel
+    sense: false
+- ref: L_FILT
+  type: inductor
+  role: output_filter_inductor
+  params:
+    inductance: 5m
+    sense: false
+- ref: C_FILT
+  type: capacitor
+  role: output_filter_capacitor
+  params:
+    capacitance: 10u
+    sense: false
+- ref: R_LOAD
+  type: resistor
+  role: ac_load
+  params:
+    resistance: 20
+    sense: false
+- ref: Rsnub1
+  type: resistor
+  params:
+    resistance: 100
+- ref: Csnub1
+  type: capacitor
+  params:
+    capacitance: 1n
+- ref: Rsnub2
+  type: resistor
+  params:
+    resistance: 100
+- ref: Csnub2
+  type: capacitor
+  params:
+    capacitance: 1n
+nets:
+- - - GND
+    - pin
+  - - VIN
+    - '-'
+  - - VTRI
+    - '-'
+  - - VREF
+    - '-'
+  - - B2
+    - '-'
+  - - B1
+    - '-'
+  - - E1
+    - ctrl-
+  - - B3
+    - '-'
+  - - E2
+    - '-'
+  - - E2
+    - ctrl-
+  - - R9
+    - neg
+  - - S2
+    - neg
+  - - S2
+    - ctrl-
+  - - D2
+    - anode
+  - - B6
+    - '-'
+  - - E5
+    - ctrl-
+  - - B5
+    - '-'
+  - - E4
+    - '-'
+  - - E4
+    - ctrl-
+  - - R11
+    - neg
+  - - S4
+    - neg
+  - - S4
+    - ctrl-
+  - - D4
+    - anode
+  - - Csnub1
+    - neg
+  - - Csnub2
+    - neg
+- - - NTOP
+    - pin
+  - - VIN
+    - +
+  - - S1
+    - pos
+  - - D1
+    - cathode
+  - - S3
+    - pos
+  - - D3
+    - cathode
+- - - TRI
+    - pin
+  - - VTRI
+    - +
+- - - ControlA
+    - pin
+  - - VREF
+    - +
+- - - ControlB
+    - pin
+  - - B2
+    - +
+- - - nb1
+    - pin
+  - - B1
+    - +
+  - - E1
+    - ctrl+
+- - - ne1
+    - pin
+  - - E1
+    - +
+  - - R1
+    - pos
+- - - g1
+    - pin
+  - - R1
+    - neg
+  - - R3
+    - pos
+  - - S1
+    - ctrl+
+- - - OUT1
+    - pin
+  - - E1
+    - '-'
+  - - R3
+    - neg
+  - - S1
+    - neg
+  - - S1
+    - ctrl-
+  - - D1
+    - anode
+  - - S2
+    - pos
+  - - D2
+    - cathode
+  - - L_FILT
+    - pos
+  - - Rsnub1
+    - pos
+- - - nb3
+    - pin
+  - - B3
+    - +
+  - - E2
+    - ctrl+
+- - - ne2
+    - pin
+  - - E2
+    - +
+  - - R2
+    - pos
+- - - g2
+    - pin
+  - - R2
+    - neg
+  - - R9
+    - pos
+  - - S2
+    - ctrl+
+- - - nb6
+    - pin
+  - - B6
+    - +
+  - - E5
+    - ctrl+
+- - - ne5
+    - pin
+  - - E5
+    - +
+  - - R8
+    - pos
+- - - g3
+    - pin
+  - - R8
+    - neg
+  - - R10
+    - pos
+  - - S3
+    - ctrl+
+- - - OUT2
+    - pin
+  - - E5
+    - '-'
+  - - R10
+    - neg
+  - - S3
+    - neg
+  - - S3
+    - ctrl-
+  - - D3
+    - anode
+  - - S4
+    - pos
+  - - D4
+    - cathode
+  - - C_FILT
+    - neg
+  - - R_LOAD
+    - neg
+  - - Rsnub2
+    - pos
+- - - nb5
+    - pin
+  - - B5
+    - +
+  - - E4
+    - ctrl+
+- - - ne4
+    - pin
+  - - E4
+    - +
+  - - R4
+    - pos
+- - - g4
+    - pin
+  - - R4
+    - neg
+  - - R11
+    - pos
+  - - S4
+    - ctrl+
+- - - out_filt
+    - pin
+  - - L_FILT
+    - neg
+  - - C_FILT
+    - pos
+  - - R_LOAD
+    - pos
+- - - nsnub1
+    - pin
+  - - Rsnub1
+    - neg
+  - - Csnub1
+    - pos
+- - - nsnub2
+    - pin
+  - - Rsnub2
+    - neg
+  - - Csnub2
+    - pos
+analysis:
+  spice_settings:
+    reltol: 0.01
+    abstol: 1.0e-09
+    vntol: 1.0e-05
+    chgtol: 1.0e-11
+    gmin: 1.0e-10
+    method: gear
+    maxord: 2
+    trtol: 4
+  transient:
+    spice_settings:
+      tstop: 0.06
+      use_ic: false
+      reltol: 0.01
+      abstol: 1.0e-09
+      vntol: 1.0e-05
+      chgtol: 1.0e-11
+      gmin: 1.0e-10
+      method: gear
+      maxord: 2
+      trtol: 4
+    requirements:
+    - rid: tr_hbridge_inverter
+      requirement: Filtered sinusoidal AC output voltage across load and inductor
+        current
+      criteria:
+        target_vout_rms: 215
+        fundamental_freq_hz: 50
+        vdc_bus: 380
+      environment:
+      - ref: time_domain
+        t_step: 1.0e-06
+        t_stop: 0.06
+        t_max_step: 1.0e-06
+      measurement:
+      - ref: VOUT
+        plot:
+          x_axis: time
+          title: Filtered Output Voltage
+        quantity: voltage
+        nets:
+        - - R_LOAD
+          - pos
+        - - R_LOAD
+          - neg
+        data:
+        - name: Vout_rms
+          spice_command: rms
+          description: RMS Filtered AC Output Voltage
+        - name: Vout_max
+          spice_command: max
+          description: Peak Positive Output Voltage
+        - name: Vout_min
+          spice_command: min
+          description: Peak Negative Output Voltage
+        - name: Vout_pp
+          spice_command: pp
+          description: Peak-to-Peak Filtered Output Voltage
+      - ref: ILOAD
+        plot:
+          x_axis: time
+          title: Filtered Load Current
+        component: L_FILT
+        quantity: current
+        data:
+        - name: Iload_rms
+          spice_command: rms
+          description: RMS Filtered Inductor/Load Current
+        - name: Iload_max
+          spice_command: max
+          description: Peak Positive Load Current
+        - name: Iload_min
+          spice_command: min
+          description: Peak Negative Load Current
+        - name: Iload_pp
+          spice_command: pp
+          description: Peak-to-Peak Load Current
+      - ref: V_PWM_RAW
+        plot:
+          x_axis: time
+          title: Raw PWM Bridge Voltage (OUT1 - OUT2)
+        quantity: voltage
+        nets:
+        - - L_FILT
+          - pos
+        - - C_FILT
+          - neg
+        data:
+        - name: Vpwm_max
+          spice_command: max
+          description: Peak Raw Bridge Voltage
+        - name: Vpwm_min
+          spice_command: min
+          description: Minimum Raw Bridge Voltage
+        - name: Vpwm_pp
+          spice_command: pp
+          description: Peak-to-Peak Raw Bridge Voltage
+      outputs:
+      - var: vout_rms_v
+        formula: '[Vout_rms]'
+        description: RMS Filtered AC Output Voltage
+      - var: vout_peak_v
+        formula: '[Vout_max]'
+        description: Peak Filtered Output Voltage
+      - var: vout_pp_v
+        formula: '[Vout_pp]'
+        description: Peak-to-Peak Filtered Output Voltage
+      - var: iload_rms_a
+        formula: '[Iload_rms]'
+        description: RMS Filtered Load Current
+      - var: iload_peak_a
+        formula: '[Iload_max]'
+        description: Peak Load Current
+      - var: vpwm_max_v
+        formula: '[Vpwm_max]'
+        description: Peak Raw PWM Bridge Voltage
+      - var: vpwm_pp_v
+        formula: '[Vpwm_pp]'
+        description: Peak-to-Peak Raw Bridge Voltage
+metadata:
+  stage:
+  - power_switch
+  - filter
+  topology: inverter
+  control: sine_triangle_pwm
+  tags:
+  - full-bridge
+  - h-bridge
+  - inverter
+  - dc-ac
+  - single-phase
+  - pwm

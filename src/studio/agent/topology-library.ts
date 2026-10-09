@@ -1,0 +1,45 @@
+/**
+ * Ids of the built-in topology library, in the order qdonis-core lists them
+ * (`data_utils.list_builtin_topologies()`: sorted file names of
+ * `qdonis_backend/data/topologies/json_library`, 35 at core 239d79a).
+ * The agent may only visualise / design / simulate these. Kept in sync with
+ * test/parity/fixtures/studio-agent/topology-ids.json by the parity spec;
+ * replaced by the migrated topology library in a later migration step.
+ */
+export const STUDIO_TOPOLOGY_IDS: readonly string[] = [
+  'acdc_centre_tapped_full_wave',
+  'acdc_flyback_pfc_dcm',
+  'acdc_interleaved_boost_power_factor_correction',
+  'acdc_single_phase_active_front_end',
+  'acdc_single_phase_boost_power_factor_correction',
+  'acdc_single_phase_diode_bridge',
+  'acdc_single_phase_full_wave(transformer)',
+  'acdc_three_phase_active_front_end',
+  'acdc_three_phase_vienna',
+  'acdc_totem_pole_power_factor_correction',
+  'dcac_neutral_point_clamped',
+  'dcac_single_phase_h_bridge',
+  'dcac_t_type',
+  'dcac_three_phase_voltage_source_inverter',
+  'dcdc_active_clamp_flyback',
+  'dcdc_boost',
+  'dcdc_buck',
+  'dcdc_buck_boost',
+  'dcdc_cllc_resonant',
+  'dcdc_cuk',
+  'dcdc_dual_active_bridge',
+  'dcdc_flyback',
+  'dcdc_four_switch_buck_boost',
+  'dcdc_full_bridge_centertapped',
+  'dcdc_full_bridge_llc_resonant',
+  'dcdc_half_bridge',
+  'dcdc_half_bridge_llc_resonant',
+  'dcdc_interleaved_multiphase_buck',
+  'dcdc_phase_shifted_full_bridge_not_centertapped',
+  'dcdc_push_pull',
+  'dcdc_sepic',
+  'dcdc_single_switch_forward',
+  'dcdc_synchronous_buck',
+  'dcdc_two_switch_forward',
+  'dcdc_zeta',
+];

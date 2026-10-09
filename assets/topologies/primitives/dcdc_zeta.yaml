@@ -1,0 +1,287 @@
+id: dcdc_zeta
+name: Zeta DC-DC Converter
+description: Non-inverting step-up/step-down converter similar to SEPIC with continuous
+  input current. Converts 12V input to regulated output (D=0.4 for step-up operation).
+components:
+  - ref: Vs
+    type: node
+    role: input_source
+    params:
+      node_type: voltage_source
+      voltage: 12
+      source: dc
+      series_resistance: 0.01
+  - ref: SW
+    type: transistor
+    role: power_switch
+    params:
+      family: mosfet
+      type: pnp
+      mode: enhancement
+      voltage_rating: 100
+      current_rating: 5
+      Vto: -2.0
+      Kp: 5.0
+      Lambda: 0.01
+      Cgs: 500e-12
+      Cgd: 100e-12
+      Cdb: 100e-12
+    layout:
+      schX: -1.0
+      schY: -1.0
+      rotation: 270deg
+  - ref: L1
+    type: inductor
+    role: input_inductor
+    params:
+      inductance: 330e-6
+      series_resistance: 0.1
+      saturation_current: 5.0
+      core_loss_resistance: 1e6
+      parasitic_capacitance: 50e-12
+      ic: 0
+    layout:
+      schX: 0.0
+      schY: 0.0
+      orientation: horizontal
+  - ref: C1
+    type: capacitor
+    role: coupling_cap
+    params:
+      capacitance: 47e-6
+      polarized: true
+      voltage_rating: 100
+      tolerance: 0.1
+      esr: 0.1
+      esl: 3e-9
+      leakage_current: 1e-12
+      ic: 0
+    layout:
+      schX: 1.0
+      schY: 0.0
+      orientation: horizontal
+  - ref: L2
+    type: inductor
+    role: output_inductor
+    params:
+      inductance: 330e-6
+      series_resistance: 0.1
+      saturation_current: 3.0
+      core_loss_resistance: 1e6
+      parasitic_capacitance: 60e-12
+      ic: 0
+    layout:
+      schX: 3.0
+      schY: 0.0
+      orientation: horizontal
+  - ref: D1
+    type: diode
+    role: rectifier
+    params:
+      reverse_voltage: 50
+      current_rating: 3
+      Is: 1e-12
+      n: 1.1
+      Rs: 0.1
+      Cjo: 10e-12
+      Tt: 20e-9
+      Bv: 100
+      Ibv: 1e-6
+    layout:
+      schX: 2.0
+      schY: 0.0
+      orientation: horizontal
+  - ref: C2
+    type: capacitor
+    role: output_filter
+    params:
+      capacitance: 470e-6
+      polarized: true
+      voltage_rating: 50
+      tolerance: 0.1
+      esr: 0.05
+      esl: 5e-9
+      leakage_current: 1e-9
+      ic: 0
+    layout:
+      schX: 4.0
+      schY: -1.0
+      orientation: vertical
+  - ref: R1
+    type: resistor
+    role: load
+    params:
+      resistance: 10
+      tolerance: 0.05
+      temp_coefficient: 100e-6
+      parasitic_inductance: 10e-9
+    layout:
+      schX: 5.0
+      schY: -1.0
+      orientation: vertical
+  - ref: PWM
+    type: node
+    role: pwm_control
+    params:
+      node_type: pwm_control
+      frequency: 100e3
+      duty_cycle: 0.42
+      vhigh: 12.0
+      vlow: 0.0
+      trise: 1e-7
+      tfall: 1e-7
+      tdelay: 0
+      drive_resistance: 100
+nets:
+  - - - Vs
+      - +
+    - - SW
+      - source
+  - - - Vs
+      - '-'
+    - - L1
+      - pin2
+    - - D1
+      - anode
+    - - C2
+      - neg
+    - - R1
+      - neg
+  - - - SW
+      - drain
+    - - L1
+      - pin1
+    - - C1
+      - neg
+  - - - C1
+      - pos
+    - - D1
+      - cathode
+    - - L2
+      - pin1
+  - - - L2
+      - pin2
+    - - C2
+      - pos
+    - - R1
+      - pos
+  - - - PWM
+      - pos
+    - - SW
+      - gate
+  - - - PWM
+      - neg
+    - - Vs
+      - '-'
+analysis:
+  transient:
+    simulator:
+      method: gear
+      maxord: 2.0
+      reltol: 0.001
+      abstol: 1.0e-09
+      vntol: 1.0e-05
+      chgtol: 1.0e-11
+      gmin: 1.0e-10
+      rshunt: 1000000.0
+      trtol: 2.0
+      use_ic: true
+    requirements:
+      - rid: tr_reg
+        requirement: Output voltage regulation
+        criteria:
+          target_vout: 12.0
+        environment:
+          - ref: time_domain
+            t_start: 0.009
+            t_stop: 0.01
+            t_step: 1.0e-07
+            description: 10ms with 100ns step
+        measurement:
+          - ref: VIN
+            plot:
+              x_axis: time
+              title: Input Voltage
+            quantity: voltage
+            nets:
+              - - Vs
+                - +
+              - - Vs
+                - '-'
+          - ref: VOUT
+            plot:
+              x_axis: time
+              title: Output Voltage
+            component: R1
+            quantity: voltage
+            nets:
+              - - R1
+                - pos
+              - - R1
+                - neg
+            data:
+              - name: Vout_avg
+                spice_command: avg
+                description: Average output voltage
+              - name: Vout_ripple_vpp
+                spice_command: pp
+                description: Peak-to-peak output ripple
+          - ref: IIN
+            plot:
+              x_axis: time
+              title: Input Current
+            component: Vs
+            quantity: current
+          - ref: IOUT
+            plot:
+              x_axis: time
+              title: Output Current
+            component: R1
+            quantity: current
+            data:
+              - name: Iout_avg
+                spice_command: avg
+                description: Average load current
+          - ref: IL1
+            plot:
+              x_axis: time
+              title: Inductor L1 Current
+            component: L1
+            quantity: current
+          - ref: IL2
+            plot:
+              x_axis: time
+              title: Inductor L2 Current
+            component: L2
+            quantity: current
+          - ref: VSW_DS
+            plot:
+              x_axis: time
+              title: SW Drain-Source Voltage
+            quantity: voltage
+            nets:
+              - - SW
+                - drain
+              - - SW
+                - source
+        outputs:
+          - var: load_regulation_pct
+            formula: 100*abs([Vout_avg] - {criteria.target_vout})/{criteria.target_vout}
+            description: Load regulation deviation from target
+          - var: vout_avg_v
+            formula: '[Vout_avg]'
+            description: Average output voltage
+          - var: vout_ripple_vpp_v
+            formula: '[Vout_ripple_vpp]'
+            description: Output voltage peak-to-peak ripple
+metadata:
+  stage:
+    - energy_transfer
+    - coupling
+    - filter
+  topology: non-isolated
+  control: PWM
+  tags:
+    - zeta
+    - step-up
+    - step-down

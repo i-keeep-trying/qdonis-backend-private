@@ -1,0 +1,574 @@
+{
+  "components": [
+    {
+      "id": "M_A_TOP",
+      "type": "MOSFET",
+      "x": -240,
+      "y": -700,
+      "rotation": 0,
+      "parameters": {
+        "Ron": "10m",
+        "Roff": "1M"
+      }
+    },
+    {
+      "id": "M_A_BOT",
+      "type": "MOSFET",
+      "x": -240,
+      "y": -260,
+      "rotation": 0,
+      "parameters": {
+        "Ron": "10m",
+        "Roff": "1M"
+      }
+    },
+    {
+      "id": "M_B_TOP",
+      "type": "MOSFET",
+      "x": -60,
+      "y": -700,
+      "rotation": 0,
+      "parameters": {
+        "Ron": "10m",
+        "Roff": "1M"
+      }
+    },
+    {
+      "id": "M_B_BOT",
+      "type": "MOSFET",
+      "x": -60,
+      "y": -260,
+      "rotation": 0,
+      "parameters": {
+        "Ron": "10m",
+        "Roff": "1M"
+      }
+    },
+    {
+      "id": "M_C_TOP",
+      "type": "MOSFET",
+      "x": 100,
+      "y": -700,
+      "rotation": 0,
+      "parameters": {
+        "Ron": "10m",
+        "Roff": "1M"
+      }
+    },
+    {
+      "id": "M_C_BOT",
+      "type": "MOSFET",
+      "x": 100,
+      "y": -260,
+      "rotation": 0,
+      "parameters": {
+        "Ron": "10m",
+        "Roff": "1M"
+      }
+    },
+    {
+      "id": "V_A",
+      "type": "AC_V",
+      "x": -660,
+      "y": -580,
+      "rotation": 90,
+      "parameters": {
+        "amplitude": "12",
+        "frequency": "50"
+      }
+    },
+    {
+      "id": "V_B",
+      "type": "AC_V",
+      "x": -660,
+      "y": -460,
+      "rotation": 90,
+      "parameters": {
+        "amplitude": "12",
+        "frequency": "50"
+      }
+    },
+    {
+      "id": "V_C",
+      "type": "AC_V",
+      "x": -660,
+      "y": -360,
+      "rotation": 90,
+      "parameters": {
+        "amplitude": "12",
+        "frequency": "50"
+      }
+    },
+    {
+      "id": "R_DAMP_A",
+      "type": "R",
+      "x": -540,
+      "y": -580,
+      "rotation": 90,
+      "parameters": {
+        "value": "10",
+        "esr": "0"
+      }
+    },
+    {
+      "id": "LA",
+      "type": "L",
+      "x": -400,
+      "y": -580,
+      "rotation": 90,
+      "parameters": {
+        "L": "10m",
+        "esr": "50m",
+        "iL0": "0"
+      }
+    },
+    {
+      "id": "R_DAMP_B",
+      "type": "R",
+      "x": -540,
+      "y": -460,
+      "rotation": 90,
+      "parameters": {
+        "value": "10",
+        "esr": "0"
+      }
+    },
+    {
+      "id": "LB",
+      "type": "L",
+      "x": -400,
+      "y": -460,
+      "rotation": 90,
+      "parameters": {
+        "L": "10m",
+        "esr": "50m",
+        "iL0": "0"
+      }
+    },
+    {
+      "id": "R_DAMP_C",
+      "type": "R",
+      "x": -540,
+      "y": -360,
+      "rotation": 90,
+      "parameters": {
+        "value": "10",
+        "esr": "0"
+      }
+    },
+    {
+      "id": "LC",
+      "type": "L",
+      "x": -400,
+      "y": -360,
+      "rotation": 90,
+      "parameters": {
+        "L": "10m",
+        "esr": "50m",
+        "iL0": "0"
+      }
+    },
+    {
+      "id": "C_DC",
+      "type": "C",
+      "x": 280,
+      "y": -460,
+      "rotation": 0,
+      "parameters": {
+        "C": "100u",
+        "esr": "10m",
+        "vC0": "0"
+      }
+    },
+    {
+      "id": "R_DC",
+      "type": "R",
+      "x": 420,
+      "y": -480,
+      "rotation": 0,
+      "parameters": {
+        "value": "10",
+        "esr": "0"
+      }
+    }
+  ],
+  "wires": [
+    {
+      "id": "W1",
+      "from": {
+        "type": "pin",
+        "compId": "V_A",
+        "terminal": "B"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "V_B",
+        "terminal": "B"
+      }
+    },
+    {
+      "id": "W2",
+      "from": {
+        "type": "pin",
+        "compId": "V_C",
+        "terminal": "B"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "V_B",
+        "terminal": "B"
+      }
+    },
+    {
+      "id": "W3",
+      "from": {
+        "type": "pin",
+        "compId": "M_A_BOT",
+        "terminal": "D"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "M_A_TOP",
+        "terminal": "S"
+      }
+    },
+    {
+      "id": "W4",
+      "from": {
+        "type": "pin",
+        "compId": "M_B_BOT",
+        "terminal": "D"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "M_B_TOP",
+        "terminal": "S"
+      }
+    },
+    {
+      "id": "W5",
+      "from": {
+        "type": "pin",
+        "compId": "M_C_BOT",
+        "terminal": "D"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "M_C_TOP",
+        "terminal": "S"
+      }
+    },
+    {
+      "id": "W6",
+      "from": {
+        "type": "pin",
+        "compId": "M_A_TOP",
+        "terminal": "D"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "M_B_TOP",
+        "terminal": "D"
+      }
+    },
+    {
+      "id": "W7",
+      "from": {
+        "type": "pin",
+        "compId": "M_C_TOP",
+        "terminal": "D"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "M_B_TOP",
+        "terminal": "D"
+      }
+    },
+    {
+      "id": "W8",
+      "from": {
+        "type": "pin",
+        "compId": "M_A_BOT",
+        "terminal": "S"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "M_B_BOT",
+        "terminal": "S"
+      }
+    },
+    {
+      "id": "W9",
+      "from": {
+        "type": "pin",
+        "compId": "M_C_BOT",
+        "terminal": "S"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "M_B_BOT",
+        "terminal": "S"
+      }
+    },
+    {
+      "id": "W10",
+      "from": {
+        "type": "pin",
+        "compId": "C_DC",
+        "terminal": "A"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "M_B_TOP",
+        "terminal": "D"
+      },
+      "manualPath": [
+        {
+          "x": 280,
+          "y": -500
+        },
+        {
+          "x": 280,
+          "y": -760
+        },
+        {
+          "x": -60,
+          "y": -760
+        },
+        {
+          "x": -60,
+          "y": -740
+        }
+      ]
+    },
+    {
+      "id": "W11",
+      "from": {
+        "type": "pin",
+        "compId": "C_DC",
+        "terminal": "B"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "M_B_BOT",
+        "terminal": "S"
+      },
+      "manualPath": [
+        {
+          "x": 280,
+          "y": -420
+        },
+        {
+          "x": 280,
+          "y": -200
+        },
+        {
+          "x": -60,
+          "y": -200
+        },
+        {
+          "x": -60,
+          "y": -220
+        }
+      ]
+    },
+    {
+      "id": "W12",
+      "from": {
+        "type": "pin",
+        "compId": "R_DC",
+        "terminal": "A"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "C_DC",
+        "terminal": "A"
+      },
+      "manualPath": [
+        {
+          "x": 420,
+          "y": -520
+        },
+        {
+          "x": 420,
+          "y": -760
+        },
+        {
+          "x": 380,
+          "y": -760
+        },
+        {
+          "x": 380,
+          "y": -760
+        },
+        {
+          "x": 280,
+          "y": -760
+        },
+        {
+          "x": 280,
+          "y": -500
+        }
+      ]
+    },
+    {
+      "id": "W13",
+      "from": {
+        "type": "pin",
+        "compId": "R_DC",
+        "terminal": "B"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "C_DC",
+        "terminal": "B"
+      },
+      "manualPath": [
+        {
+          "x": 420,
+          "y": -440
+        },
+        {
+          "x": 420,
+          "y": -200
+        },
+        {
+          "x": 280,
+          "y": -200
+        },
+        {
+          "x": 280,
+          "y": -420
+        }
+      ]
+    },
+    {
+      "id": "W14",
+      "from": {
+        "type": "pin",
+        "compId": "V_A",
+        "terminal": "A"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "R_DAMP_A",
+        "terminal": "B"
+      }
+    },
+    {
+      "id": "W15",
+      "from": {
+        "type": "pin",
+        "compId": "R_DAMP_A",
+        "terminal": "A"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "LA",
+        "terminal": "B"
+      }
+    },
+    {
+      "id": "W16",
+      "from": {
+        "type": "pin",
+        "compId": "LA",
+        "terminal": "A"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "M_A_TOP",
+        "terminal": "S"
+      }
+    },
+    {
+      "id": "W17",
+      "from": {
+        "type": "pin",
+        "compId": "V_B",
+        "terminal": "A"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "R_DAMP_B",
+        "terminal": "B"
+      }
+    },
+    {
+      "id": "W18",
+      "from": {
+        "type": "pin",
+        "compId": "R_DAMP_B",
+        "terminal": "A"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "LB",
+        "terminal": "B"
+      }
+    },
+    {
+      "id": "W19",
+      "from": {
+        "type": "pin",
+        "compId": "LB",
+        "terminal": "A"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "M_B_TOP",
+        "terminal": "S"
+      }
+    },
+    {
+      "id": "W20",
+      "from": {
+        "type": "pin",
+        "compId": "V_C",
+        "terminal": "A"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "R_DAMP_C",
+        "terminal": "B"
+      }
+    },
+    {
+      "id": "W21",
+      "from": {
+        "type": "pin",
+        "compId": "R_DAMP_C",
+        "terminal": "A"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "LC",
+        "terminal": "B"
+      }
+    },
+    {
+      "id": "W22",
+      "from": {
+        "type": "pin",
+        "compId": "LC",
+        "terminal": "A"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "M_C_BOT",
+        "terminal": "D"
+      }
+    }
+  ],
+  "plotConfiguration": {
+    "plots": []
+  },
+  "simulationSettings": {
+    "stopTime": "0.05",
+    "stepSize": "1e-5",
+    "stepType": "fixed",
+    "solver": "euler"
+  },
+  "id": "acdc_three_phase_active_front_end",
+  "name": "Three Phase Active Front End Rectifier"
+}

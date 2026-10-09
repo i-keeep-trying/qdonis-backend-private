@@ -1,0 +1,54 @@
+{
+  "verdict": "APPROVED",
+  "findings": [
+    {
+      "id": "aborted-stream-free",
+      "blocking": false,
+      "confidence": "confirmed",
+      "where": "qdonis-backend/src/studio/agent/studio-agent.service.ts (runStep, post-loop `if (signal.aborted) return;` and the catch branch)",
+      "problem": "If the client stops or disconnects mid-stream, it keeps the streamed text and the step is never charged, although Bedrock bills the ~12k-token prompt. Even when usage metadata already arrived, an abort skips the charge. This is documented as D9.",
+      "fix": "Charge whenever usage was received, even if the signal aborted afterwards. Consider charging a prompt-size estimate on mid-stream abort, or get explicit product sign-off and keep it in the ledger."
+    },
+    {
+      "id": "concurrent-balance-gate",
+      "blocking": false,
+      "confidence": "likely",
+      "where": "qdonis-backend/src/ai/ai.service.ts prepare() as used by StudioAgentService.prepare",
+      "problem": "The gate only checks `balance > 0`, and one Studio step costs more than the 10k signup bonus. Parallel requests from a low-balance user are all served, and only the remainder is collected.",
+      "fix": "Add a per-user in-flight limit for POST /studio/agent, or reserve tokens before calling Bedrock."
+    },
+    {
+      "id": "frontend-401-no-refresh",
+      "blocking": false,
+      "confidence": "confirmed",
+      "where": "qdonis/lib/studio/agent.ts openAgentStream (and services/bedrockService.ts, which it copies)",
+      "problem": "On 401 it calls getAccessToken() again. That returns the cached token until refreshAt, so the retry reuses the rejected token.",
+      "fix": "Call refreshSession() on 401 before retrying."
+    },
+    {
+      "id": "e2e-request-not-asserted",
+      "blocking": false,
+      "confidence": "confirmed",
+      "where": "qdonis-backend/test/studio.e2e-spec.ts happy-path test",
+      "problem": "The HTTP path compares SSE events but not the Bedrock request after ValidationPipe/class-transformer. Parity is proven only for the raw-fixture build.",
+      "fix": "Assert fake.sent[0].input deep-equals fixture.expected_request in the e2e happy path."
+    },
+    {
+      "id": "undocumented-dto-strictness",
+      "blocking": false,
+      "confidence": "confirmed",
+      "where": "qdonis-backend/src/studio/dto/studio-agent.dto.ts; .agents/migration/core-migration-ledger.md",
+      "problem": "Role `system`, numeric id/tool_use_id and non-string text now return 400, where Python skipped or str()-coerced them. These are not listed among the D11 deviations.",
+      "fix": "Add these cases to the ledger's deviation list. Relax the DTO only if a client needs them."
+    },
+    {
+      "id": "converse-retries",
+      "blocking": false,
+      "confidence": "confirmed",
+      "where": "qdonis-backend/src/ai/bedrock/bedrock-runtime.provider.ts (maxAttempts: 3)",
+      "problem": "/ai/bedrock/converse now retries throttles and 5xx (up to 3 attempts), where the old fetch client made a single call. This changes latency on failure. The contract is otherwise unchanged.",
+      "fix": "Note it in the ledger, or pass a per-command single attempt for converse() if the old behaviour matters."
+    }
+  ],
+  "reviewDoc": "d:\\1. TailorFlowAI Work\\Qdonis v2\\qdonis-backend\\.agents\\migration/step1-review.md"
+}

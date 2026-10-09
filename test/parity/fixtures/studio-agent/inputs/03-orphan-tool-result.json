@@ -1,0 +1,30 @@
+{
+  "name": "03-orphan-tool-result",
+  "description": "Tool results whose tool use is not in the preceding assistant turn are dropped (mismatched id; result after a text-only assistant turn).",
+  "messages": [
+    { "role": "user", "content": [{ "type": "text", "text": "Build the spec table for a 24 V to 12 V, 5 A converter." }] },
+    {
+      "role": "assistant",
+      "content": [
+        { "type": "text", "text": "Filling in the table." },
+        { "type": "tool_use", "id": "tu_specs_1", "name": "update_specs", "input": { "rows": [{ "name": "Input Voltage", "value": "24", "unit": "V" }] } }
+      ]
+    },
+    {
+      "role": "user",
+      "content": [
+        { "type": "tool_result", "tool_use_id": "tu_specs_1", "content": { "ok": true, "rows": 1 } },
+        { "type": "tool_result", "tool_use_id": "tu_unknown_999", "content": "stale result" }
+      ]
+    },
+    { "role": "assistant", "content": [{ "type": "text", "text": "Table updated. Approve it?" }] },
+    {
+      "role": "user",
+      "content": [
+        { "type": "tool_result", "tool_use_id": "tu_orphan", "content": "orphan" },
+        { "type": "text", "text": "Looks good, approved." }
+      ]
+    }
+  ],
+  "project_state": { "specs": { "application": "24 V to 12 V buck", "approved": false, "rows": ["Input Voltage: 24 V [user]"] } }
+}

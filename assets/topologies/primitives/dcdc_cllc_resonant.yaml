@@ -1,0 +1,748 @@
+id: dcdc_cllc_resonant
+name: CLLC Resonant DC-DC Converter
+description: 'Bidirectional isolated resonant DC-DC converter with complementary LLC
+  tanks on primary and secondary sides. Converts 400V input to 400V output (unity-gain
+  V2G demo). Primary full H-bridge (SW1-SW4) drives a series-resonant tank Cr_P-Lr
+  through transformer T1. Secondary features an asymmetric topology: Cr_S in series
+  from T1.S1, followed by secondary resonant inductor Ls which drives the right-side
+  bridge (SW7-SW8), while the left-side bridge (SW5-SW6) is driven directly from T1.S2.
+  This asymmetry allows independent control of power flow direction while maintaining
+  ZVS/ZCS operation near the resonant frequency fr = 1/(2pi*sqrt(Lr*Cr_P)) ~ 100kHz
+  on the primary side.'
+components:
+  - ref: VIN
+    type: node
+    role: input_source
+    params:
+      node_type: voltage_source
+      source: dc
+      voltage: 400
+      series_resistance: 0.2
+  - ref: PWM1
+    type: node
+    role: pwm_control
+    params:
+      node_type: pwm_control
+      frequency: 100e3
+      duty_cycle: 0.46
+      vhigh: 20.0
+      vlow: 0.0
+      trise: 1e-7
+      tfall: 1e-7
+      tdelay: 0
+      drive_resistance: 50
+  - ref: PWM2
+    type: node
+    role: pwm_control
+    params:
+      node_type: pwm_control
+      frequency: 100e3
+      duty_cycle: 0.46
+      vhigh: 20.0
+      vlow: 0.0
+      trise: 1e-7
+      tfall: 1e-7
+      tdelay: 5.0e-06
+      drive_resistance: 50
+  - ref: PWM3
+    type: node
+    role: pwm_control
+    params:
+      node_type: pwm_control
+      frequency: 100e3
+      duty_cycle: 0.46
+      vhigh: 20.0
+      vlow: 0.0
+      trise: 1e-7
+      tfall: 1e-7
+      tdelay: 5.0e-06
+      drive_resistance: 50
+  - ref: PWM4
+    type: node
+    role: pwm_control
+    params:
+      node_type: pwm_control
+      frequency: 100e3
+      duty_cycle: 0.46
+      vhigh: 20.0
+      vlow: 0.0
+      trise: 1e-7
+      tfall: 1e-7
+      tdelay: 0
+      drive_resistance: 50
+  - ref: PWM5
+    type: node
+    role: pwm_control
+    params:
+      node_type: pwm_control
+      frequency: 100e3
+      duty_cycle: 0.46
+      vhigh: 20.0
+      vlow: 0.0
+      trise: 1e-7
+      tfall: 1e-7
+      tdelay: 5.0e-06
+      drive_resistance: 50
+  - ref: PWM6
+    type: node
+    role: pwm_control
+    params:
+      node_type: pwm_control
+      frequency: 100e3
+      duty_cycle: 0.46
+      vhigh: 20.0
+      vlow: 0.0
+      trise: 1e-7
+      tfall: 1e-7
+      tdelay: 0
+      drive_resistance: 50
+  - ref: PWM7
+    type: node
+    role: pwm_control
+    params:
+      node_type: pwm_control
+      frequency: 100e3
+      duty_cycle: 0.46
+      vhigh: 20.0
+      vlow: 0.0
+      trise: 1e-7
+      tfall: 1e-7
+      tdelay: 0
+      drive_resistance: 50
+  - ref: PWM8
+    type: node
+    role: pwm_control
+    params:
+      node_type: pwm_control
+      frequency: 100e3
+      duty_cycle: 0.46
+      vhigh: 20.0
+      vlow: 0.0
+      trise: 1e-7
+      tfall: 1e-7
+      tdelay: 5.0e-06
+      drive_resistance: 50
+  - ref: SW1
+    type: transistor
+    role: pri_hs_left
+    params:
+      family: mosfet
+      type: nmos
+      mode: enhancement
+      voltage_rating: 600
+      current_rating: 10
+      Vto: 1.5
+      Kn: 25e-3
+      Lambda: 0.005
+      Cgs: 1000e-12
+      Cgd: 200e-12
+      Cdb: 200e-12
+    layout:
+      schX: -3.0
+      schY: 0.0
+      rotation: 270deg
+  - ref: SW2
+    type: transistor
+    role: pri_ls_left
+    params:
+      family: mosfet
+      type: nmos
+      mode: enhancement
+      voltage_rating: 600
+      current_rating: 10
+      Vto: 1.5
+      Kn: 25e-3
+      Lambda: 0.005
+      Cgs: 1000e-12
+      Cgd: 200e-12
+      Cdb: 200e-12
+    layout:
+      schX: -3.0
+      schY: -3.0
+      rotation: 270deg
+  - ref: SW3
+    type: transistor
+    role: pri_hs_right
+    params:
+      family: mosfet
+      type: nmos
+      mode: enhancement
+      voltage_rating: 600
+      current_rating: 10
+      Vto: 1.5
+      Kn: 25e-3
+      Lambda: 0.005
+      Cgs: 1000e-12
+      Cgd: 200e-12
+      Cdb: 200e-12
+    layout:
+      schX: 0.0
+      schY: 0.0
+      rotation: 270deg
+  - ref: SW4
+    type: transistor
+    role: pri_ls_right
+    params:
+      family: mosfet
+      type: nmos
+      mode: enhancement
+      voltage_rating: 600
+      current_rating: 10
+      Vto: 1.5
+      Kn: 25e-3
+      Lambda: 0.005
+      Cgs: 1000e-12
+      Cgd: 200e-12
+      Cdb: 200e-12
+    layout:
+      schX: 0.0
+      schY: -3.0
+      rotation: 270deg
+  - ref: Cr_P
+    type: capacitor
+    role: primary_resonant_cap
+    params:
+      capacitance: 47e-9
+      polarized: false
+      voltage_rating: 600
+      tolerance: 0.05
+      esr: 0.05
+      esl: 2e-9
+      leakage_current: 1e-12
+    layout:
+      schX: 1.0
+      schY: -1.0
+      orientation: horizontal
+  - ref: Lr
+    type: inductor
+    role: primary_resonant_inductor
+    params:
+      inductance: 54e-6
+      series_resistance: 0.1
+      saturation_current: 10.0
+      core_loss_resistance: 1e6
+      parasitic_capacitance: 20e-12
+    layout:
+      schX: 2.5
+      schY: -1.0
+      orientation: horizontal
+  - ref: T1
+    type: transformer
+    role: power_transformer
+    params:
+      Lm_primary: 1000e-6
+      turns_ratio: 1.0
+      k_coupling: 0.99
+      phase: same
+      Rp: 0.1
+      Rs: 0.1
+      core_loss_resistance: 1e6
+    layout:
+      schX: 4.0
+      schY: -2.0
+      configuration: left-to-right
+    internal:
+      - ref: R_ISO
+        type: resistor
+        role: secondary_ground_anchor
+        params:
+          resistance: 10e6
+        connections:
+          pos:
+            - T1
+            - S2
+          neg:
+            - VIN
+            - '-'
+  - ref: Cr_S
+    type: capacitor
+    role: secondary_resonant_cap
+    params:
+      capacitance: 47e-9
+      polarized: false
+      voltage_rating: 600
+      tolerance: 0.05
+      esr: 0.05
+      esl: 2e-9
+      leakage_current: 1e-12
+    layout:
+      schX: 5.5
+      schY: -1.0
+      orientation: horizontal
+  - ref: Ls
+    type: inductor
+    role: secondary_resonant_inductor
+    params:
+      inductance: 54e-6
+      series_resistance: 0.1
+      saturation_current: 10.0
+      core_loss_resistance: 1e6
+      parasitic_capacitance: 20e-12
+    layout:
+      schX: 7.5
+      schY: -1.0
+      orientation: horizontal
+  - ref: SW5
+    type: transistor
+    role: sec_hs_left
+    params:
+      family: mosfet
+      type: nmos
+      mode: enhancement
+      voltage_rating: 600
+      current_rating: 10
+      Vto: 1.5
+      Kn: 25e-3
+      Lambda: 0.005
+      Cgs: 1000e-12
+      Cgd: 200e-12
+      Cdb: 200e-12
+    layout:
+      schX: 9.0
+      schY: 0.0
+      rotation: 270deg
+  - ref: SW6
+    type: transistor
+    role: sec_ls_left
+    params:
+      family: mosfet
+      type: nmos
+      mode: enhancement
+      voltage_rating: 600
+      current_rating: 10
+      Vto: 1.5
+      Kn: 25e-3
+      Lambda: 0.005
+      Cgs: 1000e-12
+      Cgd: 200e-12
+      Cdb: 200e-12
+    layout:
+      schX: 9.0
+      schY: -3.0
+      rotation: 270deg
+  - ref: SW7
+    type: transistor
+    role: sec_hs_right
+    params:
+      family: mosfet
+      type: nmos
+      mode: enhancement
+      voltage_rating: 600
+      current_rating: 10
+      Vto: 1.5
+      Kn: 25e-3
+      Lambda: 0.005
+      Cgs: 1000e-12
+      Cgd: 200e-12
+      Cdb: 200e-12
+    layout:
+      schX: 12.0
+      schY: 0.0
+      rotation: 270deg
+  - ref: SW8
+    type: transistor
+    role: sec_ls_right
+    params:
+      family: mosfet
+      type: nmos
+      mode: enhancement
+      voltage_rating: 600
+      current_rating: 10
+      Vto: 1.5
+      Kn: 25e-3
+      Lambda: 0.005
+      Cgs: 1000e-12
+      Cgd: 200e-12
+      Cdb: 200e-12
+    layout:
+      schX: 12.0
+      schY: -3.0
+      rotation: 270deg
+  - ref: Cout
+    type: capacitor
+    role: output_filter
+    params:
+      capacitance: 10e-6
+      polarized: true
+      voltage_rating: 600
+      tolerance: 0.1
+      esr: 0.01
+      esl: 5e-9
+      leakage_current: 10e-6
+      ic: 0
+    layout:
+      schX: 13.5
+      schY: -1.5
+      orientation: vertical
+  - ref: R_LOAD
+    type: resistor
+    role: load
+    params:
+      resistance: 40
+      tolerance: 0.05
+      temp_coefficient: 100e-6
+      parasitic_inductance: 10e-9
+    layout:
+      schX: 14.5
+      schY: -1.5
+      orientation: vertical
+nets:
+  - - - VIN
+      - +
+    - - SW1
+      - drain
+    - - SW3
+      - drain
+  - - - SW1
+      - source
+    - - SW2
+      - drain
+    - - Cr_P
+      - pos
+    - - PWM1
+      - neg
+  - - - PWM1
+      - pos
+    - - SW1
+      - gate
+  - - - Cr_P
+      - neg
+    - - Lr
+      - pin1
+  - - - Lr
+      - pin2
+    - - T1
+      - P1
+  - - - SW3
+      - source
+    - - SW4
+      - drain
+    - - T1
+      - P2
+    - - PWM3
+      - neg
+  - - - PWM3
+      - pos
+    - - SW3
+      - gate
+  - - - PWM2
+      - pos
+    - - SW2
+      - gate
+  - - - PWM2
+      - neg
+    - - SW2
+      - source
+    - - VIN
+      - '-'
+  - - - PWM4
+      - pos
+    - - SW4
+      - gate
+  - - - PWM4
+      - neg
+    - - SW4
+      - source
+    - - VIN
+      - '-'
+  - - - T1
+      - S1
+    - - Cr_S
+      - pos
+  - - - Cr_S
+      - neg
+    - - Ls
+      - pin1
+  - - - SW5
+      - drain
+    - - SW7
+      - drain
+    - - Cout
+      - pos
+    - - R_LOAD
+      - pos
+  - - - T1
+      - S2
+    - - SW5
+      - source
+    - - SW6
+      - drain
+    - - PWM5
+      - neg
+  - - - PWM5
+      - pos
+    - - SW5
+      - gate
+  - - - Ls
+      - pin2
+    - - SW7
+      - source
+    - - SW8
+      - drain
+    - - PWM7
+      - neg
+  - - - PWM7
+      - pos
+    - - SW7
+      - gate
+  - - - SW6
+      - source
+    - - SW8
+      - source
+    - - Cout
+      - neg
+    - - R_LOAD
+      - neg
+    - - PWM6
+      - neg
+    - - PWM8
+      - neg
+  - - - PWM6
+      - pos
+    - - SW6
+      - gate
+  - - - PWM8
+      - pos
+    - - SW8
+      - gate
+analysis:
+  transient:
+    spice_settings:
+      tstop: 0.01
+      use_ic: true
+      reltol: 0.01
+      abstol: 1.0e-06
+      vntol: 0.0001
+      gmin: 1.0e-12
+      method: gear
+      maxord: 2
+    requirements:
+      - rid: tr_reg
+        requirement: Output voltage regulation at 400V; verify unity-gain operation
+          at resonant frequency
+        criteria:
+          target_vout: 400.0
+          regulation_limit_pct: 5
+          ripple_limit_vpp: 4.0
+        measurement:
+          - ref: VIN
+            plot:
+              x_axis: time
+              title: Input Voltage (tr_reg)
+            quantity: voltage
+            nets:
+              - - VIN
+                - +
+              - - VIN
+                - '-'
+          - ref: VOUT
+            plot:
+              x_axis: time
+              title: Output Voltage CLLC
+            component: R_LOAD
+            quantity: voltage
+            nets:
+              - - R_LOAD
+                - pos
+              - - Cout
+                - neg
+            data:
+              - name: Vout_avg
+                spice_command: avg
+                description: Average output voltage
+              - name: Vout_ripple_vpp
+                spice_command: pp
+                description: Peak-to-peak output ripple
+          - ref: IOUT
+            plot: false
+            component: R_LOAD
+            quantity: current
+            data:
+              - name: Iout_avg
+                spice_command: avg
+                description: Average load current
+        outputs:
+          - var: load_regulation_pct
+            formula: 100*abs([Vout_avg] - {criteria.target_vout})/{criteria.target_vout}
+            description: Load regulation deviation from target
+          - var: vout_avg_v
+            formula: '[Vout_avg]'
+            description: Average output voltage
+      - rid: tr_resonant
+        requirement: Primary and secondary resonant tank verification; Lr current
+          should be sinusoidal at operating frequency; Ls current validates asymmetric
+          secondary power path and bidirectional capability
+        criteria:
+          resonant_freq_hz: 100e3
+        measurement:
+          - ref: VIN
+            plot: false
+            quantity: voltage
+            nets:
+              - - VIN
+                - +
+              - - VIN
+                - '-'
+          - ref: ILR
+            plot:
+              x_axis: time
+              title: Primary Resonant Inductor Current (should be sinusoidal)
+            component: Lr
+            quantity: current
+            data:
+              - name: ILr_peak
+                spice_command: max
+                description: Peak primary resonant tank current
+              - name: ILr_rms
+                spice_command: rms
+                description: RMS primary resonant tank current
+          - ref: VCR_P
+            plot:
+              x_axis: time
+              title: Primary Resonant Capacitor Voltage
+            component: Cr_P
+            quantity: voltage
+            nets:
+              - - Cr_P
+                - pos
+              - - Cr_P
+                - neg
+            data:
+              - name: Vcr_p_peak
+                spice_command: max
+                description: Peak primary resonant capacitor voltage
+          - ref: ILS
+            plot:
+              x_axis: time
+              title: Secondary Resonant Inductor Current (asymmetric path)
+            component: Ls
+            quantity: current
+            data:
+              - name: ILs_peak
+                spice_command: max
+                description: Peak secondary resonant inductor current
+              - name: ILs_rms
+                spice_command: rms
+                description: RMS secondary resonant inductor current
+          - ref: VCR_S
+            plot:
+              x_axis: time
+              title: Secondary Resonant Capacitor Voltage
+            component: Cr_S
+            quantity: voltage
+            nets:
+              - - Cr_S
+                - pos
+              - - Cr_S
+                - neg
+            data:
+              - name: Vcr_s_peak
+                spice_command: max
+                description: Peak secondary resonant capacitor voltage
+              - name: Vcr_s_min
+                spice_command: min
+                description: Minimum secondary resonant capacitor voltage
+          - ref: VOUT
+            plot: false
+            quantity: voltage
+            nets:
+              - - R_LOAD
+                - pos
+              - - R_LOAD
+                - neg
+        outputs:
+          - var: ilr_peak_a
+            formula: '[ILr_peak]'
+            description: Peak primary resonant inductor current in amperes
+          - var: ilr_rms_a
+            formula: '[ILr_rms]'
+            description: RMS primary resonant inductor current in amperes
+          - var: vcr_p_peak_v
+            formula: '[Vcr_p_peak]'
+            description: Peak primary resonant capacitor voltage
+          - var: ils_peak_a
+            formula: '[ILs_peak]'
+            description: Peak secondary resonant inductor current (indicates right-bridge
+              power)
+          - var: ils_rms_a
+            formula: '[ILs_rms]'
+            description: RMS secondary resonant inductor current
+          - var: vcr_s_peak_v
+            formula: '[Vcr_s_peak]'
+            description: Peak secondary resonant capacitor voltage
+          - var: vcr_s_swing_v
+            formula: '[Vcr_s_peak] - [Vcr_s_min]'
+            description: Secondary resonant capacitor voltage swing (asymmetric tank
+              stress indicator)
+      - rid: tr_eff
+        requirement: Efficiency at unity-gain operating point; ZVS/ZCS expected at
+          resonant frequency
+        criteria:
+          efficiency_target_pct: 95
+        measurement:
+          - ref: IIN
+            plot: false
+            component: VIN
+            quantity: current
+            data:
+              - name: Iin_avg
+                spice_command: avg
+                description: Average input current
+          - ref: IOUT_EFF
+            plot: false
+            component: R_LOAD
+            quantity: current
+            data:
+              - name: Iout_avg
+                spice_command: avg
+                description: Average load current
+          - ref: VOUT_EFF
+            plot: false
+            component: R_LOAD
+            quantity: voltage
+            nets:
+              - - R_LOAD
+                - pos
+              - - Cout
+                - neg
+            data:
+              - name: Vout_avg
+                spice_command: avg
+                description: Average output voltage
+          - ref: VIN_EFF
+            plot: false
+            component: VIN
+            quantity: voltage
+            nets:
+              - - VIN
+                - +
+              - - VIN
+                - '-'
+            data:
+              - name: Vin_avg
+                spice_command: avg
+                description: Average input voltage
+        outputs:
+          - var: Pin_avg
+            formula: abs([Vin_avg]*[Iin_avg])
+            description: Average input power
+          - var: Pout_avg
+            formula: '[Vout_avg]*[Iout_avg]'
+            description: Average output power
+          - var: efficiency_pct
+            formula: 100*[Pout_avg]/[Pin_avg]
+            description: Efficiency percentage
+metadata:
+  stage:
+    - power_switch
+    - isolation
+    - rectification
+    - filter
+  topology: isolated
+  control: resonant
+  tags:
+    - CLLC
+    - resonant
+    - bidirectional
+    - V2G
+    - EV-charger

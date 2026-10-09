@@ -1,0 +1,12 @@
+{
+  "name": "13-stream-no-metadata",
+  "description": "Stream that ends without a metadata event: done.usage is {} (and nothing is charged).",
+  "messages": [{ "role": "user", "content": [{ "type": "text", "text": "Hello" }] }],
+  "project_state": {},
+  "bedrock_stream": [
+    { "messageStart": { "role": "assistant" } },
+    { "contentBlockDelta": { "contentBlockIndex": 0, "delta": { "text": "Hi, I am Q." } } },
+    { "contentBlockStop": { "contentBlockIndex": 0 } },
+    { "messageStop": { "stopReason": "end_turn" } }
+  ]
+}

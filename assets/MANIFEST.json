@@ -1,0 +1,4826 @@
+{
+  "source": {
+    "repository": "qdonis-core",
+    "commit": "239d79a29c6fc6e97b2038aded19e5a71dbf1081",
+    "branch": "feature/chat-first",
+    "root": "qdonis_backend/data"
+  },
+  "generatedBy": "scripts/import-core-assets.mjs",
+  "files": [
+    {
+      "path": "models/C3D10065A.json",
+      "bytes": 553,
+      "sha256": "02c252c470227b41d392a661e5f3062e277155078d2847efe3b78aed1bff1ca9"
+    },
+    {
+      "path": "models/E3M0060065K.json",
+      "bytes": 10077,
+      "sha256": "102ae75580a64b254f92f5a6bcc4cbf32d80451e899fe3cbf5af3eceabf08db5"
+    },
+    {
+      "path": "models/library/diode/C2M0025120D_bodydiode.json",
+      "bytes": 677,
+      "sha256": "191cbe5f091b75132fc3057024078f164bb4d9ca652ab4775c80ee25c6a5819d"
+    },
+    {
+      "path": "models/library/diode/C2M0040120D_bodydiode.json",
+      "bytes": 711,
+      "sha256": "f0a234a042f16bdccd75469d520cff2f82071c6ff92472c5d9f9ff16446e69b6"
+    },
+    {
+      "path": "models/library/diode/C2M0045170D_bodydiode.json",
+      "bytes": 655,
+      "sha256": "2ecfd036593824d8f1ae7371472cc5a3b79ff636bda11b276643fdb15ac2950d"
+    },
+    {
+      "path": "models/library/diode/C2M0045170P_bodydiode.json",
+      "bytes": 655,
+      "sha256": "2ecfd036593824d8f1ae7371472cc5a3b79ff636bda11b276643fdb15ac2950d"
+    },
+    {
+      "path": "models/library/diode/C2M0080120D_bodydiode.json",
+      "bytes": 670,
+      "sha256": "7f0f31d1e85ce5e5d7dfce5d8be748a2898d6604bb3599b1195ffba6e9435876"
+    },
+    {
+      "path": "models/library/diode/C2M0080170P_bodydiode.json",
+      "bytes": 764,
+      "sha256": "46d32d529ac7d1de35ac417e00c1e0d0dbdda9298b765e2e381674414115864b"
+    },
+    {
+      "path": "models/library/diode/C2M0160120D_bodydiode.json",
+      "bytes": 708,
+      "sha256": "d9e4ac60eba37747dd1fe2b40f8a78a4d4c96fed584e3cbeeff54697bf613bd7"
+    },
+    {
+      "path": "models/library/diode/C2M0280120D_bodydiode.json",
+      "bytes": 690,
+      "sha256": "2e7137c332ec419972c1cdc897b94a09081bb51a423f1fe5ad084d51ba3d07a4"
+    },
+    {
+      "path": "models/library/diode/C2M1000170D_bodydiode.json",
+      "bytes": 668,
+      "sha256": "1834a04f0cd2eef1ad7104d99845fab44563fb28ccaca4b056b06cd7416af50a"
+    },
+    {
+      "path": "models/library/diode/C2M1000170J_bodydiode.json",
+      "bytes": 668,
+      "sha256": "ba0010c140374f6f79ec8c1bfb433082d7e42fc9616f112b69d76ad5a66977ac"
+    },
+    {
+      "path": "models/library/diode/C3D02060A.json",
+      "bytes": 648,
+      "sha256": "a1bfe0ba434e77625b3a6fba73dece8297625a1673807f6888cc06e3db6b2db1"
+    },
+    {
+      "path": "models/library/diode/C3D02060E.json",
+      "bytes": 648,
+      "sha256": "cdc55491f9c868c341c10ee5c1c0c98c525da853ebac439e40fd3f61752260d1"
+    },
+    {
+      "path": "models/library/diode/C3D02060F.json",
+      "bytes": 648,
+      "sha256": "8decc2d579d23935e769fa5e86b61e85c2feecf95297a9b402b7aca0b2b5a7f5"
+    },
+    {
+      "path": "models/library/diode/C3D02065E.json",
+      "bytes": 648,
+      "sha256": "ce049ddedd050fe61cf172f714dd112f6166b813441562e2fe6163b23d938650"
+    },
+    {
+      "path": "models/library/diode/C3D03060A.json",
+      "bytes": 649,
+      "sha256": "21778cbbfb013a32853b1825270b5dbcd8f341c812119671c36b0b5ebfe56945"
+    },
+    {
+      "path": "models/library/diode/C3D03060E.json",
+      "bytes": 649,
+      "sha256": "78f2b9dda6af45842f88323e4e58783b73d30149725c5b14fbe0e392fb09e73f"
+    },
+    {
+      "path": "models/library/diode/C3D03060F.json",
+      "bytes": 649,
+      "sha256": "be8f75d81bbc0e7f47b6147825b58dc20ec07eaff4f221b3732e18520d6707dc"
+    },
+    {
+      "path": "models/library/diode/C3D03065E.json",
+      "bytes": 649,
+      "sha256": "a5a3aa5c6edc14932089b39c002a9c2d3aa6f48fe2ec4efecfe12d73b0df7ee4"
+    },
+    {
+      "path": "models/library/diode/C3D04060A.json",
+      "bytes": 656,
+      "sha256": "18af7337201ac28fc747a93fb04e4eb65e7693b70ed1007eb3e6885b10334263"
+    },
+    {
+      "path": "models/library/diode/C3D04060E.json",
+      "bytes": 656,
+      "sha256": "4eac330a112fe071c3631e5a506c553f336a71102e96028c07d34919ae6cc8af"
+    },
+    {
+      "path": "models/library/diode/C3D04060F.json",
+      "bytes": 656,
+      "sha256": "def0f3206152e969b9d404e7a2f1e1e586f82336b658a81d779d88e45e70c918"
+    },
+    {
+      "path": "models/library/diode/C3D04065A.json",
+      "bytes": 656,
+      "sha256": "d19c8f7f456aa706d55bdab0e2399bdb1827f83570a2164370b260665329b311"
+    },
+    {
+      "path": "models/library/diode/C3D04065E.json",
+      "bytes": 656,
+      "sha256": "860590780dccfbb79aa9181d7a8b6ecf536ca31b3686f8e001fd5fdeb75578b5"
+    },
+    {
+      "path": "models/library/diode/C3D06060A.json",
+      "bytes": 648,
+      "sha256": "860fd9953215a2eb32bf8ca5ecf4b26afa2468d4cd9c2327e79e554ebc204c1c"
+    },
+    {
+      "path": "models/library/diode/C3D06060F.json",
+      "bytes": 648,
+      "sha256": "0de61c429cb95e9b98253c93e4abd267d82419a873d6a9bdfa94d545507a8de1"
+    },
+    {
+      "path": "models/library/diode/C3D06060G.json",
+      "bytes": 648,
+      "sha256": "38148c30b06f432b22890af8a3ca805c50c3422bcf9243162da4aedf2844a08a"
+    },
+    {
+      "path": "models/library/diode/C3D06065A.json",
+      "bytes": 648,
+      "sha256": "08ee133402274ed3d3fe12d607af3621d5c72f51da21d70475ca148bd83b8a73"
+    },
+    {
+      "path": "models/library/diode/C3D06065E.json",
+      "bytes": 648,
+      "sha256": "3c4cf2e5dbe260e1d535b75c8924c3f8f3dadf31757cdf757de7cacbbc777e9c"
+    },
+    {
+      "path": "models/library/diode/C3D06065I.json",
+      "bytes": 648,
+      "sha256": "a961cfa7222ea5eefcb02456beaa0898559ac23a59eb3bec450e4c369b53640b"
+    },
+    {
+      "path": "models/library/diode/C3D08060A.json",
+      "bytes": 654,
+      "sha256": "f5aff8f7369742de3e776e29cc040cb72321025abdb4f03c7ccf0595f9f125ae"
+    },
+    {
+      "path": "models/library/diode/C3D08060G.json",
+      "bytes": 654,
+      "sha256": "3038aaa2219811a4c52fcd348fbd9dab71cff3d43e9803a61b18961db3d2e736"
+    },
+    {
+      "path": "models/library/diode/C3D08065A.json",
+      "bytes": 654,
+      "sha256": "cb9d76452dfcec9bc28501f814e145b5f1309afc81bd4b8df5871ffea9293358"
+    },
+    {
+      "path": "models/library/diode/C3D08065E.json",
+      "bytes": 654,
+      "sha256": "b4abdc50e78fefa9be9505d94a9d62f24516ff2de2ea4db4bafc0270cbe43f37"
+    },
+    {
+      "path": "models/library/diode/C3D08065I.json",
+      "bytes": 654,
+      "sha256": "67947db5ef498bc7ff3e227477f8eae769a28c11743c260dc769a775e9b94dd6"
+    },
+    {
+      "path": "models/library/diode/C3D10060A.json",
+      "bytes": 666,
+      "sha256": "2a5515cc477ae445fae530da6c7f49e12afda273988d5c1db87662cb740f611a"
+    },
+    {
+      "path": "models/library/diode/C3D10060G.json",
+      "bytes": 666,
+      "sha256": "f13eea9c5dba1a00c66cfb67f5e913d19d2309c330606a99b7f7141232aed4cf"
+    },
+    {
+      "path": "models/library/diode/C3D10065A.json",
+      "bytes": 666,
+      "sha256": "3731bf9697c1441bf8369d75ffb7fda32ded6b96e5fbec916b60db8f0c4a92d6"
+    },
+    {
+      "path": "models/library/diode/C3D10065E.json",
+      "bytes": 666,
+      "sha256": "6d6edfd0a1bad77d29e873ce0ae82147caec810795f57a5892b83bbcf01ebc96"
+    },
+    {
+      "path": "models/library/diode/C3D10065I.json",
+      "bytes": 666,
+      "sha256": "b23aefd782804eb582ca9a6a2770bdcbaf8d55889f1cf39048bc27cbdd3d1080"
+    },
+    {
+      "path": "models/library/diode/C3D10170H.json",
+      "bytes": 663,
+      "sha256": "c426f7c49bd16550b0625e3a8c590aa78f6046ff6fe4b70d1091e220c07a3cc7"
+    },
+    {
+      "path": "models/library/diode/C3D12065A.json",
+      "bytes": 720,
+      "sha256": "c01ca85611524af98b2a586628bf60df03e82b3d7a771d71e21fa5f509294423"
+    },
+    {
+      "path": "models/library/diode/C3D16060D.json",
+      "bytes": 654,
+      "sha256": "91139534fce8c971e1c08ed9f42de2702dad1ba755d192dbbf1db7bafb34c9ee"
+    },
+    {
+      "path": "models/library/diode/C3D16065D.json",
+      "bytes": 654,
+      "sha256": "60cebbf38b28906e39af72ef8c8a5687615767dbb315492faec429c2c788e8f6"
+    },
+    {
+      "path": "models/library/diode/C3D16065D1.json",
+      "bytes": 780,
+      "sha256": "517e266077c5700aea9e56442f66ebf0dbcc7bcc49743856cbdc55e26c369ea2"
+    },
+    {
+      "path": "models/library/diode/C3D20060D.json",
+      "bytes": 665,
+      "sha256": "2a3762ec0dba528805f8936e5d5566916f63be065a527f2c6195891f759ad6f4"
+    },
+    {
+      "path": "models/library/diode/C3D20065D.json",
+      "bytes": 665,
+      "sha256": "2a3762ec0dba528805f8936e5d5566916f63be065a527f2c6195891f759ad6f4"
+    },
+    {
+      "path": "models/library/diode/C3D25170H.json",
+      "bytes": 844,
+      "sha256": "bb5c2a400422ab914756c8f186afafe55dd363ba7d4a2448e91f0daaaa8a2676"
+    },
+    {
+      "path": "models/library/diode/C3M0010090K_bodydiode.json",
+      "bytes": 1070,
+      "sha256": "f2e254c4b550ee3bfb82645b01e03b24ea8c6741b46171a0fd05afa541e4e017"
+    },
+    {
+      "path": "models/library/diode/C3M0015065D_bodydiode.json",
+      "bytes": 695,
+      "sha256": "2e9b8ed3db8dd02dba7b45627ca0deaea9153fc220a25702103aae67a051581f"
+    },
+    {
+      "path": "models/library/diode/C3M0015065K_bodydiode.json",
+      "bytes": 695,
+      "sha256": "58ff7b08af1ae7e4ca706434649719d98da00c58103525d4c45fc2c7b4ffebc6"
+    },
+    {
+      "path": "models/library/diode/C3M0016120D_bodydiode.json",
+      "bytes": 990,
+      "sha256": "ed33da0396bac54e83156e493a461c51e80421f7dc30941ec4312edba25514e1"
+    },
+    {
+      "path": "models/library/diode/C3M0016120K1_bodydiode.json",
+      "bytes": 1044,
+      "sha256": "a12932c00fe83b1070c776741dbb34344f4f45e17df48d0329e9faa168cf5717"
+    },
+    {
+      "path": "models/library/diode/C3M0016120K_bodydiode.json",
+      "bytes": 990,
+      "sha256": "2df786867b1ed99f694c26f943aea4f3c71491bf3d39a37e600e8f4539d406e8"
+    },
+    {
+      "path": "models/library/diode/C3M0021120D_bodydiode.json",
+      "bytes": 859,
+      "sha256": "7d77d8fd07c9e5f0adb2e7c75449236969c56ff078a36b5c1df787182ef36e10"
+    },
+    {
+      "path": "models/library/diode/C3M0021120J2_bodydiode.json",
+      "bytes": 1082,
+      "sha256": "9fe154765f6a7f76df17beef60fca62ac7e3be3fd957cb91e0601b08534a07e9"
+    },
+    {
+      "path": "models/library/diode/C3M0021120K1_bodydiode.json",
+      "bytes": 1082,
+      "sha256": "0909fc4660634b7c0c59d156bbec6c56698a21b40a4fdf1463669f39996b5781"
+    },
+    {
+      "path": "models/library/diode/C3M0021120K_bodydiode.json",
+      "bytes": 859,
+      "sha256": "e0e0585da7846765b6d92a9bdc4bd14df2a7e7e7ab1b2443bc5883a616e7ebb3"
+    },
+    {
+      "path": "models/library/diode/C3M0025065D_bodydiode.json",
+      "bytes": 697,
+      "sha256": "1f92595218fddc4b5c34bfdc339cd26870e50a542be11b4e976dcedff14e7ab7"
+    },
+    {
+      "path": "models/library/diode/C3M0025065J1_bodydiode.json",
+      "bytes": 687,
+      "sha256": "2d3f47b3be68d564ae6515c68d0ae86f489879ce6bead85c3787b5e3159ea5aa"
+    },
+    {
+      "path": "models/library/diode/C3M0025065K_bodydiode.json",
+      "bytes": 697,
+      "sha256": "ff052126a9e3e96f3c4e99a39e38d8fa0f5f85830a30b7c7cfcf5f9112323ebf"
+    },
+    {
+      "path": "models/library/diode/C3M0025065L_bodydiode.json",
+      "bytes": 1027,
+      "sha256": "96c3f03be4c655807b5458d01293982a7ebb19e00ff0f6ba1ea8657510859355"
+    },
+    {
+      "path": "models/library/diode/C3M0025075K1_bodydiode.json",
+      "bytes": 1110,
+      "sha256": "9510d1982ccdf2ef038950abc52566369cef287aff749d30a216cd02387e4357"
+    },
+    {
+      "path": "models/library/diode/C3M0030090K_bodydiode.json",
+      "bytes": 865,
+      "sha256": "9e78c25117c9b5881c682adb2c133602e1b8532d7c2a1699ae22d2aec6a54766"
+    },
+    {
+      "path": "models/library/diode/C3M0032120D_bodydiode.json",
+      "bytes": 800,
+      "sha256": "6a7d1471aafc53757bcc5fb7cf736520cad68611dddf0435dad549be07864b26"
+    },
+    {
+      "path": "models/library/diode/C3M0032120J1_bodydiode.json",
+      "bytes": 714,
+      "sha256": "f793a4176b3aa17422e47f82d154447d50acabebba584aa87fbcab070921727b"
+    },
+    {
+      "path": "models/library/diode/C3M0032120J2_bodydiode.json",
+      "bytes": 900,
+      "sha256": "180633a9193b79c2e843ae6b160ca46ff79e5ee2a79daa5bfd1eaed3c8cb8c52"
+    },
+    {
+      "path": "models/library/diode/C3M0032120K1_bodydiode.json",
+      "bytes": 788,
+      "sha256": "0da43a267b80b4f109739ead4603c73c9d5b49d1db1e0efd9d29b87c182d5427"
+    },
+    {
+      "path": "models/library/diode/C3M0032120K_bodydiode.json",
+      "bytes": 800,
+      "sha256": "ee83166207a9b8cb2957732284f4a0f8e4b56a50771dace827e7d7ca03294288"
+    },
+    {
+      "path": "models/library/diode/C3M0040120D_bodydiode.json",
+      "bytes": 714,
+      "sha256": "3760e0e2d6a706e6aaec9745e20b4ee13b194816d5c16220a89b65d77a41765b"
+    },
+    {
+      "path": "models/library/diode/C3M0040120J1_bodydiode.json",
+      "bytes": 715,
+      "sha256": "3a4351b9646eb1c1b8fdd124823fc5622262ab7f73c2a9db16665efd52032aca"
+    },
+    {
+      "path": "models/library/diode/C3M0040120J2_bodydiode.json",
+      "bytes": 860,
+      "sha256": "5ac225a89d508b898de3865a6df78715f111d33cde7caff81b67b50993498d10"
+    },
+    {
+      "path": "models/library/diode/C3M0040120K1_bodydiode.json",
+      "bytes": 860,
+      "sha256": "ad1886b53549ca8cd3eeaf92a2589711db66a97dc2965728ac23992fc8b3a4f0"
+    },
+    {
+      "path": "models/library/diode/C3M0040120K_bodydiode.json",
+      "bytes": 714,
+      "sha256": "89b43a8cb15c76b33a49b0898d12252b6f54c361e684d4bc1ed3fd71f43b4bb0"
+    },
+    {
+      "path": "models/library/diode/C3M0045065D_bodydiode.json",
+      "bytes": 637,
+      "sha256": "f4a8f0cba3808eef7ec9898fcc62d805e71a44a7bdc7f436411d5e49b5dbf8f2"
+    },
+    {
+      "path": "models/library/diode/C3M0045065J1_bodydiode.json",
+      "bytes": 622,
+      "sha256": "b6cb3d33392228c76f9c8db6d260817287e7a5ce6b220452a898acaf0c47bb0c"
+    },
+    {
+      "path": "models/library/diode/C3M0045065K_bodydiode.json",
+      "bytes": 637,
+      "sha256": "7634e0fb2a3b1bfc0d464a05a0078bc1e30f0e6407abcee22577cccf73126a63"
+    },
+    {
+      "path": "models/library/diode/C3M0045065L_bodydiode.json",
+      "bytes": 637,
+      "sha256": "5a1fdc8a11bdbde9690ec9cf9b200b48b5527c94ca6f701782f6ff7098927f0d"
+    },
+    {
+      "path": "models/library/diode/C3M0045075K1_bodydiode.json",
+      "bytes": 875,
+      "sha256": "c6f3084cbf4d385356c3e2d06e8df07423f16e6adcbe4ef2921f38ff957746f6"
+    },
+    {
+      "path": "models/library/diode/C3M0060065D_bodydiode.json",
+      "bytes": 657,
+      "sha256": "40f1bd39967d81362c996aa682b94664508bcaadd705c4e0389c4c7e29cd883e"
+    },
+    {
+      "path": "models/library/diode/C3M0060065J_bodydiode.json",
+      "bytes": 631,
+      "sha256": "9ff00e8836c423935cbfdf5eada0b30d802f0b256354f9b963341483c4b96e58"
+    },
+    {
+      "path": "models/library/diode/C3M0060065K_bodydiode.json",
+      "bytes": 657,
+      "sha256": "39c91b4e93379f9d258bc8f5360f055a0bbd824987751371f19bee1b35c41422"
+    },
+    {
+      "path": "models/library/diode/C3M0060065L_bodydiode.json",
+      "bytes": 657,
+      "sha256": "9a7612e34ec27c160951d81ef307262c83efd0037764059d7c83e23960faf225"
+    },
+    {
+      "path": "models/library/diode/C3M0060075K1_bodydiode.json",
+      "bytes": 756,
+      "sha256": "2b486e68da5d89e376ce8275bfdbb53435ced80b0487c414817f4e04d5666254"
+    },
+    {
+      "path": "models/library/diode/C3M0065090D_bodydiode.json",
+      "bytes": 758,
+      "sha256": "0d0f8a4aca23425ab753edeeb327ea8cfb9d7b510caddea60dcacd965fb8f18a"
+    },
+    {
+      "path": "models/library/diode/C3M0065090J_bodydiode.json",
+      "bytes": 818,
+      "sha256": "31863deb10e9a2e601f01668251df8a2fc4f148e55b518bf7de0edaaa8ab755a"
+    },
+    {
+      "path": "models/library/diode/C3M0065100J_bodydiode.json",
+      "bytes": 975,
+      "sha256": "0395ee2b2a6e3126f126943ba013d49456ebdeebd8c5893f14123ace114bc49b"
+    },
+    {
+      "path": "models/library/diode/C3M0065100K_bodydiode.json",
+      "bytes": 842,
+      "sha256": "c9f5d20c97c944d892d6393cc1d041ae1c02b4bfbeb71f39bcd7d04a0cb54bd6"
+    },
+    {
+      "path": "models/library/diode/C3M0075120D_bodydiode.json",
+      "bytes": 780,
+      "sha256": "790ff60e962d8d3feee402c83e47667719c03f26528dfe515f42f628e3709815"
+    },
+    {
+      "path": "models/library/diode/C3M0075120J2_bodydiode.json",
+      "bytes": 791,
+      "sha256": "d59a67146143c2f3fb40ef03f80f295e6f3473e032e46d9abfcc0d1d2f6e8397"
+    },
+    {
+      "path": "models/library/diode/C3M0075120J_bodydiode.json",
+      "bytes": 736,
+      "sha256": "6bb2bc91f917596fbd6c49a6d41f365a92782ae2df3964c9d08fbd9f05edfdf8"
+    },
+    {
+      "path": "models/library/diode/C3M0075120K1_bodydiode.json",
+      "bytes": 874,
+      "sha256": "cdc01a1943d032645367ec82ad25ceefef01228c7552b8a78ae9887cfa7b65c4"
+    },
+    {
+      "path": "models/library/diode/C3M0075120K_bodydiode.json",
+      "bytes": 731,
+      "sha256": "1fde14d08c96cef79fcb773818a40313fac939e7364f3f5fbc755d30e3ecab50"
+    },
+    {
+      "path": "models/library/diode/C3M0120065D_bodydiode.json",
+      "bytes": 886,
+      "sha256": "b9aefcf3199ca580f68ecc256064dd42a1170be3945a85215c1f68629c73a8cb"
+    },
+    {
+      "path": "models/library/diode/C3M0120065J_bodydiode.json",
+      "bytes": 886,
+      "sha256": "689ff3f51a9ce6df7cf7497c244993c25a1ac8803dcac09446ccb7f8debbe9b7"
+    },
+    {
+      "path": "models/library/diode/C3M0120065K_bodydiode.json",
+      "bytes": 886,
+      "sha256": "acf772100cbffddc4acabcf0a403fc77ab5b337ecd4b0be930b3575d19b7381b"
+    },
+    {
+      "path": "models/library/diode/C3M0120065L_bodydiode.json",
+      "bytes": 886,
+      "sha256": "acf772100cbffddc4acabcf0a403fc77ab5b337ecd4b0be930b3575d19b7381b"
+    },
+    {
+      "path": "models/library/diode/C3M0120090D_bodydiode.json",
+      "bytes": 843,
+      "sha256": "26facc865fb21a6d49954e8bd2a61732fa8d38bff2a0fc18756e8378e76347a7"
+    },
+    {
+      "path": "models/library/diode/C3M0120090J_bodydiode.json",
+      "bytes": 735,
+      "sha256": "270585d251a96efa9fb6b4eb3fd6e8b81bd978ea4d011fbc694e18c546de2a3a"
+    },
+    {
+      "path": "models/library/diode/C3M0120100J_bodydiode.json",
+      "bytes": 843,
+      "sha256": "2f8d11728cb9bef015d95fa853b78081270560ef840aa3c487c3291f54f01dac"
+    },
+    {
+      "path": "models/library/diode/C3M0120100K_bodydiode.json",
+      "bytes": 841,
+      "sha256": "5ad1e43ba21751b301d3cd294465b00eb25c99eca45c868d35e2e226f825856b"
+    },
+    {
+      "path": "models/library/diode/C3M0160120D_bodydiode.json",
+      "bytes": 623,
+      "sha256": "b4538ce9aef0d9600b1b3ff7ffe808f8b54f0fe5e8850f7b077b05fc31b75d33"
+    },
+    {
+      "path": "models/library/diode/C3M0160120J_bodydiode.json",
+      "bytes": 623,
+      "sha256": "2e2058ea8f140c0325bdffa30f9f64f16414c6c57ae6401d9f57f5f4883c82c4"
+    },
+    {
+      "path": "models/library/diode/C3M0160120K1_bodydiode.json",
+      "bytes": 650,
+      "sha256": "00f35bbc3a7bed2279f2b30cf62fb24bb59a5adebecc5d1dbdf794b81ac4958f"
+    },
+    {
+      "path": "models/library/diode/C3M0280090D_bodydiode.json",
+      "bytes": 748,
+      "sha256": "43e84d97d68ebf3cbf00dd5307a70c7e42dade8b5a6a483a66fd621ab567a529"
+    },
+    {
+      "path": "models/library/diode/C3M0280090J_bodydiode.json",
+      "bytes": 748,
+      "sha256": "0d3a48350a53624a83744beff8b4d79514976dc1be8640647a827045af001f7a"
+    },
+    {
+      "path": "models/library/diode/C3M0350120D_bodydiode.json",
+      "bytes": 560,
+      "sha256": "85e548f0c19d70d1a5ef1ab7aca952c5799777c7fc6da68999709b5201aa2a72"
+    },
+    {
+      "path": "models/library/diode/C3M0350120J_bodydiode.json",
+      "bytes": 560,
+      "sha256": "1cc2cb28a322b15e501cb594bc0dab5b69d339c68fced1c94c5c26f4bf30936e"
+    },
+    {
+      "path": "models/library/diode/C3M0900170D_bodydiode.json",
+      "bytes": 1251,
+      "sha256": "4218a86c31b52b55034acd5527998f9a6faa56cf16fe1491f0cb975be2633826"
+    },
+    {
+      "path": "models/library/diode/C3M0900170J_bodydiode.json",
+      "bytes": 1251,
+      "sha256": "6a92b361ba2c5c78c6d75a488c9a4942a4c0748defdc37345f730dd429045147"
+    },
+    {
+      "path": "models/library/diode/C3M0900170M_bodydiode.json",
+      "bytes": 1251,
+      "sha256": "4eb8f948efad765cb22fc34207e42cb4e4d66be14b7b6c65b292ef067d97ea8a"
+    },
+    {
+      "path": "models/library/diode/C4D02120A.json",
+      "bytes": 685,
+      "sha256": "c4a1cc40bac16f5990185598412420a9427b8b12cf7d1267c933e0ad15b35743"
+    },
+    {
+      "path": "models/library/diode/C4D02120E.json",
+      "bytes": 694,
+      "sha256": "4c261cbbfdf28f06ef689714d9695a0e559f5e1c14848c36f498c10d681bcfb7"
+    },
+    {
+      "path": "models/library/diode/C4D05120A.json",
+      "bytes": 686,
+      "sha256": "011d10c253bf586ba7480d4bb35a6a65fe3bcae1cfcfbb47bd1be3f8c49cd82c"
+    },
+    {
+      "path": "models/library/diode/C4D05120E.json",
+      "bytes": 729,
+      "sha256": "2662487286f2ebd2ac42ba2fcde8695c330fa6d4188cc5f86a82385c14ee5367"
+    },
+    {
+      "path": "models/library/diode/C4D08120A.json",
+      "bytes": 728,
+      "sha256": "a9865739ebe83ab52d3d87b19b657e4f9376df172da043b8a1dfd6c212c9a951"
+    },
+    {
+      "path": "models/library/diode/C4D08120E.json",
+      "bytes": 728,
+      "sha256": "5624d6a2a8533794c338cb6eaa3e55e86ea74953c3c2dd4e8f11af5d2137b0dc"
+    },
+    {
+      "path": "models/library/diode/C4D10120A.json",
+      "bytes": 742,
+      "sha256": "8cbb71f5abf59c693685d9fed2d6b64765c65f5cda501ac53058dba7bd1fc391"
+    },
+    {
+      "path": "models/library/diode/C4D10120D.json",
+      "bytes": 667,
+      "sha256": "223dc65dbe7f0c180b5a8eddbf321e353a91706cd758ee826c15ec189e378068"
+    },
+    {
+      "path": "models/library/diode/C4D10120E.json",
+      "bytes": 737,
+      "sha256": "030da60da1871f6fbfbbd8954102ca8e18804aadb9aef7efe30049dbe55e1d4c"
+    },
+    {
+      "path": "models/library/diode/C4D10120H.json",
+      "bytes": 742,
+      "sha256": "3c16349c14d560041b6e1262395daa8a1c4aa413b981f00bc7a01a247ce68a5b"
+    },
+    {
+      "path": "models/library/diode/C4D15120A.json",
+      "bytes": 726,
+      "sha256": "139f0da35e107aad6190cc8cb45970643e8edbce2cda4510438c709b6e210f6b"
+    },
+    {
+      "path": "models/library/diode/C4D15120H.json",
+      "bytes": 726,
+      "sha256": "7b7d3fa9def75e60144873f1214021151805621f2a024a6a673772ab88cdab60"
+    },
+    {
+      "path": "models/library/diode/C4D20120A.json",
+      "bytes": 666,
+      "sha256": "729e08be2a9691a68e26a8e5155f3fec7cba5519c31b4c34f18147924cef0bb6"
+    },
+    {
+      "path": "models/library/diode/C4D20120D.json",
+      "bytes": 663,
+      "sha256": "6dda46a54572213609c2b09ae0a3d2cb8c459fafcd691815eded2b8b2e433a6c"
+    },
+    {
+      "path": "models/library/diode/C4D20120H.json",
+      "bytes": 666,
+      "sha256": "e847577e9ad01592c8d6f0e23af84e6bdcf13fa78d6e44cf17e866ac6fd355c7"
+    },
+    {
+      "path": "models/library/diode/C4D30120D.json",
+      "bytes": 665,
+      "sha256": "217c5aa35bace07972072cecbc1510e1e42da51152fb7b76ce1e78a89188f535"
+    },
+    {
+      "path": "models/library/diode/C4D30120H.json",
+      "bytes": 666,
+      "sha256": "dc4f145177a7e255a82c0c1c50b67409ed849765e68c2812fe63d18c97d105ce"
+    },
+    {
+      "path": "models/library/diode/C4D40120D.json",
+      "bytes": 665,
+      "sha256": "a5f096c578b505e7853e97e6a9f853f6ad8c8bc1a334ca904e723d27651c9953"
+    },
+    {
+      "path": "models/library/diode/C4D40120H.json",
+      "bytes": 671,
+      "sha256": "ef416f2e536c58dc6560e4f4af74752583b368ada03d1c488d4d2d8ee16bee37"
+    },
+    {
+      "path": "models/library/diode/C4MS008065L_bodydiode.json",
+      "bytes": 4465,
+      "sha256": "604bb9fadcfe2f37bebc035ed80d98a873e46070dbd0c5a26cdb75845d438c00"
+    },
+    {
+      "path": "models/library/diode/C4MS008075J2_bodydiode.json",
+      "bytes": 4466,
+      "sha256": "7c4e5743d6ae889b4d8be0d04bf5803dc3a046d19d78655e6be735f228844315"
+    },
+    {
+      "path": "models/library/diode/C4MS008075K1_bodydiode.json",
+      "bytes": 4466,
+      "sha256": "87c6099187558ca795e0b769e90cafd049bffd090714cac713c8bfa2222ca320"
+    },
+    {
+      "path": "models/library/diode/C4MS008075QT_bodydiode.json",
+      "bytes": 4466,
+      "sha256": "cebb77067bade348c6460377eb2fa68664cfb20a15357a97ba241e902a77210b"
+    },
+    {
+      "path": "models/library/diode/C4MS008075U2_bodydiode.json",
+      "bytes": 4466,
+      "sha256": "e7b382c8618dd7e8d1ddf4d4481ec2c88051048e7c8769b7a67c1e3c374ebb37"
+    },
+    {
+      "path": "models/library/diode/C4MS009120K1_bodydiode.json",
+      "bytes": 4583,
+      "sha256": "e73eec95160bb8c6a334e2785ee6e42ea6a3992d0479bdc65ad3ecf6291376f2"
+    },
+    {
+      "path": "models/library/diode/C4MS009120K_bodydiode.json",
+      "bytes": 4582,
+      "sha256": "db26ed92208899bf0275d15e9b83a6070dcd58a18e47c2455e5f0f4de6688aca"
+    },
+    {
+      "path": "models/library/diode/C4MS009120QT_bodydiode.json",
+      "bytes": 4583,
+      "sha256": "aa7e040a861d4f5bfec377b06a7dddcedefefe17dc7de3d7b886156ca8dcb412"
+    },
+    {
+      "path": "models/library/diode/C4MS009120U2_bodydiode.json",
+      "bytes": 4583,
+      "sha256": "7dd9846d77f6f1177685889c28ad6e622bd5bf8a532662741add4c220c5b040c"
+    },
+    {
+      "path": "models/library/diode/C4MS012120QT_bodydiode.json",
+      "bytes": 4347,
+      "sha256": "30adb23f94444218a10bba5ff45ea98eca38f3e93a8d9f42f350e2f0f7c6d9b4"
+    },
+    {
+      "path": "models/library/diode/C4MS015075J2_bodydiode.json",
+      "bytes": 5943,
+      "sha256": "edc876f9caa6abd2b4cc666081451b23d4c6508415bf78a8a543880e1a871d06"
+    },
+    {
+      "path": "models/library/diode/C4MS015075K1_bodydiode.json",
+      "bytes": 5943,
+      "sha256": "9aecdc17e213d166d528b814afea1a7edea4d19c907652e99ee7d9c3a745fba3"
+    },
+    {
+      "path": "models/library/diode/C4MS015075QT_bodydiode.json",
+      "bytes": 5943,
+      "sha256": "8f3f377f309020d1523b2d9e261beb85ef6125fa186d7a76d2adc9bf33271ebc"
+    },
+    {
+      "path": "models/library/diode/C4MS015075U2_bodydiode.json",
+      "bytes": 5943,
+      "sha256": "5866aba41498345e6cd886610d786f7cb88b12fece33a2b51ecae6083c76a8db"
+    },
+    {
+      "path": "models/library/diode/C4MS025065L_bodydiode.json",
+      "bytes": 4144,
+      "sha256": "a0d32bbdc4c2d5e15200c040c4872b30f8dff5decb26736fbbe27b86f0cfe630"
+    },
+    {
+      "path": "models/library/diode/C4MS025075J2_bodydiode.json",
+      "bytes": 6105,
+      "sha256": "ee7fcb2dbbd2cf8addc35d39091f86b97f3f08c36a32a1ba7f3fd74f69921374"
+    },
+    {
+      "path": "models/library/diode/C4MS025075K1_bodydiode.json",
+      "bytes": 6105,
+      "sha256": "2b6cbfe527a71b6c114f83892f41074b72595c12913b392e8567fa9e31713654"
+    },
+    {
+      "path": "models/library/diode/C4MS025075QT_bodydiode.json",
+      "bytes": 6105,
+      "sha256": "13de96ef9d82ea61981fc5de434fc6ab07c757d5e31f36835ccb5bdd37de3535"
+    },
+    {
+      "path": "models/library/diode/C4MS025075U2_bodydiode.json",
+      "bytes": 6105,
+      "sha256": "7a22619c37bc041e6ab9d52074d9350ab5c84f03e3302b978d62b86d2df4c5fb"
+    },
+    {
+      "path": "models/library/diode/C4MS025120J2_bodydiode.json",
+      "bytes": 4126,
+      "sha256": "067e7a422e516f5603611402529741288e492e3e22893f48265c03f150f11f52"
+    },
+    {
+      "path": "models/library/diode/C4MS025120K1_bodydiode.json",
+      "bytes": 4126,
+      "sha256": "df958d4fcdb90c35ecfff0b9289420155dd29ed92b155f2d933d91e10fcb8149"
+    },
+    {
+      "path": "models/library/diode/C4MS025120K_bodydiode.json",
+      "bytes": 4125,
+      "sha256": "76d85faabc2edaabcdbba724232ae4afb87e09d1b04f94c543a92fa622a03589"
+    },
+    {
+      "path": "models/library/diode/C4MS025120QT_bodydiode.json",
+      "bytes": 5565,
+      "sha256": "42ed5f5a18f04e89509b9d91d443f47b3df4547c6838ecbb01d04c0f23e6a732"
+    },
+    {
+      "path": "models/library/diode/C4MS025120U2_bodydiode.json",
+      "bytes": 4126,
+      "sha256": "8210257f9f8088c759c67eddb6f7f35120ffa25092294b95a2c8c9605d90ba37"
+    },
+    {
+      "path": "models/library/diode/C4MS035065L_bodydiode.json",
+      "bytes": 6065,
+      "sha256": "c1131cc7bb4c27c88e0570e829d15cababd20bc4d8fa20e137ca2d85b51f3380"
+    },
+    {
+      "path": "models/library/diode/C4MS035075K1  _bodydiode.json",
+      "bytes": 6073,
+      "sha256": "2b1c8af437a2a12d0a6728e1959b4ccc2971c35081b42b7139c0a543ac42bce6"
+    },
+    {
+      "path": "models/library/diode/C4MS036120J2_bodydiode.json",
+      "bytes": 4735,
+      "sha256": "c2a306cb04e0fce6a28ae80380cc0b22b0f78ae50d5595a0876a3d0f018c635a"
+    },
+    {
+      "path": "models/library/diode/C4MS036120K1_bodydiode.json",
+      "bytes": 4735,
+      "sha256": "7d70f2c4f96a90b356f3b027c622e48f83e4abb7114ecb995f8899b69e107a07"
+    },
+    {
+      "path": "models/library/diode/C4MS036120K_bodydiode.json",
+      "bytes": 4734,
+      "sha256": "c31575d0beb0a15bc5d559d9a99b49263509df53b70be4fab1060e48daa52da8"
+    },
+    {
+      "path": "models/library/diode/C4MS036120QT_bodydiode.json",
+      "bytes": 4375,
+      "sha256": "2b6d9cdf6aa28cfe04fe7846a8d0a89c27238ac83452ac2ec98c4d6f8dbec41a"
+    },
+    {
+      "path": "models/library/diode/C4MS036120U2_bodydiode.json",
+      "bytes": 4735,
+      "sha256": "bb583638a005524cafe720f4fed7f4d5a2fb1941924bb6d1efffc90e5c0118d0"
+    },
+    {
+      "path": "models/library/diode/C4MS045065L_bodydiode.json",
+      "bytes": 5986,
+      "sha256": "9bc9919eb1aa42457a15841c88b1d56529a03b842d3e7259080214681a742b25"
+    },
+    {
+      "path": "models/library/diode/C4MS045075J2_bodydiode.json",
+      "bytes": 5987,
+      "sha256": "dff85274abfe02dea5bf9b412bd2dd1cf896e0aa1a23cfc14d8c224e36b947fa"
+    },
+    {
+      "path": "models/library/diode/C4MS045075K1_bodydiode.json",
+      "bytes": 5987,
+      "sha256": "8d839442157f672bca49ed095cc8f3e36e40c4b6fec0410d2e76e307e0742cb3"
+    },
+    {
+      "path": "models/library/diode/C4MS045075QT_bodydiode.json",
+      "bytes": 5987,
+      "sha256": "4d606fdd03d89fb244270c97333747de2cd924f7ec3fab5a2a2f264106507fe4"
+    },
+    {
+      "path": "models/library/diode/C4MS045075U2_bodydiode.json",
+      "bytes": 5987,
+      "sha256": "28d6e708bae7968a837ea72177ca0e40cf4ef7b383f2684d6bd7be85306d4d84"
+    },
+    {
+      "path": "models/library/diode/C4MS047120J2_bodydiode.json",
+      "bytes": 3789,
+      "sha256": "23364d25e4c24991db3a44a1e421c162ab19357d3f05133b6c223a3213d9c3da"
+    },
+    {
+      "path": "models/library/diode/C4MS047120K1_bodydiode.json",
+      "bytes": 3789,
+      "sha256": "ab9029257539ac8c2b355a02348203dba194afc8ac7c13686e96aa5f98376ad6"
+    },
+    {
+      "path": "models/library/diode/C4MS047120K_bodydiode.json",
+      "bytes": 3788,
+      "sha256": "9122cbb0011e2f03c10b0392d7b95f6ba9987a3eab9a4542ee8b4a0e7efd1d5a"
+    },
+    {
+      "path": "models/library/diode/C4MS047120QT_bodydiode.json",
+      "bytes": 5508,
+      "sha256": "62d14abe0c6ef4bd90346e0e99f0037fb9eba50b0e622a98aefc742767416ae4"
+    },
+    {
+      "path": "models/library/diode/C4MS047120U2_bodydiode.json",
+      "bytes": 3789,
+      "sha256": "e6352769e6a3ef3c80a6b8b603335470c3ffaed305845430bca763eca7064ae8"
+    },
+    {
+      "path": "models/library/diode/C4MS065120J2_bodydiode.json",
+      "bytes": 3840,
+      "sha256": "a3e0d74b050d6c932990fa5dffc20d3fd088008da870fa51e89349183b5da0f9"
+    },
+    {
+      "path": "models/library/diode/C4MS065120K1_bodydiode.json",
+      "bytes": 3840,
+      "sha256": "b0a02c405e91354bfc55420081a0fac1e85b69dbcd35cc5d9983222a56ca1dc7"
+    },
+    {
+      "path": "models/library/diode/C4MS065120K_bodydiode.json",
+      "bytes": 3839,
+      "sha256": "d0fc216c7569a228596d6d15495051431ade011cc2a98c5287288f7f207a1981"
+    },
+    {
+      "path": "models/library/diode/C4MS065120U2_bodydiode.json",
+      "bytes": 3841,
+      "sha256": "bccec8814ed13ef42c526463d0fda9550e9ed345ba3089f421dbefa3bcf5f782"
+    },
+    {
+      "path": "models/library/diode/C4MS080120J2_bodydiode.json",
+      "bytes": 5144,
+      "sha256": "35a22d9185e115550a4b261c0cfc1fdaefc4b51db5192d5dea118ef92f8872ba"
+    },
+    {
+      "path": "models/library/diode/C4MS080120K_bodydiode.json",
+      "bytes": 5143,
+      "sha256": "ebda435b53d4acaeb089e255ee41778b275242241b4aaa933cb4d3d7a4b15467"
+    },
+    {
+      "path": "models/library/diode/C4MS080120U2_bodydiode.json",
+      "bytes": 5144,
+      "sha256": "4340d415b0bb603210fb8a18321747876145f15bdaca855ea85a39677938f67f"
+    },
+    {
+      "path": "models/library/diode/C5D05170H.json",
+      "bytes": 704,
+      "sha256": "21586fa51eeb8d526ad99db3986ae1d7876a21b5490772240884ef0f0b2cbc6b"
+    },
+    {
+      "path": "models/library/diode/C5D10170H.json",
+      "bytes": 669,
+      "sha256": "2f377499254dfad0a9b0cec29e7d1fb739d2d793140728a36ade1728876fc8b2"
+    },
+    {
+      "path": "models/library/diode/C5D25170H.json",
+      "bytes": 753,
+      "sha256": "35df7bb763eaf9bea28b2da7bca883d03dd17c68ffa9a43819c95286b73b0281"
+    },
+    {
+      "path": "models/library/diode/C5D50065D.json",
+      "bytes": 836,
+      "sha256": "e452b9563ada7d0d6ff6cfd93c3beb981a738e347d46a50f7e933ed1da0ec90f"
+    },
+    {
+      "path": "models/library/diode/C6D04065A.json",
+      "bytes": 812,
+      "sha256": "67aefa583aa5967470b21f6608dd81634ca0d0e50d987f5e52901c7f0f3703c3"
+    },
+    {
+      "path": "models/library/diode/C6D04065E.json",
+      "bytes": 812,
+      "sha256": "8fb54ce53a3c7cd772e03e3b5c0e84a0889ab487a062b4f3f6aa5d840816f740"
+    },
+    {
+      "path": "models/library/diode/C6D06065A.json",
+      "bytes": 762,
+      "sha256": "18a425cb7d6068441dafd19269a8ba988d622bc09738f436c1b986d276106654"
+    },
+    {
+      "path": "models/library/diode/C6D06065E.json",
+      "bytes": 762,
+      "sha256": "9fc70b5cb13d97e9b3ba2d6c0a9205de877caee85a55127a08dbcfba0290ac64"
+    },
+    {
+      "path": "models/library/diode/C6D06065G.json",
+      "bytes": 759,
+      "sha256": "a6d437184ef2ff4d9b0dd96b153fc8b863a56fd965653b46ea515785105e95be"
+    },
+    {
+      "path": "models/library/diode/C6D06065Q.json",
+      "bytes": 759,
+      "sha256": "d455c68632b8a3afbd7675a0d142afd1c3f5a56dd94f8265f28e5e5fb1fbeb8c"
+    },
+    {
+      "path": "models/library/diode/C6D08065A.json",
+      "bytes": 773,
+      "sha256": "fab39b6b97e7622937dc4fb4ae1597924fc84eb829e44b67f12df1c6855284ae"
+    },
+    {
+      "path": "models/library/diode/C6D08065E.json",
+      "bytes": 773,
+      "sha256": "477960fef25fe6b1b0ac37c499c63b676e280df903467c88839f975121d59d36"
+    },
+    {
+      "path": "models/library/diode/C6D08065G.json",
+      "bytes": 771,
+      "sha256": "ecdb1f640ec659e5b17a46e27946de058bbc2b482b50bdc8cd6d276345911cc6"
+    },
+    {
+      "path": "models/library/diode/C6D08065Q.json",
+      "bytes": 771,
+      "sha256": "c8187aa6b1a67def37c6f5df53d48a6f4736a5bf05c4df2eb24ca3a0aa4463bb"
+    },
+    {
+      "path": "models/library/diode/C6D10065A.json",
+      "bytes": 767,
+      "sha256": "9b9ff98eb3885fe2adaa8a97995b6879c8b49ccef2a036615b105902a989fc05"
+    },
+    {
+      "path": "models/library/diode/C6D10065E.json",
+      "bytes": 767,
+      "sha256": "62944259f4d264f95d43570b0d02172916ba7a91af9e3d23c7cb666b2eb2f0b6"
+    },
+    {
+      "path": "models/library/diode/C6D10065G.json",
+      "bytes": 767,
+      "sha256": "ec89c56ddb7a6dcb98da2b7645b1bcef236fd9961f661f1e1aac390c2109397d"
+    },
+    {
+      "path": "models/library/diode/C6D10065Q.json",
+      "bytes": 767,
+      "sha256": "ec89c56ddb7a6dcb98da2b7645b1bcef236fd9961f661f1e1aac390c2109397d"
+    },
+    {
+      "path": "models/library/diode/C6D16065D.json",
+      "bytes": 793,
+      "sha256": "2dab4cebb6e9822b5454cfca0c9b05b448f659ffbbc09bec7f186ae7a47e2555"
+    },
+    {
+      "path": "models/library/diode/C6D16065H.json",
+      "bytes": 1112,
+      "sha256": "019718bd62c2cae41a3b9ecb880482b4b9ce28d61af21086ac34ac3d6223f36f"
+    },
+    {
+      "path": "models/library/diode/C6D20065D.json",
+      "bytes": 788,
+      "sha256": "06fd59b3d1a14f2df27a12b0c8b399cd9db5dee9bc56500b710c97164102e711"
+    },
+    {
+      "path": "models/library/diode/C6D30065H.json",
+      "bytes": 1193,
+      "sha256": "261f55b47c4b2c3e2c21aa8a6b1bd9a324d7a31d9d020c66726414d3aeac561d"
+    },
+    {
+      "path": "models/library/diode/CAB003M09DM3_bodydiode.json",
+      "bytes": 6393,
+      "sha256": "16612771c51a62e701739202055b1cf040415e1806a5303dd8dbfc1e332a401e"
+    },
+    {
+      "path": "models/library/diode/CAB004A12GM4_bodydiode.json",
+      "bytes": 6141,
+      "sha256": "9ec1243732f312c62b9af54884afa17636225a80bef852ad70dcd5b2dfa7e0fc"
+    },
+    {
+      "path": "models/library/diode/CAB004M12GM4_bodydiode.json",
+      "bytes": 6141,
+      "sha256": "07129f1839d9e901260d6e513bbcde33c99a336496e272a081f9f4432844ce18"
+    },
+    {
+      "path": "models/library/diode/CAB006A12GM3_bodydiode.json",
+      "bytes": 6182,
+      "sha256": "ad614d1e3eb5611a6944b00fa61dc32cb3c112069385f5256ac425228f4613f6"
+    },
+    {
+      "path": "models/library/diode/CAB006A12GM4_bodydiode.json",
+      "bytes": 6590,
+      "sha256": "3680d616f643d8957a57391c31ea067de812912352d9d86333e64329f40ac925"
+    },
+    {
+      "path": "models/library/diode/CAB006M12GM3_bodydiode.json",
+      "bytes": 6182,
+      "sha256": "18586693643ab224f2c8fc1d7bf98b0f47e19d48064f402030f008f18eb26ddb"
+    },
+    {
+      "path": "models/library/diode/CAB008A12GM3_bodydiode.json",
+      "bytes": 4753,
+      "sha256": "a7336af0835b6c281e793913b3a17f88e2aee2af4ade6a16081ce55dfdd48f0b"
+    },
+    {
+      "path": "models/library/diode/CAB008M12GM3_bodydiode.json",
+      "bytes": 4753,
+      "sha256": "4a497e496f9a3182b0f726f5deb36cf4ee97c737fa73e768d370a6ffe88490e7"
+    },
+    {
+      "path": "models/library/diode/CAB011A12GM3_bodydiode.json",
+      "bytes": 4842,
+      "sha256": "9092c980611682f125ba3eda20c8ef0b4fa63782d6a29290ec0a01bf9ffab890"
+    },
+    {
+      "path": "models/library/diode/CAB011M12FM3_bodydiode.json",
+      "bytes": 3656,
+      "sha256": "8ff1bf730845895606645b1a4a7eca88a9cb98286994225e639d44e0d5646393"
+    },
+    {
+      "path": "models/library/diode/CAB016M12FM3_bodydiode.json",
+      "bytes": 4182,
+      "sha256": "e670a80bcb9406787fc6501a1ae78d03a097f6201c108073b862b4c55380bfdb"
+    },
+    {
+      "path": "models/library/diode/CAB320M17XM3_bodydiode.json",
+      "bytes": 5494,
+      "sha256": "15d8398ea77298d896f4a039da8bf4aa57af1fbcad113a2c1c85cc0d54aebfd7"
+    },
+    {
+      "path": "models/library/diode/CAB3R5M12DM4_bodydiode.json",
+      "bytes": 5471,
+      "sha256": "60eb49543f210bd86cde13c04c3093ff99e8bc275ccd8c4d0a9346472b8caf61"
+    },
+    {
+      "path": "models/library/diode/CAB400M12XM3_bodydiode.json",
+      "bytes": 6765,
+      "sha256": "2aa96252f2334018c78e4f86f464d86c042b5b5593e15fa275610b55551da6ce"
+    },
+    {
+      "path": "models/library/diode/CAB425M12XM3_bodydiode.json",
+      "bytes": 6946,
+      "sha256": "ae23930d5de25a7c355ea2a409b8435927872b9b2b0349a730d21132827b743d"
+    },
+    {
+      "path": "models/library/diode/CAB450M12XM3_bodydiode.json",
+      "bytes": 6624,
+      "sha256": "00f59dbaef20a61760605d8a7d9593887ca6067bc5660526f8495bee5c718711"
+    },
+    {
+      "path": "models/library/diode/CAB500M17HM3_bodydiode.json",
+      "bytes": 5081,
+      "sha256": "15ac9799c5d0c27763685cb4186df72544f9f9cda85556b24d57347d3f384af3"
+    },
+    {
+      "path": "models/library/diode/CAB525F12XM3_bodydiode.json",
+      "bytes": 4773,
+      "sha256": "3416b50787d243b3cf50014b8e76713e8cf980deb7607896d160ba854e1eb026"
+    },
+    {
+      "path": "models/library/diode/CAB530M12BM3_bodydiode.json",
+      "bytes": 5046,
+      "sha256": "bc5dae63b75aa257cb361a85b8d8634cb0411e1570f9d0ce2e08c5d39bd7783d"
+    },
+    {
+      "path": "models/library/diode/CAB5R0A23GM4_bodydiode.json",
+      "bytes": 4868,
+      "sha256": "3c3d1f7d45cbef4eada28f514f1d910be7d5a89d06f66eb11e1f4053e96dc611"
+    },
+    {
+      "path": "models/library/diode/CAB600M33LM3_bodydiode.json",
+      "bytes": 5262,
+      "sha256": "fde313eb7b128435e851b85d8e524097bc8debabe4dd19539da688ea4405bd49"
+    },
+    {
+      "path": "models/library/diode/CAB650M17HM3_bodydiode.json",
+      "bytes": 6017,
+      "sha256": "e0fb4f741868fe284c8bc1379550bad1c0b873b2e2f3d2c653cbd90881069da6"
+    },
+    {
+      "path": "models/library/diode/CAB6R0A23GM4_bodydiode.json",
+      "bytes": 5863,
+      "sha256": "4cc236f94af978a411a332db6958ff2769d5f1de8976e851bdbc7ee1941b40de"
+    },
+    {
+      "path": "models/library/diode/CAB760M12HM3_bodydiode.json",
+      "bytes": 6371,
+      "sha256": "e63cb30d80247b93d6b61212749c118b2cfb45dc451eca1bdfda787404d6b37c"
+    },
+    {
+      "path": "models/library/diode/CAB7R5A23GM4_bodydiode.json",
+      "bytes": 5661,
+      "sha256": "25e81df2d2aa09434577fb523409f8ce8efff283dd153dc442d79dba24759c9c"
+    },
+    {
+      "path": "models/library/diode/CAR600M12HN6.json",
+      "bytes": 1707,
+      "sha256": "5e2db67cf574687cf9ce850033c2b06b23b315503a2030f7581bb70ae8e70aba"
+    },
+    {
+      "path": "models/library/diode/CAR600M12HN6_diode.json",
+      "bytes": 1707,
+      "sha256": "5e2db67cf574687cf9ce850033c2b06b23b315503a2030f7581bb70ae8e70aba"
+    },
+    {
+      "path": "models/library/diode/CAR600M17HN6.json",
+      "bytes": 1699,
+      "sha256": "6c095eda66813546c7fb6e269823bddb58b91e9d7cc0a0a21d4f4757c6151cb5"
+    },
+    {
+      "path": "models/library/diode/CAR600M17HN6_diode.json",
+      "bytes": 1699,
+      "sha256": "6c095eda66813546c7fb6e269823bddb58b91e9d7cc0a0a21d4f4757c6151cb5"
+    },
+    {
+      "path": "models/library/diode/CAS120M12BM2_schottkydiode.json",
+      "bytes": 916,
+      "sha256": "dde13a8fcd54e4f5a87d30ab93bde267e96e0ea6475ea09fcfbc9259b0c98468"
+    },
+    {
+      "path": "models/library/diode/CAS175M12BM3_schottkydiode.json",
+      "bytes": 1754,
+      "sha256": "2ba9d1f7ab57e3a84fcba298d830ee61105f93cfad3038fa692c81cd8e28ae0b"
+    },
+    {
+      "path": "models/library/diode/CAS300M12BM2_schottkydiode.json",
+      "bytes": 2060,
+      "sha256": "f6d67e27d71c27de238d7c1787bdc9327d11ae84b30094e180e18d2821df456f"
+    },
+    {
+      "path": "models/library/diode/CAS300M17BM2_schottkydiode.json",
+      "bytes": 647,
+      "sha256": "531e4ffc6067d54c3a385d7974ee9f8bd33420f1584bd26b409aa2f4ca9b7d88"
+    },
+    {
+      "path": "models/library/diode/CAS310M17BM3_schottkydiode.json",
+      "bytes": 1757,
+      "sha256": "a2e19b886c2064c5d8cb6d81d48a30a26153845fb0347b2140d0704426b96c1d"
+    },
+    {
+      "path": "models/library/diode/CAS350M12BM3_schottkydiode.json",
+      "bytes": 1888,
+      "sha256": "f239494ca18fcf06bc247532f2139bf86d3093b2b49ebadd043b977e62e095c7"
+    },
+    {
+      "path": "models/library/diode/CAS380M17HM3_schottkydiode.json",
+      "bytes": 1944,
+      "sha256": "dbcae03191043514f195b1b557b89aede5e230fd73e527ecf3b55aa72d183227"
+    },
+    {
+      "path": "models/library/diode/CAS480M12HM3_schottkydiode.json",
+      "bytes": 2029,
+      "sha256": "58df3b2a88a97e35a491578c2f52cb7775207c915c5fe41c684a8cf3b67aa930"
+    },
+    {
+      "path": "models/library/diode/CAS530M12BM3_schottkydiode.json",
+      "bytes": 1689,
+      "sha256": "2001485a68510554509fafda04bb6544e9c597f54c202fc2971d6c270b4e2b61"
+    },
+    {
+      "path": "models/library/diode/CBB010A12FM4_bodydiode.json",
+      "bytes": 4122,
+      "sha256": "cf67c9c3bc77a26b7f223ea7c12541094d969372ae440c09558a6726a7bc22e0"
+    },
+    {
+      "path": "models/library/diode/CBB010A23GM4_bodydiode.json",
+      "bytes": 4705,
+      "sha256": "14fb40ea8624839aa3b08fbebee78c40b076c2d11c993df8829e2c1feb3b7934"
+    },
+    {
+      "path": "models/library/diode/CBB011M12GM4_bodydiode.json",
+      "bytes": 3632,
+      "sha256": "9a9094c5fe308387d80bc3b0b0c72d31789e9197143e2a2695de6a71c6ae06bb"
+    },
+    {
+      "path": "models/library/diode/CBB014A12FM4_bodydiode.json",
+      "bytes": 4600,
+      "sha256": "cdeb899c6993ccbad3b091eb8616097f4f03c62b97d65708f9a8669dfe3fbc6c"
+    },
+    {
+      "path": "models/library/diode/CBB017M12FM4_bodydiode.json",
+      "bytes": 3438,
+      "sha256": "1c657b457f5a6402fd8c066ccd3627cc16827630546962f44887be7d9ad1ff4f"
+    },
+    {
+      "path": "models/library/diode/CBB021M12FM3_bodydiode.json",
+      "bytes": 4259,
+      "sha256": "e03e6d9ef86e59656e0ba070c996d137296c95690de129fcba30f6b2d45f868c"
+    },
+    {
+      "path": "models/library/diode/CBB030A23FM4_bodydiode.json",
+      "bytes": 4695,
+      "sha256": "92e0fb11e5518d9c09e9dbf51f32f375fea2d6364f6f16e2f35e56ada923a147"
+    },
+    {
+      "path": "models/library/diode/CBB032M12FM3_bodydiode.json",
+      "bytes": 4143,
+      "sha256": "e74e2833c19866a554c56c13ef07368af187dc20f7359b901a2f0d1137cec8f7"
+    },
+    {
+      "path": "models/library/diode/CCB016M12GM3_bodydiode.json",
+      "bytes": 4323,
+      "sha256": "ee4484627ff1b2f8e90bee436f2cbe6a41b6f1d1fa04498da41957cfa676934e"
+    },
+    {
+      "path": "models/library/diode/CCB021M12FM3_bodydiode.json",
+      "bytes": 4220,
+      "sha256": "8601da3ec4857fcc91600bd2e8573f45bf6531284d556a513d4993c4c5fa4bee"
+    },
+    {
+      "path": "models/library/diode/CCB032M12FM3_bodydiode.json",
+      "bytes": 4216,
+      "sha256": "ad16e417983bbfd41c836be4bc82b6751c64b30dcc240e7dba83d523f63aa380"
+    },
+    {
+      "path": "models/library/diode/CHB011M12GM4_bodydiode.json",
+      "bytes": 3693,
+      "sha256": "2726358534677e64fc1b2a3e1b9eccb46f3cdd9dadd99b1e9b32a3ae926ee9b2"
+    },
+    {
+      "path": "models/library/diode/CHB7R5A23GM4_M11_bodydiode.json",
+      "bytes": 6507,
+      "sha256": "300a2cfe5df2cef6a6d91be6acb57aa7a978f7ee4ca975df6b332b7a017a9324"
+    },
+    {
+      "path": "models/library/diode/CHB7R5A23GM4_M13_bodydiode.json",
+      "bytes": 4687,
+      "sha256": "a6e31f0830e9b88b01480db833e92877c136a702c8dd3e0a7e9858d38b227e90"
+    },
+    {
+      "path": "models/library/diode/CLB650M17HM3_bodydiode.json",
+      "bytes": 6017,
+      "sha256": "5001a66df4c8e0d8983924458ccd3e1b1b7fd8dcf7f1163182ae5103a3fb814e"
+    },
+    {
+      "path": "models/library/diode/CLB800M12HM3P_bodydiode.json",
+      "bytes": 6632,
+      "sha256": "812baba5b9e584e47fc50dcb1ceb8e7659f4582bab5196850f90882491fbbb09"
+    },
+    {
+      "path": "models/library/diode/CSD01060A.json",
+      "bytes": 634,
+      "sha256": "6498238438c37d42baad41f616c028b3f6f55809c42abcf115a2cb84745fb15e"
+    },
+    {
+      "path": "models/library/diode/CSD01060E.json",
+      "bytes": 634,
+      "sha256": "022932bb453be18fba6f612130bff8f5d8ceb73132c4665b6b09310b4c1b4650"
+    },
+    {
+      "path": "models/library/diode/CVFD20065A.json",
+      "bytes": 790,
+      "sha256": "b7b2c21ecf039c62076fec5684e3bf5ca1f1b1432d1421551df0edf55c437c58"
+    },
+    {
+      "path": "models/library/diode/DIM1000ACM33-TF001 - DIODE.json",
+      "bytes": 1156,
+      "sha256": "2d94b66f920feab1fe6d192d82ab615eecb28c3a37cdd749284ee1619ae7448b"
+    },
+    {
+      "path": "models/library/diode/DIM1000ACM33-TL001 - DIODE.json",
+      "bytes": 1172,
+      "sha256": "de13890eb882bb657c10047049db6fcb0819d9e79ebd13bfaaa6e94dbc46b88d"
+    },
+    {
+      "path": "models/library/diode/DIM1000ASM65-UF000 - DIODE.json",
+      "bytes": 1139,
+      "sha256": "6d40f7fa3147552d4fa5bce6b011f40a6363aa8262bc6f6ee31c25e35016e053"
+    },
+    {
+      "path": "models/library/diode/DIM1000ECM33-TF000 - DIODE.json",
+      "bytes": 1156,
+      "sha256": "2d94b66f920feab1fe6d192d82ab615eecb28c3a37cdd749284ee1619ae7448b"
+    },
+    {
+      "path": "models/library/diode/DIM1000ECM33-TL000 - DIODE.json",
+      "bytes": 1172,
+      "sha256": "96ba69663cc8af65e8c8da192d5d935dc057cdfb743407167c65a7c2199ca458"
+    },
+    {
+      "path": "models/library/diode/DIM1000ECM33-TS000 - DIODE.json",
+      "bytes": 1171,
+      "sha256": "f4d65d6775ab729a40d1065a5bf2f2083d5e09f1bd900c021f6d93c6dacbdbd1"
+    },
+    {
+      "path": "models/library/diode/DIM1000H1HS17-PA500 - DIODE.json",
+      "bytes": 1172,
+      "sha256": "53e86cd597aca8940c9741054e780069479ad598d12c2a47445a456c15f1030a"
+    },
+    {
+      "path": "models/library/diode/DIM1000NSM33-TF000 - DIODE.json",
+      "bytes": 1156,
+      "sha256": "2d94b66f920feab1fe6d192d82ab615eecb28c3a37cdd749284ee1619ae7448b"
+    },
+    {
+      "path": "models/library/diode/DIM1000NSM33-TL000 - DIODE.json",
+      "bytes": 1172,
+      "sha256": "fa27fb0823bb90dabfd57b08efe2abcb1a80b2db173444667fd2e8414c0b3887"
+    },
+    {
+      "path": "models/library/diode/DIM1000NSM33-TS000 - DIODE.json",
+      "bytes": 1171,
+      "sha256": "a3201a476410dcba01d240d1c0107c6f1afa96ed50bd1034236b8ffd41c1684a"
+    },
+    {
+      "path": "models/library/diode/DIM1000XSM33-TF000 - DIODE.json",
+      "bytes": 1156,
+      "sha256": "2d94b66f920feab1fe6d192d82ab615eecb28c3a37cdd749284ee1619ae7448b"
+    },
+    {
+      "path": "models/library/diode/DIM1000XSM33-TF001 - DIODE.json",
+      "bytes": 1156,
+      "sha256": "2d94b66f920feab1fe6d192d82ab615eecb28c3a37cdd749284ee1619ae7448b"
+    },
+    {
+      "path": "models/library/diode/DIM1000XSM33-TL001 - DIODE.json",
+      "bytes": 1172,
+      "sha256": "2ac1018d8fa7174ce6bc19e5babd6f20d88d636fd7f18fc8cd4e2c89425b57a0"
+    },
+    {
+      "path": "models/library/diode/DIM1000XSM33-TS001 - DIODE.json",
+      "bytes": 1171,
+      "sha256": "d07e47e61b99413be8b3fa9adaf4b4ee99155adbefbf786a592be81ba1927b86"
+    },
+    {
+      "path": "models/library/diode/DIM100PHM33-F000 - DIODE.json",
+      "bytes": 765,
+      "sha256": "6d459e72ef0842552bbf729f936d9ea5dd1a57af3bba047cb36ee86540b1d174"
+    },
+    {
+      "path": "models/library/diode/DIM1200ASM45-PR501 - DIODE.json",
+      "bytes": 1207,
+      "sha256": "5b360a7fe455f325e2b3200bfaf6b5084684ada78d44edbb19f20562836429ed"
+    },
+    {
+      "path": "models/library/diode/DIM1200ASM45-TL000 - DIODE.json",
+      "bytes": 1799,
+      "sha256": "1312bd34fd51138665df1b18bea46fb3282a8f4321f78fa5aa46b6d48533d57b"
+    },
+    {
+      "path": "models/library/diode/DIM1200ASM45-TL001 - DIODE.json",
+      "bytes": 1799,
+      "sha256": "23ea9008dc11f95ea6d599f9f2cf5da900b0fccb667128cd5decf731f3286bdc"
+    },
+    {
+      "path": "models/library/diode/DIM1200ASM45-TS000 - DIODE.json",
+      "bytes": 1840,
+      "sha256": "9551cd2335d14a7e0f822ca89fdf33edec7dec00a884fe7ee8a12142901afd2b"
+    },
+    {
+      "path": "models/library/diode/DIM1200ASM45-TS001 - DIODE.json",
+      "bytes": 1840,
+      "sha256": "e6e056d5770e89568ffbad39b543c3778471e8be9b8ae68cbca9c4474e3cc3cc"
+    },
+    {
+      "path": "models/library/diode/DIM1200ESM33-F000 - DIODE.json",
+      "bytes": 1118,
+      "sha256": "ae573e6f2959a881c2df2d87b79b0f794c724c1ebea13c9eeb239e4a22e0003f"
+    },
+    {
+      "path": "models/library/diode/DIM1200FSM12-A000 - DIODE.json",
+      "bytes": 1302,
+      "sha256": "0affbe723c5b4a062bb7be6686eef2e63d2cf21e084257505de6d247387176dc"
+    },
+    {
+      "path": "models/library/diode/DIM1200FSM17-A000 - DIODE.json",
+      "bytes": 1011,
+      "sha256": "69933dcdef59086e4f8abfd8b76cc57cc5c7608592bc523721d3bbd4f46acc96"
+    },
+    {
+      "path": "models/library/diode/DIM1200FSS12-A000 - DIODE.json",
+      "bytes": 1302,
+      "sha256": "f5520ec923fa788fe5af6440305a700b1d5c43a08ce37233a1b23fc9e6aee423"
+    },
+    {
+      "path": "models/library/diode/DIM1200NSM12-A000 - DIODE.json",
+      "bytes": 1302,
+      "sha256": "d1eefb83a02d08be6a13e53796067646affa8ae11e173a6c5844712f946065f0"
+    },
+    {
+      "path": "models/library/diode/DIM1200NSM17-A000 - DIODE.json",
+      "bytes": 1348,
+      "sha256": "6913562e6b94f7052cf14bf77c719ecd25dc52338c37847fa3169f2db4c3aaa3"
+    },
+    {
+      "path": "models/library/diode/DIM125PHM33-TF000 - DIODE.json",
+      "bytes": 1250,
+      "sha256": "3a9c1c5e76e84af91e9a75185186eaf55b9bf5b89090c1471fc3a2ca3388e63a"
+    },
+    {
+      "path": "models/library/diode/DIM125PHM33-TL000 - DIODE.json",
+      "bytes": 1246,
+      "sha256": "531229c61e541086763b17fd40f1eab04243a80ff60fe6defc03838cd3c945eb"
+    },
+    {
+      "path": "models/library/diode/DIM125PHM33-TS000 - DIODE.json",
+      "bytes": 1322,
+      "sha256": "bc0a0923e455dbb0937b7f9d0569a4981260d7fc2ce82a4f27ce7b68d5ab4ca8"
+    },
+    {
+      "path": "models/library/diode/DIM1400H1HS12-PA500 - DIODE.json",
+      "bytes": 1259,
+      "sha256": "a83f33a8eb75065fdf6910b11e47d4dd2797b670d7984e095e4d3e406d7b59fd"
+    },
+    {
+      "path": "models/library/diode/DIM1500ASM33-TF001 - DIODE.json",
+      "bytes": 1405,
+      "sha256": "7d012adfc1f934ab1d3b52304dc233a6b51335bc68012a21401c40ae6608b28a"
+    },
+    {
+      "path": "models/library/diode/DIM1500ASM33-TL001 - DIODE.json",
+      "bytes": 1531,
+      "sha256": "5cc3b99728f5a33054020594073c21352bf334bf93a7a2f883655cb56f1e7305"
+    },
+    {
+      "path": "models/library/diode/DIM1500ASM33-TS001 - DIODE.json",
+      "bytes": 1532,
+      "sha256": "cda4839924b7a258aa80a15f3fa0c924a27bf52673e183dee602ee1bcb0c0314"
+    },
+    {
+      "path": "models/library/diode/DIM1500ESM33-MS000 - DIODE.json",
+      "bytes": 2019,
+      "sha256": "deec35fb5dc72c9b8eb3283ab36be084d01b51f25c9d38535faa3caa3ccd4a2d"
+    },
+    {
+      "path": "models/library/diode/DIM1500ESM33-RR500 - DIODE.json",
+      "bytes": 1066,
+      "sha256": "309013761ef83177ab9ef34ca9598b17550fbc993324a3f9d9094723c31eb1e3"
+    },
+    {
+      "path": "models/library/diode/DIM1500ESM33-TF000 - DIODE.json",
+      "bytes": 1405,
+      "sha256": "bfe01d9a7ec40bedbdba04fd6893ddadd085eea684fd9052fd8b18e60101b44f"
+    },
+    {
+      "path": "models/library/diode/DIM1500ESM33-TL000 - DIODE.json",
+      "bytes": 1992,
+      "sha256": "c9f79856ece591fa5a93453ccb910096e283f1c01b4c0cc2e72a50b4fec1b433"
+    },
+    {
+      "path": "models/library/diode/DIM1500ESM33-TS000 - DIODE.json",
+      "bytes": 2055,
+      "sha256": "a9dd6ed78b0f987e9f5fca9c1f7ecd9a6b0eb8d5a350ae5a1ba5dd6c0774c663"
+    },
+    {
+      "path": "models/library/diode/DIM1600ECM17-A000 - DIODE.json",
+      "bytes": 1561,
+      "sha256": "4b9bf8d4833b85f533865248d567b61a56564f7a80e294cfceb4630dfae7b0c6"
+    },
+    {
+      "path": "models/library/diode/DIM1600FSM12-A000 - DIODE.json",
+      "bytes": 1448,
+      "sha256": "21a07d8fd9a89c6bfc003ee0fef20ca7b64bdda61fc57db757f3522d2d02d830"
+    },
+    {
+      "path": "models/library/diode/DIM1600FSM17-A000 - DIODE.json",
+      "bytes": 1561,
+      "sha256": "8ff47da6620a274b7d7d6b710c1587d1f89c1dd18577a40f73cc2bcfde0b70a7"
+    },
+    {
+      "path": "models/library/diode/DIM1600FSS12-A000 - DIODE.json",
+      "bytes": 1448,
+      "sha256": "f315335a5ae17cfa2769e660cfd503f8bcdca22b6bb7e229e2fc4404fcf2d40e"
+    },
+    {
+      "path": "models/library/diode/DIM1600NSM12-A000 - DIODE.json",
+      "bytes": 1448,
+      "sha256": "917f47bde4b37806f7ea04fbc665b997d95990a8725204b79d8f3aa96ba44b88"
+    },
+    {
+      "path": "models/library/diode/DIM1600NSM17-A000 - DIODE.json",
+      "bytes": 1561,
+      "sha256": "11f046caecad97607435740dd5b3f1fb8d05d7a8180114160f655c3071b43d33"
+    },
+    {
+      "path": "models/library/diode/DIM1800ESM12-A000 - DIODE.json",
+      "bytes": 1715,
+      "sha256": "050be10ea01a2cfaea20eccacda9ae7a0f643bc619bcc31489355771f335a7c4"
+    },
+    {
+      "path": "models/library/diode/DIM1800ESS12-A000 - DIODE.json",
+      "bytes": 1715,
+      "sha256": "76fa0b66d05d28ea509064d1bef12a8e313689e47d870a0e9591b985031c7155"
+    },
+    {
+      "path": "models/library/diode/DIM1800H1HS17-PH500 - DIODE.json",
+      "bytes": 1800,
+      "sha256": "ef2ada6c9170c182a0c5ebe239fb6c2c752948f9d6d3f4fba4684ff0f4749161"
+    },
+    {
+      "path": "models/library/diode/DIM200PHM33-F000 - DIODE.json",
+      "bytes": 829,
+      "sha256": "aa15bdc667d77a793a0621ea7a9424bae36408c116b774cc11d435303873dd56"
+    },
+    {
+      "path": "models/library/diode/DIM200PKM33-F000 - DIODE.json",
+      "bytes": 829,
+      "sha256": "569ab3c84e1fb81cc49b8fa3f3fb1beb9e35b39b756e803429d016914faea769"
+    },
+    {
+      "path": "models/library/diode/DIM200PLM33-F000 - DIODE.json",
+      "bytes": 829,
+      "sha256": "35391bb2464af02f9451c84a9a82c4c2570dcaee0c4307b4d15a0ce56815db93"
+    },
+    {
+      "path": "models/library/diode/DIM2400ESM12-A000 - DIODE.json",
+      "bytes": 2058,
+      "sha256": "4ecd62903f9f34bc0782661a45b52f324a2de129e17ca994c67a992eaeb07d54"
+    },
+    {
+      "path": "models/library/diode/DIM2400ESM17-A000 - DIODE.json",
+      "bytes": 1937,
+      "sha256": "e161879569eaf4d8fe910504840605f5b4514a16799ee13a0067856d0a963473"
+    },
+    {
+      "path": "models/library/diode/DIM2400ESS12-A000 - DIODE.json",
+      "bytes": 2058,
+      "sha256": "e0b01c51f2eb533925f1c96c40508ba10a8b979721d5f513c96403587753e6a7"
+    },
+    {
+      "path": "models/library/diode/DIM2400NSM17-PT500 - DIODE.json",
+      "bytes": 1184,
+      "sha256": "c7413e2621a0306954fa2587c522e613d003a07fb86c9f8fa79176e19b1dfc06"
+    },
+    {
+      "path": "models/library/diode/DIM250KHM33-TF001 - DIODE.json",
+      "bytes": 1193,
+      "sha256": "a7a19fd9544385585c44d59c35243117991a8f51adb759aa9dcc603a1012d151"
+    },
+    {
+      "path": "models/library/diode/DIM250KHM33-TL001 - DIODE.json",
+      "bytes": 1181,
+      "sha256": "992b0b5828f3558bf8bed6900de12703d8e04dfd7b83b27392935ce8225101d1"
+    },
+    {
+      "path": "models/library/diode/DIM250PHM33-TL000 - DIODE.json",
+      "bytes": 950,
+      "sha256": "ac59d381fb478272a640bf98ca99e7e5051b13383cfbff33a07477dfa44daa89"
+    },
+    {
+      "path": "models/library/diode/DIM250PHM33-TS000 - DIODE.json",
+      "bytes": 946,
+      "sha256": "4c6cac277c1769dffc6bc73ab9e6084b4a3fbc1101a2b6e6fdc684be0f502d7b"
+    },
+    {
+      "path": "models/library/diode/DIM250PKM33-TL000 - DIODE.json",
+      "bytes": 950,
+      "sha256": "8af0cebb0fb51083a5b71ef373d650c765013d44c1e245a8b66a5bc93e9a63eb"
+    },
+    {
+      "path": "models/library/diode/DIM250PKM33-TS000 - DIODE.json",
+      "bytes": 946,
+      "sha256": "739633ddf31213e95b9b07bc964f427c9de3d8d7677b92a6de4c79fb33bebd4f"
+    },
+    {
+      "path": "models/library/diode/DIM250PLM33-TL000 - DIODE.json",
+      "bytes": 950,
+      "sha256": "6edfc9239f7a3082ca8cfe2929539c8e66ebfda126e1407bc3d43b1f8bf63cfa"
+    },
+    {
+      "path": "models/library/diode/DIM250PLM33-TS000 - DIODE.json",
+      "bytes": 946,
+      "sha256": "22dfeeffa868fafbaf147a99db221005e44b5b714a648270d1626e3036763f68"
+    },
+    {
+      "path": "models/library/diode/DIM250XCM65-TS000 - DIODE.json",
+      "bytes": 1094,
+      "sha256": "1cde8cb8f003f40344292b01591ac7c3943335dec7e1321431f09fc279cf6691"
+    },
+    {
+      "path": "models/library/diode/DIM300WHS12-PA500 - DIODE.json",
+      "bytes": 1192,
+      "sha256": "d68620865a6f62ec98da80489a168378fb9baa30740416ec767456a969b9645f"
+    },
+    {
+      "path": "models/library/diode/DIM335XCM65-UF000 - DIODE.json",
+      "bytes": 1114,
+      "sha256": "98e44dcb20746b7d19c5eeeed8e7851bae273eeda7f64688697e7827f8dbfa9f"
+    },
+    {
+      "path": "models/library/diode/DIM3600ESM17-PT500 - DIODE.json",
+      "bytes": 1154,
+      "sha256": "45852588edc4efb8b368931c900ed328431f1236eefdd6fac32659b7700e2dd4"
+    },
+    {
+      "path": "models/library/diode/DIM400DCM17-A000 - DIODE - DIODE ARM.json",
+      "bytes": 1010,
+      "sha256": "48c3c271248c4ec1431faddf4cb2264732d269b14407a59497170c1f90b56e43"
+    },
+    {
+      "path": "models/library/diode/DIM400DCM17-A000 - DIODE - IGBT ARM.json",
+      "bytes": 954,
+      "sha256": "b973a1790bdb5cbf098866aa4fd5da4b23f4669211736c48438ea3e81ac4f15a"
+    },
+    {
+      "path": "models/library/diode/DIM400DDM12-A000 - DIODE.json",
+      "bytes": 989,
+      "sha256": "27422ae0f558f48be86f7447909b47d1a022442475f3303a9ed6c1a073ac60fd"
+    },
+    {
+      "path": "models/library/diode/DIM400DDM17-A000 - DIODE.json",
+      "bytes": 954,
+      "sha256": "09773f18bb419689c0a7a89a0cc494f33ea8b38947bcbe05a02f36fe50503fce"
+    },
+    {
+      "path": "models/library/diode/DIM400DDS12-A000 - DIODE.json",
+      "bytes": 989,
+      "sha256": "5b9a6e1a490733822c09ba6c09ee61334085df6ab718f4f4f3f9ebe9f13dba68"
+    },
+    {
+      "path": "models/library/diode/DIM400GCM33-F000 - DIODE.json",
+      "bytes": 1001,
+      "sha256": "4b7e70857e2a28f7a0fa9b607a66c1f328f81ee23ac90bb025555158d0401573"
+    },
+    {
+      "path": "models/library/diode/DIM400GDM33-F000 - DIODE.json",
+      "bytes": 1001,
+      "sha256": "df3190f8762cd88817e4d1e860bc8258795d7e38d572c59beb8de16e072f22d7"
+    },
+    {
+      "path": "models/library/diode/DIM400NCM17-A000 - DIODE - DIODE ARM.json",
+      "bytes": 1010,
+      "sha256": "6e7ccacb3286866df0ab0722970147f48d8e66c0fbb90c3be39ddf11d5ac8f5e"
+    },
+    {
+      "path": "models/library/diode/DIM400NCM17-A000 - DIODE - IGBT ARM.json",
+      "bytes": 954,
+      "sha256": "bb7c89a20a86ecea098ddca4b038fad5e955705311b9165bb1eeb41badc44d0d"
+    },
+    {
+      "path": "models/library/diode/DIM400NSM33-F000 - DIODE.json",
+      "bytes": 1001,
+      "sha256": "0882a279929a5bad4a3f42bcccb1883f8dcdf41780c1b0fd8f8e500b9c52db49"
+    },
+    {
+      "path": "models/library/diode/DIM400PBM17-A000 - DIODE.json",
+      "bytes": 954,
+      "sha256": "53d2af18483f9b19790c0746f673fa830519abcdde781275c1f4d5a980e23e41"
+    },
+    {
+      "path": "models/library/diode/DIM400PHM17-A000 - DIODE.json",
+      "bytes": 954,
+      "sha256": "041f39a236c5edfa4c3117840ad7ed7b4f06bb9f38c49fc092133392f7d8aa91"
+    },
+    {
+      "path": "models/library/diode/DIM400XCM33-F000 - DIODE.json",
+      "bytes": 1001,
+      "sha256": "5ee1de49540643b7174727c05aec6b24789b52a3280caf46614adbd868024bb1"
+    },
+    {
+      "path": "models/library/diode/DIM400XCM45-TS000 - DIODE.json",
+      "bytes": 1016,
+      "sha256": "0d42bc11d5faac4516b24411f0db23e74b7bb329f5e49627e98d51ac79af033a"
+    },
+    {
+      "path": "models/library/diode/DIM400XCM45-TS001 - DIODE.json",
+      "bytes": 1016,
+      "sha256": "e36a903086fc040f05783137c43dae13752920f6a4ceaf9d2718b9d034f94d12"
+    },
+    {
+      "path": "models/library/diode/DIM400XSM45-TS000 - DIODE.json",
+      "bytes": 1016,
+      "sha256": "36716332083ee2c6517a97a49172f456829320efef34dd714c55771f8753675f"
+    },
+    {
+      "path": "models/library/diode/DIM400XSM45-TS001 - DIODE.json",
+      "bytes": 1016,
+      "sha256": "6aed90741152b9e299e0ffe720da2347935246f3097f9186b8d9745c9989e4a8"
+    },
+    {
+      "path": "models/library/diode/DIM450M1HS12-PB500 - DIODE.json",
+      "bytes": 1082,
+      "sha256": "20ba652090de2f19866a1e430451fd7fbf7b3a1fadbae74bab1be6d0f580218f"
+    },
+    {
+      "path": "models/library/diode/DIM450M1HS17-PA500 - DIODE.json",
+      "bytes": 1110,
+      "sha256": "320f7e83a433571232b3e1eefdb45e95435d86765b9a7dd3718f940e4a8831b7"
+    },
+    {
+      "path": "models/library/diode/DIM500ACM65-TS000 - DIODE.json",
+      "bytes": 977,
+      "sha256": "eff09b32d0dd2d3c0ce33d7fe4b601f2c0002564baf344e092c5a047b991ebb0"
+    },
+    {
+      "path": "models/library/diode/DIM500GCM33-TL000 - DIODE.json",
+      "bytes": 1136,
+      "sha256": "404db195abb797fde6541ce2c6665366f2e4788c0ae29a24bedfbca2828d3b06"
+    },
+    {
+      "path": "models/library/diode/DIM500GCM33-TS000 - DIODE.json",
+      "bytes": 1141,
+      "sha256": "9a5edb06fd8f545f6890551857eda46d31601f6946e712c2b859a60d5f00eb3e"
+    },
+    {
+      "path": "models/library/diode/DIM500GDM33-TL000 - DIODE.json",
+      "bytes": 1136,
+      "sha256": "a739cd6971d0b932a02f336b084e80769c055f99169a140e74d67b1162f4a5a2"
+    },
+    {
+      "path": "models/library/diode/DIM500GDM33-TS000 - DIODE.json",
+      "bytes": 1141,
+      "sha256": "1017f890f78277bf3f5035c5fca72a16eeec395b0399010a89dabdd7c501f758"
+    },
+    {
+      "path": "models/library/diode/DIM500XSM65-TS000 - DIODE.json",
+      "bytes": 1093,
+      "sha256": "3bf8efd1c4b29c240d650e2cc15ccb69a8a0698848c486b8cb234269295597b6"
+    },
+    {
+      "path": "models/library/diode/DIM600DCM17-A000 - DIODE.json",
+      "bytes": 1300,
+      "sha256": "57517a3f5721cfd8c573a66407ededa779b24216e24f6f5a02499a8715443f5a"
+    },
+    {
+      "path": "models/library/diode/DIM600DDM12-A000 - DIODE.json",
+      "bytes": 1391,
+      "sha256": "cc23bf10415e0a9ade2d9a662f186976bfdea40e9a5b5215eaca05f6aa589414"
+    },
+    {
+      "path": "models/library/diode/DIM600DDM17-A000 - DIODE.json",
+      "bytes": 1306,
+      "sha256": "fa2f12400d1939f74fe3d850a4bb46e27a636efa3396a1af303a672d339bcf56"
+    },
+    {
+      "path": "models/library/diode/DIM600M1HS12-PC500 - DIODE.json",
+      "bytes": 1090,
+      "sha256": "b9f2eb77892dfafd73ad87c602d715f0b60694ba7833c62bc3ceba2cd266722c"
+    },
+    {
+      "path": "models/library/diode/DIM600M1HS17-PA500 - DIODE.json",
+      "bytes": 1238,
+      "sha256": "506cbe67edefebd9bb28d51b60fb0e808e83fd0f815dec7d526c730de709918b"
+    },
+    {
+      "path": "models/library/diode/DIM600WHS12-PC500 - DIODE.json",
+      "bytes": 1036,
+      "sha256": "46b9ae9afb30449fbc5a7c08beffdd8afdf4183c24365f8b0e9dd7f1ea30f924"
+    },
+    {
+      "path": "models/library/diode/DIM650H2HS17-PA500 - DIODE.json",
+      "bytes": 1196,
+      "sha256": "f4d222410cae83e09cbca430b5d8718a82a68dc0f2b3e60bd41655229d23e6cc"
+    },
+    {
+      "path": "models/library/diode/DIM670ACM65-UF000 - DIODE.json",
+      "bytes": 1110,
+      "sha256": "a7d0b1bf498e95de5da7ad6fc868fc26024d6b5855be23a75b1ae3d54d6c509c"
+    },
+    {
+      "path": "models/library/diode/DIM670XSM65-UF000 - DIODE.json",
+      "bytes": 1110,
+      "sha256": "bf6bc350ee633fcc68c9cdf9a421fa31850896fe8b612cb10003bdd33d0a8416"
+    },
+    {
+      "path": "models/library/diode/DIM750ASM65-TF000 - DIODE.json",
+      "bytes": 1009,
+      "sha256": "49b963bd37729078a595ebcb4af64d04cc6244fa182c6309ee52d996c2fb358f"
+    },
+    {
+      "path": "models/library/diode/DIM750ASM65-TS000 - DIODE.json",
+      "bytes": 1401,
+      "sha256": "230ebb69dc5aac1ee4e52b41e0304195483e73a288686f7afafbc36ccf17c3f8"
+    },
+    {
+      "path": "models/library/diode/DIM800DCM17-A000 - DIODE - DIODE ARM.json",
+      "bytes": 1072,
+      "sha256": "fa4d27e4b4e3c5a2612c33054cba7eedd14375abf7f7cf8d51c24a7469115eaf"
+    },
+    {
+      "path": "models/library/diode/DIM800DCM17-A000 - DIODE - IGBT ARM.json",
+      "bytes": 1095,
+      "sha256": "5e43077f85bff4a1da5afa769e698f34df0788ea04b18612291fe9861cab0628"
+    },
+    {
+      "path": "models/library/diode/DIM800DDM12-A000 - DIODE.json",
+      "bytes": 1618,
+      "sha256": "9671a9d3bd57e30c09ff41fea1b780da81ea274d99318af35027fbfd9e0f9cc6"
+    },
+    {
+      "path": "models/library/diode/DIM800DDM17-A000 - DIODE.json",
+      "bytes": 1095,
+      "sha256": "b2e6b5c4d24e4165c5a21363b26cb2dab2601b320f04f56ffd83a8d6a55d7e61"
+    },
+    {
+      "path": "models/library/diode/DIM800DDS12-A000 - DIODE.json",
+      "bytes": 1618,
+      "sha256": "d1230be274c6c01f01c348a3ce9229d368fa920bbb757b96c212920519313095"
+    },
+    {
+      "path": "models/library/diode/DIM800ECM33-F000 - DIODE.json",
+      "bytes": 997,
+      "sha256": "2a544c5dcb5450a653768588d07c96120ae99d49349c0298fac137f220972571"
+    },
+    {
+      "path": "models/library/diode/DIM800FSM12-A000 - DIODE.json",
+      "bytes": 1618,
+      "sha256": "46baf2783243fed7143f0a33495cf3888925327ace38cc7ee42b59c1b4c524a0"
+    },
+    {
+      "path": "models/library/diode/DIM800FSM17-A000 - DIODE.json",
+      "bytes": 1095,
+      "sha256": "a45a324bf9a7d7134787dd63daeaeee666e60236c4a0ed606e9fd0aa5ebb3434"
+    },
+    {
+      "path": "models/library/diode/DIM800FSS12-A000 - DIODE.json",
+      "bytes": 1618,
+      "sha256": "ca05fc95a63c01423b79c6250bc7804f3e5b3952727fb585a6a034c084eba80a"
+    },
+    {
+      "path": "models/library/diode/DIM800M1HS17-PG500 - DIODE.json",
+      "bytes": 1172,
+      "sha256": "593e26be58acbbd45d14d024d5deebd8d2ce04a6c7d80a90836b93ed2b5fd9f5"
+    },
+    {
+      "path": "models/library/diode/DIM800NCM17-A000 - DIODE - DIODE ARM.json",
+      "bytes": 1072,
+      "sha256": "857023ac0251b5c78a09ec507e7badc9a4962174f96a9b699d85f04604b1a098"
+    },
+    {
+      "path": "models/library/diode/DIM800NCM17-A000 - DIODE - IGBT ARM.json",
+      "bytes": 1095,
+      "sha256": "ea805d86f288dc1afdde534fb97499d1857067b154d9e504cd423d60a510c9fa"
+    },
+    {
+      "path": "models/library/diode/DIM800NSM12-A000 - DIODE.json",
+      "bytes": 1618,
+      "sha256": "353b1c49a2a75227c6d1406b144404c06e498e942d2984f71aec61dd94ed8985"
+    },
+    {
+      "path": "models/library/diode/DIM800NSM17-A000 - DIODE.json",
+      "bytes": 1095,
+      "sha256": "587cdef39cfc6834cf6638cfc4da71190327d51c97b836267916ae629f4b54c5"
+    },
+    {
+      "path": "models/library/diode/DIM800NSM33-F000 - DIODE.json",
+      "bytes": 997,
+      "sha256": "8b92bcb7c27249dbd3a80a2a34a4f080382c4c22b9950a26f4026d7f8d70bdf2"
+    },
+    {
+      "path": "models/library/diode/DIM800WHS12-PF500 - DIODE.json",
+      "bytes": 1216,
+      "sha256": "ead8899897866be06cb3c737620e39f46fda145f01c8f8783dbfd378d45e76b0"
+    },
+    {
+      "path": "models/library/diode/DIM800XSM33-F000 - DIODE.json",
+      "bytes": 997,
+      "sha256": "49a858d65958b148348f1de4e98b76da6dc0aa913a2b2775dc8a97928a8423f2"
+    },
+    {
+      "path": "models/library/diode/DIM800XSM45-TF000 - DIODE.json",
+      "bytes": 1107,
+      "sha256": "bd1a06f5aba8fdd30c06cab8b200e92bcb03780745f33e46841abdabf489c42c"
+    },
+    {
+      "path": "models/library/diode/DIM800XSM45-TF001 - DIODE.json",
+      "bytes": 1107,
+      "sha256": "8f44c77ce65805b569b1241b7ca727acc4da2f41843e69c0e18434cb8f61aaf5"
+    },
+    {
+      "path": "models/library/diode/DIM800XSM45-TL000 - DIODE.json",
+      "bytes": 1389,
+      "sha256": "5bfd107abe46cdb288b4648bb1cebe7485f3338defdf67fafd458507b5125934"
+    },
+    {
+      "path": "models/library/diode/DIM800XSM45-TL001 - DIODE.json",
+      "bytes": 1389,
+      "sha256": "87d7cdec18a58ca37b138ae14bf09518348f5bf4967ba34c9804427a5368b823"
+    },
+    {
+      "path": "models/library/diode/DIM800XSM45-TS000 - DIODE.json",
+      "bytes": 1059,
+      "sha256": "f352ede8bcac55a0611a702140c51eb7f30aa8a50a2cbfdaa9a2650cf537cb74"
+    },
+    {
+      "path": "models/library/diode/DIM800XSM45-TS001 - DIODE.json",
+      "bytes": 1059,
+      "sha256": "693a3dffbb04ff4bf7c157384d94403e155fc5ef07564b88f0dc4ff462a317e2"
+    },
+    {
+      "path": "models/library/diode/DIM900M1HS12-PG500 - DIODE.json",
+      "bytes": 1361,
+      "sha256": "2b78221f558ff226659f293f2b4f38e92677c0800e651adb3fb465136875c8f0"
+    },
+    {
+      "path": "models/library/diode/E3D08065G.json",
+      "bytes": 721,
+      "sha256": "50c0286fd0dd2601200da77774036339f010db0582501c129e740be1c0ff4488"
+    },
+    {
+      "path": "models/library/diode/E3D20065D.json",
+      "bytes": 752,
+      "sha256": "b16de1ccfc8d1929c6e01fc5ea594aea301713ea77763e7875092c5a6cd5fa83"
+    },
+    {
+      "path": "models/library/diode/E3D30065D.json",
+      "bytes": 787,
+      "sha256": "e5122749f45f740867c820e777dd29d5b34977282c726a9674038a0f959c50c4"
+    },
+    {
+      "path": "models/library/diode/E3M0016120K_bodydiode.json",
+      "bytes": 1114,
+      "sha256": "eb432e60e8c45a8282f42767e069fa3c483a31c6462335ae9344075bb8681a1b"
+    },
+    {
+      "path": "models/library/diode/E3M0021120J2_bodydiode.json",
+      "bytes": 1259,
+      "sha256": "f6a9ce17f23c459004793385da818452d5800b5a1b9142f26c6f2f613757d64d"
+    },
+    {
+      "path": "models/library/diode/E3M0021120K_bodydiode.json",
+      "bytes": 859,
+      "sha256": "5c118e57d9c8565fc7ef574b905e878b98967a42e7fd7922972905ec87840195"
+    },
+    {
+      "path": "models/library/diode/E3M0032120J2_bodydiode.json",
+      "bytes": 1019,
+      "sha256": "a31276f8bdadb1096997573050da9ff289e0f843cc375f873a2840b8d7d80219"
+    },
+    {
+      "path": "models/library/diode/E3M0032120K_bodydiode.json",
+      "bytes": 800,
+      "sha256": "3fdc0c1f5e3f42851642589876da6de091665c0708b1c0540e98487cb3c3e2ef"
+    },
+    {
+      "path": "models/library/diode/E3M0032120U2_bodydiode.json",
+      "bytes": 1186,
+      "sha256": "ff6d74373a9f9a56e4042b8d62e9ed757b5c60f29ac248a2aa01a79dae09e006"
+    },
+    {
+      "path": "models/library/diode/E3M0040120J2_bodydiode.json",
+      "bytes": 862,
+      "sha256": "b3e8a5c41bbcaefc9dec0956be75721ecd5cd1bb1a4f48e836109583a41687ec"
+    },
+    {
+      "path": "models/library/diode/E3M0040120K_bodydiode.json",
+      "bytes": 859,
+      "sha256": "c3a4cba7de62eafdd7a7224ac58f67cdd853b820925c173be8488a42f463f83f"
+    },
+    {
+      "path": "models/library/diode/E3M0040120U2_bodydiode.json",
+      "bytes": 862,
+      "sha256": "b2505706f68c5af4f8da511481f59ee361a93d5848af5c5f9724547e7ccbbc75"
+    },
+    {
+      "path": "models/library/diode/E3M0060065D_bodydiode.json",
+      "bytes": 657,
+      "sha256": "9fc489ed36e2a21491c73e7baaaf34b5f5e4257506d2ba76d56b78c0a02b4505"
+    },
+    {
+      "path": "models/library/diode/E3M0060065K_bodydiode.json",
+      "bytes": 657,
+      "sha256": "0dde0a1d43ce1da94f8693bf6bb76cc4777abc90764ecb13345fa883bedbcf47"
+    },
+    {
+      "path": "models/library/diode/E3M0065090D_bodydiode.json",
+      "bytes": 915,
+      "sha256": "3925867cf6ccba1c0b78ed85ade43ad9eaa217b849f107061d8f29b51ee0a042"
+    },
+    {
+      "path": "models/library/diode/E3M0075120D_bodydiode.json",
+      "bytes": 944,
+      "sha256": "79e09b2016655922ac457fc34062ad2f55b21dfb4fde7f7d9f15f29e263568b3"
+    },
+    {
+      "path": "models/library/diode/E3M0075120J2_bodydiode.json",
+      "bytes": 756,
+      "sha256": "259a80862ead8cb815f79301a9be54b298ed3cb94f09fdf76bb513295a5ab9e4"
+    },
+    {
+      "path": "models/library/diode/E3M0075120K_bodydiode.json",
+      "bytes": 944,
+      "sha256": "d67615f6471d88ebef830ff8ef659506f4bc610be178fdf24eb7e09de5234e29"
+    },
+    {
+      "path": "models/library/diode/E3M0075120U2_bodydiode.json",
+      "bytes": 756,
+      "sha256": "88d67f1b2d6052396e04ca46b2a61c3de6ded8dd98c53190ea036ce7e98d74f2"
+    },
+    {
+      "path": "models/library/diode/E3M0120090D_bodydiode.json",
+      "bytes": 841,
+      "sha256": "2c464fe9e3ec1f2d68dcd7f73b4cc5acefd5c11287e070decbc1f5fc5340492e"
+    },
+    {
+      "path": "models/library/diode/E3M0120090J_bodydiode.json",
+      "bytes": 651,
+      "sha256": "d9c1db7849167d0f15441e261c22f865fa09268534133251d5242786a563887d"
+    },
+    {
+      "path": "models/library/diode/E3M0160120D_bodydiode.json",
+      "bytes": 649,
+      "sha256": "6531cd8f6a983226d3eaec66fe366644cddbf7188632d1a4d7b185356390bdab"
+    },
+    {
+      "path": "models/library/diode/E3M0160120J2_bodydiode.json",
+      "bytes": 823,
+      "sha256": "959aa6528c2af0003a94b891a35d084445b7ad7fb9649af95b9ead5931fd3db7"
+    },
+    {
+      "path": "models/library/diode/E3M0160120K_bodydiode.json",
+      "bytes": 649,
+      "sha256": "80384f90422b1a9b94bab11453ba528ae8d84426f852d495d73ebca7b57109dd"
+    },
+    {
+      "path": "models/library/diode/E3M0280090D_bodydiode.json",
+      "bytes": 711,
+      "sha256": "745a12526a3ccd9384e726786868936deac976a0764794a896f067f70c43369c"
+    },
+    {
+      "path": "models/library/diode/E3M0900170D_bodydiode.json",
+      "bytes": 1251,
+      "sha256": "1c6a20bf8cd020065be0fb00047e74c8d968b1a4ceef081bdbda921949aefadb"
+    },
+    {
+      "path": "models/library/diode/E3M0900170J_bodydiode.json",
+      "bytes": 1251,
+      "sha256": "b08a643efaf52a9d77a82527ff5142403639657b27ed7b3ff9c4456effd901fb"
+    },
+    {
+      "path": "models/library/diode/E4D02120E.json",
+      "bytes": 700,
+      "sha256": "425b02e40dbf33424fbec4d5d75d1e1d566b1145e1c72e0b982693bc8e5cc866"
+    },
+    {
+      "path": "models/library/diode/E4D10120A.json",
+      "bytes": 715,
+      "sha256": "2bed8eed84583eef8c99bd7530293f9843b628a808a0dbd2da3c0878373d26a2"
+    },
+    {
+      "path": "models/library/diode/E4D20120A.json",
+      "bytes": 786,
+      "sha256": "472df93b7bdc2608408e3c124f749400c972e7a783216d57f0e24651122754f3"
+    },
+    {
+      "path": "models/library/diode/E4D20120D.json",
+      "bytes": 716,
+      "sha256": "e70da0fb06aa3733c63600a14b8ff5f9a813f55a6af0b74bb1e6ab8a3901d401"
+    },
+    {
+      "path": "models/library/diode/E4D20120G.json",
+      "bytes": 786,
+      "sha256": "80daff6a5b62dd5e5b3626183c4028f1febc248fcc13a8977860adb1e8c75a98"
+    },
+    {
+      "path": "models/library/diode/E4M0013120K_bodydiode.json",
+      "bytes": 1114,
+      "sha256": "7b7f0c99fdb7cb1761d0c36a5e1f054acb1f6b7cdbd5af813942c42a2c6bb6b9"
+    },
+    {
+      "path": "models/library/diode/E4M0015075J2_bodydiode.json",
+      "bytes": 969,
+      "sha256": "46a41fcb3f906e0d7f49bbcf1b05d790173974464c12472f18131f89214ffa95"
+    },
+    {
+      "path": "models/library/diode/E4M0015075K1_bodydiode.json",
+      "bytes": 969,
+      "sha256": "054051fbb96de3f23b349c4cccb81c2480b3e9b6d3c7c888aac1b328badecee6"
+    },
+    {
+      "path": "models/library/diode/E4M0025075J2_bodydiode.json",
+      "bytes": 1110,
+      "sha256": "079aadccfd15245b2ee22ee9b8132e5dbedcc150f2dff86cda1fea7ebb39884c"
+    },
+    {
+      "path": "models/library/diode/E4M0025075K1_bodydiode.json",
+      "bytes": 1110,
+      "sha256": "4b76d8c41c7c3182f88fd11b056f56a42b57cfdd114a90b4c24b18053e77a5e8"
+    },
+    {
+      "path": "models/library/diode/E4M0045075J2_bodydiode.json",
+      "bytes": 875,
+      "sha256": "75387c8fcf3beda667b2d38990e9a5263e099dcbeb059c18c690510b76eede1f"
+    },
+    {
+      "path": "models/library/diode/E4M0045075K1_bodydiode.json",
+      "bytes": 875,
+      "sha256": "bdd8a4cb6bc6448a7f7ea17107bfbc391e36ad9d899b6cc7068e9b5fd938ccb0"
+    },
+    {
+      "path": "models/library/diode/E4M0060075J2_bodydiode.json",
+      "bytes": 753,
+      "sha256": "efce822b5721ec12001d858f35bd3c0e6be0f7a611453e5e188358863f45e142"
+    },
+    {
+      "path": "models/library/diode/E4M0060075K1_bodydiode.json",
+      "bytes": 756,
+      "sha256": "d5db1d191978102ccf96d0a8906d9baab33534d7397a1080adf5dd08ed7626ac"
+    },
+    {
+      "path": "models/library/diode/E4MS008075J2_bodydiode.json",
+      "bytes": 4466,
+      "sha256": "a2c237f2889d304ca8122b5c62094e8569855a2062e2be3fde04e7735c76c83a"
+    },
+    {
+      "path": "models/library/diode/E4MS008075K1_bodydiode.json",
+      "bytes": 4466,
+      "sha256": "92b48c2509c68e4b82c370afc05c298052d5c8d773b9fcf16e206a6527e534ca"
+    },
+    {
+      "path": "models/library/diode/E4MS008075QT_bodydiode.json",
+      "bytes": 4466,
+      "sha256": "113e4c2756bea3c86a66459461b9d4a0d07bd2d56e1415357203c325ff2179e5"
+    },
+    {
+      "path": "models/library/diode/E4MS008075U2_bodydiode.json",
+      "bytes": 4466,
+      "sha256": "9ee55db101b8f7e2525c574cf3234c39bc382f09405406c932f2f92e0a25241b"
+    },
+    {
+      "path": "models/library/diode/E4MS009120K_bodydiode.json",
+      "bytes": 4582,
+      "sha256": "c55e9532ba90d2428a3e9c1128ee4a4087ffea8a8b50b386edc44c3782807a3f"
+    },
+    {
+      "path": "models/library/diode/E4MS009120QT_bodydiode.json",
+      "bytes": 4583,
+      "sha256": "66ff30cb231753c8a813060cae288ad5d87405ad49d58b9be6be38a3b9a91adc"
+    },
+    {
+      "path": "models/library/diode/E4MS015075J2_bodydiode.json",
+      "bytes": 5943,
+      "sha256": "c37981cb4d682ba748701a868524db01f0536d68ce05dc7a9768f2bd04f83dbe"
+    },
+    {
+      "path": "models/library/diode/E4MS015075K1_bodydiode.json",
+      "bytes": 5943,
+      "sha256": "252480ef52f4e14d89f2b6da719b3b1e465cfef71c1d27df0634eeef27c1aaca"
+    },
+    {
+      "path": "models/library/diode/E4MS015075QT_bodydiode.json",
+      "bytes": 5943,
+      "sha256": "a68f45733b818c0c816d63cb0e4012d9cae54aced042c663b0c686780ea9450f"
+    },
+    {
+      "path": "models/library/diode/E4MS015075U2_bodydiode.json",
+      "bytes": 5943,
+      "sha256": "17a8dd377445ec2ef148b6221a5bd545b9d2a889106d783c743f86026c48f572"
+    },
+    {
+      "path": "models/library/diode/E4MS018120QT_bodydiode.json",
+      "bytes": 3791,
+      "sha256": "8cee5f34b998a19b1dcd7d6f6896e199698828241b466a82852b042a3d7e125b"
+    },
+    {
+      "path": "models/library/diode/E4MS025075J2_bodydiode.json",
+      "bytes": 6105,
+      "sha256": "911a7d0e39580eec199e8f965c49c28953d85f19ea12b82fc5e03b6180c58721"
+    },
+    {
+      "path": "models/library/diode/E4MS025075K1_bodydiode.json",
+      "bytes": 6105,
+      "sha256": "8becc9392cf00231229b07048212f562724f2b28c0bb72c8dddb87bedd49dc72"
+    },
+    {
+      "path": "models/library/diode/E4MS025075U2_bodydiode.json",
+      "bytes": 6105,
+      "sha256": "8c7442a20948bfdfc6a421062e5892b0d6481bf822e11b6d99625339a3ab10e8"
+    },
+    {
+      "path": "models/library/diode/E4MS025120J2_bodydiode.json",
+      "bytes": 4126,
+      "sha256": "da1d4a020bd96a50501ac5fb1fe7b89f32b13b0c6075ce13000a2e48c19efa07"
+    },
+    {
+      "path": "models/library/diode/E4MS025120K_bodydiode.json",
+      "bytes": 4125,
+      "sha256": "ea97bde40213211856c66b9231104f1e60120e38ae54da753c5751730c20a817"
+    },
+    {
+      "path": "models/library/diode/E4MS025120QT_bodydiode.json",
+      "bytes": 5565,
+      "sha256": "da66d6dbd887f464ba927987746b1b8ef1a20d8ba84c69b3d5d826b7ddc6eef9"
+    },
+    {
+      "path": "models/library/diode/E4MS025120U2_bodydiode.json",
+      "bytes": 4126,
+      "sha256": "847b3fd74ecb9d078ed6fb39d46175942f85c174f65c0e1022830def8ee3d14b"
+    },
+    {
+      "path": "models/library/diode/E4MS036120J2_bodydiode.json",
+      "bytes": 4735,
+      "sha256": "116a961506e20fe71a43cdd9586f15335bf34f3a8d5d2498a544b10ba8bd35ee"
+    },
+    {
+      "path": "models/library/diode/E4MS036120K_bodydiode.json",
+      "bytes": 4734,
+      "sha256": "fdfa8ccea1c8341448d2cb31b49bd3e0663191316779a03db5e2da69e7868467"
+    },
+    {
+      "path": "models/library/diode/E4MS036120U2_bodydiode.json",
+      "bytes": 4735,
+      "sha256": "af44690a51b9fa4ef057ae325118b23f27365a162fb9c89acc8d3abfce29487c"
+    },
+    {
+      "path": "models/library/diode/E4MS045075J2_bodydiode.json",
+      "bytes": 5987,
+      "sha256": "25ded109392c574e6e0ded22f94d50714f0d43a457fa4803f417b8913067ce1d"
+    },
+    {
+      "path": "models/library/diode/E4MS045075K1_bodydiode.json",
+      "bytes": 5987,
+      "sha256": "31e2e2f7ad0181e22e52690c4e2c04cfad72e5c79e2e5e0df24ce9d19afddb1e"
+    },
+    {
+      "path": "models/library/diode/E4MS045075U2_bodydiode.json",
+      "bytes": 5987,
+      "sha256": "9819a98514af6af33d2841162c8f594494ba27a473741a44a235204ac6d056f7"
+    },
+    {
+      "path": "models/library/diode/E4MS047120J2_bodydiode.json",
+      "bytes": 3789,
+      "sha256": "70167cd9c6428ded2a8539c9167936b4ac6e4d50a231c1a69f4883e50ef91c48"
+    },
+    {
+      "path": "models/library/diode/E4MS047120K_bodydiode.json",
+      "bytes": 3788,
+      "sha256": "63cf085658e9e5ad076a7833e43cc5e71d7e554c1cd835cf38277111311e9868"
+    },
+    {
+      "path": "models/library/diode/E4MS047120U2_bodydiode.json",
+      "bytes": 3789,
+      "sha256": "9de01a1a110ed70933c577fb884f995a709d7804330015d7aac847c958ee77e1"
+    },
+    {
+      "path": "models/library/diode/E4MS065120J2_bodydiode.json",
+      "bytes": 3840,
+      "sha256": "1a44c1b92cf22736228e54c9f03655be6daa9c62f0e052d2854a0e6e64a0125e"
+    },
+    {
+      "path": "models/library/diode/E4MS065120K_bodydiode.json",
+      "bytes": 3839,
+      "sha256": "e0e9e55fd417c73e257369391c70adddc5e3c10bce1210bc70246870345a057f"
+    },
+    {
+      "path": "models/library/diode/E4MS065120U2_bodydiode.json",
+      "bytes": 3841,
+      "sha256": "fae509a173761e95542a8bae20a21ddfa1500f02dccff39ae8dc5b48c04d5e09"
+    },
+    {
+      "path": "models/library/diode/E4MS080120J2_bodydiode.json",
+      "bytes": 5144,
+      "sha256": "d2fbf04a6638e3f3aadd3fbb92e9364c0ca2c45ffe5798b9f5a0f77c288af7a0"
+    },
+    {
+      "path": "models/library/diode/E4MS080120K_bodydiode.json",
+      "bytes": 5143,
+      "sha256": "0517f4d2ffff97e67bd467841819b403ae200485a1b35412e8188295abf25ddd"
+    },
+    {
+      "path": "models/library/diode/E4MS080120QT_bodydiode.json",
+      "bytes": 5144,
+      "sha256": "eb30ce395a0c27fe9117c2f2363ea4f88dffe9ba916f88713091cba4dffe3b00"
+    },
+    {
+      "path": "models/library/diode/E4MS080120U2_bodydiode.json",
+      "bytes": 5144,
+      "sha256": "648f35d606eb356d1d69082e37df8567777c7681d85805392de64c2515d4d364"
+    },
+    {
+      "path": "models/library/diode/E6D10065A.json",
+      "bytes": 1049,
+      "sha256": "5c3bbf09b54240d863f11ecb510c5da9847763c63f368c81b2650ed754004ce9"
+    },
+    {
+      "path": "models/library/diode/E6D10065G.json",
+      "bytes": 1049,
+      "sha256": "d19bee22357f48186eb1e11c25c4bfbba8f0ef26176e2c8b911b03fe11507e30"
+    },
+    {
+      "path": "models/library/diode/E6D16065A.json",
+      "bytes": 1101,
+      "sha256": "d3e29f5c0b89b1be9dbabd542bf047a052f69234bd78b56b959e4c8b956776ba"
+    },
+    {
+      "path": "models/library/diode/E6D16065D1.json",
+      "bytes": 1197,
+      "sha256": "3b9f9afac7a81dc76be70b103e7aa998063b56a81ee06eb195d47129e46b3ccb"
+    },
+    {
+      "path": "models/library/diode/E6D16065G.json",
+      "bytes": 1196,
+      "sha256": "85bb94068687477a4ef1a3f2dee54a7e3058cbe1b02bd0280053d4eb3fa2b756"
+    },
+    {
+      "path": "models/library/diode/E6D16065H.json",
+      "bytes": 1196,
+      "sha256": "d2efc1732dd22845c1f44a45276bfebd1a17bf42c4713e68b15ac6ff8a333ebf"
+    },
+    {
+      "path": "models/library/diode/E6D20065A.json",
+      "bytes": 1294,
+      "sha256": "bc7aa2684d10f12a9f037d607d365f1013cb65d3d17fae67410e535e93788a1f"
+    },
+    {
+      "path": "models/library/diode/E6D20065D.json",
+      "bytes": 1049,
+      "sha256": "96e75ae743aae7646cfcba096673111136fd9ac17420cbb35e0f43b3562fede1"
+    },
+    {
+      "path": "models/library/diode/E6D20065G.json",
+      "bytes": 1294,
+      "sha256": "6363b44859a530f4e79169638456ac1b7a50bda75060121effd834fd31e68f71"
+    },
+    {
+      "path": "models/library/diode/E6D20065H.json",
+      "bytes": 1294,
+      "sha256": "ac602fbbd1292d5bb997edb2572be036504e7c8a3b2386182c788e9045ae1a58"
+    },
+    {
+      "path": "models/library/diode/E6D30065A.json",
+      "bytes": 1251,
+      "sha256": "7fc5464ff7bb6ef26a6875f85e73775605e1f8d7caf4103d1daaa161aba20e95"
+    },
+    {
+      "path": "models/library/diode/E6D30065D.json",
+      "bytes": 1196,
+      "sha256": "8eca637e19a39b60ce1a99b51a4aa0ea6fc25444564e9dabf2f5058ded6d3916"
+    },
+    {
+      "path": "models/library/diode/E6D30065G.json",
+      "bytes": 1248,
+      "sha256": "abbce4373b9d29949cb33e1bcf5a049741b7c4ba0a660de21f1e6cde561791ae"
+    },
+    {
+      "path": "models/library/diode/E6D30065H.json",
+      "bytes": 1248,
+      "sha256": "5b4c522da1208bf156b460b608de069e515c5bf47e492cb2918e6901c7b1c4c3"
+    },
+    {
+      "path": "models/library/diode/E6D40065A.json",
+      "bytes": 1351,
+      "sha256": "02331869471e1ec58f3a33f40ddb68d8ed9fd0a5b18114aa9e3dc814629a1fb5"
+    },
+    {
+      "path": "models/library/diode/E6D40065D.json",
+      "bytes": 1294,
+      "sha256": "0b10afa4f615112c7493acbe9ecd11347d6730d083e8e75d68a9f2553cdcd4f1"
+    },
+    {
+      "path": "models/library/diode/E6D40065G.json",
+      "bytes": 1351,
+      "sha256": "9e6b25bd4d3b41e8fced8e8fe7ad44fdb9c80f14728a639687d7e57e3ed83a71"
+    },
+    {
+      "path": "models/library/diode/E6D40065H.json",
+      "bytes": 1351,
+      "sha256": "fb88aa7cca82c88676fbe483fd68369ed42db1bea0cd927369eb8eacc5e5e4ca"
+    },
+    {
+      "path": "models/library/diode/ECB1R6M12YM4_bodydiode.json",
+      "bytes": 7120,
+      "sha256": "f7be78f96b3aa64dea44639f33d6b83b6598aa6a5d19f8af45c692a47c249b72"
+    },
+    {
+      "path": "models/library/diode/ECB2R1M12YM3_bodydiode.json",
+      "bytes": 5620,
+      "sha256": "19d591875220128cc3580ab9e3d4243354e363333069774d125659b9d36a58b8"
+    },
+    {
+      "path": "models/library/diode/ECB2R1M12YM4_bodydiode.json",
+      "bytes": 5018,
+      "sha256": "f60624e7eaf76433c0cdafa30d5ba0b68665ff55736d6f81be5ea46123522fcd"
+    },
+    {
+      "path": "models/library/diode/ECB2R8M12YM3_bodydiode.json",
+      "bytes": 7013,
+      "sha256": "d14af2638cdfa524800b3b52358f3f7f3405710d29826bcb70ccd57f4bb34fb4"
+    },
+    {
+      "path": "models/library/diode/ECB3R1M12YM4_bodydiode.json",
+      "bytes": 5165,
+      "sha256": "ecf9f38931259fa0114163ae4de6a107c39805e279d43d4d0a2e59050ece451c"
+    },
+    {
+      "path": "models/library/diode/ECB4R3M12YM3_bodydiode.json",
+      "bytes": 5840,
+      "sha256": "c4283a495c99e7d04afd0e86ea263378170b66ae1cf06d8d6ef0cb65606ae1b1"
+    },
+    {
+      "path": "models/library/diode/WAB300M12BM3_bodydiode.json",
+      "bytes": 1008,
+      "sha256": "91e0897ced4db7e8264af5fbc088d729a91610faa7b818e34d22f9717974e0c2"
+    },
+    {
+      "path": "models/library/diode/WAB400M12BM3_bodydiode.json",
+      "bytes": 1044,
+      "sha256": "871cedd40a59b3be08b42801d93b1876a646190a163f2ff2b7e1348832a62022"
+    },
+    {
+      "path": "models/library/igbt/DIM1000ACM33-TF001.json",
+      "bytes": 1211,
+      "sha256": "23fccd8a83a5dd91e184099397993373c76fc0f31441b227672d9976eb6c1e3d"
+    },
+    {
+      "path": "models/library/igbt/DIM1000ACM33-TL001.json",
+      "bytes": 1240,
+      "sha256": "15fb8d0f410890c9662041a6bd91691720876961dd134d0150c1e7b1f53143dd"
+    },
+    {
+      "path": "models/library/igbt/DIM1000ASM65-UF000.json",
+      "bytes": 1360,
+      "sha256": "dfebf08e7dc44ea5cef69b05745e2d617683db9e50d04c2f3ee09225112a144a"
+    },
+    {
+      "path": "models/library/igbt/DIM1000ECM33-TF000.json",
+      "bytes": 1211,
+      "sha256": "23fccd8a83a5dd91e184099397993373c76fc0f31441b227672d9976eb6c1e3d"
+    },
+    {
+      "path": "models/library/igbt/DIM1000ECM33-TL000.json",
+      "bytes": 1240,
+      "sha256": "cf0f58de5ce3f01f4b01a0e5548db7377ebdec0b26c75b69980f0c3d3d9701b7"
+    },
+    {
+      "path": "models/library/igbt/DIM1000ECM33-TS000.json",
+      "bytes": 1224,
+      "sha256": "3e00bcdef27595402472bcb586a61a2264cb140f9e07be2cea765ad66ea58410"
+    },
+    {
+      "path": "models/library/igbt/DIM1000H1HS17-PA500.json",
+      "bytes": 1275,
+      "sha256": "a1974f76c946b29cb39407feb45501debd2b6378c15d059e57f1c07857b7fc6d"
+    },
+    {
+      "path": "models/library/igbt/DIM1000NSM33-TF000.json",
+      "bytes": 1211,
+      "sha256": "23fccd8a83a5dd91e184099397993373c76fc0f31441b227672d9976eb6c1e3d"
+    },
+    {
+      "path": "models/library/igbt/DIM1000NSM33-TL000.json",
+      "bytes": 1240,
+      "sha256": "363ca1ede383e4531f59358cadbb97e10c33b412ff44b228ab617161f740eb4f"
+    },
+    {
+      "path": "models/library/igbt/DIM1000NSM33-TS000.json",
+      "bytes": 1224,
+      "sha256": "aadf4c380cdadddb4b2967e229bd3935ec7e19b6eb87de1e48c62437e15a6eac"
+    },
+    {
+      "path": "models/library/igbt/DIM1000XSM33-TF000.json",
+      "bytes": 1211,
+      "sha256": "23fccd8a83a5dd91e184099397993373c76fc0f31441b227672d9976eb6c1e3d"
+    },
+    {
+      "path": "models/library/igbt/DIM1000XSM33-TF001.json",
+      "bytes": 1211,
+      "sha256": "23fccd8a83a5dd91e184099397993373c76fc0f31441b227672d9976eb6c1e3d"
+    },
+    {
+      "path": "models/library/igbt/DIM1000XSM33-TL001.json",
+      "bytes": 1240,
+      "sha256": "caacabfd109ade096a6ffb5bb76a38b6a18b63ca48dc9ae437adafaec2777bcf"
+    },
+    {
+      "path": "models/library/igbt/DIM1000XSM33-TS001.json",
+      "bytes": 1224,
+      "sha256": "4ddea24b631ea42cba9c9bd06c29109ded42d21cb1abd5482ea0e5faf6e0ee59"
+    },
+    {
+      "path": "models/library/igbt/DIM100PHM33-F000.json",
+      "bytes": 812,
+      "sha256": "6f4a05c9dc6bf06ab90418af24f31cbc3c0604b4a1b0c47b5d21c01c662006b4"
+    },
+    {
+      "path": "models/library/igbt/DIM1200ASM45-PR501.json",
+      "bytes": 1500,
+      "sha256": "63c010ad37f83fe96160600d02a5826f69df392d63b0330a7e46e037cf91b05a"
+    },
+    {
+      "path": "models/library/igbt/DIM1200ASM45-TL000.json",
+      "bytes": 1867,
+      "sha256": "ba445e628d2b779dceb291662263567a2304fc7efa84a61d274019316fff4199"
+    },
+    {
+      "path": "models/library/igbt/DIM1200ASM45-TL001.json",
+      "bytes": 1867,
+      "sha256": "69d94a653c4b8c2bc6fab7c3d500f33a7c610e63a0e7c526e9f5e2ded3da4190"
+    },
+    {
+      "path": "models/library/igbt/DIM1200ASM45-TS000.json",
+      "bytes": 1914,
+      "sha256": "8e3e7a6b14860aaf6c1cdb5ddbd6bf461838b8ba5c4cad74b5b6c7bb900e52fa"
+    },
+    {
+      "path": "models/library/igbt/DIM1200ASM45-TS001.json",
+      "bytes": 1914,
+      "sha256": "cf0f7571cebe80233391552e7f5f18ca413d8ebeb069ed7cd91932d47a3c6072"
+    },
+    {
+      "path": "models/library/igbt/DIM1200ESM33-F000.json",
+      "bytes": 1286,
+      "sha256": "aca453e5322d13ac60ab3e26f029a70d985eaa277197571e3eb7b589d3fb4e44"
+    },
+    {
+      "path": "models/library/igbt/DIM1200FSM12-A000.json",
+      "bytes": 1371,
+      "sha256": "4f489b20b510ad6aa38adb81a8da8fef57eb336611cd40c5253aae8174b310a3"
+    },
+    {
+      "path": "models/library/igbt/DIM1200FSM17-A000.json",
+      "bytes": 1104,
+      "sha256": "246495a71208e6bd554d5c8f9e194025412dbd52e6fedc45b610677605351da2"
+    },
+    {
+      "path": "models/library/igbt/DIM1200FSS12-A000.json",
+      "bytes": 1371,
+      "sha256": "bfb20d74a527d848a15de6fbbcbcec10de467c39195206eb515a365056cda416"
+    },
+    {
+      "path": "models/library/igbt/DIM1200NSM12-A000.json",
+      "bytes": 1371,
+      "sha256": "cd87b8b40d31c1d8ced7ca9d56c23b7d4b6263981f260f483c5dbe61516f9a68"
+    },
+    {
+      "path": "models/library/igbt/DIM1200NSM17-A000.json",
+      "bytes": 1354,
+      "sha256": "9f637f612eeea7e0cabb3ff5e0a363cbf3d986ab0432939c12b2a51c167622ff"
+    },
+    {
+      "path": "models/library/igbt/DIM125PHM33-TF000.json",
+      "bytes": 1489,
+      "sha256": "85369ade4c0e33e146f70e2e96cce3690c446dd6aaedb0c5eef983050a8055f9"
+    },
+    {
+      "path": "models/library/igbt/DIM125PHM33-TL000.json",
+      "bytes": 1503,
+      "sha256": "0a1aba6d3eff5c2f999138fb368560f5c57388e36f1fdbc02c61764f521d75c7"
+    },
+    {
+      "path": "models/library/igbt/DIM125PHM33-TS000.json",
+      "bytes": 1417,
+      "sha256": "4d0df80a28ca158bda00c0f77e3e83c75b82a698e657f2119638de9c625925f2"
+    },
+    {
+      "path": "models/library/igbt/DIM1400H1HS12-PA500.json",
+      "bytes": 1360,
+      "sha256": "e0595f7a52d8241831a89b5cf0ad334b6616f43b17e241240b47ff66b4b004f7"
+    },
+    {
+      "path": "models/library/igbt/DIM1500ASM33-TF001.json",
+      "bytes": 1583,
+      "sha256": "8cdd8d257791ccd43c14608181a7118d3d4c6bc9d025af393e1d464c4e433ec3"
+    },
+    {
+      "path": "models/library/igbt/DIM1500ASM33-TL001.json",
+      "bytes": 1569,
+      "sha256": "3eddec00c7158f80d9ca08f4945370453f0009860dfb583add886a8c403c9401"
+    },
+    {
+      "path": "models/library/igbt/DIM1500ASM33-TS001.json",
+      "bytes": 1572,
+      "sha256": "ec5258438fc5918b3b9e036da2c8947d9abe45d396e552ec82480085fcc0e4e0"
+    },
+    {
+      "path": "models/library/igbt/DIM1500ESM33-MS000.json",
+      "bytes": 2141,
+      "sha256": "1d058de7c4bdb31ff16a750b80ffc30e2ef96f66ec8cc6dafca553d4bea71d8a"
+    },
+    {
+      "path": "models/library/igbt/DIM1500ESM33-RR500.json",
+      "bytes": 1129,
+      "sha256": "ee9f1e83071dd9f17f91e21229326ab3a987cda3c730b80da2553546ff8e7c4c"
+    },
+    {
+      "path": "models/library/igbt/DIM1500ESM33-TF000.json",
+      "bytes": 1583,
+      "sha256": "33e00155b1c4689a2c6a214a7f2ffd9e4ba7ef565de412297dc437c582d1f0e8"
+    },
+    {
+      "path": "models/library/igbt/DIM1500ESM33-TL000.json",
+      "bytes": 2063,
+      "sha256": "a7ee1d83eac44100f52ac6ff747c521ba419956a1c997bdb79d12faabbb5719d"
+    },
+    {
+      "path": "models/library/igbt/DIM1500ESM33-TS000.json",
+      "bytes": 2126,
+      "sha256": "dd481efd29f427913e71dd61cb0c8a3edeadd075b4a7cf721a7090ce0a60dcdd"
+    },
+    {
+      "path": "models/library/igbt/DIM1600ECM17-A000.json",
+      "bytes": 1673,
+      "sha256": "20f22373c7c84d195d3bae57d51eef7f58c9eab7d4ee1ca329c3793bab235309"
+    },
+    {
+      "path": "models/library/igbt/DIM1600FSM12-A000.json",
+      "bytes": 1523,
+      "sha256": "926fe4b1a6fd6e67a15bb755fc580742ed6fc1ef897bc5f4806f93ede0c4547c"
+    },
+    {
+      "path": "models/library/igbt/DIM1600FSM17-A000.json",
+      "bytes": 1673,
+      "sha256": "38f079b0b8d49f95f8f44ba30a9d2211de0a1a705cfc0c6819b6203d4752a34f"
+    },
+    {
+      "path": "models/library/igbt/DIM1600FSS12-A000.json",
+      "bytes": 1523,
+      "sha256": "bbb7e7dffb4d8fd495ec93ba33f67adc950509b4f311f19fc0e4d8379b44f27a"
+    },
+    {
+      "path": "models/library/igbt/DIM1600NSM12-A000.json",
+      "bytes": 1523,
+      "sha256": "08e0cd92540bb2f6ccb36724d5e9e3327e867eb03d1b56148d86979da3e22ba1"
+    },
+    {
+      "path": "models/library/igbt/DIM1600NSM17-A000.json",
+      "bytes": 1673,
+      "sha256": "39202f21222e0ca3ac9f257bf8fbcde240eaa22b0e06cc93fc5d6b382afb126f"
+    },
+    {
+      "path": "models/library/igbt/DIM1800ESM12-A000.json",
+      "bytes": 1825,
+      "sha256": "8e2acb0ee5f681508dc24202ce1aeb6d3f7fd736332f85d70783f4cd3db2e73f"
+    },
+    {
+      "path": "models/library/igbt/DIM1800ESS12-A000.json",
+      "bytes": 1825,
+      "sha256": "d038837c946fb6e9a222824aa8fb2cc80ecd520d5bfd7b17855e180603a66a2a"
+    },
+    {
+      "path": "models/library/igbt/DIM1800H1HS17-PH500.json",
+      "bytes": 2135,
+      "sha256": "6be792628cdbe092c94e49d7d856176327a01497bfa56ea282178651cf7732df"
+    },
+    {
+      "path": "models/library/igbt/DIM200PHM33-F000.json",
+      "bytes": 891,
+      "sha256": "9b94691e5f9198ff9f72ce44578fd48522d8128a173c48949dd884b349bce161"
+    },
+    {
+      "path": "models/library/igbt/DIM200PKM33-F000.json",
+      "bytes": 891,
+      "sha256": "b71df35ba3850b52b5ce6b0f08513540149b0ecb10a0df75c6c56ff55e2460d9"
+    },
+    {
+      "path": "models/library/igbt/DIM200PLM33-F000.json",
+      "bytes": 891,
+      "sha256": "d8c3ea5061b9d4251f7371ec7af4ced3c7389858396f810b6d6e40511d552148"
+    },
+    {
+      "path": "models/library/igbt/DIM2400ESM12-A000.json",
+      "bytes": 2190,
+      "sha256": "4f8f2ed462bb1dec296bd3ad96b6637435947ff303f42f57c03ad44374db74ff"
+    },
+    {
+      "path": "models/library/igbt/DIM2400ESM17-A000.json",
+      "bytes": 2026,
+      "sha256": "f8268d2553b03c43f29e22485bdd82608f47c251ddd5f2f275fd104df3441a4c"
+    },
+    {
+      "path": "models/library/igbt/DIM2400ESS12-A000.json",
+      "bytes": 2190,
+      "sha256": "cf68947ec30f0271c3d537f38fc2ad7468b4aa776db667a4dde54cdcfe9058f7"
+    },
+    {
+      "path": "models/library/igbt/DIM2400NSM17-PT500.json",
+      "bytes": 1193,
+      "sha256": "c1e0e4cc962cf710288bed2935847b95062668bd3bd60ec02919fbec0822fed0"
+    },
+    {
+      "path": "models/library/igbt/DIM250KHM33-TF001.json",
+      "bytes": 1479,
+      "sha256": "00934d087e810ef1a89a1ad3c793e9e41f8fba8f4b6bffb87ab2086278b0512f"
+    },
+    {
+      "path": "models/library/igbt/DIM250KHM33-TL001.json",
+      "bytes": 1444,
+      "sha256": "59a82193eb0336af60d2dd3d225ce27db61b349cd26c6ddbce5bf8d30019da6f"
+    },
+    {
+      "path": "models/library/igbt/DIM250PHM33-TL000.json",
+      "bytes": 991,
+      "sha256": "12d3cb4afe36f05c0b9858ed13c83bdbbf1244ac931d499f13d9fd232e18b188"
+    },
+    {
+      "path": "models/library/igbt/DIM250PHM33-TS000.json",
+      "bytes": 979,
+      "sha256": "cc01310a66e01ad58ed46f286a3f32db033ff4c740c11f583e501522afb76e3e"
+    },
+    {
+      "path": "models/library/igbt/DIM250PKM33-TL000.json",
+      "bytes": 991,
+      "sha256": "0b8c8315ef80924a6274db562eb82c52ad05dbc0124ac90867f110eedec6c880"
+    },
+    {
+      "path": "models/library/igbt/DIM250PKM33-TS000.json",
+      "bytes": 979,
+      "sha256": "3ae2b47dc2b4593bc0b5f7c2fda228f292ee677940162350b5777175a8e9efd3"
+    },
+    {
+      "path": "models/library/igbt/DIM250PLM33-TL000.json",
+      "bytes": 991,
+      "sha256": "6528b9706c6b1fa95cb4f4d898602a7fab782b5f869f7e441161bbdb61b7a443"
+    },
+    {
+      "path": "models/library/igbt/DIM250PLM33-TS000.json",
+      "bytes": 979,
+      "sha256": "badc40883389d92cb443f127901bd3a5cc0836992849cbcd5639cb3a2b24aa93"
+    },
+    {
+      "path": "models/library/igbt/DIM250XCM65-TS000.json",
+      "bytes": 1126,
+      "sha256": "74b535291d1333fea43d949938d9a8e8bacb5ed37095129e5c7907ec6b3c7ed6"
+    },
+    {
+      "path": "models/library/igbt/DIM300WHS12-PA500.json",
+      "bytes": 1308,
+      "sha256": "fbc273600379c47a6bf6ba7426fb022d392b08614504b35ca3b48ab828807aaf"
+    },
+    {
+      "path": "models/library/igbt/DIM335XCM65-UF000.json",
+      "bytes": 1144,
+      "sha256": "6992a6656ac475baf2e24b01ad3d3b80771ebfe19f637d0a761e966b0031e90f"
+    },
+    {
+      "path": "models/library/igbt/DIM3600ESM17-PT500.json",
+      "bytes": 1287,
+      "sha256": "cd67b9a6be756940916c6d7febcaeaf46dcdba69569f794ce7402b858b0e31c7"
+    },
+    {
+      "path": "models/library/igbt/DIM400DCM17-A000.json",
+      "bytes": 1039,
+      "sha256": "b13826ae8adab79c56e89ace6718fa919d986003f3b491620dbfb14147b08aad"
+    },
+    {
+      "path": "models/library/igbt/DIM400DDM12-A000.json",
+      "bytes": 1053,
+      "sha256": "312cf7fae76b50d8f753e2fcbbb9fc10b9bd51da44a5a5c49de5b55e8cef157b"
+    },
+    {
+      "path": "models/library/igbt/DIM400DDM17-A000.json",
+      "bytes": 1039,
+      "sha256": "a4849302389bacc24f8a3564cf8221ec5618d9d24a8c4ae857aa474d9c407c34"
+    },
+    {
+      "path": "models/library/igbt/DIM400DDS12-A000.json",
+      "bytes": 1053,
+      "sha256": "e27c26211ae467d7d8fd9f3df27112d318f88a52ec30551de39b6b101d445896"
+    },
+    {
+      "path": "models/library/igbt/DIM400GCM33-F000.json",
+      "bytes": 1040,
+      "sha256": "93c4787cc7e1edffaceab164f6f940778f823f1c432383e64ab7b7c4f90135a1"
+    },
+    {
+      "path": "models/library/igbt/DIM400GDM33-F000.json",
+      "bytes": 1040,
+      "sha256": "9e2fcc5e614bdf2759976b3a34b642f5a0ddcced46b64bdeb119425e4dbc7261"
+    },
+    {
+      "path": "models/library/igbt/DIM400NCM17-A000.json",
+      "bytes": 1039,
+      "sha256": "fba223f9dfbb23540d2e8f2b23f6558bf928a60b0d516632add42a7033a65ea9"
+    },
+    {
+      "path": "models/library/igbt/DIM400NSM33-F000.json",
+      "bytes": 1040,
+      "sha256": "84a839b9c03ff8410b6a8b243c4f362f7eb9b9e771ca4cad865feefc2c44b0be"
+    },
+    {
+      "path": "models/library/igbt/DIM400PBM17-A000.json",
+      "bytes": 1039,
+      "sha256": "60a3612751fe6afb911982d93bed4c9bf853f673cf81dafa97bf68b62b72bd3f"
+    },
+    {
+      "path": "models/library/igbt/DIM400PHM17-A000.json",
+      "bytes": 1039,
+      "sha256": "6aef81de0115f532d63beae3370ce564d43405bd1e468bfae90234012aafa840"
+    },
+    {
+      "path": "models/library/igbt/DIM400XCM33-F000.json",
+      "bytes": 1040,
+      "sha256": "af18ed0773b3a25515e16d5deb1d69c9fc0d0b0d53f5deb5fbc57d5eb1a91bae"
+    },
+    {
+      "path": "models/library/igbt/DIM400XCM45-TS000.json",
+      "bytes": 1053,
+      "sha256": "13488de8ed1b1d95ef6963af7386e8e0e8f2941faa5a71c4fdb12f0fa33d6686"
+    },
+    {
+      "path": "models/library/igbt/DIM400XCM45-TS001.json",
+      "bytes": 1053,
+      "sha256": "75c9ca2c49bf3b5e854e841ff8218d46c3f7b08d56bcc292232333a283cdeb7d"
+    },
+    {
+      "path": "models/library/igbt/DIM400XSM45-TS000.json",
+      "bytes": 1053,
+      "sha256": "d1f33ef9da089da5c61b22cf2ae4ac7cb4d3922e713acec8efa6d99e4986f041"
+    },
+    {
+      "path": "models/library/igbt/DIM400XSM45-TS001.json",
+      "bytes": 1053,
+      "sha256": "c8fa924022bc7164abd73f0ce83cad30bd8853621e633d7766849e5699ea8ce1"
+    },
+    {
+      "path": "models/library/igbt/DIM450M1HS12-PB500.json",
+      "bytes": 1213,
+      "sha256": "331b37974bb2e3f64428e9e14239700cd685800d4d3402017c028d7676bd3e83"
+    },
+    {
+      "path": "models/library/igbt/DIM450M1HS17-PA500.json",
+      "bytes": 1238,
+      "sha256": "24206e06df2a91e5ed730ac9ca6b5da484500f41af2b792e0345481d2bb790c3"
+    },
+    {
+      "path": "models/library/igbt/DIM500ACM65-TS000.json",
+      "bytes": 1005,
+      "sha256": "3ef79bbd5d57008ba6ce98a3ac3ac6be3ce5bb1e3aaca34b750dad6c1012b2bb"
+    },
+    {
+      "path": "models/library/igbt/DIM500GCM33-TL000.json",
+      "bytes": 1202,
+      "sha256": "6899790757addc1a2f4923b3aa3045edf2a6183f21a6e9629757b8f68ecfe3e2"
+    },
+    {
+      "path": "models/library/igbt/DIM500GCM33-TS000.json",
+      "bytes": 1214,
+      "sha256": "02cb2993c3ddad8400472a908690f65f35230a4c67bd895fccba043981e3f8c9"
+    },
+    {
+      "path": "models/library/igbt/DIM500GDM33-TL000.json",
+      "bytes": 1202,
+      "sha256": "168037d63d30c4110362279d08b9ee88eecfe85caedd11b081abd7aa809abfcb"
+    },
+    {
+      "path": "models/library/igbt/DIM500GDM33-TS000.json",
+      "bytes": 1214,
+      "sha256": "a2641d8439f26e9461658a802fe01ee5f86a2e06f3d2c9d9430bb8c3f443f14b"
+    },
+    {
+      "path": "models/library/igbt/DIM500XSM65-TS000.json",
+      "bytes": 1121,
+      "sha256": "0b832730f75e33164613d8528d711cea75256daa35225e35267cf64d1da9504a"
+    },
+    {
+      "path": "models/library/igbt/DIM600DCM17-A000.json",
+      "bytes": 1383,
+      "sha256": "dd77a4daf6db4b7be66fbb6bc4d061728b0b02f116337bad14f80d18c4a4d570"
+    },
+    {
+      "path": "models/library/igbt/DIM600DDM12-A000.json",
+      "bytes": 1438,
+      "sha256": "20aed700be7917be0878b7ac7957bb60d0f356289ae08220833ba973eb145175"
+    },
+    {
+      "path": "models/library/igbt/DIM600DDM17-A000.json",
+      "bytes": 1393,
+      "sha256": "f19f4091fc83486f648814310db06119dd94288111f0d3e8cd2574c0e59b4795"
+    },
+    {
+      "path": "models/library/igbt/DIM600M1HS12-PC500.json",
+      "bytes": 1091,
+      "sha256": "806c89cc555aca395f8d2e251cd85f23578bdf7eaf1443bce66c0fa4af95f64e"
+    },
+    {
+      "path": "models/library/igbt/DIM600M1HS17-PA500.json",
+      "bytes": 1353,
+      "sha256": "4baf46dd1002cbc2bdd7b82f61b79f65bb43cc82745592e463bd37c2002740ad"
+    },
+    {
+      "path": "models/library/igbt/DIM600WHS12-PC500.json",
+      "bytes": 1044,
+      "sha256": "f4d44e7cadf32eec320e97149ca6fc2f421f6365cca67d7cd6130bb0998aacac"
+    },
+    {
+      "path": "models/library/igbt/DIM650H2HS17-PA500.json",
+      "bytes": 1161,
+      "sha256": "1751c645f67e93a38f19050aa74497dc4f03f891d031bd1c58c38b98b02f624e"
+    },
+    {
+      "path": "models/library/igbt/DIM670ACM65-UF000.json",
+      "bytes": 1228,
+      "sha256": "ed4ea71e08d0059b55cf3f9759363e25d1de729354b2db280a9f0a0c3120605c"
+    },
+    {
+      "path": "models/library/igbt/DIM670XSM65-UF000.json",
+      "bytes": 1228,
+      "sha256": "daa1bc63a5edf3e113899f0a74e1e3e97a9ace211cbd0ca04966cb90dc6054e3"
+    },
+    {
+      "path": "models/library/igbt/DIM750ASM65-TF000.json",
+      "bytes": 984,
+      "sha256": "11dd65bb6a3adf4672dd5eb4261e938e5374422507fcf87aa7ba05104469223c"
+    },
+    {
+      "path": "models/library/igbt/DIM750ASM65-TS000.json",
+      "bytes": 1438,
+      "sha256": "442ece792998e6e131535b2337cfd8785f8923416e7e8b094ad202b4fecf1929"
+    },
+    {
+      "path": "models/library/igbt/DIM800DCM17-A000.json",
+      "bytes": 1200,
+      "sha256": "618fe951e9269730faa6663a71031d980b802c4d9027abe0aebcd9aa83906bbd"
+    },
+    {
+      "path": "models/library/igbt/DIM800DDM12-A000.json",
+      "bytes": 1729,
+      "sha256": "b52aab1669a237b98b58790ba33d27d2a27b04a704c10a9d91adf100c115ab0d"
+    },
+    {
+      "path": "models/library/igbt/DIM800DDM17-A000.json",
+      "bytes": 1200,
+      "sha256": "1f1ee2987582ed414950728599861571e5ef29d1d0bac81066fd5a81a9c9966a"
+    },
+    {
+      "path": "models/library/igbt/DIM800DDS12-A000.json",
+      "bytes": 1729,
+      "sha256": "bdbb0b5ecc00d16ec0d1ff2428437170bf843e501302eef11706f803c36aad26"
+    },
+    {
+      "path": "models/library/igbt/DIM800ECM33-F000.json",
+      "bytes": 1018,
+      "sha256": "339beffadad7882aacd46dbd2fae782fb9e10a06da35e8108cb2d8944cb5c3c3"
+    },
+    {
+      "path": "models/library/igbt/DIM800FSM12-A000.json",
+      "bytes": 1729,
+      "sha256": "3404b57d4b8455c3e45345d1a5e904676f05b87e934591a82cd013fbc0dab18f"
+    },
+    {
+      "path": "models/library/igbt/DIM800FSM17-A000.json",
+      "bytes": 1200,
+      "sha256": "6c330bada47fb152a5849c6d98c1b232bf662a77266ae8975fdc00d3a68c015a"
+    },
+    {
+      "path": "models/library/igbt/DIM800FSS12-A000.json",
+      "bytes": 1729,
+      "sha256": "12c9228baaec157577fc9c251e379ebf3c7f72e7f8dc47645821374aa8b61cec"
+    },
+    {
+      "path": "models/library/igbt/DIM800M1HS17-PG500.json",
+      "bytes": 1335,
+      "sha256": "929629fd65d4ae506bf4c7546c6d5a630b1ffc60981d413d5661410c1e813ebf"
+    },
+    {
+      "path": "models/library/igbt/DIM800NCM17-A000.json",
+      "bytes": 1200,
+      "sha256": "a5532020098b703ba92a8c056d3570db18029f334e4ce860f772bffe415b35fd"
+    },
+    {
+      "path": "models/library/igbt/DIM800NSM12-A000.json",
+      "bytes": 1729,
+      "sha256": "c1f5a05adefb26f81b3fa683a4212cbf869a5c2215d060dbeff3cdd1626cf2af"
+    },
+    {
+      "path": "models/library/igbt/DIM800NSM17-A000.json",
+      "bytes": 1200,
+      "sha256": "b840bea6f498b5665c7a9ad6ccb6e9f19a0456aab8fb91d1d08c53aaf7a43769"
+    },
+    {
+      "path": "models/library/igbt/DIM800NSM33-F000.json",
+      "bytes": 1018,
+      "sha256": "1b98e10bd8296a300255cc14c4de3e3ba27e62e075b270f8fb72491ec2e62ff2"
+    },
+    {
+      "path": "models/library/igbt/DIM800WHS12-PF500.json",
+      "bytes": 1405,
+      "sha256": "6d041a3d2a807b94239b715671c64f04eaa6c0e8bb0f12664291ce8963272ccd"
+    },
+    {
+      "path": "models/library/igbt/DIM800XSM33-F000.json",
+      "bytes": 1018,
+      "sha256": "8fc5e52be332ece1adff246dc963330555fd5f5ea432d67396b1bca5b8b011c9"
+    },
+    {
+      "path": "models/library/igbt/DIM800XSM45-TF000.json",
+      "bytes": 1099,
+      "sha256": "2415266696c512a5023c8c8109af09276b8ab92671a78c5f5b1410fb8f0ae3e6"
+    },
+    {
+      "path": "models/library/igbt/DIM800XSM45-TF001.json",
+      "bytes": 1099,
+      "sha256": "1a34dcb4401a2347c1b070f7b881737b5f751eb276f200ef93608a8ca57a44e2"
+    },
+    {
+      "path": "models/library/igbt/DIM800XSM45-TL000.json",
+      "bytes": 1438,
+      "sha256": "ea1c85e39fcaf3b370aa9a536ff683496d959a8d724b36a9620d510bb026a91a"
+    },
+    {
+      "path": "models/library/igbt/DIM800XSM45-TL001.json",
+      "bytes": 1438,
+      "sha256": "526cf07ae944f98815c75564ffce57f427550596f31a48b56a8893ed291a42cd"
+    },
+    {
+      "path": "models/library/igbt/DIM800XSM45-TS000.json",
+      "bytes": 1082,
+      "sha256": "2b06822740a05667569c3324610ccdf0beb67270b40dce7f2fe7355b918c9e53"
+    },
+    {
+      "path": "models/library/igbt/DIM800XSM45-TS001.json",
+      "bytes": 1082,
+      "sha256": "a91e43759f1915e8b7a101dc2f1f0057237c9c8ee0d9a46cc59739eedbefd008"
+    },
+    {
+      "path": "models/library/igbt/DIM900M1HS12-PG500.json",
+      "bytes": 1454,
+      "sha256": "3167cab9caaf2d82d7e3c1ec025e4dfc7b43b77ad0e8b91c33cfb57c443c6544"
+    },
+    {
+      "path": "models/library/mosfet/C2M0025120D.json",
+      "bytes": 2322,
+      "sha256": "87eea03772d82721eea0dbf34a976d543341d4fe66c56ba166ee18e162214c44"
+    },
+    {
+      "path": "models/library/mosfet/C2M0040120D.json",
+      "bytes": 2273,
+      "sha256": "1dda7e5de0de915f673e9553812ab6e26299fb31c2690074279e38a503447642"
+    },
+    {
+      "path": "models/library/mosfet/C2M0045170D.json",
+      "bytes": 3300,
+      "sha256": "f43a790cda9c8b0aac0f1e9c69be21b229272e035bb50ff579f470e8a3c8ecc6"
+    },
+    {
+      "path": "models/library/mosfet/C2M0045170P.json",
+      "bytes": 3291,
+      "sha256": "74341e7b39be5d73581c222f2fd6af94a48a72ced8c7ecf330c6f4fc3dcdef14"
+    },
+    {
+      "path": "models/library/mosfet/C2M0080120D.json",
+      "bytes": 2777,
+      "sha256": "3fe3e8ebf928fd5ce83411d8259eca97e3de416928167493ce7c3b050e0002bd"
+    },
+    {
+      "path": "models/library/mosfet/C2M0080170P.json",
+      "bytes": 3243,
+      "sha256": "778a0ad75f49a381b513dea8ccc8558a19aea45828f7640d574b903c2964fb52"
+    },
+    {
+      "path": "models/library/mosfet/C2M0160120D.json",
+      "bytes": 5082,
+      "sha256": "40abb61153257dc22010e1dd1f66f31be7187276163387ee14c5d003ddec78c8"
+    },
+    {
+      "path": "models/library/mosfet/C2M0280120D.json",
+      "bytes": 3486,
+      "sha256": "2f567ca2ddb7d454c0da6d122cf6de125d3371186b16c0c997aa118cb4f22125"
+    },
+    {
+      "path": "models/library/mosfet/C2M1000170D.json",
+      "bytes": 3328,
+      "sha256": "a09833685cf830ae262207f56bce6994668a4a27e435eae4b62b1f77e51367c2"
+    },
+    {
+      "path": "models/library/mosfet/C2M1000170J.json",
+      "bytes": 4568,
+      "sha256": "38c63784870c2b71ea7683959a220f9cdf29d10d2ece21bd409c82064ca5e07e"
+    },
+    {
+      "path": "models/library/mosfet/C3M0010090K.json",
+      "bytes": 3816,
+      "sha256": "6e18ba32c5eeb747a4c640a0f43591c6490a0a0571998c743051b371446a12ac"
+    },
+    {
+      "path": "models/library/mosfet/C3M0015065D.json",
+      "bytes": 3967,
+      "sha256": "8d2321a27031a59a0dc958ba6aba206a0963b0db2b6b57fd1ada5d122c806402"
+    },
+    {
+      "path": "models/library/mosfet/C3M0015065K.json",
+      "bytes": 3346,
+      "sha256": "dcffecea82cfc4e30e6d42c4a59c4ed602bbff32dcc9f29033df39a90fbe8bc5"
+    },
+    {
+      "path": "models/library/mosfet/C3M0016120D.json",
+      "bytes": 4670,
+      "sha256": "7df675c35896502508f1c813b876d87c62a610c70d5c1ebf2e51afb561f520b9"
+    },
+    {
+      "path": "models/library/mosfet/C3M0016120K.json",
+      "bytes": 5922,
+      "sha256": "26423ef8ccdd2f93653dc85f1d143c391079f4075c885e6a3eab9bbf2be567ec"
+    },
+    {
+      "path": "models/library/mosfet/C3M0016120K1.json",
+      "bytes": 6225,
+      "sha256": "f8f4eff4bbf1923cc26afba3b83590ee676e89b83a60b56eda49870eee342012"
+    },
+    {
+      "path": "models/library/mosfet/C3M0021120D.json",
+      "bytes": 3967,
+      "sha256": "7bd33315632bfcc26498555902696bbba93b5dab5257c42149af2c182d1ad9a6"
+    },
+    {
+      "path": "models/library/mosfet/C3M0021120J2.json",
+      "bytes": 6348,
+      "sha256": "9b7111b8bac08c00d3da2a4700c1488c10821203e06622cd4e96b17d67fb6014"
+    },
+    {
+      "path": "models/library/mosfet/C3M0021120K.json",
+      "bytes": 5715,
+      "sha256": "259791a75baade263177e956ac5b0e6c8989bb71759fff191a1d6b8715b08801"
+    },
+    {
+      "path": "models/library/mosfet/C3M0021120K1.json",
+      "bytes": 6221,
+      "sha256": "a13da736514ca4f018f9cb05c2ca25bce8d4a12d7575c097584532f7cb90358b"
+    },
+    {
+      "path": "models/library/mosfet/C3M0025065D.json",
+      "bytes": 3887,
+      "sha256": "0dc5101ffbe1a5d84c9f8d08a706d14d49bcc618e98a27264169b165846994ef"
+    },
+    {
+      "path": "models/library/mosfet/C3M0025065J1.json",
+      "bytes": 3840,
+      "sha256": "1057238712fc204f62f484a532f12e8ff92a109f419235271759414077003e99"
+    },
+    {
+      "path": "models/library/mosfet/C3M0025065K.json",
+      "bytes": 3896,
+      "sha256": "8d689d691491e02a2140076c78b0a12d5e232a7438e14f96ee094f00b0f7067e"
+    },
+    {
+      "path": "models/library/mosfet/C3M0025065L.json",
+      "bytes": 4753,
+      "sha256": "d209fbe2a1b5a0243dbdbf5bab93b1ec61ced75f6b3f52b0a8d58aaad0e828b4"
+    },
+    {
+      "path": "models/library/mosfet/C3M0025075K1.json",
+      "bytes": 4949,
+      "sha256": "7a3ed1d85c9b7f8149baddc75f160c0790c471fc74630795627cbfd557ce203d"
+    },
+    {
+      "path": "models/library/mosfet/C3M0030090K.json",
+      "bytes": 6108,
+      "sha256": "e51232d156955838986ea73a2d20d33547a58d3d4e88b36f3b42367aa5749f5e"
+    },
+    {
+      "path": "models/library/mosfet/C3M0032120D.json",
+      "bytes": 3999,
+      "sha256": "f5722b08bdc24251b8ba9133154cf91b184ab3b3a209fc3d92595ebb7cef0ba9"
+    },
+    {
+      "path": "models/library/mosfet/C3M0032120J1.json",
+      "bytes": 5384,
+      "sha256": "7bfee9ce4f701bf98588719a5833a575aa3521a12f3d6974c55ebf03f721b797"
+    },
+    {
+      "path": "models/library/mosfet/C3M0032120J2.json",
+      "bytes": 6094,
+      "sha256": "5a8e9610fdf5a6689a93a128cb05ac201c6be447dc4277ab55593695dd2fa44c"
+    },
+    {
+      "path": "models/library/mosfet/C3M0032120K.json",
+      "bytes": 5106,
+      "sha256": "4e3d9163468348dce84d80c1f1233b0a59134802eca4d1d30d32307f86ff1174"
+    },
+    {
+      "path": "models/library/mosfet/C3M0032120K1.json",
+      "bytes": 5396,
+      "sha256": "1d96ebde7a87b1d6fe8b34f0998d894abbfc9b03295f2ecc49a18da9cf403b59"
+    },
+    {
+      "path": "models/library/mosfet/C3M0040120D.json",
+      "bytes": 5418,
+      "sha256": "de9d9c78796d0acb08049f7d5a2bbc84d8b742557abcdd5e34e0c2c174637971"
+    },
+    {
+      "path": "models/library/mosfet/C3M0040120J1.json",
+      "bytes": 4030,
+      "sha256": "8575d67cc8f370b70c06a5f857011667779f3675cfbfa9b1923e6879b6569d2b"
+    },
+    {
+      "path": "models/library/mosfet/C3M0040120J2.json",
+      "bytes": 3818,
+      "sha256": "e874fe9da07d19eb0ccd9d6d2595c20a82aef8d923bb1601129cd98b91ec4292"
+    },
+    {
+      "path": "models/library/mosfet/C3M0040120K.json",
+      "bytes": 5297,
+      "sha256": "b7a140683c99e3ffce12439c86d864be687e2744abed790920f24058e6f4e69a"
+    },
+    {
+      "path": "models/library/mosfet/C3M0040120K1.json",
+      "bytes": 5705,
+      "sha256": "be9cce4bffa0fec5d6191ce53d5d2af5589ec50071b05bc24197a3eca6ef9e65"
+    },
+    {
+      "path": "models/library/mosfet/C3M0045065D.json",
+      "bytes": 3718,
+      "sha256": "27c081533a864d858f79d1edaef0e1532687a45b749ddb37d2eb378c56e82693"
+    },
+    {
+      "path": "models/library/mosfet/C3M0045065J1.json",
+      "bytes": 3482,
+      "sha256": "d1dfaedac6415a2845bd3dd6886aba6f6026cd2276db7e713be14d2a3c21198c"
+    },
+    {
+      "path": "models/library/mosfet/C3M0045065K.json",
+      "bytes": 3678,
+      "sha256": "4116662916cc198ac08040e47e28a9fb41b53ed6d0c07aa1375dc84d5ee0fe25"
+    },
+    {
+      "path": "models/library/mosfet/C3M0045065L.json",
+      "bytes": 3699,
+      "sha256": "cce1fab9593eae8d3db89192bce57e34c92fbad51d44578d62e006dadeb0242a"
+    },
+    {
+      "path": "models/library/mosfet/C3M0045075K1.json",
+      "bytes": 4081,
+      "sha256": "d3ee918f1fa442ffa0944ea8bf382cf3a7ab50fc675c9bcf14357b23a084ccb2"
+    },
+    {
+      "path": "models/library/mosfet/C3M0060065D.json",
+      "bytes": 3741,
+      "sha256": "fbf578ea9c3e7ccbf1837184903d9922cf902bdc3de425169774a0ceb97d87de"
+    },
+    {
+      "path": "models/library/mosfet/C3M0060065J.json",
+      "bytes": 5120,
+      "sha256": "6cb5a0465f870a13c70d262be5af730d8ad31cbbec5d23cec7204a00af38c0d1"
+    },
+    {
+      "path": "models/library/mosfet/C3M0060065K.json",
+      "bytes": 3694,
+      "sha256": "ef71cf1981672a5be859894ee3c7f183d7a1d098f87aa97c1c7f15fdc7f82c6a"
+    },
+    {
+      "path": "models/library/mosfet/C3M0060065L.json",
+      "bytes": 3770,
+      "sha256": "fb7674d9cd40c43bf7e927cd0e5e55ac82a4bc210f926b29569150a1225fb58c"
+    },
+    {
+      "path": "models/library/mosfet/C3M0060075K1.json",
+      "bytes": 3978,
+      "sha256": "af11f44a7b70e3f37cb26cc04c9492f930f274a40401d160d1a66486d4ea4c5d"
+    },
+    {
+      "path": "models/library/mosfet/C3M0065090D.json",
+      "bytes": 5460,
+      "sha256": "70e949a71d035f24e5364f04fc3624acd0b5bc5bd0d043b6f6bff14ca7c9e2a5"
+    },
+    {
+      "path": "models/library/mosfet/C3M0065090J.json",
+      "bytes": 4813,
+      "sha256": "0325a606202b5121ca8a88f601f03556912d9e8a876134e816525b25019abd15"
+    },
+    {
+      "path": "models/library/mosfet/C3M0065100J.json",
+      "bytes": 6358,
+      "sha256": "8026da72475070da0efa80a55934ca1d27673f64342fe7b19c2a53d1aa50e5c5"
+    },
+    {
+      "path": "models/library/mosfet/C3M0065100K.json",
+      "bytes": 5633,
+      "sha256": "289fa8789c15bb49a2f7b2db6e9199e33c45cd0062d23511fee64665269bdb00"
+    },
+    {
+      "path": "models/library/mosfet/C3M0075120D.json",
+      "bytes": 4238,
+      "sha256": "65646ad3b11595aca2938733e27c06b786e2b3638e406c92c098a0ab5c8fa91d"
+    },
+    {
+      "path": "models/library/mosfet/C3M0075120J.json",
+      "bytes": 5369,
+      "sha256": "a377733ff859ec8f49d0d859da7120287a5db8c2e10f2791373755b8fdfdf122"
+    },
+    {
+      "path": "models/library/mosfet/C3M0075120J2.json",
+      "bytes": 5198,
+      "sha256": "f9ae8775b43cf0db2f75d8893ea6efd952560317b506a80eba41f080e7474f78"
+    },
+    {
+      "path": "models/library/mosfet/C3M0075120K.json",
+      "bytes": 5115,
+      "sha256": "f6a25741c1a3e6756d80c7869df5ffdace0bfe9903aab5c81dce5694b0fe471e"
+    },
+    {
+      "path": "models/library/mosfet/C3M0075120K1.json",
+      "bytes": 5370,
+      "sha256": "40b891d22ce9b96e7a2f41d125e19d4e824d8bdfa85899d8373b06ed78d104cc"
+    },
+    {
+      "path": "models/library/mosfet/C3M0120065D.json",
+      "bytes": 5403,
+      "sha256": "12f32071480adcf81489183db433390d9d815ba97f80b85bcdc9b846990a8962"
+    },
+    {
+      "path": "models/library/mosfet/C3M0120065J.json",
+      "bytes": 5327,
+      "sha256": "797c761ec57a196ed41375f4e8c08f904195c70b8880bfe836c622e70ec4c507"
+    },
+    {
+      "path": "models/library/mosfet/C3M0120065K.json",
+      "bytes": 5316,
+      "sha256": "cc5c88309b300a20230b9a18645bb701888c3557d6d805acc1d0b8d99b700d29"
+    },
+    {
+      "path": "models/library/mosfet/C3M0120065L.json",
+      "bytes": 4492,
+      "sha256": "bd33dc00ec47e38f09083ab284eb4419354f8e4af053f2d85b0be6ef1bb6e587"
+    },
+    {
+      "path": "models/library/mosfet/C3M0120090D.json",
+      "bytes": 5031,
+      "sha256": "93204d18343e05efb4b046e6ef28b97fc989cfedfeebadeef67100d5005b9c84"
+    },
+    {
+      "path": "models/library/mosfet/C3M0120090J.json",
+      "bytes": 5325,
+      "sha256": "468de9125a1029a027e3bafa8762b3e45525a71c810ba6fcb8d822e01e333214"
+    },
+    {
+      "path": "models/library/mosfet/C3M0120100J.json",
+      "bytes": 4974,
+      "sha256": "5060935327e2b44774c4e99a5f2d4d2eb9c1c47e9cbdff84a73228faf39915f1"
+    },
+    {
+      "path": "models/library/mosfet/C3M0120100K.json",
+      "bytes": 5025,
+      "sha256": "ce384d213f395db5a6b0bebfa661f780561d51514da9e910c7c40a050c1fdb11"
+    },
+    {
+      "path": "models/library/mosfet/C3M0160120D.json",
+      "bytes": 5241,
+      "sha256": "2189d0152441ec434c8c353eae6451ff52dc59d22b3d6e868042759ae81ca5cf"
+    },
+    {
+      "path": "models/library/mosfet/C3M0160120J.json",
+      "bytes": 5221,
+      "sha256": "edb26a9f00fb34ef4ca8ee3cc7343d673332b0ec6eb31d16a96858d27073c3f2"
+    },
+    {
+      "path": "models/library/mosfet/C3M0160120K1.json",
+      "bytes": 4869,
+      "sha256": "0572c2c3ee7f8837e17d4140dcfad9eca5cf6bc222639e8c363d0b61a130aa27"
+    },
+    {
+      "path": "models/library/mosfet/C3M0280090D.json",
+      "bytes": 4901,
+      "sha256": "437683e7cb04d03c3df25637fd40dd6918cc4cb1c3c341ed5692a7f3a0fa50dd"
+    },
+    {
+      "path": "models/library/mosfet/C3M0280090J.json",
+      "bytes": 4873,
+      "sha256": "7a99954c83918ff6c84ae0a587c535c84685d719996ef0dc3542b0b70d15250d"
+    },
+    {
+      "path": "models/library/mosfet/C3M0350120D.json",
+      "bytes": 4912,
+      "sha256": "2e8c9d566fc0e302b96add8e6cd98f00e58ef085cd533f1b3e266db2fee60685"
+    },
+    {
+      "path": "models/library/mosfet/C3M0350120J.json",
+      "bytes": 4922,
+      "sha256": "453019e7bf7e22374b976e1a44006632f2ada9a8febffb6161ab4305b0460813"
+    },
+    {
+      "path": "models/library/mosfet/C3M0900170D.json",
+      "bytes": 5859,
+      "sha256": "6abb1956a21a497fbba47e2bc65b7c5c7d8ba25c5617a805a431da80c5798948"
+    },
+    {
+      "path": "models/library/mosfet/C3M0900170J.json",
+      "bytes": 5867,
+      "sha256": "2ee1e57a5e2e53e10bfa750e12d81c3853fa83c852721fd7ed83002a6a4d5aa5"
+    },
+    {
+      "path": "models/library/mosfet/C3M0900170M.json",
+      "bytes": 5852,
+      "sha256": "772fa8be1680a1b57e33ae8831810079f477618ce542204f9a14052261e5cda0"
+    },
+    {
+      "path": "models/library/mosfet/C4MS008065L.json",
+      "bytes": 7753,
+      "sha256": "01cd0e36a8e267e2d69fe7bb41fa069f94adcdd1c260d9714cf0a5d4aca23b29"
+    },
+    {
+      "path": "models/library/mosfet/C4MS008075J2.json",
+      "bytes": 7754,
+      "sha256": "6beecd9b6685ab89295efb14d8fb8bcc4c3049e2ec83f7f40c224963ef66b310"
+    },
+    {
+      "path": "models/library/mosfet/C4MS008075K1.json",
+      "bytes": 7754,
+      "sha256": "87879555ce57d943e3f70883fba34cc5c648d44fef67234ec5d0703f04c2c5b8"
+    },
+    {
+      "path": "models/library/mosfet/C4MS008075QT.json",
+      "bytes": 7754,
+      "sha256": "241413c1010bfbc37ff087aea4623cdca169a852544b29e2bd9e9158f0233a1c"
+    },
+    {
+      "path": "models/library/mosfet/C4MS008075U2.json",
+      "bytes": 7754,
+      "sha256": "3af41d57e2a093eb6bec4b281cc13b9fa24e76dac88427b3c66aeadf62b3ea2e"
+    },
+    {
+      "path": "models/library/mosfet/C4MS009120K.json",
+      "bytes": 9147,
+      "sha256": "2936ad3dcf5ccfccae877f95ffc8fdbce6d02ee201620470aac249fdcc4b0acd"
+    },
+    {
+      "path": "models/library/mosfet/C4MS009120K1.json",
+      "bytes": 9148,
+      "sha256": "ebde8464326d9c3a3992cf34c73d715001c4e110d7c55a6635f92275231489c9"
+    },
+    {
+      "path": "models/library/mosfet/C4MS009120QT.json",
+      "bytes": 9148,
+      "sha256": "a43bcb2afb1241445d490863967ec42aef00b55e1665683d71538e5295b933ab"
+    },
+    {
+      "path": "models/library/mosfet/C4MS009120U2.json",
+      "bytes": 9148,
+      "sha256": "57dac7f6a191460b4713f1829acd07f6cde3cbe7a38c3d916ae0494a3590feae"
+    },
+    {
+      "path": "models/library/mosfet/C4MS012120QT.json",
+      "bytes": 7734,
+      "sha256": "32066b5b86db407eb376994e124b2a5aed9ec87f4c402b9112470b87fa33e77f"
+    },
+    {
+      "path": "models/library/mosfet/C4MS015075J2.json",
+      "bytes": 12380,
+      "sha256": "f55336b55eb79edb67c60246c4debbe8903966d03439f395cfdeefbf6d47e9f3"
+    },
+    {
+      "path": "models/library/mosfet/C4MS015075K1.json",
+      "bytes": 12380,
+      "sha256": "07ccf3e426dd1347b051eb77cbbf0170d494acfed06b18583e7d1b34586e8e5a"
+    },
+    {
+      "path": "models/library/mosfet/C4MS015075QT.json",
+      "bytes": 12380,
+      "sha256": "df89a2907e880539f6ce12054c7e780f7615d30a372f0c0ec9b2c1dd371a3a01"
+    },
+    {
+      "path": "models/library/mosfet/C4MS015075U2.json",
+      "bytes": 12380,
+      "sha256": "b33118fcc088afd79ca317305d725e4feb4f97e6287b73e9719827ce4c2f1c37"
+    },
+    {
+      "path": "models/library/mosfet/C4MS025065L.json",
+      "bytes": 8667,
+      "sha256": "9798a2e9ce75dec8abb0b14f948e135ae80c10e45b96e16617e434eb81371c4d"
+    },
+    {
+      "path": "models/library/mosfet/C4MS025075J2.json",
+      "bytes": 12346,
+      "sha256": "dfb68fa316667cc5de7740062ac09cf3893c0b67de8093ca6d6c93b4f569d5ce"
+    },
+    {
+      "path": "models/library/mosfet/C4MS025075K1.json",
+      "bytes": 12346,
+      "sha256": "5f5f193b91b88008c6be0a051b54b5e2c4a1888fdac2dcb37e661ed4a2cfcf15"
+    },
+    {
+      "path": "models/library/mosfet/C4MS025075QT.json",
+      "bytes": 12346,
+      "sha256": "c9341d377838e8775025a41635811abec9234dc411c43742828bf8c12b7a4b90"
+    },
+    {
+      "path": "models/library/mosfet/C4MS025075U2.json",
+      "bytes": 12346,
+      "sha256": "2e7095dc775b460c9d74cafba73338a72e4eda92bb7a0c91c7215eba1cd64839"
+    },
+    {
+      "path": "models/library/mosfet/C4MS025120J2.json",
+      "bytes": 8757,
+      "sha256": "255ba82dbec9e973adc2bdbc6819340bb13bc75f20e12d0704c6f4c3a9c64d0e"
+    },
+    {
+      "path": "models/library/mosfet/C4MS025120K.json",
+      "bytes": 8756,
+      "sha256": "ac6e3045cf530eb3ee1ddbc1bb14f2f3d281780dbf55fda7f409324330842383"
+    },
+    {
+      "path": "models/library/mosfet/C4MS025120K1.json",
+      "bytes": 8757,
+      "sha256": "cfe6961b1f928038ab1af7c442ebb824df1b6ba783f456321d5137e826c39dde"
+    },
+    {
+      "path": "models/library/mosfet/C4MS025120QT.json",
+      "bytes": 11757,
+      "sha256": "3aeb6facd34d8b3dfa4cd91313e25b8feea857f46438eb3076a92ee6bab7892d"
+    },
+    {
+      "path": "models/library/mosfet/C4MS025120U2.json",
+      "bytes": 8757,
+      "sha256": "cfbce624c04b64a94f8cef918004b5adef8891332f1b5655a6ccbc00c9cbb304"
+    },
+    {
+      "path": "models/library/mosfet/C4MS035065L.json",
+      "bytes": 12131,
+      "sha256": "695ca2ddc6900cc1e7e9402d996652106cf829cd67215bf5d30621bcd97561d6"
+    },
+    {
+      "path": "models/library/mosfet/C4MS035075K1  .json",
+      "bytes": 12139,
+      "sha256": "ddf161fe7dbc18a23bbbd37244b2608c55dae6cbec07825963c334452aec3b29"
+    },
+    {
+      "path": "models/library/mosfet/C4MS036120J2.json",
+      "bytes": 9284,
+      "sha256": "d29749e3041ccf8dfee2e45d1b723655fa148e7a5a197c9b3e184fc27903034d"
+    },
+    {
+      "path": "models/library/mosfet/C4MS036120K.json",
+      "bytes": 9283,
+      "sha256": "cf70de38dbcf4b03468f3444f53bc2fb5df60a06dfb3cbf0f39591c56dc7dc8a"
+    },
+    {
+      "path": "models/library/mosfet/C4MS036120K1.json",
+      "bytes": 9284,
+      "sha256": "06e488005531d5b4de77050f7b79c2a19dbb44f3ac12ed98fbbe989de07dd08d"
+    },
+    {
+      "path": "models/library/mosfet/C4MS036120QT.json",
+      "bytes": 9148,
+      "sha256": "1629e6ab8b9810cf211b1654cc7e12b2fb4a9ca8676cee7662e5db5efef093b6"
+    },
+    {
+      "path": "models/library/mosfet/C4MS036120U2.json",
+      "bytes": 9284,
+      "sha256": "4e789367c7867b7a049844f599e6822cc97e5f113fbd40c287f1c67407965fe1"
+    },
+    {
+      "path": "models/library/mosfet/C4MS045065L.json",
+      "bytes": 11960,
+      "sha256": "0ac3a9717bd630159f3d88ba7bf7571103c3dbee6c89bf2ef854d01b5fdb457c"
+    },
+    {
+      "path": "models/library/mosfet/C4MS045075J2.json",
+      "bytes": 11961,
+      "sha256": "e69577f3e2b38c23777516f475523320a29881d3a08a03668448f4a87371e9fd"
+    },
+    {
+      "path": "models/library/mosfet/C4MS045075K1.json",
+      "bytes": 11961,
+      "sha256": "fe88277cc5a77b60b8d6989bb16b30fd4e9694182f3eb5d7fe3062676523ece6"
+    },
+    {
+      "path": "models/library/mosfet/C4MS045075QT.json",
+      "bytes": 11961,
+      "sha256": "b65f51c0342234ca1713383705df4f028fdf6895f9f13d5f86d0d20e84ee398a"
+    },
+    {
+      "path": "models/library/mosfet/C4MS045075U2.json",
+      "bytes": 11961,
+      "sha256": "4b4b62a7476697e9650dc6cb3d07f11e70eb2bba4cbce679d59fdc6086b40f62"
+    },
+    {
+      "path": "models/library/mosfet/C4MS047120J2.json",
+      "bytes": 8433,
+      "sha256": "449745fb9de568f8303dbaf03e349101a995846cbb6939209e8f9e8953b292cc"
+    },
+    {
+      "path": "models/library/mosfet/C4MS047120K.json",
+      "bytes": 8432,
+      "sha256": "501c84194d0d7003f2ee00f7b8847a5547d1198c420d4e379c4b496549afc18f"
+    },
+    {
+      "path": "models/library/mosfet/C4MS047120K1.json",
+      "bytes": 8433,
+      "sha256": "8ea4fbeea04c792e5c69b38be2a9c9c652b262daf10c6ebe53a9614562030582"
+    },
+    {
+      "path": "models/library/mosfet/C4MS047120QT.json",
+      "bytes": 11410,
+      "sha256": "1d4b3072569c0bf099f0c464513d5b5140fbba4811d6958af16a923f26a76d23"
+    },
+    {
+      "path": "models/library/mosfet/C4MS047120U2.json",
+      "bytes": 8433,
+      "sha256": "0c1af32b3e2c3df84a02728a1a55801a2e5a922dbb4bd347d52c7b3846c3742b"
+    },
+    {
+      "path": "models/library/mosfet/C4MS065120J2.json",
+      "bytes": 8523,
+      "sha256": "715a841ec5c4f06fd7a0cb5e0432c10ac223d8675fb4cfe0eec8d5c2933ebd73"
+    },
+    {
+      "path": "models/library/mosfet/C4MS065120K.json",
+      "bytes": 8522,
+      "sha256": "a3ba9d220a1c2a309e84d43bcb87226d47f4e739aec42fc808fcfa5d67e60d54"
+    },
+    {
+      "path": "models/library/mosfet/C4MS065120K1.json",
+      "bytes": 8523,
+      "sha256": "db90a83da783ed2b8c8f1abcbe8b08b24be9c5d9416e23975412591bfa3596f5"
+    },
+    {
+      "path": "models/library/mosfet/C4MS065120U2.json",
+      "bytes": 8482,
+      "sha256": "8b8d950a00b485e4f476d91e58dc080e97e39cd0e94a6e7e2b66386c57c83334"
+    },
+    {
+      "path": "models/library/mosfet/C4MS080120J2.json",
+      "bytes": 10713,
+      "sha256": "420c0c39e4591b58d07ddfade732edf7433dfb988962af78ac6bbe6c9924dc0e"
+    },
+    {
+      "path": "models/library/mosfet/C4MS080120K.json",
+      "bytes": 10712,
+      "sha256": "e39b41632ae8a0a911370c47f918f0fe85ee6405aac3eaa04943fa0f1cc77d5b"
+    },
+    {
+      "path": "models/library/mosfet/C4MS080120U2.json",
+      "bytes": 10713,
+      "sha256": "c22d3e5a66ce330a00f40894f6cd74535af1ea9f036f8049b7db6f169b4c281a"
+    },
+    {
+      "path": "models/library/mosfet/CAB003M09DM3.json",
+      "bytes": 13882,
+      "sha256": "27ab12e9a1d6a98b8a1c69f4e5b6841fe35efaab83286d3a3f63dca7910bc841"
+    },
+    {
+      "path": "models/library/mosfet/CAB004A12GM4.json",
+      "bytes": 12886,
+      "sha256": "984ffdeb4a0584e7c45d7a7796a7fc82ddf063d6e54cce53daab22696033dad5"
+    },
+    {
+      "path": "models/library/mosfet/CAB004M12GM4.json",
+      "bytes": 12886,
+      "sha256": "86bc98d920bc5a6879804dafa76150cf5890fe46078a4595eabe03368e8aa5f7"
+    },
+    {
+      "path": "models/library/mosfet/CAB006A12GM3.json",
+      "bytes": 12710,
+      "sha256": "2c67bfcbdf3d21580ff17df8325a3168a6629c38b9a5fc641d42c0115313aca8"
+    },
+    {
+      "path": "models/library/mosfet/CAB006A12GM4.json",
+      "bytes": 14414,
+      "sha256": "02b4c196fad45c29edb641cfcb40dada47160a69957e6b17aa92bd1df7a731fd"
+    },
+    {
+      "path": "models/library/mosfet/CAB006M12GM3.json",
+      "bytes": 12710,
+      "sha256": "9636ac0b00c37257cc9d64766f0fcadb0bd93b68b8d94f34421144577bf0db1b"
+    },
+    {
+      "path": "models/library/mosfet/CAB008A12GM3.json",
+      "bytes": 9880,
+      "sha256": "6a7428e5aa4a6624526e8fbe16e4a6db3d9891ef8aebb3246c43e0297357309f"
+    },
+    {
+      "path": "models/library/mosfet/CAB008M12GM3.json",
+      "bytes": 9880,
+      "sha256": "139aab349d83b5aea6e66a5ece430177228b6e012455020b551d64578b0c7ad6"
+    },
+    {
+      "path": "models/library/mosfet/CAB011A12GM3.json",
+      "bytes": 10169,
+      "sha256": "18cfdfc8d3fda87c375e791b8a5eabb55d4b1c23b8de07053fec909b340eb616"
+    },
+    {
+      "path": "models/library/mosfet/CAB011M12FM3.json",
+      "bytes": 7411,
+      "sha256": "17739f30cc1c304c5712d5f5bc882fc575c93f12ddc55e8ea383b474cf37667e"
+    },
+    {
+      "path": "models/library/mosfet/CAB016M12FM3.json",
+      "bytes": 8038,
+      "sha256": "fbfae6e1ddfded76ea05679aee2bb4e38d20fad9eb80f8302290180b3e41c7ed"
+    },
+    {
+      "path": "models/library/mosfet/CAB320M17XM3.json",
+      "bytes": 11387,
+      "sha256": "74bd35ba732db738cf8e91d9f5ff8d4c7fd9c53a8c230b3817892f6d7e60ec28"
+    },
+    {
+      "path": "models/library/mosfet/CAB3R5M12DM4.json",
+      "bytes": 11451,
+      "sha256": "9f23d2197a98b393c69243e554cec80d039cb79ee1d78aeab6027ad637fb733b"
+    },
+    {
+      "path": "models/library/mosfet/CAB400M12XM3.json",
+      "bytes": 13978,
+      "sha256": "eb76aa1f9ab46730ed0cbf5757ba31cae1966a694907ee19f5841a40522a73dc"
+    },
+    {
+      "path": "models/library/mosfet/CAB425M12XM3.json",
+      "bytes": 14929,
+      "sha256": "f7bfa77dd7c397155dec17de1f2bea277c3c6e104d783a745f80d247f5c876f3"
+    },
+    {
+      "path": "models/library/mosfet/CAB450M12XM3.json",
+      "bytes": 14646,
+      "sha256": "5e3e5cd072ccb2559271212406d5925876ce1c18d024774f2227cfdc22f47091"
+    },
+    {
+      "path": "models/library/mosfet/CAB500M17HM3.json",
+      "bytes": 10663,
+      "sha256": "179cd16d488e47a599cb18eda67a2390e0b8d2a295883df552631d4121b0a1b4"
+    },
+    {
+      "path": "models/library/mosfet/CAB525F12XM3.json",
+      "bytes": 10425,
+      "sha256": "ba406c3485579fda7b025515e287ae1766779cb87fc6b3242459ddb3e97257bb"
+    },
+    {
+      "path": "models/library/mosfet/CAB530M12BM3.json",
+      "bytes": 10717,
+      "sha256": "9d89b280fdc0889d1f8664e871a94602a7a73c92423e31367d1ab62b3d5ebc45"
+    },
+    {
+      "path": "models/library/mosfet/CAB5R0A23GM4.json",
+      "bytes": 10149,
+      "sha256": "727651151caf1ce44fefceba79c82dcca984700d322851aca0e19d7e54338e86"
+    },
+    {
+      "path": "models/library/mosfet/CAB600M33LM3.json",
+      "bytes": 11491,
+      "sha256": "4064d0fb19dbc47849182291f4e8a70aedb738eafa0b8891dfbedb263b3e2b8c"
+    },
+    {
+      "path": "models/library/mosfet/CAB650M17HM3.json",
+      "bytes": 12584,
+      "sha256": "258f57aaf719fffecc8f42624a993deddb0d91a8e70e9375ac96c8ce51f8a7f6"
+    },
+    {
+      "path": "models/library/mosfet/CAB6R0A23GM4.json",
+      "bytes": 12778,
+      "sha256": "2999a6cc335bcf5fa3df2611a9762c2bfd431902726b7c9ad7fcf97b37816697"
+    },
+    {
+      "path": "models/library/mosfet/CAB760M12HM3.json",
+      "bytes": 13886,
+      "sha256": "1a317520c22676476509ab9fb3097dedbb5e81ec6ad30be70ce30cc07f7a26f5"
+    },
+    {
+      "path": "models/library/mosfet/CAB7R5A23GM4.json",
+      "bytes": 12568,
+      "sha256": "24faa8c56e6983e1eb2c1f7f30850136ff1f88b94712885c8f0e623df80b7204"
+    },
+    {
+      "path": "models/library/mosfet/CAS120M12BM2.json",
+      "bytes": 3944,
+      "sha256": "0ea68939631a95c3a2eabcbd1c1759de878abc57cf39eb97640aa06b5ae8ef7f"
+    },
+    {
+      "path": "models/library/mosfet/CAS175M12BM3.json",
+      "bytes": 9969,
+      "sha256": "80951452480d0a790b6a263502712a905901ff71d632f47db50d491a24ebe183"
+    },
+    {
+      "path": "models/library/mosfet/CAS300M12BM2.json",
+      "bytes": 8307,
+      "sha256": "2c4e2a5dff791789e9b4558c291be720f5cdff896b45801ca7a8c81d45789c9f"
+    },
+    {
+      "path": "models/library/mosfet/CAS300M17BM2.json",
+      "bytes": 2865,
+      "sha256": "5934332347621666efb95112bce2c3a0665d9e9acc9af42988f751fb309c1a63"
+    },
+    {
+      "path": "models/library/mosfet/CAS310M17BM3.json",
+      "bytes": 10042,
+      "sha256": "3306344a865abe1c0467956a6e6cd08e09fc0ad1de5be5ce6a3d31afe5381dd0"
+    },
+    {
+      "path": "models/library/mosfet/CAS350M12BM3.json",
+      "bytes": 11090,
+      "sha256": "c8ecae5706160c167e0fde9bf94de3bcfc988eb14b8ee430d6ff12bd1ecf9808"
+    },
+    {
+      "path": "models/library/mosfet/CAS380M17HM3.json",
+      "bytes": 11778,
+      "sha256": "d1c884f85875b6c62a5c20da584b1821725133f46df48d177b81baff37867c35"
+    },
+    {
+      "path": "models/library/mosfet/CAS480M12HM3.json",
+      "bytes": 13858,
+      "sha256": "6750a987f7dd0159bee6f52ecff018be2532aad8d92a87cfd0383a7b5099e4f1"
+    },
+    {
+      "path": "models/library/mosfet/CAS530M12BM3.json",
+      "bytes": 9410,
+      "sha256": "0071e49f30cfd9c399f8093ed2143844d3ec8b659c13a2e45ab42631b62182f2"
+    },
+    {
+      "path": "models/library/mosfet/CBB010A12FM4.json",
+      "bytes": 8257,
+      "sha256": "1f9425b82d974e0eea7ae305db7971e9c6709e020dc029c605cd6167e0d1532f"
+    },
+    {
+      "path": "models/library/mosfet/CBB010A23GM4.json",
+      "bytes": 9525,
+      "sha256": "7fd7af1b2d602c0552ee69b959262647709eef4076526a98e7420c7fae5dad4c"
+    },
+    {
+      "path": "models/library/mosfet/CBB011M12GM4.json",
+      "bytes": 7513,
+      "sha256": "bb2dc179ccf8f07b3afb7facd22df5794e78fac1b921c0ddf491567c959a64eb"
+    },
+    {
+      "path": "models/library/mosfet/CBB014A12FM4.json",
+      "bytes": 9188,
+      "sha256": "bc4882a7dde4a55652de5df4b54170e8223e367f215f3142e772c41b40048aed"
+    },
+    {
+      "path": "models/library/mosfet/CBB017M12FM4.json",
+      "bytes": 6577,
+      "sha256": "690353f0382f3f5c3c380b34d8c5eb32f72751d7839650fb8875baf22367b14d"
+    },
+    {
+      "path": "models/library/mosfet/CBB021M12FM3.json",
+      "bytes": 8748,
+      "sha256": "7f59d4fafbad9ca5b634c0226e3606f03dd808f4c8a0239bfb25537b86750aad"
+    },
+    {
+      "path": "models/library/mosfet/CBB030A23FM4.json",
+      "bytes": 9610,
+      "sha256": "e4afd1bae5e10544578c04752466b42a46921f6fb4a323245477d0fb217b6234"
+    },
+    {
+      "path": "models/library/mosfet/CBB032M12FM3.json",
+      "bytes": 8531,
+      "sha256": "45b847fcccb66f92751929e53e2c7edf9c0a3fe19a883ca42496e512b1fa7d2f"
+    },
+    {
+      "path": "models/library/mosfet/CCB016M12GM3.json",
+      "bytes": 8756,
+      "sha256": "7680fd515cec78205541f277bc0d4599f4284cfb1a3a56cfacbc7ef9da6f892a"
+    },
+    {
+      "path": "models/library/mosfet/CCB021M12FM3.json",
+      "bytes": 8953,
+      "sha256": "98b90a7a077af151501933a563f69605f7a7bdde6daf02faa04ebd9a48f97c10"
+    },
+    {
+      "path": "models/library/mosfet/CCB032M12FM3.json",
+      "bytes": 8618,
+      "sha256": "047648c9c8186dfcd4f5a71363b6bf6ff80d4edf97a59dfe0b04e44c43e05ee5"
+    },
+    {
+      "path": "models/library/mosfet/CHB011M12GM4.json",
+      "bytes": 7447,
+      "sha256": "2fa238b613a17e786fc3d561e1b8bcfbb02ee98f853a575ada2f589453ee5b08"
+    },
+    {
+      "path": "models/library/mosfet/CHB7R5A23GM4_M11.json",
+      "bytes": 13690,
+      "sha256": "99907a0c38e8ed8ea159c43e41d552b272725e63b6458abeeffb17a51a125b68"
+    },
+    {
+      "path": "models/library/mosfet/CHB7R5A23GM4_M13.json",
+      "bytes": 9818,
+      "sha256": "ed4b6237d4fc9fa48d80088951a5f032601ee616732cfe102e9381064311cf23"
+    },
+    {
+      "path": "models/library/mosfet/CLB650M17HM3.json",
+      "bytes": 12591,
+      "sha256": "dd64253c9670fbf70f52b161d8b26893526cb4f7e23b3f90c6b365bf3a22c7c6"
+    },
+    {
+      "path": "models/library/mosfet/CLB800M12HM3P.json",
+      "bytes": 14554,
+      "sha256": "e6f4fd5dedf33faab36defad2db02f77d35cf61410b0bd3a7d2b76db0635e0e8"
+    },
+    {
+      "path": "models/library/mosfet/E3M0016120K.json",
+      "bytes": 6513,
+      "sha256": "1e88b29a469189186b4ddabe918c095e703a8b16b95d566853f79737dcafc695"
+    },
+    {
+      "path": "models/library/mosfet/E3M0021120J2.json",
+      "bytes": 6863,
+      "sha256": "b6c0101d1b05f45bc0db691eb8007c6c3adae3bc8806a283cb8b57ac65ed651b"
+    },
+    {
+      "path": "models/library/mosfet/E3M0021120K.json",
+      "bytes": 5715,
+      "sha256": "b06730968a1a209b374e892f4c181729287b9e9068c0564d9a6062cb93ee76eb"
+    },
+    {
+      "path": "models/library/mosfet/E3M0032120J2.json",
+      "bytes": 6208,
+      "sha256": "a952860978903b5412de4c2b5b9082c24fdf31bc56c379f286c4c215163fdef0"
+    },
+    {
+      "path": "models/library/mosfet/E3M0032120K.json",
+      "bytes": 5106,
+      "sha256": "0a889506ce80337f22a9b6ad679a19a9a19f71467bbc7ae08ecc033cad80695e"
+    },
+    {
+      "path": "models/library/mosfet/E3M0032120U2.json",
+      "bytes": 5368,
+      "sha256": "17ab25044c792d5900979960896d84ee56c84c570d450e6e488d9397d08e71a9"
+    },
+    {
+      "path": "models/library/mosfet/E3M0040120J2.json",
+      "bytes": 5592,
+      "sha256": "6f1c0f04e7994ea6648343aa6cd0b38479d6b9d1cb9b9cddb2065026661f0508"
+    },
+    {
+      "path": "models/library/mosfet/E3M0040120K.json",
+      "bytes": 5704,
+      "sha256": "e3bc7158a47eb763d098c58a9b69840b4939df904d619d16acd28410d92bfd25"
+    },
+    {
+      "path": "models/library/mosfet/E3M0040120U2.json",
+      "bytes": 5088,
+      "sha256": "b677c92c5f9e1d620ce05d9df7d370e7243f3939c781354366e82cb79799ef62"
+    },
+    {
+      "path": "models/library/mosfet/E3M0045065K.json",
+      "bytes": 3678,
+      "sha256": "299b57b51aef980ed9d1ee94a6798473fcc57ca3a9c6c3c080aa44c967f9433e"
+    },
+    {
+      "path": "models/library/mosfet/E3M0060065D.json",
+      "bytes": 3741,
+      "sha256": "7481434ebc190a91c93eb8b4a342bbe09a948dbc0a3f5979a07f5d8eb187288e"
+    },
+    {
+      "path": "models/library/mosfet/E3M0060065K.json",
+      "bytes": 3793,
+      "sha256": "8a5e464e01855dcba9ab82e371d8cdbec690fb1d3df0225d576cf7f8cd81e9ba"
+    },
+    {
+      "path": "models/library/mosfet/E3M0065090D.json",
+      "bytes": 4355,
+      "sha256": "9c1315fe1dc4091ad116582f48d1fc895041408010b2a0e8d9615ad35153592e"
+    },
+    {
+      "path": "models/library/mosfet/E3M0075120D.json",
+      "bytes": 3956,
+      "sha256": "7194290e485abb75c8337c5a90e455b43a01e77f933885a12d4103cdf9071558"
+    },
+    {
+      "path": "models/library/mosfet/E3M0075120J2.json",
+      "bytes": 6459,
+      "sha256": "be1873f51f1370cdcd462d238f2ad5cf0681a2d7b32e89ec3536cb6b247b1f62"
+    },
+    {
+      "path": "models/library/mosfet/E3M0075120K.json",
+      "bytes": 3858,
+      "sha256": "06c236f4652f7856be1958ddb5260f76d33eb42fb98dfded94bf0affcdceebc8"
+    },
+    {
+      "path": "models/library/mosfet/E3M0075120U2.json",
+      "bytes": 4767,
+      "sha256": "db74986bcc54e38b805803b76573fc745006dc5346a08bb0019d14643bfda976"
+    },
+    {
+      "path": "models/library/mosfet/E3M0120090D.json",
+      "bytes": 3711,
+      "sha256": "8cabbd98e08dee20b56e01a93be461f95e3133936294949e66278eed2bf8bfed"
+    },
+    {
+      "path": "models/library/mosfet/E3M0120090J.json",
+      "bytes": 4913,
+      "sha256": "a0707066acf5baca976b3b8073613821658ab8e662ca0c8fb0589d5bbbd9459a"
+    },
+    {
+      "path": "models/library/mosfet/E3M0160120D.json",
+      "bytes": 4951,
+      "sha256": "4f27ee7aad21824c761bcf3649fd211a2b2a1b5c32250eb93ce79f295ae7a1ed"
+    },
+    {
+      "path": "models/library/mosfet/E3M0160120J2.json",
+      "bytes": 5577,
+      "sha256": "12f6ada5c82257bdccc57bbaa9185c7084e0ec3bad36a9bed181de9adbdbd21e"
+    },
+    {
+      "path": "models/library/mosfet/E3M0160120K.json",
+      "bytes": 4868,
+      "sha256": "b5adf1ce820eecaa2cb93aa1b240ce9e19b87332e4ebc08931b98d6c282d89cf"
+    },
+    {
+      "path": "models/library/mosfet/E3M0280090D.json",
+      "bytes": 3726,
+      "sha256": "ba0ca8d02f2771a1f14121dda306dc9b14553cbe2229f1e76ad6e7ab90787cc3"
+    },
+    {
+      "path": "models/library/mosfet/E3M0900170D.json",
+      "bytes": 5860,
+      "sha256": "167576adb0133d305365a87b748d567bd2775be59f5c1718c713ce423eb12d3d"
+    },
+    {
+      "path": "models/library/mosfet/E3M0900170J.json",
+      "bytes": 5867,
+      "sha256": "039eb799895db52693463ed10783afaf30d3127fc8d035b3b38ea9aa376a2c46"
+    },
+    {
+      "path": "models/library/mosfet/E4M0013120K.json",
+      "bytes": 6268,
+      "sha256": "c1d2d7e43aad96e0dcd9e8405c31cf94013c1a5e37b012a49dade9c8e5b77f2d"
+    },
+    {
+      "path": "models/library/mosfet/E4M0015075J2.json",
+      "bytes": 4691,
+      "sha256": "d40a51026d92edaed975b20dbded861253972517a1dfb4750d2cfcb80717308c"
+    },
+    {
+      "path": "models/library/mosfet/E4M0015075K1.json",
+      "bytes": 4735,
+      "sha256": "7746ee92b597b25e99a701040834c23f01aa730c1f38db34b0fde0bebb753365"
+    },
+    {
+      "path": "models/library/mosfet/E4M0025075J2.json",
+      "bytes": 4911,
+      "sha256": "8ab056f524d09a853f48e08517bf3f791e8289f8fdeb4c9ed304f2ed759ee23b"
+    },
+    {
+      "path": "models/library/mosfet/E4M0025075K1.json",
+      "bytes": 4949,
+      "sha256": "8c1e057a700db3265b12d26035127ef34abc3fc1967563b8049af965428b720d"
+    },
+    {
+      "path": "models/library/mosfet/E4M0045075J2.json",
+      "bytes": 4119,
+      "sha256": "a8036c60416983808fec39fef0bc7f1825ea04dc23268619f3063154206d967a"
+    },
+    {
+      "path": "models/library/mosfet/E4M0045075K1.json",
+      "bytes": 4081,
+      "sha256": "63859fe0733af0ee914009aed9f197318c69b78d415aaf288ee53126ae3dc6cc"
+    },
+    {
+      "path": "models/library/mosfet/E4M0060075J2.json",
+      "bytes": 4099,
+      "sha256": "c2b3561194b9b01123282d9476359d6bfa67c2c3bb68b2218a450bc7230185ad"
+    },
+    {
+      "path": "models/library/mosfet/E4M0060075K1.json",
+      "bytes": 3978,
+      "sha256": "7c1602e993af96b6cd626df6028a80d57a42d5fa97f93f78c372999ad11f5153"
+    },
+    {
+      "path": "models/library/mosfet/E4MS008075J2.json",
+      "bytes": 7754,
+      "sha256": "49562e6ea30245f93caf3d40cdeed05516202af587a5b92268bf606ee99d77c5"
+    },
+    {
+      "path": "models/library/mosfet/E4MS008075K1.json",
+      "bytes": 7754,
+      "sha256": "e20d6de3ec5fc1ebdfe40a83e79c64c38408e70f9cb980d948f60247814e23e7"
+    },
+    {
+      "path": "models/library/mosfet/E4MS008075QT.json",
+      "bytes": 7754,
+      "sha256": "feef5a4321c1996516f83eae1ede2b8c9c8c8b4aa12e3640c459c4943c55ff88"
+    },
+    {
+      "path": "models/library/mosfet/E4MS008075U2.json",
+      "bytes": 7754,
+      "sha256": "56a3784e72c1edf1f4dbb95a1fd3aa43e4f9742b4ef205785eb8361504c12c39"
+    },
+    {
+      "path": "models/library/mosfet/E4MS009120K.json",
+      "bytes": 9147,
+      "sha256": "15fd7fced4f2bef2e78e9900261fc6c01f23d54de2c27d1f81b974d89c4a3c03"
+    },
+    {
+      "path": "models/library/mosfet/E4MS009120QT.json",
+      "bytes": 9148,
+      "sha256": "8ad8326d3cfb405d32b0f8a3710a193d066694ca8e5cf571a04b78083e3be333"
+    },
+    {
+      "path": "models/library/mosfet/E4MS015075J2.json",
+      "bytes": 12380,
+      "sha256": "6348ac5406e63f500d22a801ab55255eb5be17af6be7f16f4710f2acb4c0afc7"
+    },
+    {
+      "path": "models/library/mosfet/E4MS015075K1.json",
+      "bytes": 12380,
+      "sha256": "e82f16241d4762498e429e4b5149ddce35b45118a6d97de396edae82b74f6519"
+    },
+    {
+      "path": "models/library/mosfet/E4MS015075QT.json",
+      "bytes": 12380,
+      "sha256": "62dee591e3e1fbbdb9ddc824b351ed26ebcc1aaf9c418513fb0c24ca6a631e52"
+    },
+    {
+      "path": "models/library/mosfet/E4MS015075U2.json",
+      "bytes": 12380,
+      "sha256": "8c6a43aa3cabf3330eec9ec7c0680d468e4b832095904ff19b433f64123647c2"
+    },
+    {
+      "path": "models/library/mosfet/E4MS018120QT.json",
+      "bytes": 7138,
+      "sha256": "162c4192c06e7245f393d64acfd49841f326b1ac24d36611b9751741fd6a95e5"
+    },
+    {
+      "path": "models/library/mosfet/E4MS025075J2.json",
+      "bytes": 12346,
+      "sha256": "c4f343998c06f5f1fb9b88761b7d5543206dde67579f6fc1b35bccc65be194a9"
+    },
+    {
+      "path": "models/library/mosfet/E4MS025075K1.json",
+      "bytes": 12346,
+      "sha256": "402390fe0e2a405d133232e3ae9dcf40f426ff7b0ac637469952a3ee6a296e8c"
+    },
+    {
+      "path": "models/library/mosfet/E4MS025075U2.json",
+      "bytes": 12346,
+      "sha256": "38186925006e30a0fbc29df4f4e219bbb9c973aa522f65ac0946c94847fbaed9"
+    },
+    {
+      "path": "models/library/mosfet/E4MS025120J2.json",
+      "bytes": 8757,
+      "sha256": "7073d216826907d6eec01ba57440d3753678ac12d100277e8fec8b7f64896664"
+    },
+    {
+      "path": "models/library/mosfet/E4MS025120K.json",
+      "bytes": 8756,
+      "sha256": "f0f6114f7b7491065aa2587f0724e5698c2695ecb0dba6fac888f2b836ae7f24"
+    },
+    {
+      "path": "models/library/mosfet/E4MS025120QT.json",
+      "bytes": 11757,
+      "sha256": "98ae723329767ee34464be825563e2663131f81649beca6654152c5bde1e8996"
+    },
+    {
+      "path": "models/library/mosfet/E4MS025120U2.json",
+      "bytes": 8757,
+      "sha256": "0ab6467cb7130ce7d990b9a449dc5670584de8afb7843f7305557e57fe9e480c"
+    },
+    {
+      "path": "models/library/mosfet/E4MS036120J2.json",
+      "bytes": 9284,
+      "sha256": "715ad96330b6c2c1b9f93bddc2d7a09c5f6f2b045d2524690a46019deffa80f7"
+    },
+    {
+      "path": "models/library/mosfet/E4MS036120K.json",
+      "bytes": 9283,
+      "sha256": "19add58c92aa041284e69064dff6c6d3c0652050d4aa1845d8a27cb73cfda667"
+    },
+    {
+      "path": "models/library/mosfet/E4MS036120U2.json",
+      "bytes": 9284,
+      "sha256": "84cd92cb60c00090b33b5db61e455ade1beb6610744f2fa55ec329286a831562"
+    },
+    {
+      "path": "models/library/mosfet/E4MS045075J2.json",
+      "bytes": 11961,
+      "sha256": "81fc85719387646673724504f5d14da2d65c95e6b3749f41d20b8c845ef3254d"
+    },
+    {
+      "path": "models/library/mosfet/E4MS045075K1.json",
+      "bytes": 11961,
+      "sha256": "5133d08cd0337efa4b36bcc98eb9f5399f7ee5a7bf5b12d798b8b3a4512c0232"
+    },
+    {
+      "path": "models/library/mosfet/E4MS045075U2.json",
+      "bytes": 11961,
+      "sha256": "8f7012ed2e5a983ee58fea4208a3acbdf86da474b85c4fa1bf3becd5ad6c58e2"
+    },
+    {
+      "path": "models/library/mosfet/E4MS047120J2.json",
+      "bytes": 8433,
+      "sha256": "39729c1b40430f3881a4d188558f7b97edd9cfdf461f1f79ca36f043e44045d3"
+    },
+    {
+      "path": "models/library/mosfet/E4MS047120K.json",
+      "bytes": 8432,
+      "sha256": "982d36c841dc0f69dbc0f9f38c3d1c286127739e1091056d7cc1a24ba58d6095"
+    },
+    {
+      "path": "models/library/mosfet/E4MS047120U2.json",
+      "bytes": 8433,
+      "sha256": "c445ccb7c86a1d5f162db2b9e989c3a0b3927da65b655c431a175899f98f1724"
+    },
+    {
+      "path": "models/library/mosfet/E4MS065120J2.json",
+      "bytes": 8523,
+      "sha256": "6b45d37d3e286c388cfe9964255bb319ef77888534e9c729f696ab46b39d0f35"
+    },
+    {
+      "path": "models/library/mosfet/E4MS065120K.json",
+      "bytes": 8522,
+      "sha256": "d88f6ddd5458029b3d3d5a8188c4e8e594fd666fdd1f27ce1ccbd67a010085de"
+    },
+    {
+      "path": "models/library/mosfet/E4MS065120U2.json",
+      "bytes": 8483,
+      "sha256": "5c21a2a0fe835fe56c7a2360b96014191e19023380d681e4598c697c12934f0b"
+    },
+    {
+      "path": "models/library/mosfet/E4MS080120J2.json",
+      "bytes": 10713,
+      "sha256": "bdaeb8038dd952a6d7cf7fda52117222b3a36385e19831285f91471179b8d1ad"
+    },
+    {
+      "path": "models/library/mosfet/E4MS080120K.json",
+      "bytes": 10712,
+      "sha256": "445347634e9d08be6f286b47868997baf352e62e9eca65b16802a17dc4c9ba15"
+    },
+    {
+      "path": "models/library/mosfet/E4MS080120QT.json",
+      "bytes": 10713,
+      "sha256": "dd25f53c16195b3363551f22b8829e721cadceccc38303069687c83a5cbc7fa2"
+    },
+    {
+      "path": "models/library/mosfet/E4MS080120U2.json",
+      "bytes": 10713,
+      "sha256": "6d11af28cca53eb277895fe7f6f164f64bf0eb6805f873e2f69b03a24c5fa013"
+    },
+    {
+      "path": "models/library/mosfet/ECB1R6M12YM4.json",
+      "bytes": 15777,
+      "sha256": "3200cebdcc027a45e0d79740f78c3b7d2656e6e841f403fa8a7cac679295a447"
+    },
+    {
+      "path": "models/library/mosfet/ECB2R1M12YM3.json",
+      "bytes": 12046,
+      "sha256": "dcb815d049796339d10d24fc8d18398e3fdd9d466a1c8931ecceeccb2c9d2649"
+    },
+    {
+      "path": "models/library/mosfet/ECB2R1M12YM4.json",
+      "bytes": 10555,
+      "sha256": "7d115491c27f45d0415fb2a3690f538c42d59c99d32df86587cf721c81c14610"
+    },
+    {
+      "path": "models/library/mosfet/ECB2R8M12YM3.json",
+      "bytes": 15086,
+      "sha256": "f5e731b17d67617d8a48f5dcb7242876416c027c2c020e90246a36df63d86935"
+    },
+    {
+      "path": "models/library/mosfet/ECB3R1M12YM4.json",
+      "bytes": 11932,
+      "sha256": "4e7401269fceacaa6a44bcfbafe850a35029a38eb23aa3f6ea82520edf05be7c"
+    },
+    {
+      "path": "models/library/mosfet/ECB4R3M12YM3.json",
+      "bytes": 12273,
+      "sha256": "1783631f41bce53a6da85f3a5f9f7fe2775bba28aaa7f38b7666200b4449d2b6"
+    },
+    {
+      "path": "models/library/mosfet/EDB003M06TM3.json",
+      "bytes": 15735,
+      "sha256": "55a783abefc48f7449702e6e7c42a76c98c8ba3406996ff182707f8c5b7b3a94"
+    },
+    {
+      "path": "models/library/mosfet/EDB004M06TM3.json",
+      "bytes": 24926,
+      "sha256": "2b3d1a627d2eddaa57689a58be83d9fab2118aeb63c249f8b8828a80c82fa216"
+    },
+    {
+      "path": "models/library/mosfet/EDB005M12TM4.json",
+      "bytes": 18109,
+      "sha256": "38ee5f6658d5ba146efb366e9cc1bf0f765aadc930237d3c150a0079f9ff9fb4"
+    },
+    {
+      "path": "models/library/mosfet/EDB007M06TM3.json",
+      "bytes": 9539,
+      "sha256": "d2923e9fc8a0a83cc7d4e2a08a0af32812bdb62a4fcb96013702782c8e0ffb1e"
+    },
+    {
+      "path": "models/library/mosfet/EDB007M12TM4.json",
+      "bytes": 9591,
+      "sha256": "f1cda6eaad7163b07aafc138ee9028f6bbb055040f6e04a644f9c6d9ed11f967"
+    },
+    {
+      "path": "models/library/mosfet/EDB010M12TM4.json",
+      "bytes": 8318,
+      "sha256": "1f3a3611af141aeb74dc0d443aded78484264d3f75debb01f5b305d4cb7229bc"
+    },
+    {
+      "path": "models/library/mosfet/WAB300M12BM3.json",
+      "bytes": 4478,
+      "sha256": "68749466bb14ab8b296ed29c2907917f4d778e94bcba10aefd9cc706b2c2397e"
+    },
+    {
+      "path": "models/library/mosfet/WAB400M12BM3.json",
+      "bytes": 5813,
+      "sha256": "33c95d7135d159c934a3b04859feef5c24f064ac7748113cfbe797dde7a4a55d"
+    },
+    {
+      "path": "mosfet_database.json",
+      "bytes": 5166,
+      "sha256": "561c26394e1754254cf2049b7980d0f96bb377ad34c8e29706aea109f05c327e"
+    },
+    {
+      "path": "spice/spice_components.json",
+      "bytes": 27859,
+      "sha256": "8d2900d5a42e93e307fb88ff9e94bd100868f38c7e6dc93f45f14d976baff044"
+    },
+    {
+      "path": "topologies/json_library/acdc_centre_tapped_full_wave.json",
+      "bytes": 3388,
+      "sha256": "b303af9d9d9dee711d5efd37f143bce1663a973cfde188236d25b4fd8e24823c"
+    },
+    {
+      "path": "topologies/json_library/acdc_flyback_pfc_dcm.json",
+      "bytes": 4998,
+      "sha256": "677c96f43fdfa39d618f84b508702e3fe521e28a70b7b128060a7d2e4d1281ee"
+    },
+    {
+      "path": "topologies/json_library/acdc_interleaved_boost_power_factor_correction.json",
+      "bytes": 8260,
+      "sha256": "ae612f3ffaa98dd285a1f46e09a1175bbc7132fb37cab794ac2723e00582c9d0"
+    },
+    {
+      "path": "topologies/json_library/acdc_single_phase_active_front_end.json",
+      "bytes": 5587,
+      "sha256": "383308cee28e89fc4db894ecf7438ab1190ec67d577b15f5e671a83aa3f1da74"
+    },
+    {
+      "path": "topologies/json_library/acdc_single_phase_boost_power_factor_correction.json",
+      "bytes": 6991,
+      "sha256": "4455eee66be13af5bd8bc192d15d3dcd825dd9bc4c77f03accbced7dd01a532d"
+    },
+    {
+      "path": "topologies/json_library/acdc_single_phase_diode_bridge.json",
+      "bytes": 4876,
+      "sha256": "2f017d15e023218cc7b0f89f5c6bb3a2873691a266a9b204f6e93bb2c524bfb0"
+    },
+    {
+      "path": "topologies/json_library/acdc_single_phase_full_wave(transformer).json",
+      "bytes": 5239,
+      "sha256": "75f1b5e371b2fc06bfc88d35bf73107cb7db856221130be35a41bed7b3e5d403"
+    },
+    {
+      "path": "topologies/json_library/acdc_three_phase_active_front_end.json",
+      "bytes": 9753,
+      "sha256": "6e11210dcadb7abfd5086250579658fbefb11340d2f1707f4994b1c7471ee281"
+    },
+    {
+      "path": "topologies/json_library/acdc_three_phase_vienna.json",
+      "bytes": 11145,
+      "sha256": "2a7615e0462d3903ec13c4d403410c18dc3929e9de968c7dca486e8d95a0d4ee"
+    },
+    {
+      "path": "topologies/json_library/acdc_totem_pole_power_factor_correction.json",
+      "bytes": 5444,
+      "sha256": "7a138b71b9752e6d32f1e8c56a8cc0f8dd09e2b41a87f324ffdbbba043136255"
+    },
+    {
+      "path": "topologies/json_library/dcac_neutral_point_clamped.json",
+      "bytes": 16587,
+      "sha256": "b674da02256458b00801d0734a8f13759afce79e6195545e06106921adf4bd6e"
+    },
+    {
+      "path": "topologies/json_library/dcac_single_phase_h_bridge.json",
+      "bytes": 4767,
+      "sha256": "6317fc11db97ba7e930b76204d89208f28e76ffa585b33c40460e1909ddaccaa"
+    },
+    {
+      "path": "topologies/json_library/dcac_t_type.json",
+      "bytes": 10686,
+      "sha256": "c4e84dd53c5dd90437af96571f9e90a3d4be5a61128bed7671eb521043ae09a9"
+    },
+    {
+      "path": "topologies/json_library/dcac_three_phase_voltage_source_inverter.json",
+      "bytes": 6996,
+      "sha256": "a69bc1606af068c41269abdf2fe8f4dfc9e31f38cea7cb56acac451581410bb9"
+    },
+    {
+      "path": "topologies/json_library/dcdc_active_clamp_flyback.json",
+      "bytes": 6644,
+      "sha256": "bfa7edbcc214a8fe611dbd8a460847596d5b7b32fb0afe24a337ad7f8661226d"
+    },
+    {
+      "path": "topologies/json_library/dcdc_boost.json",
+      "bytes": 11442,
+      "sha256": "d7f8b99d05727c923230f285d3bb132270aac8928350f6626182290b2add24e9"
+    },
+    {
+      "path": "topologies/json_library/dcdc_buck.json",
+      "bytes": 11871,
+      "sha256": "edea0751d5552aea0173d269c039e6d9728e35ed33273ffef1d884913a0940e8"
+    },
+    {
+      "path": "topologies/json_library/dcdc_buck_boost.json",
+      "bytes": 12419,
+      "sha256": "37ec619fbed3c1143d50ee1e36764925b3f7a5881a8a2e2ff685bcca3aea4397"
+    },
+    {
+      "path": "topologies/json_library/dcdc_cllc_resonant.json",
+      "bytes": 11078,
+      "sha256": "a5af77efc5bf4d54490bd78e7a82c0168067608ab5781133b942d8027c495edf"
+    },
+    {
+      "path": "topologies/json_library/dcdc_cuk.json",
+      "bytes": 12889,
+      "sha256": "0aeee5eadac71e339d20d7974f4bd8b464af3b3bb166488b3eee4189f814e1cd"
+    },
+    {
+      "path": "topologies/json_library/dcdc_dual_active_bridge.json",
+      "bytes": 10926,
+      "sha256": "9ef332525b42d4afb1360d0b066364a542670796bd2045ca309cf08419f0363c"
+    },
+    {
+      "path": "topologies/json_library/dcdc_flyback.json",
+      "bytes": 11093,
+      "sha256": "263a03cd2552b77bc5af60f088cbcbbbf2bbd3a1d21fad51fd0bff5379e7121b"
+    },
+    {
+      "path": "topologies/json_library/dcdc_four_switch_buck_boost.json",
+      "bytes": 4216,
+      "sha256": "745f6ec73a6f713f6bc9390e3511be4dd255bcc28cb542edf5eb6c47eb8e1633"
+    },
+    {
+      "path": "topologies/json_library/dcdc_full_bridge_centertapped.json",
+      "bytes": 7154,
+      "sha256": "04ed88832a741fe60aa9d81227e8a0b4ea87203aa29f173d43ae35cf2dd3914f"
+    },
+    {
+      "path": "topologies/json_library/dcdc_full_bridge_llc_resonant.json",
+      "bytes": 8124,
+      "sha256": "abd3816b0e75cbf2d0217c5ba2890bb74335c857492497b052eb94d7af5d128a"
+    },
+    {
+      "path": "topologies/json_library/dcdc_half_bridge.json",
+      "bytes": 6918,
+      "sha256": "3e125bb656aa72de168e46e67b317ae2283be68a7a646684e0703c085faa7f75"
+    },
+    {
+      "path": "topologies/json_library/dcdc_half_bridge_llc_resonant.json",
+      "bytes": 6814,
+      "sha256": "306241ca3e15c701ddbb33183ff48671f5665e2adcf9a3238a957500018941d3"
+    },
+    {
+      "path": "topologies/json_library/dcdc_interleaved_multiphase_buck.json",
+      "bytes": 9513,
+      "sha256": "da4d433169fd5a30f59c09f76ff125b0ffbf01d6db87fd4663ee2deee8379bfd"
+    },
+    {
+      "path": "topologies/json_library/dcdc_phase_shifted_full_bridge_not_centertapped.json",
+      "bytes": 10620,
+      "sha256": "6517680b246fc1a17776b1bceaa37a58014a6d5a2bcf8ec240f5f3882c9ac855"
+    },
+    {
+      "path": "topologies/json_library/dcdc_push_pull.json",
+      "bytes": 8358,
+      "sha256": "6a0b109c2c2741c2b6abec4544ede87a06b5a6fbdd16c3cde44492e4a1c80071"
+    },
+    {
+      "path": "topologies/json_library/dcdc_sepic.json",
+      "bytes": 12249,
+      "sha256": "9042ff032c596569511945b0b4e3c87ca8d682cb79012463ae86cb8ba2432662"
+    },
+    {
+      "path": "topologies/json_library/dcdc_single_switch_forward.json",
+      "bytes": 12682,
+      "sha256": "3cb2a1a23edea01e36bd36b380699f755d3a5142460cbe7b51e527681af1e96b"
+    },
+    {
+      "path": "topologies/json_library/dcdc_synchronous_buck.json",
+      "bytes": 3162,
+      "sha256": "c138ee55cf0d3be1c217cc7d676cc5e01c115c8a7f8330eff4bfc9423bff568d"
+    },
+    {
+      "path": "topologies/json_library/dcdc_two_switch_forward.json",
+      "bytes": 9264,
+      "sha256": "39164a626885efef86cdc0460fb78cea9ad4b18faab4f720f1cd1f0d8de0d405"
+    },
+    {
+      "path": "topologies/json_library/dcdc_zeta.json",
+      "bytes": 6086,
+      "sha256": "abb21c4fc1b1ab982fd9c8b9975f7281b5e082451aebc8f2977778cd0338343d"
+    },
+    {
+      "path": "topologies/primitives/acdc_centre_tapped_full_wave.yaml",
+      "bytes": 2178,
+      "sha256": "c9d31b8b18c851b7adc53dd1f5ec96d5c06dc87d180b7c2a1219bece7631995e"
+    },
+    {
+      "path": "topologies/primitives/acdc_flyback_pfc_dcm.yaml",
+      "bytes": 2711,
+      "sha256": "83dbc0e8991a0b385e36645821f0c074cb1fef501d9ee13cf759aadd032e13d4"
+    },
+    {
+      "path": "topologies/primitives/acdc_interleaved_boost_power_factor_correction.yaml",
+      "bytes": 15606,
+      "sha256": "7e1140b82160f46d0916d4ea0100ae63287b6136f7559a3620e005d4e745f4d5"
+    },
+    {
+      "path": "topologies/primitives/acdc_single_phase_active_front_end.yaml",
+      "bytes": 8470,
+      "sha256": "6400a65cd27c2dda08a82a892002f23806419220d60a2a998eb46f690ce07e1c"
+    },
+    {
+      "path": "topologies/primitives/acdc_single_phase_boost_power_factor_correction.yaml",
+      "bytes": 10595,
+      "sha256": "77cf8d87b1128e26d36139f79ced3fec8a15dad4f61a724cff1cf15bcc39bb4d"
+    },
+    {
+      "path": "topologies/primitives/acdc_single_phase_diode_bridge.yaml",
+      "bytes": 2713,
+      "sha256": "c9ef7abed9a9955bff4383317100962dbe8190eb407bbcd8e2cada39c574ab40"
+    },
+    {
+      "path": "topologies/primitives/acdc_single_phase_full_wave(transformer).yaml",
+      "bytes": 2374,
+      "sha256": "60028498c49d7bcca496fd91e0af08bb2452dee9701cfdc5ec54bbbe4260c177"
+    },
+    {
+      "path": "topologies/primitives/acdc_three_phase_active_front_end.yaml",
+      "bytes": 15024,
+      "sha256": "9b5e46bebda5bd767927a7af4df771453e2a3d176bf23d04daecd7bf49a3a3f2"
+    },
+    {
+      "path": "topologies/primitives/acdc_three_phase_vienna.yaml",
+      "bytes": 9262,
+      "sha256": "a32ff7bd77458a731b81c60fe7093260501baf876c1ca1cf2b92cdb3ce5fd837"
+    },
+    {
+      "path": "topologies/primitives/acdc_totem_pole_power_factor_correction.yaml",
+      "bytes": 13754,
+      "sha256": "1b63f9b082cb707edd916d66ceafb10571da443d4460bb1fdf5fcbc958192919"
+    },
+    {
+      "path": "topologies/primitives/dcac_neutral_point_clamped.yaml",
+      "bytes": 20003,
+      "sha256": "e9eb5088cc7322ea7f7e6cb0c417048b7f4a478dbfa3723f0be45d85b3b335e3"
+    },
+    {
+      "path": "topologies/primitives/dcac_single_phase_h_bridge.yaml",
+      "bytes": 10565,
+      "sha256": "647c2d1c5a8b3bf6cc1c1d64ffab2f264e5b0b9cd7230592434bb6c20d20896e"
+    },
+    {
+      "path": "topologies/primitives/dcac_t_type.yaml",
+      "bytes": 28917,
+      "sha256": "71aed6074f30f07c84e3697956571c6e468a07a3934139df2cd01523b0c06219"
+    },
+    {
+      "path": "topologies/primitives/dcac_three_phase_voltage_source_inverter.yaml",
+      "bytes": 12306,
+      "sha256": "f518c1ff2c149bfd8b36e03084dc4683c67182b90ff1626d1188089c9cf20f7f"
+    },
+    {
+      "path": "topologies/primitives/dcdc_active_clamp_flyback.yaml",
+      "bytes": 11520,
+      "sha256": "70cef3feb4b8d530986686e1c5da118ffb3d8e94fc29ed5325454cefb694131e"
+    },
+    {
+      "path": "topologies/primitives/dcdc_boost.yaml",
+      "bytes": 15944,
+      "sha256": "11d54ff0096676ba5f5b3475caf12b71d0f6313ac30c34dd74c65bc0c8790cae"
+    },
+    {
+      "path": "topologies/primitives/dcdc_buck.yaml",
+      "bytes": 16061,
+      "sha256": "0412351c5e18a8f964b2ca4e818bc3b4fbf2c686b1032643f3e174374cf5f55b"
+    },
+    {
+      "path": "topologies/primitives/dcdc_buck_boost.yaml",
+      "bytes": 15928,
+      "sha256": "391bc1f11605bf5c736bc430c025e7dfb126663035ed49e95b1c69aa8560a4d5"
+    },
+    {
+      "path": "topologies/primitives/dcdc_cllc_resonant.yaml",
+      "bytes": 17211,
+      "sha256": "3780d09f8ffa9ad7b6793ff1286172ff445fd021a7e9118a7cc97ac583dfb5b5"
+    },
+    {
+      "path": "topologies/primitives/dcdc_cuk.yaml",
+      "bytes": 16669,
+      "sha256": "466feb7e6065c8a064773a2bff0e364c8cbe3a4d1564924ac2017d51e7384946"
+    },
+    {
+      "path": "topologies/primitives/dcdc_dual_active_bridge.yaml",
+      "bytes": 19509,
+      "sha256": "a42983226f71091437ca0ff29f16706afb36ffa5e4218b531a87b01bab76cb79"
+    },
+    {
+      "path": "topologies/primitives/dcdc_flyback.yaml",
+      "bytes": 15992,
+      "sha256": "bc9eb3a086520a1d66aa327612b499fa71d828bddb8fffc193624a14208aeced"
+    },
+    {
+      "path": "topologies/primitives/dcdc_four_switch_buck_boost.yaml",
+      "bytes": 13390,
+      "sha256": "d6a4c885e08f47cf7d61a5038e14d6da43a3bab460a0f784bf7aa96d12b7e070"
+    },
+    {
+      "path": "topologies/primitives/dcdc_full_bridge_centertapped.yaml",
+      "bytes": 33689,
+      "sha256": "4c1c1269ead75933973c6d7858eab7e36ab568b8c30e8cbd476601dafbac2a04"
+    },
+    {
+      "path": "topologies/primitives/dcdc_full_bridge_llc_resonant.yaml",
+      "bytes": 35147,
+      "sha256": "6b0d11b93edce1d662b9097d27387e1af0d87f571161084ea2357ce1e6c868e9"
+    },
+    {
+      "path": "topologies/primitives/dcdc_half_bridge.yaml",
+      "bytes": 30883,
+      "sha256": "f57fc948566a7f340236dd2a77af8d97f87de9a63467633d4da231d5464fbc7c"
+    },
+    {
+      "path": "topologies/primitives/dcdc_half_bridge_llc_resonant.yaml",
+      "bytes": 33105,
+      "sha256": "8d59c3c5b5096cea6bffc8d3fa62b2bd6b2d32056fd7586984585cd14057cf92"
+    },
+    {
+      "path": "topologies/primitives/dcdc_interleaved_multiphase_buck.yaml",
+      "bytes": 12178,
+      "sha256": "93c5d9256ec7e76b38b3b4f88f43e265af65a1b3d2c0ed7caa037eece6b5400f"
+    },
+    {
+      "path": "topologies/primitives/dcdc_phase_shifted_full_bridge_not_centertapped.yaml",
+      "bytes": 13404,
+      "sha256": "012f4fd2eb79d9df7bd6bda0287f3046da11616862593e91306687482768d265"
+    },
+    {
+      "path": "topologies/primitives/dcdc_push_pull.yaml",
+      "bytes": 26221,
+      "sha256": "4aef463736a10af7bd8962be512cfda1783bf131577c85d5ee1539ae1ae5fef0"
+    },
+    {
+      "path": "topologies/primitives/dcdc_sepic.yaml",
+      "bytes": 16408,
+      "sha256": "ef3c3e866f8065b81dc8aae0a1e567e3393fc02628a43e21160ae986504c884b"
+    },
+    {
+      "path": "topologies/primitives/dcdc_single_switch_forward.yaml",
+      "bytes": 6579,
+      "sha256": "3db87b1edf8b4aba0d2e78fa279b25352c38f196397b89f9e01efd2a0f4e208a"
+    },
+    {
+      "path": "topologies/primitives/dcdc_synchronous_buck.yaml",
+      "bytes": 11357,
+      "sha256": "37e8d06bf56206d9cf6b8a94026c2e32886d167199c9b7c9c8661509a0520bb4"
+    },
+    {
+      "path": "topologies/primitives/dcdc_two_switch_forward.yaml",
+      "bytes": 11795,
+      "sha256": "f2d8a17b162fba3088a205299508f96e91467c6c149d527cac19cc362957885b"
+    },
+    {
+      "path": "topologies/primitives/dcdc_zeta.yaml",
+      "bytes": 6198,
+      "sha256": "35cfbb4a900b005d6f941e2149f5fd516d2037fa91f3cf25583b136640a80ea4"
+    },
+    {
+      "path": "topologies/prompts/acdc_flyback_pfc_dcm.prompt.md",
+      "bytes": 700,
+      "sha256": "fa243224913e6d81b79b8b6eb122cbbf27247391708577f19e1aa58c505bba67"
+    },
+    {
+      "path": "topologies/prompts/acdc_single_phase_active_front_end.prompt.md",
+      "bytes": 5444,
+      "sha256": "22923e67b58a889a311c3c8264f961a0941d91d5432a45dd6b7ba345898e69ed"
+    },
+    {
+      "path": "topologies/prompts/acdc_single_phase_full_wave(transformer).prompt.md",
+      "bytes": 696,
+      "sha256": "264b0c5f35f50fd940a64fbf1e1a46c0de6132563456c095b9f49fa49a5860ad"
+    },
+    {
+      "path": "topologies/prompts/acdc_three_phase_active_front_end.prompt.md",
+      "bytes": 4807,
+      "sha256": "1f3a30c1940b65f55c5db835d74d7f1851ec32000894fdde5faa9e25715c8cfe"
+    },
+    {
+      "path": "topologies/prompts/acdc_three_phase_vienna.prompt.md",
+      "bytes": 3029,
+      "sha256": "a4f59c9418d0b58ab6a1903676388de8c093ba80b47ef9ff615152b5f427fc19"
+    },
+    {
+      "path": "topologies/prompts/dcac_neutral_point_clamped.prompt.md",
+      "bytes": 671,
+      "sha256": "013afac6a9ac71d7d9d7e787a8be36d14646e957047043501abf34548a90efe7"
+    },
+    {
+      "path": "topologies/prompts/dcac_single_phase_h_bridge.prompt.md",
+      "bytes": 2040,
+      "sha256": "6c09201d2f393c2bd4823ab293fe13c5ca31d0a9d1d465682461ffc2be2009f8"
+    },
+    {
+      "path": "topologies/prompts/dcac_t_type.prompt.md",
+      "bytes": 4476,
+      "sha256": "12c0190bac5561944b62384c6db864f11bfb214e1e4643754d855a666bbbd8e2"
+    },
+    {
+      "path": "topologies/prompts/dcac_three_phase_voltage_source_inverter.prompt.md",
+      "bytes": 676,
+      "sha256": "e7fa199d5fbe1307bf28dd7398260de00c212d7fa94b5e9303900958393af2ae"
+    },
+    {
+      "path": "topologies/prompts/dcdc_active_clamp_flyback.prompt.md",
+      "bytes": 953,
+      "sha256": "f98ee4d80a6af42141f87fa1249d7ffd9ce8ea04a3c26035db7196df3962210c"
+    },
+    {
+      "path": "topologies/prompts/dcdc_boost.prompt.md",
+      "bytes": 316,
+      "sha256": "9fe1a1f3554786a79f3273072bc52b54f59b0a44fceaad864c166f1456105c4c"
+    },
+    {
+      "path": "topologies/prompts/dcdc_buck.prompt.md",
+      "bytes": 339,
+      "sha256": "49dd3cec8d12a6a997b4286f06de8823d60271af3b001f86cff7213b4dde1fe2"
+    },
+    {
+      "path": "topologies/prompts/dcdc_buck_boost.prompt.md",
+      "bytes": 1475,
+      "sha256": "df2f9419d580b3fc38b7a006cd0bec236471d0c38bcd4bbe929f86e8f7bd164e"
+    },
+    {
+      "path": "topologies/prompts/dcdc_cllc_resonant.prompt.md",
+      "bytes": 3098,
+      "sha256": "56f7fbd31de0222057c6926c1b824bb555c2a0af5071a466af6ccd729da52817"
+    },
+    {
+      "path": "topologies/prompts/dcdc_cuk.prompt.md",
+      "bytes": 375,
+      "sha256": "135ab86b6beb5b76f423c86065cad5bc2fae894ff021b1d393a49b9e4e3bb36e"
+    },
+    {
+      "path": "topologies/prompts/dcdc_dual_active_bridge.prompt.md",
+      "bytes": 6571,
+      "sha256": "6d3901f638e5ce20cc13911f9b9e2d5aaab5eddb82ddaa36c35f76a01ef7aabb"
+    },
+    {
+      "path": "topologies/prompts/dcdc_flyback.prompt.md",
+      "bytes": 2676,
+      "sha256": "dc7275cca167b5e1c3d46dd548ea7a657689abde8d60e0bd7d39ab2a42f336d9"
+    },
+    {
+      "path": "topologies/prompts/dcdc_four_switch_buck_boost.prompt.md",
+      "bytes": 2564,
+      "sha256": "a031a7422f63e64c2e3fbbba187ab8442b508880bf65267bc857e9fc2df0dfa4"
+    },
+    {
+      "path": "topologies/prompts/dcdc_full_bridge_centertapped.prompt.md",
+      "bytes": 1153,
+      "sha256": "d83e326061d9356192152e247c57669520199371d49ab343c1dd70609bd43967"
+    },
+    {
+      "path": "topologies/prompts/dcdc_full_bridge_llc_resonant.prompt.md",
+      "bytes": 2896,
+      "sha256": "6a7b0fd6be303a1102edd0c37876d30d1c3c58382b6d3d7309cfb58e6a178cfc"
+    },
+    {
+      "path": "topologies/prompts/dcdc_half_bridge.prompt.md",
+      "bytes": 893,
+      "sha256": "fe154efbd3c5c70b13d7422aa2ec05f09aec420042d6ab1ed8c952698617ec53"
+    },
+    {
+      "path": "topologies/prompts/dcdc_half_bridge_llc_resonant.prompt.md",
+      "bytes": 2433,
+      "sha256": "06f44f5b8d49bd2317ba8a63942756a4d6443c60dd80708fccd468726bed585b"
+    },
+    {
+      "path": "topologies/prompts/dcdc_interleaved_multiphase_buck.prompt.md",
+      "bytes": 323,
+      "sha256": "7417e34edd9e3d283197b01f677aa6790f03483a802e8c3327306abe0a413c7d"
+    },
+    {
+      "path": "topologies/prompts/dcdc_llc_resonant.prompt.md",
+      "bytes": 1090,
+      "sha256": "46bd14f7095fa6e1f918b1e15b8980e9a749257966aecb91c5fb5c4f144a9d4c"
+    },
+    {
+      "path": "topologies/prompts/dcdc_phase_shifted_full_bridge_not_centertapped.prompt.md",
+      "bytes": 857,
+      "sha256": "abc1efc9bc46b7a4c061b1748273e0a27aba971f4190684985e3cec3ebe49f83"
+    },
+    {
+      "path": "topologies/prompts/dcdc_push_pull.prompt.md",
+      "bytes": 2414,
+      "sha256": "7b4ee9cf769481e50f8954bbcce09c8b3e9383963960aff963a68eb0b664d96d"
+    },
+    {
+      "path": "topologies/prompts/dcdc_sepic.prompt.md",
+      "bytes": 377,
+      "sha256": "fec5761ec526dffe229697a855d542ab67ff1bab4277a6b0225fee5257186e69"
+    },
+    {
+      "path": "topologies/prompts/dcdc_single_switch_forward.prompt.md",
+      "bytes": 264,
+      "sha256": "86b1e21f2124380a6c31e76fe250d3895fedf93b31e1c6545030d48637100573"
+    },
+    {
+      "path": "topologies/prompts/dcdc_synchronous_buck.prompt.md",
+      "bytes": 541,
+      "sha256": "ad15e06ec09199724523bc05569eeb450d003f1814912af002c64990e20d9770"
+    },
+    {
+      "path": "topologies/prompts/dcdc_two_switch_forward.prompt.md",
+      "bytes": 2739,
+      "sha256": "df95edd0c3cb36256b5b8df501196b1cb485a3a6631d4bea76821ef1dc511b0a"
+    },
+    {
+      "path": "topologies/prompts/dcdc_zeta.prompt.md",
+      "bytes": 376,
+      "sha256": "4d1468231ceaaf3ce271957ca2f8e8fda41b6ebde2279b64886fcc55a9a89ef9"
+    }
+  ]
+}

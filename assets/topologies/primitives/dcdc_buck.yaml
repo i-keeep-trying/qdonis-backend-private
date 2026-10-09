@@ -1,0 +1,546 @@
+id: dcdc_buck
+name: Buck DC-DC Converter
+description: Step-down DC-DC converter using a NMOS high-side switch, freewheeling
+  diode,  inductor, and output capacitor. Steps down 12V input to 5V output at 0.5A
+  load. NMOS is driven with active-high PWM logic.
+components:
+  - ref: VIN
+    type: node
+    role: input_source
+    params:
+      node_type: voltage_source
+      voltage: 12
+      source: dc
+      series_resistance: 0.01
+  - ref: SW
+    type: transistor
+    role: power_switch
+    params:
+      family: mosfet
+      type: nmos
+      mode: enhancement
+      voltage_rating: 100
+      current_rating: 5
+      Vto: 2.0
+      Kn: 5.0
+      Lambda: 0.01
+      Cgs: 500e-12
+      Cgd: 100e-12
+      Cdb: 100e-12
+    layout:
+      schX: -1.0
+      schY: -1.0
+      rotation: 270deg
+  - ref: D
+    type: diode
+    role: freewheel_diode
+    params:
+      reverse_voltage: 20
+      current_rating: 5
+      Is: 1e-12
+      n: 1.1
+      Rs: 0.1
+      Cjo: 10e-12
+      Tt: 20e-9
+      Bv: 100
+      Ibv: 1e-6
+    layout:
+      schX: 1.0
+      schY: 0.0
+      orientation: horizontal
+  - ref: L1
+    type: inductor
+    role: output_filter
+    params:
+      inductance: 47e-6
+      series_resistance: 0.1
+      saturation_current: 5.0
+      core_loss_resistance: 1e6
+      parasitic_capacitance: 50e-12
+      ic: 0
+    layout:
+      schX: 0.0
+      schY: 0.0
+      orientation: horizontal
+  - ref: Cout
+    type: capacitor
+    role: output_filter
+    params:
+      capacitance: 100e-6
+      polarized: true
+      voltage_rating: 20
+      tolerance: 0.1
+      esr: 0.05
+      esl: 5e-9
+      leakage_current: 1e-9
+      ic: 0
+    layout:
+      schX: 2.0
+      schY: -1.0
+      orientation: vertical
+  - ref: R_LOAD
+    type: resistor
+    role: load
+    params:
+      resistance: 10
+      tolerance: 0.05
+      temp_coefficient: 100e-6
+      parasitic_inductance: 10e-9
+    layout:
+      schX: 3.0
+      schY: -1.0
+      orientation: vertical
+  - ref: PWM
+    type: node
+    role: pwm_control
+    params:
+      node_type: pwm_control
+      frequency: 100e3
+      duty_cycle: 0.48
+      vhigh: 12.0
+      vlow: 0.0
+      trise: 1e-7
+      tfall: 1e-7
+      tdelay: 0
+      drive_resistance: 100
+nets:
+  - - - VIN
+      - +
+    - - SW
+      - drain
+  - - - PWM
+      - pos
+    - - SW
+      - gate
+  - - - PWM
+      - neg
+    - - SW
+      - source
+  - - - SW
+      - source
+    - - D
+      - cathode
+    - - L1
+      - pin1
+  - - - L1
+      - pin2
+    - - Cout
+      - pos
+    - - R_LOAD
+      - pos
+  - - - VIN
+      - '-'
+    - - D
+      - anode
+    - - Cout
+      - neg
+    - - R_LOAD
+      - neg
+analysis:
+  transient:
+    requirements:
+      - rid: tr_reg
+        requirement: Meet target Vout across line (Vin) and load changes
+        criteria:
+          target_vout: 5.0
+          regulation_limit_pct: 5
+          ripple_limit_vpp: 0.05
+        measurement:
+          - ref: VOUT
+            plot:
+              x_axis: time
+              title: Output Voltage Regulation
+            component: R_LOAD
+            quantity: voltage
+            nets:
+              - - R_LOAD
+                - pos
+              - - VIN
+                - '-'
+            data:
+              - name: Vout_avg
+                spice_command: avg
+                description: Average output voltage (window chosen by the generator).
+              - name: Vout_ripple_vpp
+                spice_command: pp
+                description: Peak-to-peak ripple of the output voltage.
+          - ref: VIN
+            plot:
+              x_axis: time
+              title: Input Voltage Reference
+            component: VIN
+            quantity: voltage
+            nets:
+              - - VIN
+                - +
+              - - VIN
+                - '-'
+            data:
+              - name: Vin_avg
+                spice_command: avg
+                description: Average input voltage (window chosen by the generator).
+          - ref: IOUT
+            plot: false
+            component: R_LOAD
+            quantity: current
+            data:
+              - name: Iout_avg
+                spice_command: avg
+                description: Average load current (sign convention handled by generator).
+        outputs:
+          - var: line_regulation_pct
+            formula: 100*([Vout_avg]/[Vin_avg])
+            description: Line regulation percentage
+          - var: load_regulation_pct
+            formula: 100*abs([Vout_avg] - {criteria.target_vout})/{criteria.target_vout}
+            description: Load regulation percentage (deviation from target)
+          - var: vout_avg_v
+            formula: '[Vout_avg]'
+            description: Average output voltage
+          - var: vout_ripple_vpp_v
+            formula: '[vout_ripple_vpp]'
+            description: Output voltage peak-to-peak ripple
+      - rid: tr_dyn
+        requirement: 'Dynamic response: step changes (line/load) with minimal overshoot
+          and fast settling'
+        criteria:
+          target_vout: 5.0
+          overshoot_limit_pct: 10
+          undershoot_limit_pct: 10
+          settle_band_pct: 1.0
+          settle_time_limit: 0.002
+        environment:
+          - ref: time_domain
+            t_step: 1e-6
+            description: Time domain simulation settings; t_step is the absolute time
+              of the applied step used by TRIG AT= for settling/rise-time measures.
+            t_stop: 0.015
+            t_start: 0.0135
+        measurement:
+          - ref: VIN
+            plot: false
+            quantity: voltage
+            nets:
+              - - VIN
+                - +
+              - - VIN
+                - '-'
+          - ref: VOUT
+            plot: false
+            component: R_LOAD
+            quantity: voltage
+            nets:
+              - - R_LOAD
+                - pos
+              - - VIN
+                - '-'
+            data:
+              - name: Vout_max
+                spice_command: max
+                description: Maximum VOUT during the transient window.
+              - name: Vout_min
+                spice_command: min
+                description: Minimum VOUT during the transient window.
+              - name: rise_time_10_90
+                spice_command: TRIG [VOUT] VAL={0.1*{criteria.target_vout}} RISE=1
+                  TARG [VOUT] VAL={0.9*{criteria.target_vout}} RISE=1
+                description: Rise time from 10% to 90% of target voltage
+              - name: settle_to_upper
+                spice_command: TRIG AT={environment.time_domain.t_step} TARG [VOUT]
+                  VAL={{criteria.target_vout}*(1+{criteria.settle_band_pct}/100)}
+                  CROSS=LAST
+                description: Time to settle to upper band
+              - name: settle_to_lower
+                spice_command: TRIG AT={environment.time_domain.t_step} TARG [VOUT]
+                  VAL={{criteria.target_vout}*(1-{criteria.settle_band_pct}/100)}
+                  CROSS=LAST
+                description: Time to settle to lower band
+          - ref: IL
+            plot:
+              x_axis: time
+              title: Inductor Current Waveform
+            component: L1
+            quantity: current
+            data:
+              - name: IL_peak
+                spice_command: max
+                description: Peak inductor current during the transient.
+              - name: IL_ripple
+                spice_command: pp
+                description: Peak-to-peak inductor current in steady state.
+          - ref: VSW
+            plot:
+              x_axis: time
+              title: Switch Node Voltage
+            component: SW
+            quantity: voltage
+            nets:
+              - - SW
+                - drain
+              - - VIN
+                - '-'
+            data:
+              - name: Vsw_overshoot
+                spice_command: max
+                description: Max switch-node voltage during/after the step.
+        outputs:
+          - var: overshoot_pct
+            formula: 100*([Vout_max] - [Vout_avg])/[Vout_avg]
+            description: Overshoot percentage
+          - var: undershoot_pct
+            formula: 100*([Vout_avg] - [Vout_min])/[Vout_avg]
+            description: Undershoot percentage
+          - var: settle_time
+            formula: max([settle_to_upper], [settle_to_lower])
+            description: Settling time to within band
+          - var: vout_max_v
+            formula: '[vout_max]'
+            description: Maximum output voltage during transient
+          - var: vout_min_v
+            formula: '[vout_min]'
+            description: Minimum output voltage during transient
+          - var: il_peak_a
+            formula: '[il_peak]'
+            description: Peak inductor current
+          - var: vsw_overshoot_v
+            formula: '[vsw_overshoot]'
+            description: Switch node overshoot voltage
+      - rid: tr_eff
+        requirement: Efficiency across load points with loss breakdown
+        criteria:
+          efficiency_light_load_pct: 80
+          efficiency_nominal_pct: 92
+          efficiency_heavy_load_pct: 90
+          min_efficiency_pct: 85
+        measurement:
+          - ref: IIN
+            plot:
+              x_axis: time
+              title: Input Current for Efficiency Analysis
+            component: VIN
+            quantity: current
+            data:
+              - name: Iin_avg
+                spice_command: avg
+                description: Average input current from the source.
+          - ref: IOUT
+            plot: false
+            component: R_LOAD
+            quantity: current
+            data:
+              - name: Iout_avg
+                spice_command: avg
+                description: Average load current.
+          - ref: VOUT
+            plot: false
+            component: R_LOAD
+            quantity: voltage
+            nets:
+              - - R_LOAD
+                - pos
+              - - VIN
+                - '-'
+            data:
+              - name: Vout_avg
+                spice_command: avg
+                description: Average output voltage
+          - ref: VIN
+            plot: false
+            component: VIN
+            quantity: voltage
+            nets:
+              - - VIN
+                - +
+              - - VIN
+                - '-'
+            data:
+              - name: Vin_avg
+                spice_command: avg
+                description: Average input voltage
+          - ref: VSW_SOURCE
+            plot: false
+            component: SW
+            quantity: voltage
+            nets:
+              - - SW
+                - source
+              - - VIN
+                - '-'
+            data:
+              - name: Vsw_source_avg
+                spice_command: avg
+                description: Average switch source voltage.
+          - ref: VSW_DRAIN
+            plot: false
+            component: SW
+            quantity: voltage
+            nets:
+              - - SW
+                - drain
+              - - VIN
+                - '-'
+            data:
+              - name: Vsw_drain_avg
+                spice_command: avg
+                description: Average switch drain voltage.
+          - ref: ISW
+            plot:
+              x_axis: time
+              title: Switch Current for Efficiency Analysis
+            component: SW
+            quantity: current
+            data:
+              - name: Isw_avg
+                spice_command: avg
+                description: Average switch current.
+          - ref: VD
+            plot: false
+            component: D
+            quantity: voltage
+            nets:
+              - - D
+                - cathode
+              - - VIN
+                - '-'
+            data:
+              - name: Vd_avg
+                spice_command: avg
+                description: Average diode forward voltage.
+          - ref: ID
+            plot: false
+            component: D
+            quantity: current
+            data:
+              - name: Id_avg
+                spice_command: avg
+                description: Average diode current.
+          - ref: IL1
+            plot: false
+            component: L1
+            quantity: current
+            data:
+              - name: IL1_rms
+                spice_command: rms
+                description: RMS inductor current for copper loss.
+          - ref: ICOUT
+            plot: false
+            component: Cout
+            quantity: current
+            data:
+              - name: Icout_rms
+                spice_command: rms
+                description: RMS capacitor current for ESR loss.
+        outputs:
+          - var: Pout_avg
+            formula: '[vout_avg]*[iout_avg]'
+            description: Average output power
+          - var: Pin_avg
+            formula: abs([vin_avg]*[iin_avg])
+            description: Average input power
+          - var: P_switch_avg
+            formula: abs([vsw_source_avg]-[vsw_drain_avg])*[isw_avg]
+            description: Average switch power loss
+          - var: P_diode_avg
+            formula: '[vd_avg]*[id_avg]'
+            description: Average diode power loss
+          - var: P_L1_cu
+            formula: '[il1_rms]**2*{components.L1.series_resistance}'
+            description: Inductor copper loss (I2R with series resistance)
+          - var: P_Cout_esr
+            formula: '[icout_rms]**2*{components.Cout.esr}'
+            description: Output capacitor ESR loss (I2R with ESR)
+          - var: efficiency_pct
+            formula: 100*[Pout_avg]/[Pin_avg]
+            description: Efficiency percentage
+      - rid: tr_stress
+        requirement: Stress & thermal margins for key devices
+        criteria:
+          sw_voltage_margin_pct: 20
+          sw_current_margin_pct: 30
+          d_current_margin_pct: 30
+          l1_current_margin_pct: 30
+        measurement:
+          - ref: VIN
+            plot: false
+            quantity: voltage
+            nets:
+              - - VIN
+                - +
+              - - VIN
+                - '-'
+          - ref: VSW
+            plot: false
+            component: SW
+            quantity: voltage
+            nets:
+              - - SW
+                - drain
+              - - VIN
+                - '-'
+            data:
+              - name: Vsw_max
+                spice_command: max
+                description: Max switch-node voltage incl. ringing.
+          - ref: IL
+            plot: false
+            component: L1
+            quantity: current
+            data:
+              - name: IL_rms
+                spice_command: rms
+                description: RMS inductor current.
+              - name: IL_ripple
+                spice_command: pp
+                description: Peak-to-peak inductor current.
+          - ref: ISW
+            plot: false
+            component: SW
+            quantity: current
+            data:
+              - name: Isw_peak
+                spice_command: max
+                description: Peak switch current.
+              - name: Isw_rms
+                spice_command: rms
+                description: RMS switch current.
+          - ref: ID
+            plot: false
+            component: D
+            quantity: current
+            data:
+              - name: Id_peak
+                spice_command: max
+                description: Peak diode current.
+              - name: Id_avg
+                spice_command: avg
+                description: Average diode current.
+          - ref: VOUT
+            plot: false
+            quantity: voltage
+            nets:
+              - - R_LOAD
+                - pos
+              - - R_LOAD
+                - neg
+        outputs:
+          - var: vsw_max_v
+            formula: '[Vsw_max]'
+            description: Maximum switch voltage stress
+          - var: isw_peak_a
+            formula: '[Isw_peak]'
+            description: Peak switch current stress
+          - var: id_peak_a
+            formula: '[Id_peak]'
+            description: Peak diode current stress
+          - var: il_rms_a
+            formula: '[IL_rms]'
+            description: RMS inductor current
+metadata:
+  stage:
+    - power_switch
+    - filter
+  topology: non-isolated
+  control: PWM
+  tags:
+    - buck
+    - step-down

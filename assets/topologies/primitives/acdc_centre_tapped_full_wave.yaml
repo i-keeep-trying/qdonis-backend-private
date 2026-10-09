@@ -1,0 +1,112 @@
+id: acdc_centre_tapped_full_wave
+name: Centre Tapped Full Wave Rectifier
+description: Full wave rectifier utilizing a centre-tapped secondary transformer.
+components:
+  - ref: GND
+    type: node
+    params:
+      node_type: ground
+  - ref: VAC
+    type: node
+    role: voltage_source
+    params:
+      node_type: voltage_source
+      source: sine
+      offset: 0
+      amplitude: 24
+      frequency: 160
+  - ref: R_IN
+    type: resistor
+    params:
+      resistance: 1.0
+  - ref: TX
+    type: dual_ct_transformer
+    params:
+      Lm_primary: 0.01
+      turns_ratio: 2.0
+      k_coupling: 1.0
+      phase_s1: same
+      phase_s2: opposite
+  - ref: D1
+    type: diode
+    params:
+      Is: 3.17e-05
+      Rs: 0.051
+      n: 1.373
+      Cjo: 1.6e-10
+      Tt: 0
+  - ref: D2
+    type: diode
+    params:
+      Is: 3.17e-05
+      Rs: 0.051
+      n: 1.373
+      Cjo: 1.6e-10
+      Tt: 0
+  - ref: R_LOAD
+    type: resistor
+    params:
+      resistance: 10.0
+nets:
+  - - - GND
+      - pin
+    - - TX
+      - CT_S
+    - - R_LOAD
+      - neg
+  - - - VAC
+      - +
+    - - R_IN
+      - pin2
+  - - - VAC
+      - '-'
+    - - TX
+      - P1
+  - - - R_IN
+      - pin1
+    - - TX
+      - P2
+  - - - TX
+      - S1
+    - - D1
+      - anode
+  - - - TX
+      - S2
+    - - D2
+      - anode
+  - - - D1
+      - cathode
+    - - D2
+      - cathode
+    - - R_LOAD
+      - pos
+  - - - TX
+      - CT_P
+analysis:
+  transient:
+    requirements:
+      - rid: tr_centre_tapped_fw
+        requirement: Verify full wave rectification via centre-tapped secondary.
+        environment:
+          - ref: time_domain
+            t_step: 1.0e-06
+            t_stop: 0.1
+            t_start: 0.05
+            t_max_step: 1.0e-06
+        measurement:
+          - ref: VOUT
+            plot: true
+            quantity: voltage
+            nets:
+              - - R_LOAD
+                - pos
+              - - R_LOAD
+                - neg
+            data:
+              - name: Vout_avg
+                spice_command: avg
+                description: Average Output Voltage in steady state
+        outputs:
+          - var: vout_avg_v
+            formula: abs([Vout_avg])
+            description: Average Output Voltage

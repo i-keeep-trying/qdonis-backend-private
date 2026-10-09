@@ -26,6 +26,7 @@ import { HealthModule } from './health/health.module';
 import { MailModule } from './mail/mail.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { SettingsModule } from './settings/settings.module';
+import { StudioModule } from './studio/studio.module';
 import { UsersModule } from './users/users.module';
 
 /** Paths whose successful requests are not access-logged (probe noise). */
@@ -81,6 +82,15 @@ const QUIET_PATHS = new Set(['/health', '/health/live', '/favicon.ico']);
                 'req.query.code',
                 'req.query.state',
                 'req.query.token',
+                // Bedrock credentials, should a config or SDK object be logged.
+                '*.secretAccessKey',
+                '*.accessKeyId',
+                '*.apiKey',
+                '*.credentials',
+                '*.token',
+                '*.AWS_SECRET_ACCESS_KEY',
+                '*.AWS_ACCESS_KEY_ID',
+                '*.BEDROCK_API_KEY',
               ],
               censor: '[redacted]',
             },
@@ -140,6 +150,7 @@ const QUIET_PATHS = new Set(['/health', '/health/live', '/favicon.ico']);
     BillingModule,
     AdminModule,
     AiModule,
+    StudioModule,
     DocumentsModule,
     HealthModule,
   ],

@@ -1,0 +1,1161 @@
+id: dcdc_full_bridge_centertapped
+name: Full Bridge Centertapped DC-DC Converter
+description: Isolated DC-DC converter using a full-bridge primary stage (4 switches)
+  driving a center-tapped transformer. Converts 48V input to 12V isolated output (4:1
+  transformer ratio). Secondary side features  a center-tap rectifier (2 diodes) with
+  LC filter output. Provides galvanic isolation  and high power capability with reduced
+  primary-side voltage stress.
+components:
+  - ref: VIN
+    type: node
+    role: input_source
+    params:
+      node_type: voltage_source
+      source: dc
+      voltage: 48
+      series_resistance: 0.05
+      ramp_rise: 5e-4
+  - ref: PWM1
+    type: node
+    role: pwm_control
+    params:
+      node_type: pwm_control
+      frequency: 50e3
+      duty_cycle: 0.44
+      vhigh: 48.0
+      vlow: 36.0
+      trise: 1e-7
+      tfall: 1e-7
+      tdelay: 0
+      drive_resistance: 100
+  - ref: PWM2
+    type: node
+    role: pwm_control
+    params:
+      node_type: pwm_control
+      frequency: 50e3
+      duty_cycle: 0.44
+      vhigh: 12.0
+      vlow: 0.0
+      trise: 1e-7
+      tfall: 1e-7
+      tdelay: 10e-6
+      drive_resistance: 100
+  - ref: PWM3
+    type: node
+    role: pwm_control
+    params:
+      node_type: pwm_control
+      frequency: 50e3
+      duty_cycle: 0.44
+      vhigh: 48.0
+      vlow: 36.0
+      trise: 1e-7
+      tfall: 1e-7
+      tdelay: 10e-6
+      drive_resistance: 100
+  - ref: PWM4
+    type: node
+    role: pwm_control
+    params:
+      node_type: pwm_control
+      frequency: 50e3
+      duty_cycle: 0.44
+      vhigh: 12.0
+      vlow: 0.0
+      trise: 1e-7
+      tfall: 1e-7
+      tdelay: 0
+      drive_resistance: 100
+  - ref: S1
+    type: transistor
+    role: upper_left
+    params:
+      family: mosfet
+      type: pmos
+      mode: enhancement
+      voltage_rating: 100
+      current_rating: 10
+      Vto: -2.0
+      Kp: 50e-3
+      Lambda: 0.01
+      Cgs: 500e-12
+      Cgd: 100e-12
+      Cdb: 100e-12
+    layout:
+      schX: 0.0
+      schY: 0.0
+      rotation: 90deg
+  - ref: S2
+    type: transistor
+    role: lower_left
+    params:
+      family: mosfet
+      type: nmos
+      mode: enhancement
+      voltage_rating: 100
+      current_rating: 10
+      Vto: 2.0
+      Kn: 50e-3
+      Lambda: 0.01
+      Cgs: 500e-12
+      Cgd: 100e-12
+      Cdb: 100e-12
+    layout:
+      schX: 0.0
+      schY: -2.0
+      rotation: 270deg
+  - ref: S3
+    type: transistor
+    role: upper_right
+    params:
+      family: mosfet
+      type: pmos
+      mode: enhancement
+      voltage_rating: 100
+      current_rating: 10
+      Vto: -2.0
+      Kp: 50e-3
+      Lambda: 0.01
+      Cgs: 500e-12
+      Cgd: 100e-12
+      Cdb: 100e-12
+    layout:
+      schX: 2.0
+      schY: 0.0
+      rotation: 90deg
+  - ref: S4
+    type: transistor
+    role: lower_right
+    params:
+      family: mosfet
+      type: nmos
+      mode: enhancement
+      voltage_rating: 100
+      current_rating: 10
+      Vto: 2.0
+      Kn: 50e-3
+      Lambda: 0.01
+      Cgs: 500e-12
+      Cgd: 100e-12
+      Cdb: 100e-12
+    layout:
+      schX: 2.0
+      schY: -2.0
+      rotation: 270deg
+  - ref: D1
+    type: diode
+    role: antiparallel_diode_1
+    params:
+      reverse_voltage: 100
+      current_rating: 10
+      Is: 1e-12
+      n: 1.1
+      Rs: 0.1
+      Cjo: 10e-12
+      Tt: 20e-9
+      Bv: 100
+      Ibv: 1e-6
+    layout:
+      schX: 1.0
+      schY: 0.0
+      orientation: pos_bottom
+  - ref: D2
+    type: diode
+    role: antiparallel_diode_2
+    params:
+      reverse_voltage: 100
+      current_rating: 10
+      Is: 1e-12
+      n: 1.1
+      Rs: 0.1
+      Cjo: 10e-12
+      Tt: 20e-9
+      Bv: 100
+      Ibv: 1e-6
+    layout:
+      schX: 1.0
+      schY: -2.0
+      orientation: pos_bottom
+  - ref: D3
+    type: diode
+    role: antiparallel_diode_3
+    params:
+      reverse_voltage: 100
+      current_rating: 10
+      Is: 1e-12
+      n: 1.1
+      Rs: 0.1
+      Cjo: 10e-12
+      Tt: 20e-9
+      Bv: 100
+      Ibv: 1e-6
+    layout:
+      schX: 3.0
+      schY: 0.0
+      orientation: pos_bottom
+  - ref: D4
+    type: diode
+    role: antiparallel_diode_4
+    params:
+      reverse_voltage: 100
+      current_rating: 10
+      Is: 1e-12
+      n: 1.1
+      Rs: 0.1
+      Cjo: 10e-12
+      Tt: 20e-9
+      Bv: 100
+      Ibv: 1e-6
+    layout:
+      schX: 3.0
+      schY: -2.0
+      orientation: pos_bottom
+  - ref: T1
+    type: ct_transformer
+    role: isolation_transformer
+    params:
+      Lm_primary: 1e-3
+      turns_ratio: 0.3
+      k_coupling: 0.99
+      phase_s1: same
+      phase_s2: opposite
+      transient:
+        tstep: 0.1u
+        tstop: 0.015
+      Rp: 0.1
+      Rs1: 0.1
+      Rs2: 0.1
+      center_tap_resistance: 100e6
+      core_loss_resistance: 1e6
+    layout:
+      schX: 4.5
+      schY: -1.0
+      configuration: left-to-right
+    internal:
+      - ref: RSN_P
+        type: resistor
+        role: primary_snubber
+        params:
+          resistance: 100
+        connections:
+          pos:
+            - T1
+            - P1
+          neg:
+            - CSN_P
+            - pos
+      - ref: CSN_P
+        type: capacitor
+        role: primary_snubber
+        params:
+          capacitance: 1e-9
+        connections:
+          pos:
+            - RSN_P
+            - neg
+          neg:
+            - T1
+            - P2
+      - ref: RSN_S
+        type: resistor
+        role: secondary_snubber
+        params:
+          resistance: 20
+        connections:
+          pos:
+            - T1
+            - S1
+          neg:
+            - CSN_S
+            - pos
+      - ref: CSN_S
+        type: capacitor
+        role: secondary_snubber
+        params:
+          capacitance: 4.7e-09
+        connections:
+          pos:
+            - RSN_S
+            - neg
+          neg:
+            - T1
+            - S2
+      - ref: R_ISO
+        type: resistor
+        role: secondary_ground_anchor
+        params:
+          resistance: 100e6
+        connections:
+          pos:
+            - T1
+            - CT
+          neg:
+            - VIN
+            - '-'
+  - ref: DR1
+    type: diode
+    role: rectifier_1
+    params:
+      reverse_voltage: 50
+      current_rating: 5
+      Is: 1e-12
+      n: 1.1
+      Rs: 0.5
+      Cjo: 10e-12
+      Tt: 20e-9
+      Bv: 100
+      Ibv: 1e-6
+    layout:
+      schX: 6.0
+      schY: 0.0
+      orientation: horizontal
+  - ref: DR2
+    type: diode
+    role: rectifier_2
+    params:
+      reverse_voltage: 50
+      current_rating: 5
+      Is: 1e-12
+      n: 1.1
+      Rs: 0.5
+      Cjo: 10e-12
+      Tt: 20e-9
+      Bv: 100
+      Ibv: 1e-6
+    layout:
+      schX: 6.0
+      schY: -2.0
+      orientation: horizontal
+  - ref: L_OUT
+    type: inductor
+    role: output_filter_inductor
+    params:
+      inductance: 50e-6
+      series_resistance: 0.1
+      parasitic_capacitance: 1e-12
+    layout:
+      schX: 7.5
+      schY: 0.0
+      orientation: horizontal
+  - ref: C_OUT
+    type: capacitor
+    role: output_filter
+    params:
+      capacitance: 1000e-6
+      polarized: true
+      voltage_rating: 50
+      tolerance: 0.1
+      esr: 0.05
+      esl: 5e-9
+      leakage_current: 1e-6
+      ic: 0
+    layout:
+      schX: 8.5
+      schY: -1.0
+      orientation: vertical
+  - ref: R_LOAD
+    type: resistor
+    role: load
+    params:
+      resistance: 24
+      tolerance: 0.05
+      temp_coefficient: 100e-6
+      parasitic_inductance: 10e-9
+    layout:
+      schX: 10.0
+      schY: -1.0
+      orientation: vertical
+nets:
+  - - - VIN
+      - +
+    - - S1
+      - source
+    - - S3
+      - source
+    - - D1
+      - cathode
+    - - D3
+      - cathode
+  - - - VIN
+      - '-'
+    - - S2
+      - source
+    - - S4
+      - source
+    - - D2
+      - anode
+    - - D4
+      - anode
+    - - PWM1
+      - neg
+    - - PWM2
+      - neg
+    - - PWM3
+      - neg
+    - - PWM4
+      - neg
+  - - - S1
+      - drain
+    - - S2
+      - drain
+    - - D1
+      - anode
+    - - D2
+      - cathode
+    - - T1
+      - P1
+  - - - S3
+      - drain
+    - - S4
+      - drain
+    - - D3
+      - anode
+    - - D4
+      - cathode
+    - - T1
+      - P2
+  - - - PWM1
+      - pos
+    - - S1
+      - gate
+  - - - PWM2
+      - pos
+    - - S2
+      - gate
+  - - - PWM3
+      - pos
+    - - S3
+      - gate
+  - - - PWM4
+      - pos
+    - - S4
+      - gate
+  - - - T1
+      - S1
+    - - DR1
+      - anode
+  - - - T1
+      - S2
+    - - DR2
+      - anode
+  - - - DR1
+      - cathode
+    - - DR2
+      - cathode
+    - - L_OUT
+      - pos
+  - - - L_OUT
+      - neg
+    - - C_OUT
+      - pos
+    - - R_LOAD
+      - pos
+  - - - T1
+      - CT
+    - - C_OUT
+      - neg
+    - - R_LOAD
+      - neg
+analysis:
+  transient:
+    spice_settings:
+      reltol: 0.01
+      abstol: 1.0e-09
+      vntol: 1.0e-05
+      chgtol: 1.0e-12
+      gmin: 1.0e-10
+      method: gear
+      maxord: 2
+      trtol: 3.0
+      use_ic: true
+    requirements:
+      - rid: tr_startup
+        requirement: Startup transient from 48V input to 12V isolated output. Full-bridge
+          converter with 4:1 transformer ratio and center-tap rectifier. Measure output
+          voltage at [R_LOAD, pos] (positive output terminal). Verify soft-start behavior,
+          overshoot, and settling time.
+        criteria:
+          target_vout: 12.0
+          overshoot_pct: 10.0
+          settle_time_ms: 5.0
+          vin_nominal: 48.0
+        environment:
+          - ref: time_domain
+            t_start: 0.012
+            t_stop: 0.015
+            t_step: 1.0e-07
+            description: 15ms simulation for full-bridge startup (2000+ switching
+              cycles at ~100kHz)
+        measurement:
+          - ref: VOUT
+            plot:
+              x_axis: time
+              title: Output Voltage Startup Transient
+            quantity: voltage
+            nets:
+              - - R_LOAD
+                - pos
+              - - R_LOAD
+                - neg
+            data:
+              - name: vout_steady
+                spice_command: avg
+                description: Steady-state output voltage (average over simulation)
+              - name: vout_peak
+                spice_command: max
+                description: Peak output voltage during startup
+              - name: t_settle
+                spice_command: TRIG AT=0.001 TARG [VOUT] VAL={{criteria.target_vout}*0.95}
+                  CROSS=LAST
+                description: Time when output settles within 5% of target (last crossing)
+            description: Output voltage measurement for startup transient analysis
+          - ref: VIN
+            plot:
+              x_axis: time
+              title: Input Voltage
+            quantity: voltage
+            nets:
+              - - VIN
+                - +
+              - - VIN
+                - '-'
+            data:
+              - name: vin_avg
+                spice_command: avg
+                description: Average input voltage
+            description: Input voltage measurement
+          - ref: IIN
+            plot: false
+            component: VIN
+            quantity: current
+            data:
+              - name: iin_avg
+                spice_command: avg
+                description: Average input current
+            description: Input current measurement
+        outputs:
+          - var: vout_steady_v
+            formula: '[vout_steady]'
+            description: Steady-state output voltage in volts
+          - var: overshoot_pct
+            formula: 100 * abs([vout_peak] - {criteria.target_vout}) / {criteria.target_vout}
+            description: Output voltage overshoot percentage
+          - var: settle_time_ms
+            formula: '[t_settle] * 1000'
+            description: Settling time in milliseconds
+          - var: regulation_error_pct
+            formula: 100 * abs([vout_steady] - {criteria.target_vout}) / {criteria.target_vout}
+            description: Steady-state regulation error percentage
+      - rid: tr_line_regulation
+        requirement: "Line regulation test: input voltage step from 43V to 53V (\xC3\
+          \u201A\xC2\xB110% line variation). Measure output voltage deviation and\
+          \ recovery time at [R_LOAD, pos]. Verify regulation within \xC3\u201A\xC2\
+          \xB12% of 12V target."
+        criteria:
+          target_vout: 12.0
+          line_regulation_pct: 2.0
+          recovery_time_ms: 2.0
+          vin_min: 43.0
+          vin_max: 53.0
+        environment:
+          - ref: time_domain
+            t_start: 0.01125
+            t_stop: 0.015
+            t_step: 1.0e-07
+            description: 15ms simulation for line transient response
+        measurement:
+          - ref: VIN
+            plot: false
+            quantity: voltage
+            nets:
+              - - VIN
+                - +
+              - - VIN
+                - '-'
+          - ref: VOUT
+            plot: false
+            quantity: voltage
+            nets:
+              - - R_LOAD
+                - pos
+              - - R_LOAD
+                - neg
+            data:
+              - name: vout_min
+                spice_command: min
+                description: Minimum output voltage during line transient
+              - name: vout_max
+                spice_command: max
+                description: Maximum output voltage during line transient
+              - name: vout_avg
+                spice_command: avg
+                description: Average output voltage
+              - name: t_recovery
+                spice_command: TRIG AT=0.001 TARG [VOUT] VAL={{criteria.target_vout}*0.98}
+                  CROSS=LAST
+                description: Recovery time to within 2% of target (last crossing)
+            description: Output voltage measurement for line regulation test
+        outputs:
+          - var: vout_deviation_max_pct
+            formula: 100 * max(abs([vout_max] - {criteria.target_vout}), abs([vout_min]
+              - {criteria.target_vout})) / {criteria.target_vout}
+            description: Maximum output voltage deviation percentage
+          - var: line_regulation_pct
+            formula: 100 * abs([vout_max] - [vout_min]) / {criteria.target_vout}
+            description: Line regulation percentage (peak-to-peak variation)
+          - var: recovery_time_ms
+            formula: '[t_recovery] * 1000'
+            description: Recovery time in milliseconds
+          - var: vout_avg_v
+            formula: '[vout_avg]'
+            description: Average output voltage in volts
+      - rid: tr_load_transient
+        requirement: 'Load transient response: step load change from 50% to 100% of
+          rated load. Measure output voltage deviation, undershoot, and recovery time
+          at [R_LOAD, pos]. Verify transient response within specifications.'
+        criteria:
+          target_vout: 12.0
+          load_transient_undershoot_pct: 8.0
+          recovery_time_ms: 3.0
+          load_light_pct: 50.0
+          load_heavy_pct: 100.0
+        environment:
+          - ref: time_domain
+            t_start: 0.01125
+            t_stop: 0.015
+            t_step: 1.0e-07
+            description: 15ms simulation for load step transient
+        measurement:
+          - ref: VIN
+            plot: false
+            quantity: voltage
+            nets:
+              - - VIN
+                - +
+              - - VIN
+                - '-'
+          - ref: VOUT
+            plot: false
+            quantity: voltage
+            nets:
+              - - R_LOAD
+                - pos
+              - - R_LOAD
+                - neg
+            data:
+              - name: vout_min
+                spice_command: min
+                description: Minimum output voltage during load transient (undershoot)
+              - name: vout_avg
+                spice_command: avg
+                description: Average output voltage
+              - name: t_recovery
+                spice_command: TRIG AT=0.001 TARG [VOUT] VAL={{criteria.target_vout}*0.95}
+                  CROSS=LAST
+                description: Recovery time to within 5% of target (last crossing)
+            description: Output voltage measurement for load transient test
+        outputs:
+          - var: undershoot_pct
+            formula: 100 * abs({criteria.target_vout} - [vout_min]) / {criteria.target_vout}
+            description: Output voltage undershoot percentage
+          - var: recovery_time_ms
+            formula: '[t_recovery] * 1000'
+            description: Recovery time in milliseconds
+          - var: vout_avg_v
+            formula: '[vout_avg]'
+            description: Average output voltage in volts
+      - rid: tr_efficiency
+        requirement: Efficiency measurement at nominal operating point (48V input,
+          12V output, rated load). Calculate input power and output power to determine
+          conversion efficiency. Target >85% efficiency for isolated full-bridge topology.
+        criteria:
+          efficiency_min_pct: 85.0
+          vin_nominal: 48.0
+          target_vout: 12.0
+        environment:
+          - ref: time_domain
+            t_start: 0.012
+            t_stop: 0.015
+            t_step: 1.0e-07
+            description: 15ms simulation for steady-state efficiency calculation
+        measurement:
+          - ref: VOUT
+            plot: false
+            quantity: voltage
+            nets:
+              - - R_LOAD
+                - pos
+              - - R_LOAD
+                - neg
+            data:
+              - name: vout_avg
+                spice_command: avg
+                description: Average output voltage
+            description: Output voltage measurement
+          - ref: IOUT
+            plot: false
+            component: R_LOAD
+            quantity: current
+            data:
+              - name: iout_avg
+                spice_command: avg
+                description: Average output current
+            description: Output current measurement
+          - ref: VIN
+            plot: false
+            quantity: voltage
+            nets:
+              - - VIN
+                - +
+              - - VIN
+                - '-'
+            data:
+              - name: vin_avg
+                spice_command: avg
+                description: Average input voltage
+            description: Input voltage measurement
+          - ref: IIN
+            plot: false
+            component: VIN
+            quantity: current
+            data:
+              - name: iin_avg
+                spice_command: avg
+                description: Average input current
+            description: Input current measurement
+        outputs:
+          - var: pout_w
+            formula: abs([vout_avg] * [iout_avg])
+            description: Output power in watts
+          - var: pin_w
+            formula: abs([vin_avg] * [iin_avg])
+            description: Input power in watts
+          - var: efficiency_pct
+            formula: 100 * abs([vout_avg] * [iout_avg]) / abs([vin_avg] * [iin_avg])
+            description: Conversion efficiency percentage
+          - var: power_loss_w
+            formula: abs([vin_avg] * [iin_avg]) - abs([vout_avg] * [iout_avg])
+            description: Power loss in watts
+      - rid: tr_switch_stress
+        requirement: Primary-side switch voltage and current stress analysis. Measure
+          peak voltage across S1-S4 (should not exceed 48V due to full-bridge topology)
+          and peak switch currents. Verify reduced voltage stress compared to half-bridge.
+        criteria:
+          switch_voltage_max: 55.0
+          switch_current_peak_a: 10.0
+          vin_nominal: 48.0
+        environment:
+          - ref: time_domain
+            t_start: 0.01275
+            t_stop: 0.015
+            t_step: 1.0e-07
+            description: 15ms simulation for switch stress measurement
+        measurement:
+          - ref: VIN
+            plot: false
+            quantity: voltage
+            nets:
+              - - VIN
+                - +
+              - - VIN
+                - '-'
+          - ref: VSW1
+            plot:
+              x_axis: time
+              title: Switch S1 Drain-Source Voltage
+            quantity: voltage
+            nets:
+              - - S1
+                - drain
+              - - S1
+                - source
+            data:
+              - name: vsw1_peak
+                spice_command: max
+                description: Peak voltage across S1
+              - name: vsw1_min
+                spice_command: min
+                description: Minimum voltage across S1
+            description: Switch S1 voltage stress measurement
+          - ref: VSW2
+            plot: false
+            quantity: voltage
+            nets:
+              - - S2
+                - drain
+              - - S2
+                - source
+            data:
+              - name: vsw2_peak
+                spice_command: max
+                description: Peak voltage across S2
+              - name: vsw2_min
+                spice_command: min
+                description: Minimum voltage across S2
+            description: Switch S2 voltage stress measurement
+          - ref: VSW3
+            plot: false
+            quantity: voltage
+            nets:
+              - - S3
+                - drain
+              - - S3
+                - source
+            data:
+              - name: vsw3_peak
+                spice_command: max
+                description: Peak voltage across S3
+              - name: vsw3_min
+                spice_command: min
+                description: Minimum voltage across S3
+            description: Switch S3 voltage stress measurement
+          - ref: VSW4
+            plot: false
+            quantity: voltage
+            nets:
+              - - S4
+                - drain
+              - - S4
+                - source
+            data:
+              - name: vsw4_peak
+                spice_command: max
+                description: Peak voltage across S4
+              - name: vsw4_min
+                spice_command: min
+                description: Minimum voltage across S4
+            description: Switch S4 voltage stress measurement
+          - ref: ISW1
+            plot: false
+            component: S1
+            quantity: current
+            data:
+              - name: isw1_peak
+                spice_command: max
+                description: Peak current through S1
+            description: Switch S1 current stress measurement
+          - ref: ISW2
+            plot: false
+            component: S2
+            quantity: current
+            data:
+              - name: isw2_peak
+                spice_command: max
+                description: Peak current through S2
+            description: Switch S2 current stress measurement
+          - ref: ISW3
+            plot: false
+            component: S3
+            quantity: current
+            data:
+              - name: isw3_peak
+                spice_command: max
+                description: Peak current through S3
+            description: Switch S3 current stress measurement
+          - ref: ISW4
+            plot: false
+            component: S4
+            quantity: current
+            data:
+              - name: isw4_peak
+                spice_command: max
+                description: Peak current through S4
+            description: Switch S4 current stress measurement
+          - ref: VOUT
+            plot: false
+            quantity: voltage
+            nets:
+              - - R_LOAD
+                - pos
+              - - R_LOAD
+                - neg
+        outputs:
+          - var: switch_voltage_max_v
+            formula: max(abs([vsw1_peak]), abs([vsw1_min]), abs([vsw2_peak]), abs([vsw2_min]),
+              abs([vsw3_peak]), abs([vsw3_min]), abs([vsw4_peak]), abs([vsw4_min]))
+            description: Maximum voltage stress across all switches in volts
+          - var: switch_current_peak_a
+            formula: max(abs([isw1_peak]), abs([isw2_peak]), abs([isw3_peak]), abs([isw4_peak]))
+            description: Maximum current stress across all switches in amperes
+          - var: vsw1_peak_v
+            formula: abs([vsw1_peak])
+            description: Peak voltage across S1 in volts
+          - var: vsw2_peak_v
+            formula: abs([vsw2_peak])
+            description: Peak voltage across S2 in volts
+          - var: vsw3_peak_v
+            formula: abs([vsw3_peak])
+            description: Peak voltage across S3 in volts
+          - var: vsw4_peak_v
+            formula: abs([vsw4_peak])
+            description: Peak voltage across S4 in volts
+      - rid: tr_transformer_current
+        requirement: Transformer primary and secondary current waveforms. Measure
+          primary-side current (at T1 primary windings P1, P2) and secondary-side
+          currents (at T1 secondary windings S1, S2). Verify 4:1 current transformation
+          ratio and magnetizing current.
+        criteria:
+          primary_current_peak_a: 8.0
+          secondary_current_peak_a: 32.0
+          transformer_ratio: 4.0
+        environment:
+          - ref: time_domain
+            t_start: 0.01275
+            t_stop: 0.015
+            t_step: 1.0e-07
+            description: 15ms simulation for transformer current analysis
+        measurement:
+          - ref: VIN
+            plot: false
+            quantity: voltage
+            nets:
+              - - VIN
+                - +
+              - - VIN
+                - '-'
+          - ref: IPRI
+            plot:
+              x_axis: time
+              title: Transformer Primary Current
+            component: T1.pri
+            quantity: current
+            data:
+              - name: ipri_peak
+                spice_command: max
+                description: Peak primary current
+              - name: ipri_rms
+                spice_command: rms
+                description: RMS primary current
+            description: Transformer primary winding current measurement
+          - ref: ISEC1
+            plot:
+              x_axis: time
+              title: Transformer Secondary Winding 1 Current
+            component: T1.sec1
+            quantity: current
+            data:
+              - name: isec1_peak
+                spice_command: max
+                description: Peak secondary winding 1 current
+              - name: isec1_rms
+                spice_command: rms
+                description: RMS secondary winding 1 current
+            description: Transformer secondary winding 1 current measurement
+          - ref: ISEC2
+            plot: false
+            component: T1.sec2
+            quantity: current
+            data:
+              - name: isec2_peak
+                spice_command: max
+                description: Peak secondary winding 2 current
+              - name: isec2_rms
+                spice_command: rms
+                description: RMS secondary winding 2 current
+            description: Transformer secondary winding 2 current measurement
+          - ref: VOUT
+            plot: false
+            quantity: voltage
+            nets:
+              - - R_LOAD
+                - pos
+              - - R_LOAD
+                - neg
+        outputs:
+          - var: ipri_peak_a
+            formula: abs([ipri_peak])
+            description: Peak primary current in amperes
+          - var: isec_peak_a
+            formula: max(abs([isec1_peak]), abs([isec2_peak]))
+            description: Peak secondary current in amperes (maximum of both windings)
+          - var: current_ratio
+            formula: abs([isec1_peak]) / abs([ipri_peak])
+            description: Actual current transformation ratio (secondary/primary)
+          - var: ipri_rms_a
+            formula: abs([ipri_rms])
+            description: RMS primary current in amperes
+          - var: isec1_rms_a
+            formula: abs([isec1_rms])
+            description: RMS secondary winding 1 current in amperes
+      - rid: tr_output_ripple
+        requirement: Output voltage ripple measurement at steady state. Measure peak-to-peak
+          ripple voltage at [R_LOAD, pos] and inductor current ripple at L_OUT. Verify
+          ripple within acceptable limits for 12V output.
+        criteria:
+          vout_ripple_mv_pp: 120.0
+          inductor_ripple_pct: 30.0
+          target_vout: 12.0
+        environment:
+          - ref: time_domain
+            t_start: 0.01275
+            t_stop: 0.015
+            t_step: 1.0e-07
+            description: 15ms simulation for ripple measurement at steady state
+        measurement:
+          - ref: VIN
+            plot: false
+            quantity: voltage
+            nets:
+              - - VIN
+                - +
+              - - VIN
+                - '-'
+          - ref: VOUT
+            plot: false
+            quantity: voltage
+            nets:
+              - - R_LOAD
+                - pos
+              - - R_LOAD
+                - neg
+            data:
+              - name: vout_avg
+                spice_command: avg
+                description: Average output voltage
+              - name: vout_ripple_pp
+                spice_command: pp
+                description: Peak-to-peak output voltage ripple
+            description: Output voltage ripple measurement
+          - ref: IL_OUT
+            plot:
+              x_axis: time
+              title: Output Inductor Current Ripple
+            component: L_OUT
+            quantity: current
+            data:
+              - name: il_avg
+                spice_command: avg
+                description: Average inductor current
+              - name: il_ripple_pp
+                spice_command: pp
+                description: Peak-to-peak inductor current ripple
+            description: Output inductor current ripple measurement
+        outputs:
+          - var: vout_ripple_mv_pp
+            formula: '[vout_ripple_pp] * 1000'
+            description: Output voltage ripple in millivolts peak-to-peak
+          - var: inductor_ripple_pct
+            formula: 100 * abs([il_ripple_pp]) / abs([il_avg])
+            description: Inductor current ripple percentage
+          - var: vout_avg_v
+            formula: '[vout_avg]'
+            description: Average output voltage in volts
+          - var: il_avg_a
+            formula: abs([il_avg])
+            description: Average inductor current in amperes
+      - rid: tr_rectifier_stress
+        requirement: Secondary-side rectifier diode stress analysis. Measure peak
+          reverse voltage and forward current through DR1 and DR2 (center-tap rectifier
+          diodes). Verify diode ratings are adequate.
+        criteria:
+          diode_reverse_voltage_max: 30.0
+          diode_forward_current_peak_a: 15.0
+          target_vout: 12.0
+        environment:
+          - ref: time_domain
+            t_start: 0.01275
+            t_stop: 0.015
+            t_step: 1.0e-07
+            description: 15ms simulation for rectifier diode stress
+        measurement:
+          - ref: VIN
+            plot: false
+            quantity: voltage
+            nets:
+              - - VIN
+                - +
+              - - VIN
+                - '-'
+          - ref: VDR1
+            plot:
+              x_axis: time
+              title: Rectifier DR1 Voltage Stress
+            quantity: voltage
+            nets:
+              - - DR1
+                - cathode
+              - - DR1
+                - anode
+            data:
+              - name: vdr1_peak
+                spice_command: max
+                description: Peak reverse voltage across DR1
+            description: Rectifier DR1 voltage stress measurement
+          - ref: VDR2
+            plot: false
+            quantity: voltage
+            nets:
+              - - DR2
+                - cathode
+              - - DR2
+                - anode
+            data:
+              - name: vdr2_peak
+                spice_command: max
+                description: Peak reverse voltage across DR2
+            description: Rectifier DR2 voltage stress measurement
+          - ref: IDR1
+            plot:
+              x_axis: time
+              title: Rectifier DR1 Forward Current
+            component: DR1
+            quantity: current
+            data:
+              - name: idr1_peak
+                spice_command: max
+                description: Peak forward current through DR1
+              - name: idr1_avg
+                spice_command: avg
+                description: Average forward current through DR1
+            description: Rectifier DR1 current stress measurement
+          - ref: IDR2
+            plot: false
+            component: DR2
+            quantity: current
+            data:
+              - name: idr2_peak
+                spice_command: max
+                description: Peak forward current through DR2
+              - name: idr2_avg
+                spice_command: avg
+                description: Average forward current through DR2
+            description: Rectifier DR2 current stress measurement
+          - ref: VOUT
+            plot: false
+            quantity: voltage
+            nets:
+              - - R_LOAD
+                - pos
+              - - R_LOAD
+                - neg
+        outputs:
+          - var: diode_reverse_voltage_max_v
+            formula: max(abs([vdr1_peak]), abs([vdr2_peak]))
+            description: Maximum reverse voltage stress across rectifier diodes in
+              volts
+          - var: diode_forward_current_peak_a
+            formula: max(abs([idr1_peak]), abs([idr2_peak]))
+            description: Maximum forward current stress across rectifier diodes in
+              amperes
+          - var: idr1_avg_a
+            formula: abs([idr1_avg])
+            description: Average forward current through DR1 in amperes
+          - var: idr2_avg_a
+            formula: abs([idr2_avg])
+            description: Average forward current through DR2 in amperes
+    metrics:
+      objectives: []
+      constraints: []
+metadata:
+  stage:
+    - switching
+    - isolation
+    - rectification
+    - filter
+  topology: isolated
+  control: full_bridge_pwm
+  tags:
+    - full-bridge
+    - isolated
+    - high-power

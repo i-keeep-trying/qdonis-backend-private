@@ -1,0 +1,498 @@
+id: dcdc_interleaved_multiphase_buck
+name: Interleaved Multiphase Buck DC-DC Converter
+description: Two-phase interleaved synchronous buck converter for high-current CPU/GPU
+  core power delivery. Converts 12V input to 1.2V output at ~2.4A load. Both phases
+  run at 500kHz with 180 degrees phase offset (tdelay = half-period = 1us on phase
+  2) to achieve ripple current cancellation at the output. Each phase uses PMOS high-side
+  and NMOS synchronous low-side with 100ns dead time. Shared output capacitor benefits
+  from interleaved ripple cancellation, achieving substantially lower ripple than
+  a single-phase design.
+components:
+  - ref: VIN
+    type: node
+    role: input_source
+    params:
+      node_type: voltage_source
+      source: dc
+      voltage: 12
+      series_resistance: 0.005
+  - ref: PWM1
+    type: node
+    role: pwm_control
+    params:
+      node_type: pwm_control
+      frequency: 500e3
+      duty_cycle: 0.12
+      vhigh: 12.0
+      vlow: 0.0
+      trise: 2e-8
+      tfall: 2e-8
+      tdelay: 0
+      drive_resistance: 5
+  - ref: PWM2
+    type: node
+    role: pwm_control
+    params:
+      node_type: pwm_control
+      frequency: 500e3
+      duty_cycle: 0.38
+      vhigh: 10.0
+      vlow: 0.0
+      trise: 2e-8
+      tfall: 2e-8
+      tdelay: 1.2e-07
+      drive_resistance: 5
+  - ref: PWM3
+    type: node
+    role: pwm_control
+    params:
+      node_type: pwm_control
+      frequency: 500e3
+      duty_cycle: 0.12
+      vhigh: 12.0
+      vlow: 0.0
+      trise: 2e-8
+      tfall: 2e-8
+      tdelay: 1.0e-06
+      drive_resistance: 5
+  - ref: PWM4
+    type: node
+    role: pwm_control
+    params:
+      node_type: pwm_control
+      frequency: 500e3
+      duty_cycle: 0.38
+      vhigh: 10.0
+      vlow: 0.0
+      trise: 2e-8
+      tfall: 2e-8
+      tdelay: 1.2e-06
+      drive_resistance: 5
+  - ref: SW1
+    type: transistor
+    role: ph1_hs
+    params:
+      family: mosfet
+      type: pmos
+      mode: enhancement
+      voltage_rating: 100
+      current_rating: 10
+      Vto: -2.0
+      Kp: 100e-3
+      Lambda: 0.01
+      Cgs: 800e-12
+      Cgd: 150e-12
+      Cdb: 150e-12
+    layout:
+      schX: -2.0
+      schY: -1.0
+      rotation: 90deg
+  - ref: SW2
+    type: transistor
+    role: ph1_ls
+    params:
+      family: mosfet
+      type: nmos
+      mode: enhancement
+      voltage_rating: 100
+      current_rating: 10
+      Vto: 1.5
+      Kn: 200e-3
+      Lambda: 0.01
+      Cgs: 1500e-12
+      Cgd: 300e-12
+      Cdb: 300e-12
+    layout:
+      schX: -2.0
+      schY: -3.0
+      rotation: 270deg
+  - ref: SW3
+    type: transistor
+    role: ph2_hs
+    params:
+      family: mosfet
+      type: pmos
+      mode: enhancement
+      voltage_rating: 100
+      current_rating: 10
+      Vto: -2.0
+      Kp: 100e-3
+      Lambda: 0.01
+      Cgs: 800e-12
+      Cgd: 150e-12
+      Cdb: 150e-12
+    layout:
+      schX: -2.0
+      schY: -5.0
+      rotation: 90deg
+  - ref: SW4
+    type: transistor
+    role: ph2_ls
+    params:
+      family: mosfet
+      type: nmos
+      mode: enhancement
+      voltage_rating: 100
+      current_rating: 10
+      Vto: 1.5
+      Kn: 200e-3
+      Lambda: 0.01
+      Cgs: 1500e-12
+      Cgd: 300e-12
+      Cdb: 300e-12
+    layout:
+      schX: -2.0
+      schY: -7.0
+      rotation: 270deg
+  - ref: L1
+    type: inductor
+    role: ph1_filter
+    params:
+      inductance: 330e-9
+      series_resistance: 0.02
+      saturation_current: 15.0
+      core_loss_resistance: 1e6
+      parasitic_capacitance: 20e-12
+      ic: 0
+    layout:
+      schX: -0.5
+      schY: -2.0
+      orientation: horizontal
+  - ref: L2
+    type: inductor
+    role: ph2_filter
+    params:
+      inductance: 330e-9
+      series_resistance: 0.02
+      saturation_current: 15.0
+      core_loss_resistance: 1e6
+      parasitic_capacitance: 20e-12
+      ic: 0
+    layout:
+      schX: -0.5
+      schY: -6.0
+      orientation: horizontal
+  - ref: Cout
+    type: capacitor
+    role: output_filter
+    params:
+      capacitance: 560e-6
+      polarized: true
+      voltage_rating: 5
+      tolerance: 0.2
+      esr: 0.005
+      esl: 2e-9
+      leakage_current: 10e-6
+      ic: 0
+    layout:
+      schX: 1.0
+      schY: -4.0
+      orientation: vertical
+  - ref: R_LOAD
+    type: resistor
+    role: load
+    params:
+      resistance: 0.5
+      tolerance: 0.05
+      temp_coefficient: 100e-6
+      parasitic_inductance: 5e-9
+    layout:
+      schX: 3.0
+      schY: -4.0
+      orientation: vertical
+nets:
+  - - - VIN
+      - +
+    - - SW1
+      - source
+    - - SW3
+      - source
+  - - - PWM1
+      - pos
+    - - SW1
+      - gate
+  - - - PWM1
+      - neg
+    - - VIN
+      - '-'
+  - - - SW1
+      - drain
+    - - SW2
+      - drain
+    - - L1
+      - pin1
+  - - - PWM2
+      - pos
+    - - SW2
+      - gate
+  - - - PWM2
+      - neg
+    - - VIN
+      - '-'
+  - - - SW2
+      - source
+    - - VIN
+      - '-'
+  - - - PWM3
+      - pos
+    - - SW3
+      - gate
+  - - - PWM3
+      - neg
+    - - VIN
+      - '-'
+  - - - SW3
+      - drain
+    - - SW4
+      - drain
+    - - L2
+      - pin1
+  - - - PWM4
+      - pos
+    - - SW4
+      - gate
+  - - - PWM4
+      - neg
+    - - VIN
+      - '-'
+  - - - SW4
+      - source
+    - - VIN
+      - '-'
+  - - - L1
+      - pin2
+    - - L2
+      - pin2
+    - - Cout
+      - pos
+    - - R_LOAD
+      - pos
+  - - - VIN
+      - '-'
+    - - Cout
+      - neg
+    - - R_LOAD
+      - neg
+analysis:
+  transient:
+    spice_settings:
+      tstop: 0.01
+      use_ic: false
+      reltol: 0.01
+      abstol: 1.0e-06
+      vntol: 0.0001
+      gmin: 1.0e-12
+      method: gear
+      maxord: 2
+    requirements:
+      - rid: tr_reg
+        requirement: Output voltage regulation at 1.2V; verify interleaved ripple
+          cancellation achieves < 5mV ripple
+        criteria:
+          target_vout: 1.2
+          regulation_limit_pct: 3
+          ripple_limit_vpp: 5e-3
+        measurement:
+          - ref: VIN
+            plot:
+              x_axis: time
+              title: Input Voltage (tr_reg)
+            quantity: voltage
+            nets:
+              - - VIN
+                - +
+              - - VIN
+                - '-'
+          - ref: VOUT
+            plot:
+              x_axis: time
+              title: Output Voltage VRM
+            component: R_LOAD
+            quantity: voltage
+            nets:
+              - - R_LOAD
+                - pos
+              - - VIN
+                - '-'
+            data:
+              - name: Vout_avg
+                spice_command: avg
+                description: Average output voltage
+              - name: Vout_ripple_vpp
+                spice_command: pp
+                description: Peak-to-peak output ripple (should be cancelled by interleaving)
+          - ref: IOUT
+            plot: false
+            component: R_LOAD
+            quantity: current
+            data:
+              - name: Iout_avg
+                spice_command: avg
+                description: Average load current
+        outputs:
+          - var: load_regulation_pct
+            formula: 100*abs([Vout_avg] - {criteria.target_vout})/{criteria.target_vout}
+            description: Load regulation deviation from target
+          - var: vout_avg_v
+            formula: '[Vout_avg]'
+            description: Average output voltage
+          - var: vout_ripple_vpp_v
+            formula: '[Vout_ripple_vpp]'
+            description: Output voltage peak-to-peak ripple
+      - rid: tr_balance
+        requirement: "Current sharing balance between phase 1 and phase 2; verify\
+          \ IL1_avg \xE2\u2030\u02C6 IL2_avg \xE2\u2030\u02C6 Iout/2"
+        criteria:
+          current_balance_pct: 10
+        measurement:
+          - ref: VIN
+            plot: false
+            quantity: voltage
+            nets:
+              - - VIN
+                - +
+              - - VIN
+                - '-'
+          - ref: IL1
+            plot:
+              x_axis: time
+              title: Phase 1 Inductor Current
+            component: L1
+            quantity: current
+            data:
+              - name: IL1_avg
+                spice_command: avg
+                description: Average phase 1 inductor current
+              - name: IL1_ripple
+                spice_command: pp
+                description: Phase 1 individual ripple (before cancellation)
+          - ref: IL2
+            plot:
+              x_axis: time
+              title: Phase 2 Inductor Current
+            component: L2
+            quantity: current
+            data:
+              - name: IL2_avg
+                spice_command: avg
+                description: Average phase 2 inductor current
+              - name: IL2_ripple
+                spice_command: pp
+                description: Phase 2 individual ripple (before cancellation)
+          - ref: IOUT_B
+            plot: false
+            component: R_LOAD
+            quantity: current
+            data:
+              - name: Iout_avg
+                spice_command: avg
+                description: Total average load current
+          - ref: VOUT
+            plot: false
+            quantity: voltage
+            nets:
+              - - R_LOAD
+                - pos
+              - - R_LOAD
+                - neg
+        outputs:
+          - var: il1_avg_a
+            formula: '[IL1_avg]'
+            description: Phase 1 average current
+          - var: il2_avg_a
+            formula: '[IL2_avg]'
+            description: Phase 2 average current
+          - var: current_balance_pct
+            formula: 100*abs([IL1_avg] - [IL2_avg])/([Iout_avg]/2)
+            description: Current sharing imbalance percentage
+      - rid: tr_eff
+        requirement: Efficiency and per-phase loss breakdown
+        criteria:
+          efficiency_target_pct: 90
+        measurement:
+          - ref: IIN
+            plot: false
+            component: VIN
+            quantity: current
+            data:
+              - name: Iin_avg
+                spice_command: avg
+                description: Average input current
+          - ref: IOUT_EFF
+            plot: false
+            component: R_LOAD
+            quantity: current
+            data:
+              - name: Iout_avg
+                spice_command: avg
+                description: Average load current
+          - ref: VOUT_EFF
+            plot: false
+            component: R_LOAD
+            quantity: voltage
+            nets:
+              - - R_LOAD
+                - pos
+              - - VIN
+                - '-'
+            data:
+              - name: Vout_avg
+                spice_command: avg
+                description: Average output voltage
+          - ref: VIN_EFF
+            plot: false
+            component: VIN
+            quantity: voltage
+            nets:
+              - - VIN
+                - +
+              - - VIN
+                - '-'
+            data:
+              - name: Vin_avg
+                spice_command: avg
+                description: Average input voltage
+          - ref: IL1_EFF
+            plot: false
+            component: L1
+            quantity: current
+            data:
+              - name: IL1_rms
+                spice_command: rms
+                description: RMS phase 1 inductor current
+          - ref: IL2_EFF
+            plot: false
+            component: L2
+            quantity: current
+            data:
+              - name: IL2_rms
+                spice_command: rms
+                description: RMS phase 2 inductor current
+        outputs:
+          - var: Pin_avg
+            formula: abs([Vin_avg]*[Iin_avg])
+            description: Average input power
+          - var: Pout_avg
+            formula: '[Vout_avg]*[Iout_avg]'
+            description: Average output power
+          - var: P_L1_cu
+            formula: '[IL1_rms]**2*{components.L1.series_resistance}'
+            description: Phase 1 inductor copper loss
+          - var: P_L2_cu
+            formula: '[IL2_rms]**2*{components.L2.series_resistance}'
+            description: Phase 2 inductor copper loss
+          - var: efficiency_pct
+            formula: 100*[Pout_avg]/[Pin_avg]
+            description: Efficiency percentage
+metadata:
+  stage:
+    - power_switch
+    - sync_rectifier
+    - filter
+  topology: non-isolated
+  control: PWM
+  tags:
+    - interleaved-buck
+    - multiphase
+    - VRM
+    - step-down

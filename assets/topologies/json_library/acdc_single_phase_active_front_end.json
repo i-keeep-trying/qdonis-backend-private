@@ -1,0 +1,330 @@
+{
+  "components": [
+    {
+      "id": "M_A_TOP",
+      "type": "MOSFET",
+      "x": -80,
+      "y": -560,
+      "rotation": 0,
+      "parameters": {
+        "Ron": "10m",
+        "Roff": "1M"
+      },
+      "mirrorY": false
+    },
+    {
+      "id": "M_A_BOT",
+      "type": "MOSFET",
+      "x": -80,
+      "y": -320,
+      "rotation": 0,
+      "parameters": {
+        "Ron": "10m",
+        "Roff": "1M"
+      },
+      "mirrorY": false
+    },
+    {
+      "id": "M_B_TOP",
+      "type": "MOSFET",
+      "x": 40,
+      "y": -560,
+      "rotation": 0,
+      "parameters": {
+        "Ron": "10m",
+        "Roff": "1M"
+      },
+      "mirrorY": false
+    },
+    {
+      "id": "M_B_BOT",
+      "type": "MOSFET",
+      "x": 40,
+      "y": -320,
+      "rotation": 0,
+      "parameters": {
+        "Ron": "10m",
+        "Roff": "1M"
+      },
+      "mirrorY": false
+    },
+    {
+      "id": "L_BOOST",
+      "type": "L",
+      "x": 200,
+      "y": -500,
+      "rotation": 90,
+      "parameters": {
+        "L": "10m",
+        "esr": "50m",
+        "iL0": "0"
+      },
+      "mirrorY": false
+    },
+    {
+      "id": "R_DC",
+      "type": "R",
+      "x": -240,
+      "y": -460,
+      "rotation": 0,
+      "parameters": {
+        "value": "10",
+        "esr": "0"
+      },
+      "mirrorY": false
+    },
+    {
+      "id": "C_DC",
+      "type": "C",
+      "x": -160,
+      "y": -460,
+      "rotation": 0,
+      "mirrorX": false,
+      "mirrorY": false,
+      "parameters": {
+        "C": "100u",
+        "esr": "10m",
+        "vC0": "0"
+      }
+    },
+    {
+      "id": "VAC",
+      "type": "AC_V",
+      "x": 360,
+      "y": -440,
+      "rotation": 0,
+      "mirrorX": false,
+      "mirrorY": false,
+      "parameters": {
+        "amplitude": "12",
+        "frequency": "50"
+      }
+    }
+  ],
+  "wires": [
+    {
+      "id": "W1",
+      "from": {
+        "type": "pin",
+        "compId": "M_A_TOP",
+        "terminal": "D"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "M_B_TOP",
+        "terminal": "D"
+      }
+    },
+    {
+      "id": "W2",
+      "from": {
+        "type": "pin",
+        "compId": "M_A_TOP",
+        "terminal": "S"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "M_A_BOT",
+        "terminal": "D"
+      }
+    },
+    {
+      "id": "W3",
+      "from": {
+        "type": "pin",
+        "compId": "M_B_TOP",
+        "terminal": "S"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "M_B_BOT",
+        "terminal": "D"
+      }
+    },
+    {
+      "id": "W4",
+      "from": {
+        "type": "pin",
+        "compId": "M_A_BOT",
+        "terminal": "S"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "M_B_BOT",
+        "terminal": "S"
+      }
+    },
+    {
+      "id": "W9",
+      "from": {
+        "type": "pin",
+        "compId": "L_BOOST",
+        "terminal": "B"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "M_A_TOP",
+        "terminal": "S"
+      }
+    },
+    {
+      "id": "W10",
+      "from": {
+        "type": "pin",
+        "compId": "VAC",
+        "terminal": "A"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "L_BOOST",
+        "terminal": "A"
+      }
+    },
+    {
+      "id": "W11",
+      "from": {
+        "type": "pin",
+        "compId": "VAC",
+        "terminal": "B"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "M_B_BOT",
+        "terminal": "D"
+      }
+    },
+    {
+      "id": "W12",
+      "from": {
+        "type": "pin",
+        "compId": "C_DC",
+        "terminal": "A"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "R_DC",
+        "terminal": "A"
+      },
+      "manualPath": [
+        {
+          "x": -160,
+          "y": -500
+        },
+        {
+          "x": -160,
+          "y": -620
+        },
+        {
+          "x": -240,
+          "y": -620
+        },
+        {
+          "x": -240,
+          "y": -500
+        }
+      ]
+    },
+    {
+      "id": "W13",
+      "from": {
+        "type": "pin",
+        "compId": "C_DC",
+        "terminal": "A"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "M_A_TOP",
+        "terminal": "D"
+      },
+      "manualPath": [
+        {
+          "x": -160,
+          "y": -500
+        },
+        {
+          "x": -160,
+          "y": -620
+        },
+        {
+          "x": -80,
+          "y": -620
+        },
+        {
+          "x": -80,
+          "y": -600
+        }
+      ]
+    },
+    {
+      "id": "W14",
+      "from": {
+        "type": "pin",
+        "compId": "C_DC",
+        "terminal": "B"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "M_A_BOT",
+        "terminal": "S"
+      },
+      "manualPath": [
+        {
+          "x": -160,
+          "y": -420
+        },
+        {
+          "x": -160,
+          "y": -260
+        },
+        {
+          "x": -80,
+          "y": -260
+        },
+        {
+          "x": -80,
+          "y": -280
+        }
+      ]
+    },
+    {
+      "id": "W15",
+      "from": {
+        "type": "pin",
+        "compId": "R_DC",
+        "terminal": "B"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "C_DC",
+        "terminal": "B"
+      },
+      "manualPath": [
+        {
+          "x": -240,
+          "y": -420
+        },
+        {
+          "x": -240,
+          "y": -260
+        },
+        {
+          "x": -160,
+          "y": -260
+        },
+        {
+          "x": -160,
+          "y": -420
+        }
+      ]
+    }
+  ],
+  "plotConfiguration": {
+    "plots": []
+  },
+  "simulationSettings": {
+    "stopTime": "0.05",
+    "stepSize": "1e-5",
+    "stepType": "fixed",
+    "solver": "euler"
+  }
+}

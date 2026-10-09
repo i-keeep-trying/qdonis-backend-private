@@ -38,6 +38,7 @@ export const ErrorCode = {
   ValidationFailed: 'VALIDATION_FAILED',
   AiNotConfigured: 'AI_NOT_CONFIGURED',
   SettingNotFound: 'SETTING_NOT_FOUND',
+  TopologyNotFound: 'TOPOLOGY_NOT_FOUND',
   // billing
   BillingNotConfigured: 'BILLING_NOT_CONFIGURED',
   PlanNotFound: 'PLAN_NOT_FOUND',

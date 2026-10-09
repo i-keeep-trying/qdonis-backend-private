@@ -1,0 +1,431 @@
+id: dcdc_synchronous_buck
+name: Synchronous Buck DC-DC Converter
+description: High-efficiency step-down DC-DC converter with synchronous NMOS rectifier
+  replacing the freewheeling diode. Converts 12V input to 5V output at 0.5A load.
+  Complementary PWM drives SW1 (PMOS high-side) and SW2 (NMOS synchronous rectifier)
+  with 100ns dead time to eliminate body-diode conduction and improve efficiency over
+  the diode-based buck.
+components:
+  - ref: VIN
+    type: node
+    role: input_source
+    params:
+      node_type: voltage_source
+      source: dc
+      voltage: 12
+      series_resistance: 0.01
+  - ref: PWM1
+    type: node
+    role: pwm_control
+    params:
+      node_type: pwm_control
+      frequency: 200e3
+      duty_cycle: 0.45
+      vhigh: 12.0
+      vlow: 0.0
+      trise: 5e-8
+      tfall: 5e-8
+      tdelay: 0
+      drive_resistance: 10
+  - ref: PWM2
+    type: node
+    role: pwm_control
+    params:
+      node_type: pwm_control
+      frequency: 200e3
+      duty_cycle: 0.51
+      vhigh: 10.0
+      vlow: 0.0
+      trise: 5e-8
+      tfall: 5e-8
+      tdelay: 2.35e-06
+      drive_resistance: 10
+  - ref: SW1
+    type: transistor
+    role: power_switch
+    params:
+      family: mosfet
+      type: nmos
+      mode: enhancement
+      voltage_rating: 100
+      current_rating: 5
+      Vto: 1.5
+      Kn: 5.0
+      Lambda: 0.01
+      Cgs: 500e-12
+      Cgd: 100e-12
+      Cdb: 100e-12
+    layout:
+      schX: -1.0
+      schY: -1.0
+      rotation: 180deg
+  - ref: SW2
+    type: transistor
+    role: sync_rectifier
+    params:
+      family: mosfet
+      type: nmos
+      mode: enhancement
+      voltage_rating: 100
+      current_rating: 5
+      Vto: 1.5
+      Kn: 5.0
+      Lambda: 0.01
+      Cgs: 1000e-12
+      Cgd: 200e-12
+      Cdb: 200e-12
+    layout:
+      schX: -0.5
+      schY: -2.0
+      rotation: 270deg
+  - ref: L1
+    type: inductor
+    role: output_filter
+    params:
+      inductance: 47e-6
+      series_resistance: 0.05
+      saturation_current: 5.0
+      core_loss_resistance: 1e6
+      parasitic_capacitance: 50e-12
+      ic: 0
+    layout:
+      schX: 1.0
+      schY: -1.0
+      orientation: horizontal
+  - ref: Cout
+    type: capacitor
+    role: output_filter
+    params:
+      capacitance: 100e-6
+      polarized: true
+      voltage_rating: 20
+      tolerance: 0.1
+      esr: 0.02
+      esl: 5e-9
+      leakage_current: 1e-9
+      ic: 0
+    layout:
+      schX: 2.0
+      schY: -2.0
+      orientation: vertical
+  - ref: R_LOAD
+    type: resistor
+    role: load
+    params:
+      resistance: 10
+      tolerance: 0.05
+      temp_coefficient: 100e-6
+      parasitic_inductance: 10e-9
+    layout:
+      schX: 3.5
+      schY: -2.0
+      orientation: vertical
+nets:
+  - - - VIN
+      - +
+    - - SW1
+      - drain
+  - - - PWM1
+      - pos
+    - - SW1
+      - gate
+  - - - PWM1
+      - neg
+    - - SW1
+      - source
+  - - - SW1
+      - source
+    - - SW2
+      - drain
+    - - L1
+      - pin1
+  - - - PWM2
+      - pos
+    - - SW2
+      - gate
+  - - - PWM2
+      - neg
+    - - VIN
+      - '-'
+  - - - SW2
+      - source
+    - - VIN
+      - '-'
+  - - - L1
+      - pin2
+    - - Cout
+      - pos
+    - - R_LOAD
+      - pos
+  - - - VIN
+      - '-'
+    - - Cout
+      - neg
+    - - R_LOAD
+      - neg
+analysis:
+  transient:
+    spice_settings:
+      tstop: 0.01
+      use_ic: false
+      reltol: 0.01
+      abstol: 1.0e-06
+      vntol: 0.0001
+      gmin: 1.0e-12
+      method: gear
+      maxord: 2
+    requirements:
+      - rid: tr_reg
+        requirement: Output voltage regulation at 5V target; verify ripple reduction
+          from SW2 synchronous rectification
+        criteria:
+          target_vout: 5.0
+          regulation_limit_pct: 5
+          ripple_limit_vpp: 30e-3
+        measurement:
+          - ref: VOUT
+            plot:
+              x_axis: time
+              title: Output Voltage Regulation
+            component: R_LOAD
+            quantity: voltage
+            nets:
+              - - R_LOAD
+                - pos
+              - - VIN
+                - '-'
+            data:
+              - name: Vout_avg
+                spice_command: avg
+                description: Average output voltage
+              - name: Vout_ripple_vpp
+                spice_command: pp
+                description: Peak-to-peak output voltage ripple
+          - ref: VIN_MEAS
+            plot:
+              x_axis: time
+              title: Input Voltage (tr_reg)
+            component: VIN
+            quantity: voltage
+            nets:
+              - - VIN
+                - +
+              - - VIN
+                - '-'
+            data:
+              - name: Vin_avg
+                spice_command: avg
+                description: Average input voltage
+          - ref: IOUT
+            plot: false
+            component: R_LOAD
+            quantity: current
+            data:
+              - name: Iout_avg
+                spice_command: avg
+                description: Average load current
+        outputs:
+          - var: load_regulation_pct
+            formula: 100*abs([Vout_avg] - {criteria.target_vout})/{criteria.target_vout}
+            description: Load regulation deviation from target
+          - var: vout_avg_v
+            formula: '[Vout_avg]'
+            description: Average output voltage
+          - var: vout_ripple_vpp_v
+            formula: '[Vout_ripple_vpp]'
+            description: Output voltage peak-to-peak ripple
+      - rid: tr_eff
+        requirement: Efficiency analysis; compare synchronous rectifier conduction
+          loss to equivalent diode Vf drop
+        criteria:
+          efficiency_target_pct: 95
+        measurement:
+          - ref: IIN
+            plot: false
+            component: VIN
+            quantity: current
+            data:
+              - name: Iin_avg
+                spice_command: avg
+                description: Average input current
+          - ref: IOUT_EFF
+            plot: false
+            component: R_LOAD
+            quantity: current
+            data:
+              - name: Iout_avg
+                spice_command: avg
+                description: Average load current
+          - ref: VOUT_EFF
+            plot: false
+            component: R_LOAD
+            quantity: voltage
+            nets:
+              - - R_LOAD
+                - pos
+              - - VIN
+                - '-'
+            data:
+              - name: Vout_avg
+                spice_command: avg
+                description: Average output voltage
+          - ref: VIN_EFF
+            plot:
+              x_axis: time
+              title: Input Voltage (tr_eff)
+            component: VIN
+            quantity: voltage
+            nets:
+              - - VIN
+                - +
+              - - VIN
+                - '-'
+            data:
+              - name: Vin_avg
+                spice_command: avg
+                description: Average input voltage
+          - ref: ISW1
+            plot:
+              x_axis: time
+              title: High-Side Switch Current
+            component: SW1
+            quantity: current
+            data:
+              - name: Isw1_rms
+                spice_command: rms
+                description: RMS high-side switch current
+          - ref: ISW2
+            plot:
+              x_axis: time
+              title: Synchronous Rectifier Current
+            component: SW2
+            quantity: current
+            data:
+              - name: Isw2_rms
+                spice_command: rms
+                description: RMS synchronous rectifier current
+          - ref: IL1
+            plot: false
+            component: L1
+            quantity: current
+            data:
+              - name: IL1_rms
+                spice_command: rms
+                description: RMS inductor current
+          - ref: ICOUT
+            plot: false
+            component: Cout
+            quantity: current
+            data:
+              - name: Icout_rms
+                spice_command: rms
+                description: RMS capacitor current
+        outputs:
+          - var: Pin_avg
+            formula: abs([Vin_avg]*[Iin_avg])
+            description: Average input power
+          - var: Pout_avg
+            formula: '[Vout_avg]*[Iout_avg]'
+            description: Average output power
+          - var: P_L1_cu
+            formula: '[IL1_rms]**2*{components.L1.series_resistance}'
+            description: Inductor copper loss
+          - var: P_Cout_esr
+            formula: '[Icout_rms]**2*{components.Cout.esr}'
+            description: Output capacitor ESR loss
+          - var: efficiency_pct
+            formula: 100*[Pout_avg]/[Pin_avg]
+            description: Efficiency percentage
+      - rid: tr_stress
+        requirement: Switch node voltage and peak current stress for SW1 and SW2
+        criteria:
+          sw_voltage_margin_pct: 20
+          sw_current_margin_pct: 30
+        measurement:
+          - ref: VIN
+            plot: false
+            quantity: voltage
+            nets:
+              - - VIN
+                - +
+              - - VIN
+                - '-'
+          - ref: VSW
+            plot:
+              x_axis: time
+              title: Switch Node Voltage
+            component: SW1
+            quantity: voltage
+            nets:
+              - - SW1
+                - drain
+              - - VIN
+                - '-'
+            data:
+              - name: Vsw_max
+                spice_command: max
+                description: Maximum switch node voltage including ringing
+              - name: Vsw_min
+                spice_command: min
+                description: Minimum switch node voltage
+          - ref: ISW1_S
+            plot: false
+            component: SW1
+            quantity: current
+            data:
+              - name: Isw1_peak
+                spice_command: max
+                description: Peak high-side switch current
+          - ref: ISW2_S
+            plot: false
+            component: SW2
+            quantity: current
+            data:
+              - name: Isw2_peak
+                spice_command: max
+                description: Peak synchronous rectifier current
+          - ref: IL1_S
+            plot:
+              x_axis: time
+              title: Inductor Current
+            component: L1
+            quantity: current
+            data:
+              - name: IL1_peak
+                spice_command: max
+                description: Peak inductor current
+              - name: IL1_ripple
+                spice_command: pp
+                description: Peak-to-peak inductor current ripple
+          - ref: VOUT
+            plot: false
+            quantity: voltage
+            nets:
+              - - R_LOAD
+                - pos
+              - - R_LOAD
+                - neg
+        outputs:
+          - var: vsw_max_v
+            formula: '[Vsw_max]'
+            description: Maximum switch node voltage
+          - var: isw1_peak_a
+            formula: '[Isw1_peak]'
+            description: Peak high-side switch current
+          - var: isw2_peak_a
+            formula: '[Isw2_peak]'
+            description: Peak synchronous rectifier current
+          - var: il1_ripple_a
+            formula: '[IL1_ripple]'
+            description: Inductor current ripple amplitude
+metadata:
+  stage:
+    - power_switch
+    - sync_rectifier
+    - filter
+  topology: non-isolated
+  control: PWM
+  tags:
+    - synchronous-buck
+    - step-down
+    - synchronous-rectification

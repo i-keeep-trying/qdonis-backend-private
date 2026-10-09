@@ -1,0 +1,168 @@
+id: acdc_flyback_pfc_dcm
+name: Flyback PFC DCM
+description: Flyback Power Factor Correction (PFC) operating in Discontinuous Conduction
+  Mode (DCM)
+components:
+- ref: GND
+  type: node
+  params:
+    node_type: ground
+- ref: VIN
+  type: node
+  role: input_source
+  params:
+    node_type: voltage_source
+    source: dc
+    voltage: 160
+- ref: CIN
+  type: capacitor
+  role: input_filter
+  params:
+    capacitance: 10e-6
+- ref: PWM
+  type: node
+  role: pwm_control
+  params:
+    node_type: pwm_control
+    frequency: 1e5
+    duty_cycle: 0.34
+    vhigh: 10.0
+    vlow: 0.0
+    trise: 1e-8
+    tfall: 1e-8
+    tdelay: 0
+- ref: SW
+  type: switch
+  role: power_switch
+  params:
+    model: sw_mod
+- ref: R_SENSE
+  type: resistor
+  role: current_sense
+  params:
+    resistance: 0.1
+- ref: T1
+  type: transformer
+  role: flyback_transformer
+  params:
+    Lm_primary: 500e-6
+    turns_ratio: 0.1
+    k_coupling: 0.9999
+    phase: same
+    Rp: 1e-3
+    Rs: 1e-3
+    core_loss_resistance: 1e9
+- ref: D1
+  type: diode
+  role: output_rectifier
+  params:
+    Is: 1e-11
+    n: 1
+    Rs: 0.01
+    Cjo: 10e-12
+    Tt: 10e-9
+- ref: Cout
+  type: capacitor
+  role: output_filter
+  params:
+    capacitance: 220e-6
+    ic: 12
+- ref: R_LOAD
+  type: resistor
+  role: load
+  params:
+    resistance: 4.8
+nets:
+- - - VIN
+    - +
+  - - CIN
+    - pos
+  - - T1
+    - P1
+- - - T1
+    - P2
+  - - SW
+    - pos
+- - - SW
+    - neg
+  - - R_SENSE
+    - pos
+- - - VIN
+    - '-'
+  - - CIN
+    - neg
+  - - R_SENSE
+    - neg
+  - - PWM
+    - neg
+  - - SW
+    - ctrl-
+  - - T1
+    - S1
+  - - Cout
+    - neg
+  - - R_LOAD
+    - neg
+  - - GND
+    - pin
+- - - PWM
+    - pos
+  - - SW
+    - ctrl+
+- - - T1
+    - S2
+  - - D1
+    - anode
+- - - D1
+    - cathode
+  - - Cout
+    - pos
+  - - R_LOAD
+    - pos
+analysis:
+  transient:
+    spice_settings:
+      tstop: 0.002
+      tstart: 0.0019
+      tstep: 2.0e-08
+      use_ic: true
+      reltol: 0.005
+      abstol: 1.0e-06
+      vntol: 0.001
+      itl4: 50
+      method: gear
+    requirements:
+    - rid: tr_flyback_pfc_dcm
+      requirement: Verify Flyback PFC operation in DCM
+      measurement:
+      - ref: VOUT
+        plot:
+          x_axis: time
+          title: Output Voltage
+        quantity: voltage
+        nets:
+        - - R_LOAD
+          - pos
+        - - R_LOAD
+          - neg
+        data:
+        - name: Vout_avg
+          spice_command: avg
+          description: Average Output Voltage
+      outputs:
+      - var: vout_avg_v
+        formula: abs([Vout_avg])
+        description: Average Output Voltage
+metadata:
+  stage:
+  - pfc
+  - rectifier
+  topology: flyback_pfc_dcm
+  control: open_loop
+  tags:
+  - flyback
+  - pfc
+  - dcm
+  - acdc
+models:
+- .model sw_mod SW(vt=5 vh=0.1 ron=0.1 roff=1MEG)

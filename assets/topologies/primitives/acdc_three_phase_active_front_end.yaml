@@ -1,0 +1,1003 @@
+id: acdc_three_phase_active_front_end
+name: Three Phase Active Front End Rectifier
+description: 3-Phase active boost rectifier with a full analog SPWM and PI control
+  loop.
+components:
+- ref: V_A
+  type: node
+  role: voltage_source
+  params:
+    node_type: voltage_source
+    source: sine
+    amplitude: 310.27
+    frequency: 50
+    phase: 0
+- ref: V_B
+  type: node
+  role: voltage_source
+  params:
+    node_type: voltage_source
+    source: sine
+    amplitude: 310.27
+    frequency: 50
+    phase: -120
+- ref: V_C
+  type: node
+  role: voltage_source
+  params:
+    node_type: voltage_source
+    source: sine
+    amplitude: 310.27
+    frequency: 50
+    phase: -240
+- ref: R_N_star
+  type: resistor
+  params:
+    resistance: 10Meg
+- ref: L_EMI_A
+  type: inductor
+  params:
+    inductance: 1m
+- ref: L_EMI_B
+  type: inductor
+  params:
+    inductance: 1m
+- ref: L_EMI_C
+  type: inductor
+  params:
+    inductance: 1m
+- ref: C_EMI_A
+  type: capacitor
+  params:
+    capacitance: 10u
+- ref: C_EMI_B
+  type: capacitor
+  params:
+    capacitance: 10u
+- ref: C_EMI_C
+  type: capacitor
+  params:
+    capacitance: 10u
+- ref: R_DAMP_A
+  type: resistor
+  params:
+    resistance: 2
+- ref: R_DAMP_B
+  type: resistor
+  params:
+    resistance: 2
+- ref: R_DAMP_C
+  type: resistor
+  params:
+    resistance: 2
+- ref: LA
+  type: inductor
+  params:
+    inductance: 5m
+- ref: LB
+  type: inductor
+  params:
+    inductance: 5m
+- ref: LC
+  type: inductor
+  params:
+    inductance: 5m
+- ref: E1
+  type: e_source
+  params:
+    gain: 1
+- ref: R6
+  type: resistor
+  params:
+    resistance: 10
+- ref: M_A_TOP
+  type: transistor
+  params:
+    family: mosfet
+    type: nmos
+    mode: enhancement
+    model: sic_mosfet
+    part_number: C3M0015065D
+    rds_on: 0.015
+    tr: 1.0e-08
+- ref: D1
+  type: diode
+  params:
+    model: dmodel1
+    Bv: 1200
+    Rs: 0.001
+    Tt: 1.0e-08
+    Cjo: 5.0e-11
+- ref: R9
+  type: resistor
+  params:
+    resistance: 10
+- ref: M_A_BOT
+  type: transistor
+  params:
+    family: mosfet
+    type: nmos
+    mode: enhancement
+    model: sic_mosfet
+    part_number: C3M0015065D
+    rds_on: 0.015
+    tr: 1.0e-08
+- ref: D4
+  type: diode
+  params:
+    model: dmodel1
+    Bv: 1200
+    Rs: 0.001
+    Tt: 1.0e-08
+    Cjo: 5.0e-11
+- ref: E2
+  type: e_source
+  params:
+    gain: 1
+- ref: R7
+  type: resistor
+  params:
+    resistance: 10
+- ref: M_B_TOP
+  type: transistor
+  params:
+    family: mosfet
+    type: nmos
+    mode: enhancement
+    model: sic_mosfet
+    part_number: C3M0015065D
+    rds_on: 0.015
+    tr: 1.0e-08
+- ref: D2
+  type: diode
+  params:
+    model: dmodel1
+    Bv: 1200
+    Rs: 0.001
+    Tt: 1.0e-08
+    Cjo: 5.0e-11
+- ref: R10
+  type: resistor
+  params:
+    resistance: 10
+- ref: M_B_BOT
+  type: transistor
+  params:
+    family: mosfet
+    type: nmos
+    mode: enhancement
+    model: sic_mosfet
+    part_number: C3M0015065D
+    rds_on: 0.015
+    tr: 1.0e-08
+- ref: D5
+  type: diode
+  params:
+    model: dmodel1
+    Bv: 1200
+    Rs: 0.001
+    Tt: 1.0e-08
+    Cjo: 5.0e-11
+- ref: E3
+  type: e_source
+  params:
+    gain: 1
+- ref: R8
+  type: resistor
+  params:
+    resistance: 10
+- ref: M_C_TOP
+  type: transistor
+  params:
+    family: mosfet
+    type: nmos
+    mode: enhancement
+    model: sic_mosfet
+    part_number: C3M0015065D
+    rds_on: 0.015
+    tr: 1.0e-08
+- ref: D3
+  type: diode
+  params:
+    model: dmodel1
+    Bv: 1200
+    Rs: 0.001
+    Tt: 1.0e-08
+    Cjo: 5.0e-11
+- ref: R11
+  type: resistor
+  params:
+    resistance: 10
+- ref: M_C_BOT
+  type: transistor
+  params:
+    family: mosfet
+    type: nmos
+    mode: enhancement
+    model: sic_mosfet
+    part_number: C3M0015065D
+    rds_on: 0.015
+    tr: 1.0e-08
+- ref: D6
+  type: diode
+  params:
+    model: dmodel1
+    Bv: 1200
+    Rs: 0.001
+    Tt: 1.0e-08
+    Cjo: 5.0e-11
+- ref: C_DC
+  type: capacitor
+  params:
+    capacitance: 2200u
+- ref: R_DC
+  type: resistor
+  params:
+    resistance: 49.0
+- ref: B_ERR
+  type: b_source
+  params:
+    expression: 700 - v(V_DC)
+- ref: B_P
+  type: b_source
+  params:
+    expression: v(V_ERR) * 0.08
+- ref: B_INT
+  type: b_source
+  params:
+    source_type: i
+    expression: 'v(V_I) >= 30.1 ? (v(V_ERR) > 0 ? 0 : 0.005 * v(V_ERR)) : (v(V_I) <= 0 ? (v(V_ERR) < 0 ? 0 : 0.005 * v(V_ERR)) : 0.005 * v(V_ERR))'
+- ref: C_INT
+  type: capacitor
+  params:
+    capacitance: 1.0e-05
+- ref: R_INT
+  type: resistor
+  params:
+    resistance: 10Meg
+- ref: B_VERR_RAW
+  type: b_source
+  params:
+    expression: '((v(V_ERR) * 0.08) + v(V_I)) > 30.1 ? 30.1 : (((v(V_ERR) * 0.08) + v(V_I)) < 0 ? 0 : ((v(V_ERR) * 0.08) + v(V_I)))'
+- ref: R_MAG_FLT
+  type: resistor
+  params:
+    resistance: 1k
+- ref: C_MAG_FLT
+  type: capacitor
+  params:
+    capacitance: 1u
+- ref: R_MAG_DC
+  type: resistor
+  params:
+    resistance: 1Meg
+- ref: B_REFA
+  type: b_source
+  params:
+    expression: v(I_MAG) * (v(V_A_node) - v(N_star)) / 310.27
+- ref: B_REFB
+  type: b_source
+  params:
+    expression: v(I_MAG) * (v(V_B_node) - v(N_star)) / 310.27
+- ref: B_REFC
+  type: b_source
+  params:
+    expression: v(I_MAG) * (v(V_C_node) - v(N_star)) / 310.27
+- ref: R_REFA
+  type: resistor
+  params:
+    resistance: 1Meg
+- ref: R_REFB
+  type: resistor
+  params:
+    resistance: 1Meg
+- ref: R_REFC
+  type: resistor
+  params:
+    resistance: 1Meg
+- ref: B_SENSE_A
+  type: b_source
+  params:
+    expression: i(VLA_SENSE)
+- ref: B_SENSE_B
+  type: b_source
+  params:
+    expression: i(VLB_SENSE)
+- ref: B_SENSE_C
+  type: b_source
+  params:
+    expression: i(VLC_SENSE)
+- ref: R_IACT_A
+  type: resistor
+  params:
+    resistance: 1Meg
+- ref: R_IACT_B
+  type: resistor
+  params:
+    resistance: 1Meg
+- ref: R_IACT_C
+  type: resistor
+  params:
+    resistance: 1Meg
+- ref: B_ERR_A
+  type: b_source
+  params:
+    expression: '((v(I_REF_A) - v(V_IACT_A)) * 20) > 12 ? 12 : (((v(I_REF_A) - v(V_IACT_A))
+      * 20) < -12 ? -12 : ((v(I_REF_A) - v(V_IACT_A)) * 20))'
+- ref: B_ERR_B
+  type: b_source
+  params:
+    expression: '((v(I_REF_B) - v(V_IACT_B)) * 20) > 12 ? 12 : (((v(I_REF_B) - v(V_IACT_B))
+      * 20) < -12 ? -12 : ((v(I_REF_B) - v(V_IACT_B)) * 20))'
+- ref: B_ERR_C
+  type: b_source
+  params:
+    expression: '((v(I_REF_C) - v(V_IACT_C)) * 20) > 12 ? 12 : (((v(I_REF_C) - v(V_IACT_C))
+      * 20) < -12 ? -12 : ((v(I_REF_C) - v(V_IACT_C)) * 20))'
+- ref: R_RAW_DUMMY_A
+  type: resistor
+  params:
+    resistance: 1Meg
+- ref: R_RAW_DUMMY_B
+  type: resistor
+  params:
+    resistance: 1Meg
+- ref: R_RAW_DUMMY_C
+  type: resistor
+  params:
+    resistance: 1Meg
+- ref: R_CPA
+  type: resistor
+  params:
+    resistance: 1k
+- ref: C_CPA
+  type: capacitor
+  params:
+    capacitance: 10n
+- ref: R_CPB
+  type: resistor
+  params:
+    resistance: 1k
+- ref: C_CPB
+  type: capacitor
+  params:
+    capacitance: 10n
+- ref: R_CPC
+  type: resistor
+  params:
+    resistance: 1k
+- ref: C_CPC
+  type: capacitor
+  params:
+    capacitance: 10n
+- ref: R_DC_A
+  type: resistor
+  params:
+    resistance: 1Meg
+- ref: R_DC_B
+  type: resistor
+  params:
+    resistance: 1Meg
+- ref: R_DC_C
+  type: resistor
+  params:
+    resistance: 1Meg
+- ref: VTRI
+  type: node
+  params:
+    node_type: voltage_source
+    source: pulse
+    v1: -10
+    v2: 10
+    td: 0
+    tr: 5u
+    tf: 5u
+    pw: 0
+    per: 10u
+- ref: R_TRI
+  type: resistor
+  params:
+    resistance: 1Meg
+- ref: B1
+  type: b_source
+  params:
+    expression: '7.5 * (1 + tanh(5 * (v(V_TRI) - 0.2 - v(V_CTRL_A))))'
+- ref: B4
+  type: b_source
+  params:
+    expression: '7.5 * (1 + tanh(5 * (v(V_CTRL_A) - v(V_TRI) - 0.2)))'
+- ref: R_PWA_T
+  type: resistor
+  params:
+    resistance: 1Meg
+- ref: R_PWA_B
+  type: resistor
+  params:
+    resistance: 1Meg
+- ref: B2
+  type: b_source
+  params:
+    expression: '7.5 * (1 + tanh(5 * (v(V_TRI) - 0.2 - v(V_CTRL_B))))'
+- ref: B5
+  type: b_source
+  params:
+    expression: '7.5 * (1 + tanh(5 * (v(V_CTRL_B) - v(V_TRI) - 0.2)))'
+- ref: R_PWB_T
+  type: resistor
+  params:
+    resistance: 1Meg
+- ref: R_PWB_B
+  type: resistor
+  params:
+    resistance: 1Meg
+- ref: B3
+  type: b_source
+  params:
+    expression: '7.5 * (1 + tanh(5 * (v(V_TRI) - 0.2 - v(V_CTRL_C))))'
+- ref: B6
+  type: b_source
+  params:
+    expression: '7.5 * (1 + tanh(5 * (v(V_CTRL_C) - v(V_TRI) - 0.2)))'
+- ref: R_PWC_T
+  type: resistor
+  params:
+    resistance: 1Meg
+- ref: R_PWC_B
+  type: resistor
+  params:
+    resistance: 1Meg
+- ref: GND
+  type: node
+  params:
+    node_type: ground
+nets:
+- - - V_A_node
+    - pin
+  - - V_A
+    - +
+  - - L_EMI_A
+    - pos
+- - - V_B_node
+    - pin
+  - - V_B
+    - +
+  - - L_EMI_B
+    - pos
+- - - V_C_node
+    - pin
+  - - V_C
+    - +
+  - - L_EMI_C
+    - pos
+- - - N_star
+    - pin
+  - - V_A
+    - '-'
+  - - V_B
+    - '-'
+  - - V_C
+    - '-'
+  - - R_N_star
+    - pos
+  - - R_DAMP_A
+    - neg
+  - - R_DAMP_B
+    - neg
+  - - R_DAMP_C
+    - neg
+- - - V_A1
+    - pin
+  - - L_EMI_A
+    - neg
+  - - C_EMI_A
+    - pos
+  - - LA
+    - pos
+- - - V_B1
+    - pin
+  - - L_EMI_B
+    - neg
+  - - C_EMI_B
+    - pos
+  - - LB
+    - pos
+- - - V_C1
+    - pin
+  - - L_EMI_C
+    - neg
+  - - C_EMI_C
+    - pos
+  - - LC
+    - pos
+- - - L_A_node
+    - pin
+  - - LA
+    - neg
+  - - E1
+    - pos
+  - - E1
+    - '-'
+  - - M_A_TOP
+    - source
+  - - D1
+    - anode
+  - - M_A_BOT
+    - drain
+  - - D4
+    - cathode
+- - - L_B_node
+    - pin
+  - - LB
+    - neg
+  - - E2
+    - pos
+  - - E2
+    - '-'
+  - - M_B_TOP
+    - source
+  - - D2
+    - anode
+  - - M_B_BOT
+    - drain
+  - - D5
+    - cathode
+- - - L_C_node
+    - pin
+  - - LC
+    - neg
+  - - E3
+    - pos
+  - - E3
+    - '-'
+  - - M_C_TOP
+    - source
+  - - D3
+    - anode
+  - - M_C_BOT
+    - drain
+  - - D6
+    - cathode
+- - - ctrl_A_top
+    - pin
+  - - E1
+    - ctrl+
+  - - B1
+    - +
+  - - R_PWA_T
+    - pos
+- - - ctrl_A_bot
+    - pin
+  - - B4
+    - +
+  - - R_PWA_B
+    - pos
+  - - R9
+    - pos
+- - - ctrl_B_top
+    - pin
+  - - E2
+    - ctrl+
+  - - B2
+    - +
+  - - R_PWB_T
+    - pos
+- - - ctrl_B_bot
+    - pin
+  - - B5
+    - +
+  - - R_PWB_B
+    - pos
+  - - R10
+    - pos
+- - - ctrl_C_top
+    - pin
+  - - E3
+    - ctrl+
+  - - B3
+    - +
+  - - R_PWC_T
+    - pos
+- - - ctrl_C_bot
+    - pin
+  - - B6
+    - +
+  - - R_PWC_B
+    - pos
+  - - R11
+    - pos
+- - - G_A_TOP
+    - pin
+  - - E1
+    - +
+  - - R6
+    - pos
+- - - G_A_BOT
+    - pin
+  - - R9
+    - neg
+  - - M_A_BOT
+    - gate
+- - - G_A_TOP_G
+    - pin
+  - - R6
+    - neg
+  - - M_A_TOP
+    - gate
+- - - G_B_TOP
+    - pin
+  - - E2
+    - +
+  - - R7
+    - pos
+- - - G_B_BOT
+    - pin
+  - - R10
+    - neg
+  - - M_B_BOT
+    - gate
+- - - G_B_TOP_G
+    - pin
+  - - R7
+    - neg
+  - - M_B_TOP
+    - gate
+- - - G_C_TOP
+    - pin
+  - - E3
+    - +
+  - - R8
+    - pos
+- - - G_C_BOT
+    - pin
+  - - R11
+    - neg
+  - - M_C_BOT
+    - gate
+- - - G_C_TOP_G
+    - pin
+  - - R8
+    - neg
+  - - M_C_TOP
+    - gate
+- - - V_DC
+    - pin
+  - - M_A_TOP
+    - drain
+  - - D1
+    - cathode
+  - - M_B_TOP
+    - drain
+  - - D2
+    - cathode
+  - - M_C_TOP
+    - drain
+  - - D3
+    - cathode
+  - - C_DC
+    - pos
+  - - R_DC
+    - pos
+- - - V_ERR
+    - pin
+  - - B_ERR
+    - +
+  - - B_P
+    - ctrl+
+- - - V_P
+    - pin
+  - - B_P
+    - +
+  - - B_VERR_RAW
+    - ctrl+
+- - - V_I
+    - pin
+  - - B_INT
+    - '-'
+  - - C_INT
+    - pos
+  - - R_INT
+    - pos
+- - - I_MAG_RAW
+    - pin
+  - - B_VERR_RAW
+    - +
+  - - R_MAG_FLT
+    - pos
+- - - I_MAG
+    - pin
+  - - R_MAG_FLT
+    - neg
+  - - C_MAG_FLT
+    - pos
+  - - R_MAG_DC
+    - pos
+  - - B_REFA
+    - ctrl+
+  - - B_REFB
+    - ctrl+
+  - - B_REFC
+    - ctrl+
+- - - I_REF_A
+    - pin
+  - - B_REFA
+    - +
+  - - R_REFA
+    - pos
+- - - I_REF_B
+    - pin
+  - - B_REFB
+    - +
+  - - R_REFB
+    - pos
+- - - I_REF_C
+    - pin
+  - - B_REFC
+    - +
+  - - R_REFC
+    - pos
+- - - V_IACT_A
+    - pin
+  - - B_SENSE_A
+    - +
+  - - R_IACT_A
+    - pos
+- - - V_IACT_B
+    - pin
+  - - B_SENSE_B
+    - +
+  - - R_IACT_B
+    - pos
+- - - V_IACT_C
+    - pin
+  - - B_SENSE_C
+    - +
+  - - R_IACT_C
+    - pos
+- - - V_CTRL_A_RAW
+    - pin
+  - - B_ERR_A
+    - +
+  - - R_RAW_DUMMY_A
+    - pos
+  - - R_CPA
+    - pos
+- - - V_CTRL_B_RAW
+    - pin
+  - - B_ERR_B
+    - +
+  - - R_RAW_DUMMY_B
+    - pos
+  - - R_CPB
+    - pos
+- - - V_CTRL_C_RAW
+    - pin
+  - - B_ERR_C
+    - +
+  - - R_RAW_DUMMY_C
+    - pos
+  - - R_CPC
+    - pos
+- - - V_CTRL_A
+    - pin
+  - - R_CPA
+    - neg
+  - - C_CPA
+    - pos
+  - - R_DC_A
+    - pos
+  - - B1
+    - ctrl+
+  - - B4
+    - ctrl+
+- - - V_CTRL_B
+    - pin
+  - - R_CPB
+    - neg
+  - - C_CPB
+    - pos
+  - - R_DC_B
+    - pos
+  - - B2
+    - ctrl+
+  - - B5
+    - ctrl+
+- - - V_CTRL_C
+    - pin
+  - - R_CPC
+    - neg
+  - - C_CPC
+    - pos
+  - - R_DC_C
+    - pos
+  - - B3
+    - ctrl+
+  - - B6
+    - ctrl+
+- - - V_TRI
+    - pin
+  - - VTRI
+    - +
+  - - R_TRI
+    - pos
+- - - GND
+    - pin
+  - - R_N_star
+    - neg
+  - - M_A_BOT
+    - source
+  - - D4
+    - anode
+  - - M_B_BOT
+    - source
+  - - D5
+    - anode
+  - - M_C_BOT
+    - source
+  - - D6
+    - anode
+  - - C_DC
+    - neg
+  - - R_DC
+    - neg
+  - - B_P
+    - '-'
+  - - B_P
+    - ctrl-
+  - - B_INT
+    - +
+  - - C_INT
+    - neg
+  - - R_INT
+    - neg
+  - - B_VERR_RAW
+    - '-'
+  - - B_VERR_RAW
+    - ctrl-
+  - - C_MAG_FLT
+    - neg
+  - - R_MAG_DC
+    - neg
+  - - B_REFA
+    - '-'
+  - - B_REFB
+    - '-'
+  - - B_REFC
+    - '-'
+  - - B_REFA
+    - ctrl-
+  - - B_REFB
+    - ctrl-
+  - - B_REFC
+    - ctrl-
+  - - R_REFA
+    - neg
+  - - R_REFB
+    - neg
+  - - R_REFC
+    - neg
+  - - B_SENSE_A
+    - '-'
+  - - B_SENSE_B
+    - '-'
+  - - B_SENSE_C
+    - '-'
+  - - R_IACT_A
+    - neg
+  - - R_IACT_B
+    - neg
+  - - R_IACT_C
+    - neg
+  - - B_ERR_A
+    - '-'
+  - - B_ERR_B
+    - '-'
+  - - B_ERR_C
+    - '-'
+  - - R_RAW_DUMMY_A
+    - neg
+  - - R_RAW_DUMMY_B
+    - neg
+  - - R_RAW_DUMMY_C
+    - neg
+  - - C_CPA
+    - neg
+  - - R_DC_A
+    - neg
+  - - C_CPB
+    - neg
+  - - R_DC_B
+    - neg
+  - - C_CPC
+    - neg
+  - - R_DC_C
+    - neg
+  - - VTRI
+    - '-'
+  - - R_TRI
+    - neg
+  - - B1
+    - '-'
+  - - B4
+    - '-'
+  - - B2
+    - '-'
+  - - B5
+    - '-'
+  - - B3
+    - '-'
+  - - B6
+    - '-'
+  - - R_PWA_T
+    - neg
+  - - R_PWA_B
+    - neg
+  - - R_PWB_T
+    - neg
+  - - R_PWB_B
+    - neg
+  - - R_PWC_T
+    - neg
+  - - R_PWC_B
+    - neg
+  - - E1
+    - ctrl-
+  - - E2
+    - ctrl-
+  - - E3
+    - ctrl-
+  - - B_ERR
+    - '-'
+- - - C_A_damp
+    - pin
+  - - C_EMI_A
+    - neg
+  - - R_DAMP_A
+    - pos
+- - - C_B_damp
+    - pin
+  - - C_EMI_B
+    - neg
+  - - R_DAMP_B
+    - pos
+- - - C_C_damp
+    - pin
+  - - C_EMI_C
+    - neg
+  - - R_DAMP_C
+    - pos
+analysis:
+  transient:
+    requirements:
+    - rid: tr_afe_rectifier
+      requirement: Verify 3-phase Active Front End boost rectification to 700V DC.
+      environment:
+      - ref: time_domain
+        t_step: 1.0e-05
+        t_stop: 0.05
+        t_start: 0.04
+        t_max_step: 1.0e-05
+      measurement:
+      - ref: V_DC_OUT
+        plot: true
+        quantity: voltage
+        nets:
+        - - R_DC
+          - pos
+        - - R_DC
+          - neg
+        data:
+        - name: Vout_avg
+          spice_command: avg
+          description: Average Output Voltage
+      outputs:
+      - var: vout_avg_v
+        formula: abs([Vout_avg])
+        description: Average Output Voltage
+      criteria:
+        target_vout: 700.0
+        tolerance_pct: 5.0
+    spice_settings:
+      use_ic: false
+      method: trap
+      trtol: 7
+      ic: v(V_DC)=700 v(V_I)=21.5

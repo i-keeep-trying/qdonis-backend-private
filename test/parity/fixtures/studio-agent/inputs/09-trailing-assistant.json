@@ -1,0 +1,8 @@
+{
+  "name": "09-trailing-assistant",
+  "description": "History ending with an assistant text turn gets a 'Continue.' user turn appended.",
+  "messages": [
+    { "role": "user", "content": [{ "type": "text", "text": "What does the simulation say?" }] },
+    { "role": "assistant", "content": [{ "type": "text", "text": "Ripple is 18 mV, inside the 20 mV target." }] }
+  ]
+}

@@ -1,0 +1,189 @@
+{
+  "components": [
+    {
+      "id": "D1",
+      "type": "D",
+      "x": -240,
+      "y": 360,
+      "rotation": 270,
+      "parameters": {
+        "Vd": "0.7",
+        "Ron": "1m",
+        "Roff": "1M"
+      },
+      "lastClickTime": 1785608769354
+    },
+    {
+      "id": "D2",
+      "type": "D",
+      "x": -240,
+      "y": 600,
+      "rotation": 270,
+      "parameters": {
+        "Vd": "0.7",
+        "Ron": "1m",
+        "Roff": "1M"
+      },
+      "lastClickTime": 1785609530140
+    },
+    {
+      "id": "R_LOAD",
+      "type": "R",
+      "x": -260,
+      "y": 480,
+      "rotation": 90,
+      "parameters": {
+        "value": "10",
+        "esr": "0"
+      },
+      "lastClickTime": 1785649172059
+    },
+    {
+      "id": "TX",
+      "type": "XFMR_CT",
+      "x": -520,
+      "y": 480,
+      "rotation": 0,
+      "mirrorX": false,
+      "mirrorY": false,
+      "parameters": {
+        "N": "1",
+        "Lp": "10m",
+        "Rw": "10m"
+      }
+    },
+    {
+      "id": "VAC",
+      "type": "AC_V",
+      "x": -680,
+      "y": 480,
+      "rotation": 0,
+      "parameters": {
+        "amplitude": "220",
+        "frequency": "50",
+        "phase": "0"
+      }
+    }
+  ],
+  "wires": [
+    {
+      "id": "W4",
+      "from": {
+        "type": "pin",
+        "compId": "D2",
+        "terminal": "B"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "D1",
+        "terminal": "B"
+      }
+    },
+    {
+      "id": "W5",
+      "from": {
+        "type": "pin",
+        "compId": "R_LOAD",
+        "terminal": "A"
+      },
+      "to": {
+        "type": "wire",
+        "wireId": "W4",
+        "x": -180,
+        "y": 480
+      },
+      "manualPath": null
+    },
+    {
+      "id": "W7",
+      "from": {
+        "type": "pin",
+        "compId": "VAC",
+        "terminal": "A"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "TX",
+        "terminal": "P1"
+      }
+    },
+    {
+      "id": "W8",
+      "from": {
+        "type": "pin",
+        "compId": "VAC",
+        "terminal": "B"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "TX",
+        "terminal": "P2"
+      }
+    },
+    {
+      "id": "W9",
+      "from": {
+        "type": "pin",
+        "compId": "D1",
+        "terminal": "A"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "TX",
+        "terminal": "S1"
+      }
+    },
+    {
+      "id": "W10",
+      "from": {
+        "type": "pin",
+        "compId": "D2",
+        "terminal": "A"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "TX",
+        "terminal": "S2"
+      }
+    },
+    {
+      "id": "W11",
+      "from": {
+        "type": "pin",
+        "compId": "R_LOAD",
+        "terminal": "B"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "TX",
+        "terminal": "SCT"
+      }
+    }
+  ],
+  "plotConfiguration": {
+    "plots": [
+      {
+        "title": "Waveform analysis",
+        "variables": [
+          "COMP1.Minus",
+          "COMP1.Out",
+          "COMP1.Plus",
+          "CONST1.Out",
+          "PROBE1.V_R_LOAD",
+          "PROBE1.I_R_LOAD"
+        ]
+      }
+    ]
+  },
+  "simulationSettings": {
+    "stopTime": "0.06",
+    "stepSize": "10u",
+    "solver": "euler",
+    "stepType": "fixed",
+    "simulationMode": "regular",
+    "solverMethod": "non-ideal",
+    "enableLuCache": true
+  },
+  "id": "acdc_centre_tapped_full_wave",
+  "name": "Centre Tapped Full Wave Rectifier"
+}

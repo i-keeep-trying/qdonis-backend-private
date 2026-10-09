@@ -1,0 +1,1756 @@
+id: dcac_t_type
+name: Three-Phase 3-Level T-Type Inverter (Closed-Loop Current Controlled)
+description: Three-phase three-level T-type inverter with closed-loop AC current regulation
+  via Phase Disposition (PD) PWM and continuous-time feedforward + proportional error
+  control. Converts a 24V split-rail DC link (midpoint neutral N008 at +12V) into
+  three-phase sinusoidal AC currents regulated to 1.0A peak at 160Hz into a star-connected
+  inductive load (10mH + 1 Ohm). Each phase leg uses 4 VDMOS switches (M_S1..M_S4)
+  where M_S1 and M_S4 switch the outer DC rails and bidirectional center switches
+  M_S2 and M_S3 clamp to the midpoint N008 with 16kHz carrier modulation.
+models:
+- .model C3M0065090D VDMOS(Ron=0.065 Vto=2.6 Kp=15 Cgdmax=12p Cgdmin=1p Cgs=400p Bv=1200)
+components:
+- ref: GND
+  type: node
+  params:
+    node_type: ground
+- ref: N001
+  type: node
+  params:
+    node_type: label
+- ref: N008
+  type: node
+  params:
+    node_type: label
+- ref: Tri
+  type: node
+  params:
+    node_type: label
+- ref: CHI
+  type: node
+  params:
+    node_type: label
+- ref: CLO
+  type: node
+  params:
+    node_type: label
+- ref: I_REF_A
+  type: node
+  params:
+    node_type: label
+- ref: I_REF_B
+  type: node
+  params:
+    node_type: label
+- ref: I_REF_C
+  type: node
+  params:
+    node_type: label
+- ref: V_FF_A
+  type: node
+  params:
+    node_type: label
+- ref: V_FF_B
+  type: node
+  params:
+    node_type: label
+- ref: V_FF_C
+  type: node
+  params:
+    node_type: label
+- ref: CTRL_A
+  type: node
+  params:
+    node_type: label
+- ref: CTRL_B
+  type: node
+  params:
+    node_type: label
+- ref: CTRL_C
+  type: node
+  params:
+    node_type: label
+- ref: ControlA
+  type: node
+  params:
+    node_type: label
+- ref: ControlB
+  type: node
+  params:
+    node_type: label
+- ref: ControlC
+  type: node
+  params:
+    node_type: label
+- ref: S1A
+  type: node
+  params:
+    node_type: label
+- ref: S2A
+  type: node
+  params:
+    node_type: label
+- ref: S3A
+  type: node
+  params:
+    node_type: label
+- ref: S4A
+  type: node
+  params:
+    node_type: label
+- ref: GD1A
+  type: node
+  params:
+    node_type: label
+- ref: G1A
+  type: node
+  params:
+    node_type: label
+- ref: N1
+  type: node
+  params:
+    node_type: label
+- ref: NXA
+  type: node
+  params:
+    node_type: label
+- ref: GD2A
+  type: node
+  params:
+    node_type: label
+- ref: G2A
+  type: node
+  params:
+    node_type: label
+- ref: GD3A
+  type: node
+  params:
+    node_type: label
+- ref: G3A
+  type: node
+  params:
+    node_type: label
+- ref: GD4A
+  type: node
+  params:
+    node_type: label
+- ref: G4A
+  type: node
+  params:
+    node_type: label
+- ref: N1A
+  type: node
+  params:
+    node_type: label
+- ref: N011
+  type: node
+  params:
+    node_type: label
+- ref: S1B
+  type: node
+  params:
+    node_type: label
+- ref: S2B
+  type: node
+  params:
+    node_type: label
+- ref: S3B
+  type: node
+  params:
+    node_type: label
+- ref: S4B
+  type: node
+  params:
+    node_type: label
+- ref: GD1B
+  type: node
+  params:
+    node_type: label
+- ref: G1B
+  type: node
+  params:
+    node_type: label
+- ref: N2
+  type: node
+  params:
+    node_type: label
+- ref: NXB
+  type: node
+  params:
+    node_type: label
+- ref: GD2B
+  type: node
+  params:
+    node_type: label
+- ref: G2B
+  type: node
+  params:
+    node_type: label
+- ref: GD3B
+  type: node
+  params:
+    node_type: label
+- ref: G3B
+  type: node
+  params:
+    node_type: label
+- ref: GD4B
+  type: node
+  params:
+    node_type: label
+- ref: G4B
+  type: node
+  params:
+    node_type: label
+- ref: N2B
+  type: node
+  params:
+    node_type: label
+- ref: N012
+  type: node
+  params:
+    node_type: label
+- ref: S1C
+  type: node
+  params:
+    node_type: label
+- ref: S2C
+  type: node
+  params:
+    node_type: label
+- ref: S3C
+  type: node
+  params:
+    node_type: label
+- ref: S4C
+  type: node
+  params:
+    node_type: label
+- ref: GD1C
+  type: node
+  params:
+    node_type: label
+- ref: G1C
+  type: node
+  params:
+    node_type: label
+- ref: N3
+  type: node
+  params:
+    node_type: label
+- ref: NXC
+  type: node
+  params:
+    node_type: label
+- ref: GD2C
+  type: node
+  params:
+    node_type: label
+- ref: G2C
+  type: node
+  params:
+    node_type: label
+- ref: GD3C
+  type: node
+  params:
+    node_type: label
+- ref: G3C
+  type: node
+  params:
+    node_type: label
+- ref: GD4C
+  type: node
+  params:
+    node_type: label
+- ref: G4C
+  type: node
+  params:
+    node_type: label
+- ref: N3C
+  type: node
+  params:
+    node_type: label
+- ref: N013
+  type: node
+  params:
+    node_type: label
+- ref: N020
+  type: node
+  params:
+    node_type: label
+- ref: VIN
+  type: node
+  role: input_source
+  params:
+    node_type: voltage_source
+    source: dc
+    voltage: 800
+    series_resistance: 0
+- ref: C1
+  type: capacitor
+  role: upper_dc_cap
+  params:
+    capacitance: 470u
+    sense: false
+- ref: C2
+  type: capacitor
+  role: lower_dc_cap
+  params:
+    capacitance: 470u
+    sense: false
+- ref: Rb1
+  type: resistor
+  role: upper_balancing_resistor
+  params:
+    resistance: 100k
+    sense: false
+- ref: Rb2
+  type: resistor
+  role: lower_balancing_resistor
+  params:
+    resistance: 100k
+    sense: false
+- ref: V1
+  type: node
+  role: carrier_source
+  params:
+    node_type: voltage_source
+    source: pulse
+    v1: -10
+    v2: 10
+    td: 0
+    tr: 31.24u
+    tf: 31.24u
+    pw: 0.02u
+    per: 62.5u
+    series_resistance: 0
+- ref: B_CHI
+  type: b_source
+  params:
+    expression: V(Tri)/2 + 5
+- ref: B_CLO
+  type: b_source
+  params:
+    expression: V(Tri)/2 - 5
+- ref: V_IREF_A
+  type: node
+  role: reference_source
+  params:
+    node_type: voltage_source
+    source: sine
+    offset: 0
+    amplitude: 1.0
+    frequency: 160
+    delay: 0
+    damping: 0
+    phase: 0
+    series_resistance: 0
+- ref: V_IREF_B
+  type: node
+  role: reference_source
+  params:
+    node_type: voltage_source
+    source: sine
+    offset: 0
+    amplitude: 1.0
+    frequency: 160
+    delay: 0
+    damping: 0
+    phase: -120
+    series_resistance: 0
+- ref: V_IREF_C
+  type: node
+  role: reference_source
+  params:
+    node_type: voltage_source
+    source: sine
+    offset: 0
+    amplitude: 1.0
+    frequency: 160
+    delay: 0
+    damping: 0
+    phase: -240
+    series_resistance: 0
+- ref: V_VFF_A
+  type: node
+  role: feedforward_source
+  params:
+    node_type: voltage_source
+    source: sine
+    offset: 0
+    amplitude: 10.1
+    frequency: 160
+    delay: 0
+    damping: 0
+    phase: 84.3
+    series_resistance: 0
+- ref: V_VFF_B
+  type: node
+  role: feedforward_source
+  params:
+    node_type: voltage_source
+    source: sine
+    offset: 0
+    amplitude: 10.1
+    frequency: 160
+    delay: 0
+    damping: 0
+    phase: -35.7
+    series_resistance: 0
+- ref: V_VFF_C
+  type: node
+  role: feedforward_source
+  params:
+    node_type: voltage_source
+    source: sine
+    offset: 0
+    amplitude: 10.1
+    frequency: 160
+    delay: 0
+    damping: 0
+    phase: -155.7
+    series_resistance: 0
+- ref: B_CTRL_A
+  type: b_source
+  params:
+    expression: V(V_FF_A) + (V(I_REF_A) - I(VSENSE_A))*0.5
+- ref: B_CTRL_B
+  type: b_source
+  params:
+    expression: V(V_FF_B) + (V(I_REF_B) - I(VSENSE_B))*0.5
+- ref: B_CTRL_C
+  type: b_source
+  params:
+    expression: V(V_FF_C) + (V(I_REF_C) - I(VSENSE_C))*0.5
+- ref: B_CLMP_A
+  type: b_source
+  params:
+    expression: min(max(V(CTRL_A), -9.5), 9.5)
+- ref: B_CLMP_B
+  type: b_source
+  params:
+    expression: min(max(V(CTRL_B), -9.5), 9.5)
+- ref: B_CLMP_C
+  type: b_source
+  params:
+    expression: min(max(V(CTRL_C), -9.5), 9.5)
+- ref: B_S1A
+  type: b_source
+  params:
+    expression: 0.5*tanh(1000*(V(ControlA) - ((V(CHI)+0.16)))) + 0.5
+- ref: B_S3A
+  type: b_source
+  params:
+    expression: 0.5*tanh(1000*((V(CHI)-0.16) - (V(ControlA)))) + 0.5
+- ref: B_S2A
+  type: b_source
+  params:
+    expression: 0.5*tanh(1000*(V(ControlA) - ((V(CLO)+0.16)))) + 0.5
+- ref: B_S4A
+  type: b_source
+  params:
+    expression: 0.5*tanh(1000*((V(CLO)-0.16) - (V(ControlA)))) + 0.5
+- ref: B_S1B
+  type: b_source
+  params:
+    expression: 0.5*tanh(1000*(V(ControlB) - ((V(CHI)+0.16)))) + 0.5
+- ref: B_S3B
+  type: b_source
+  params:
+    expression: 0.5*tanh(1000*((V(CHI)-0.16) - (V(ControlB)))) + 0.5
+- ref: B_S2B
+  type: b_source
+  params:
+    expression: 0.5*tanh(1000*(V(ControlB) - ((V(CLO)+0.16)))) + 0.5
+- ref: B_S4B
+  type: b_source
+  params:
+    expression: 0.5*tanh(1000*((V(CLO)-0.16) - (V(ControlB)))) + 0.5
+- ref: B_S1C
+  type: b_source
+  params:
+    expression: 0.5*tanh(1000*(V(ControlC) - ((V(CHI)+0.16)))) + 0.5
+- ref: B_S3C
+  type: b_source
+  params:
+    expression: 0.5*tanh(1000*((V(CHI)-0.16) - (V(ControlC)))) + 0.5
+- ref: B_S2C
+  type: b_source
+  params:
+    expression: 0.5*tanh(1000*(V(ControlC) - ((V(CLO)+0.16)))) + 0.5
+- ref: B_S4C
+  type: b_source
+  params:
+    expression: 0.5*tanh(1000*((V(CLO)-0.16) - (V(ControlC)))) + 0.5
+- ref: E_S1A
+  type: e_source
+  params:
+    gain: 15
+- ref: R_S1A
+  type: resistor
+  params:
+    resistance: 10
+    sense: false
+- ref: Rp1A
+  type: resistor
+  params:
+    resistance: 25000
+    sense: false
+- ref: M_S1A
+  type: transistor
+  role: phase_a_upper_switch
+  params:
+    family: vdmos
+    model: C3M0065090D
+    sense: false
+- ref: E_S4A
+  type: e_source
+  params:
+    gain: 15
+- ref: R_S4A
+  type: resistor
+  params:
+    resistance: 10
+    sense: false
+- ref: Rp4A
+  type: resistor
+  params:
+    resistance: 25000
+    sense: false
+- ref: M_S4A
+  type: transistor
+  role: phase_a_lower_switch
+  params:
+    family: vdmos
+    model: C3M0065090D
+    sense: false
+- ref: E_S2A
+  type: e_source
+  params:
+    gain: 15
+- ref: R_S2A
+  type: resistor
+  params:
+    resistance: 10
+    sense: false
+- ref: Rp2A
+  type: resistor
+  params:
+    resistance: 25000
+    sense: false
+- ref: M_S2A
+  type: transistor
+  role: phase_a_midpoint_switch_1
+  params:
+    family: vdmos
+    model: C3M0065090D
+    sense: false
+- ref: E_S3A
+  type: e_source
+  params:
+    gain: 15
+- ref: R_S3A
+  type: resistor
+  params:
+    resistance: 10
+    sense: false
+- ref: Rp3A
+  type: resistor
+  params:
+    resistance: 25000
+    sense: false
+- ref: M_S3A
+  type: transistor
+  role: phase_a_midpoint_switch_2
+  params:
+    family: vdmos
+    model: C3M0065090D
+    sense: false
+- ref: R_NXA
+  type: resistor
+  params:
+    resistance: 10e6
+    sense: false
+- ref: E_S1B
+  type: e_source
+  params:
+    gain: 15
+- ref: R_S1B
+  type: resistor
+  params:
+    resistance: 10
+    sense: false
+- ref: Rp1B
+  type: resistor
+  params:
+    resistance: 25000
+    sense: false
+- ref: M_S1B
+  type: transistor
+  role: phase_b_upper_switch
+  params:
+    family: vdmos
+    model: C3M0065090D
+    sense: false
+- ref: E_S4B
+  type: e_source
+  params:
+    gain: 15
+- ref: R_S4B
+  type: resistor
+  params:
+    resistance: 10
+    sense: false
+- ref: Rp4B
+  type: resistor
+  params:
+    resistance: 25000
+    sense: false
+- ref: M_S4B
+  type: transistor
+  role: phase_b_lower_switch
+  params:
+    family: vdmos
+    model: C3M0065090D
+    sense: false
+- ref: E_S2B
+  type: e_source
+  params:
+    gain: 15
+- ref: R_S2B
+  type: resistor
+  params:
+    resistance: 10
+    sense: false
+- ref: Rp2B
+  type: resistor
+  params:
+    resistance: 25000
+    sense: false
+- ref: M_S2B
+  type: transistor
+  role: phase_b_midpoint_switch_1
+  params:
+    family: vdmos
+    model: C3M0065090D
+    sense: false
+- ref: E_S3B
+  type: e_source
+  params:
+    gain: 15
+- ref: R_S3B
+  type: resistor
+  params:
+    resistance: 10
+    sense: false
+- ref: Rp3B
+  type: resistor
+  params:
+    resistance: 25000
+    sense: false
+- ref: M_S3B
+  type: transistor
+  role: phase_b_midpoint_switch_2
+  params:
+    family: vdmos
+    model: C3M0065090D
+    sense: false
+- ref: R_NXB
+  type: resistor
+  params:
+    resistance: 10e6
+    sense: false
+- ref: E_S1C
+  type: e_source
+  params:
+    gain: 15
+- ref: R_S1C
+  type: resistor
+  params:
+    resistance: 10
+    sense: false
+- ref: Rp1C
+  type: resistor
+  params:
+    resistance: 25000
+    sense: false
+- ref: M_S1C
+  type: transistor
+  role: phase_c_upper_switch
+  params:
+    family: vdmos
+    model: C3M0065090D
+    sense: false
+- ref: E_S4C
+  type: e_source
+  params:
+    gain: 15
+- ref: R_S4C
+  type: resistor
+  params:
+    resistance: 10
+    sense: false
+- ref: Rp4C
+  type: resistor
+  params:
+    resistance: 25000
+    sense: false
+- ref: M_S4C
+  type: transistor
+  role: phase_c_lower_switch
+  params:
+    family: vdmos
+    model: C3M0065090D
+    sense: false
+- ref: E_S2C
+  type: e_source
+  params:
+    gain: 15
+- ref: R_S2C
+  type: resistor
+  params:
+    resistance: 10
+    sense: false
+- ref: Rp2C
+  type: resistor
+  params:
+    resistance: 25000
+    sense: false
+- ref: M_S2C
+  type: transistor
+  role: phase_c_midpoint_switch_1
+  params:
+    family: vdmos
+    model: C3M0065090D
+    sense: false
+- ref: E_S3C
+  type: e_source
+  params:
+    gain: 15
+- ref: R_S3C
+  type: resistor
+  params:
+    resistance: 10
+    sense: false
+- ref: Rp3C
+  type: resistor
+  params:
+    resistance: 25000
+    sense: false
+- ref: M_S3C
+  type: transistor
+  role: phase_c_midpoint_switch_2
+  params:
+    family: vdmos
+    model: C3M0065090D
+    sense: false
+- ref: R_NXC
+  type: resistor
+  params:
+    resistance: 10e6
+    sense: false
+- ref: VSENSE_A
+  type: node
+  role: phase_a_current_sensor
+  params:
+    node_type: voltage_source
+    source: dc
+    voltage: 0
+    series_resistance: 0
+- ref: L1
+  type: inductor
+  role: phase_a_load_inductor
+  params:
+    inductance: 10m
+    sense: false
+- ref: R15
+  type: resistor
+  role: phase_a_load_resistor
+  params:
+    resistance: 1
+    sense: false
+- ref: VSENSE_B
+  type: node
+  role: phase_b_current_sensor
+  params:
+    node_type: voltage_source
+    source: dc
+    voltage: 0
+    series_resistance: 0
+- ref: L2
+  type: inductor
+  role: phase_b_load_inductor
+  params:
+    inductance: 10m
+    sense: false
+- ref: R16
+  type: resistor
+  role: phase_b_load_resistor
+  params:
+    resistance: 1
+    sense: false
+- ref: VSENSE_C
+  type: node
+  role: phase_c_current_sensor
+  params:
+    node_type: voltage_source
+    source: dc
+    voltage: 0
+    series_resistance: 0
+- ref: L3
+  type: inductor
+  role: phase_c_load_inductor
+  params:
+    inductance: 10m
+    sense: false
+- ref: R17
+  type: resistor
+  role: phase_c_load_resistor
+  params:
+    resistance: 1
+    sense: false
+- ref: R_STAR
+  type: resistor
+  role: star_ground_tie
+  params:
+    resistance: 1Meg
+    sense: false
+- ref: R_FLT_A
+  type: resistor
+  params:
+    resistance: 1k
+    sense: false
+- ref: C_FLT_A
+  type: capacitor
+  params:
+    capacitance: 100n
+    sense: false
+- ref: R_FLT_B
+  type: resistor
+  params:
+    resistance: 1k
+    sense: false
+- ref: C_FLT_B
+  type: capacitor
+  params:
+    capacitance: 100n
+    sense: false
+- ref: R_FLT_C
+  type: resistor
+  params:
+    resistance: 1k
+    sense: false
+- ref: C_FLT_C
+  type: capacitor
+  params:
+    capacitance: 100n
+    sense: false
+- ref: R_SNUB_A
+  type: resistor
+  params:
+    resistance: 10
+    sense: false
+- ref: C_SNUB_A
+  type: capacitor
+  params:
+    capacitance: 1n
+    sense: false
+- ref: R_SNUB_B
+  type: resistor
+  params:
+    resistance: 10
+    sense: false
+- ref: C_SNUB_B
+  type: capacitor
+  params:
+    capacitance: 1n
+    sense: false
+- ref: R_SNUB_C
+  type: resistor
+  params:
+    resistance: 10
+    sense: false
+- ref: C_SNUB_C
+  type: capacitor
+  params:
+    capacitance: 1n
+    sense: false
+nets:
+- - - N001
+    - pin
+  - - VIN
+    - +
+  - - C1
+    - pos
+  - - Rb1
+    - pos
+  - - M_S1A
+    - drain
+  - - M_S1B
+    - drain
+  - - M_S1C
+    - drain
+- - - N008
+    - pin
+  - - C1
+    - neg
+  - - C2
+    - pos
+  - - Rb1
+    - neg
+  - - Rb2
+    - pos
+  - - M_S2A
+    - drain
+  - - M_S2B
+    - drain
+  - - M_S2C
+    - drain
+  - - R_NXA
+    - neg
+  - - R_NXB
+    - neg
+  - - R_NXC
+    - neg
+  - - R_STAR
+    - neg
+- - - GND
+    - pin
+  - - VIN
+    - '-'
+  - - C2
+    - neg
+  - - Rb2
+    - neg
+  - - V1
+    - '-'
+  - - B_CHI
+    - '-'
+  - - B_CLO
+    - '-'
+  - - V_IREF_A
+    - '-'
+  - - V_IREF_B
+    - '-'
+  - - V_IREF_C
+    - '-'
+  - - V_VFF_A
+    - '-'
+  - - V_VFF_B
+    - '-'
+  - - V_VFF_C
+    - '-'
+  - - B_CTRL_A
+    - '-'
+  - - B_CTRL_B
+    - '-'
+  - - B_CTRL_C
+    - '-'
+  - - B_CLMP_A
+    - '-'
+  - - B_CLMP_B
+    - '-'
+  - - B_CLMP_C
+    - '-'
+  - - B_S1A
+    - '-'
+  - - B_S3A
+    - '-'
+  - - B_S2A
+    - '-'
+  - - B_S4A
+    - '-'
+  - - B_S1B
+    - '-'
+  - - B_S3B
+    - '-'
+  - - B_S2B
+    - '-'
+  - - B_S4B
+    - '-'
+  - - B_S1C
+    - '-'
+  - - B_S3C
+    - '-'
+  - - B_S2C
+    - '-'
+  - - B_S4C
+    - '-'
+  - - E_S1A
+    - ctrl-
+  - - E_S4A
+    - '-'
+  - - E_S4A
+    - ctrl-
+  - - Rp4A
+    - neg
+  - - M_S4A
+    - source
+  - - E_S2A
+    - ctrl-
+  - - E_S3A
+    - ctrl-
+  - - E_S1B
+    - ctrl-
+  - - E_S4B
+    - '-'
+  - - E_S4B
+    - ctrl-
+  - - Rp4B
+    - neg
+  - - M_S4B
+    - source
+  - - E_S2B
+    - ctrl-
+  - - E_S3B
+    - ctrl-
+  - - E_S1C
+    - ctrl-
+  - - E_S4C
+    - '-'
+  - - E_S4C
+    - ctrl-
+  - - Rp4C
+    - neg
+  - - M_S4C
+    - source
+  - - E_S2C
+    - ctrl-
+  - - E_S3C
+    - ctrl-
+  - - C_FLT_A
+    - neg
+  - - C_FLT_B
+    - neg
+  - - C_FLT_C
+    - neg
+  - - C_SNUB_A
+    - neg
+  - - C_SNUB_B
+    - neg
+  - - C_SNUB_C
+    - neg
+- - - Tri
+    - pin
+  - - V1
+    - +
+- - - CHI
+    - pin
+  - - B_CHI
+    - +
+- - - CLO
+    - pin
+  - - B_CLO
+    - +
+- - - I_REF_A
+    - pin
+  - - V_IREF_A
+    - +
+- - - I_REF_B
+    - pin
+  - - V_IREF_B
+    - +
+- - - I_REF_C
+    - pin
+  - - V_IREF_C
+    - +
+- - - V_FF_A
+    - pin
+  - - V_VFF_A
+    - +
+- - - V_FF_B
+    - pin
+  - - V_VFF_B
+    - +
+- - - V_FF_C
+    - pin
+  - - V_VFF_C
+    - +
+- - - CTRL_A
+    - pin
+  - - R_FLT_A
+    - neg
+  - - C_FLT_A
+    - pos
+- - - CTRL_B
+    - pin
+  - - R_FLT_B
+    - neg
+  - - C_FLT_B
+    - pos
+- - - CTRL_C
+    - pin
+  - - R_FLT_C
+    - neg
+  - - C_FLT_C
+    - pos
+- - - ControlA
+    - pin
+  - - B_CLMP_A
+    - +
+- - - ControlB
+    - pin
+  - - B_CLMP_B
+    - +
+- - - ControlC
+    - pin
+  - - B_CLMP_C
+    - +
+- - - S1A
+    - pin
+  - - B_S1A
+    - +
+  - - E_S1A
+    - ctrl+
+- - - S3A
+    - pin
+  - - B_S3A
+    - +
+  - - E_S3A
+    - ctrl+
+- - - S2A
+    - pin
+  - - B_S2A
+    - +
+  - - E_S2A
+    - ctrl+
+- - - S4A
+    - pin
+  - - B_S4A
+    - +
+  - - E_S4A
+    - ctrl+
+- - - GD1A
+    - pin
+  - - E_S1A
+    - +
+  - - R_S1A
+    - pos
+- - - G1A
+    - pin
+  - - R_S1A
+    - neg
+  - - Rp1A
+    - pos
+  - - M_S1A
+    - gate
+- - - N1
+    - pin
+  - - E_S1A
+    - '-'
+  - - Rp1A
+    - neg
+  - - M_S1A
+    - source
+  - - M_S4A
+    - drain
+  - - M_S3A
+    - drain
+  - - VSENSE_A
+    - +
+  - - R_SNUB_A
+    - pos
+- - - GD4A
+    - pin
+  - - E_S4A
+    - +
+  - - R_S4A
+    - pos
+- - - G4A
+    - pin
+  - - R_S4A
+    - neg
+  - - Rp4A
+    - pos
+  - - M_S4A
+    - gate
+- - - NXA
+    - pin
+  - - E_S2A
+    - '-'
+  - - Rp2A
+    - neg
+  - - M_S2A
+    - source
+  - - E_S3A
+    - '-'
+  - - Rp3A
+    - neg
+  - - M_S3A
+    - source
+  - - R_NXA
+    - pos
+- - - GD2A
+    - pin
+  - - E_S2A
+    - +
+  - - R_S2A
+    - pos
+- - - G2A
+    - pin
+  - - R_S2A
+    - neg
+  - - Rp2A
+    - pos
+  - - M_S2A
+    - gate
+- - - GD3A
+    - pin
+  - - E_S3A
+    - +
+  - - R_S3A
+    - pos
+- - - G3A
+    - pin
+  - - R_S3A
+    - neg
+  - - Rp3A
+    - pos
+  - - M_S3A
+    - gate
+- - - S1B
+    - pin
+  - - B_S1B
+    - +
+  - - E_S1B
+    - ctrl+
+- - - S3B
+    - pin
+  - - B_S3B
+    - +
+  - - E_S3B
+    - ctrl+
+- - - S2B
+    - pin
+  - - B_S2B
+    - +
+  - - E_S2B
+    - ctrl+
+- - - S4B
+    - pin
+  - - B_S4B
+    - +
+  - - E_S4B
+    - ctrl+
+- - - GD1B
+    - pin
+  - - E_S1B
+    - +
+  - - R_S1B
+    - pos
+- - - G1B
+    - pin
+  - - R_S1B
+    - neg
+  - - Rp1B
+    - pos
+  - - M_S1B
+    - gate
+- - - N2
+    - pin
+  - - E_S1B
+    - '-'
+  - - Rp1B
+    - neg
+  - - M_S1B
+    - source
+  - - M_S4B
+    - drain
+  - - M_S3B
+    - drain
+  - - VSENSE_B
+    - +
+  - - R_SNUB_B
+    - pos
+- - - GD4B
+    - pin
+  - - E_S4B
+    - +
+  - - R_S4B
+    - pos
+- - - G4B
+    - pin
+  - - R_S4B
+    - neg
+  - - Rp4B
+    - pos
+  - - M_S4B
+    - gate
+- - - NXB
+    - pin
+  - - E_S2B
+    - '-'
+  - - Rp2B
+    - neg
+  - - M_S2B
+    - source
+  - - E_S3B
+    - '-'
+  - - Rp3B
+    - neg
+  - - M_S3B
+    - source
+  - - R_NXB
+    - pos
+- - - GD2B
+    - pin
+  - - E_S2B
+    - +
+  - - R_S2B
+    - pos
+- - - G2B
+    - pin
+  - - R_S2B
+    - neg
+  - - Rp2B
+    - pos
+  - - M_S2B
+    - gate
+- - - GD3B
+    - pin
+  - - E_S3B
+    - +
+  - - R_S3B
+    - pos
+- - - G3B
+    - pin
+  - - R_S3B
+    - neg
+  - - Rp3B
+    - pos
+  - - M_S3B
+    - gate
+- - - S1C
+    - pin
+  - - B_S1C
+    - +
+  - - E_S1C
+    - ctrl+
+- - - S3C
+    - pin
+  - - B_S3C
+    - +
+  - - E_S3C
+    - ctrl+
+- - - S2C
+    - pin
+  - - B_S2C
+    - +
+  - - E_S2C
+    - ctrl+
+- - - S4C
+    - pin
+  - - B_S4C
+    - +
+  - - E_S4C
+    - ctrl+
+- - - GD1C
+    - pin
+  - - E_S1C
+    - +
+  - - R_S1C
+    - pos
+- - - G1C
+    - pin
+  - - R_S1C
+    - neg
+  - - Rp1C
+    - pos
+  - - M_S1C
+    - gate
+- - - N3
+    - pin
+  - - E_S1C
+    - '-'
+  - - Rp1C
+    - neg
+  - - M_S1C
+    - source
+  - - M_S4C
+    - drain
+  - - M_S3C
+    - drain
+  - - VSENSE_C
+    - +
+  - - R_SNUB_C
+    - pos
+- - - GD4C
+    - pin
+  - - E_S4C
+    - +
+  - - R_S4C
+    - pos
+- - - G4C
+    - pin
+  - - R_S4C
+    - neg
+  - - Rp4C
+    - pos
+  - - M_S4C
+    - gate
+- - - NXC
+    - pin
+  - - E_S2C
+    - '-'
+  - - Rp2C
+    - neg
+  - - M_S2C
+    - source
+  - - E_S3C
+    - '-'
+  - - Rp3C
+    - neg
+  - - M_S3C
+    - source
+  - - R_NXC
+    - pos
+- - - GD2C
+    - pin
+  - - E_S2C
+    - +
+  - - R_S2C
+    - pos
+- - - G2C
+    - pin
+  - - R_S2C
+    - neg
+  - - Rp2C
+    - pos
+  - - M_S2C
+    - gate
+- - - GD3C
+    - pin
+  - - E_S3C
+    - +
+  - - R_S3C
+    - pos
+- - - G3C
+    - pin
+  - - R_S3C
+    - neg
+  - - Rp3C
+    - pos
+  - - M_S3C
+    - gate
+- - - N1A
+    - pin
+  - - VSENSE_A
+    - '-'
+  - - L1
+    - pos
+- - - N011
+    - pin
+  - - L1
+    - neg
+  - - R15
+    - pos
+- - - N2B
+    - pin
+  - - VSENSE_B
+    - '-'
+  - - L2
+    - pos
+- - - N012
+    - pin
+  - - L2
+    - neg
+  - - R16
+    - pos
+- - - N3C
+    - pin
+  - - VSENSE_C
+    - '-'
+  - - L3
+    - pos
+- - - N013
+    - pin
+  - - L3
+    - neg
+  - - R17
+    - pos
+- - - N020
+    - pin
+  - - R15
+    - neg
+  - - R16
+    - neg
+  - - R17
+    - neg
+  - - R_STAR
+    - pos
+- - - CTRL_RAW_A
+    - pin
+  - - B_CTRL_A
+    - +
+  - - R_FLT_A
+    - pos
+- - - CTRL_RAW_B
+    - pin
+  - - B_CTRL_B
+    - +
+  - - R_FLT_B
+    - pos
+- - - CTRL_RAW_C
+    - pin
+  - - B_CTRL_C
+    - +
+  - - R_FLT_C
+    - pos
+- - - N_SNUB_A
+    - pin
+  - - R_SNUB_A
+    - neg
+  - - C_SNUB_A
+    - pos
+- - - N_SNUB_B
+    - pin
+  - - R_SNUB_B
+    - neg
+  - - C_SNUB_B
+    - pos
+- - - N_SNUB_C
+    - pin
+  - - R_SNUB_C
+    - neg
+  - - C_SNUB_C
+    - pos
+analysis:
+  spice_settings:
+    reltol: 0.005
+    abstol: 1.0e-09
+    vntol: 1.0e-06
+    chgtol: 1.0e-11
+    gmin: 1.0e-10
+    method: trap
+    maxord: 2
+    trtol: 4
+    itl4: 100
+    ic: v(N008)=400
+  transient:
+    spice_settings:
+      tstop: 0.06
+      use_ic: false
+      reltol: 0.005
+      abstol: 1.0e-09
+      vntol: 1.0e-06
+      chgtol: 1.0e-11
+      gmin: 1.0e-10
+      method: trap
+      maxord: 2
+      trtol: 4
+      itl4: 100
+      ic: v(N008)=400
+    requirements:
+    - rid: tr_phase_currents
+      requirement: Regulate three-phase output load currents to 1.0A peak at 160Hz
+        via closed-loop control
+      criteria:
+        target_current_peak_a: 1.0
+        fundamental_freq_hz: 160
+      environment:
+      - ref: time_domain
+        t_step: 2.0e-07
+        t_stop: 0.06
+        t_max_step: 1.0e-06
+      measurement:
+      - ref: VIN
+        plot:
+          x_axis: time
+          title: DC Input Voltage (V1)
+        component: VIN
+        quantity: voltage
+        nets:
+        - - VIN
+          - +
+        - - VIN
+          - '-'
+        data:
+        - name: Vin_avg
+          spice_command: avg
+          description: Avg Input Voltage
+      - ref: V_OUT
+        plot:
+          x_axis: time
+          title: Phase A Load Voltage
+        nets:
+        - - N011
+          - pin
+        - - N020
+          - pin
+        quantity: voltage
+        data:
+        - name: Vout_rms
+          spice_command: rms
+          description: RMS Load Voltage
+      - ref: I_PHASE_A
+        plot:
+          x_axis: time
+          title: Phase A Output Current
+        component: VSENSE_A
+        quantity: current
+        data:
+        - name: Iphase_a_max
+          spice_command: max
+          description: Peak positive Phase A output current
+        - name: Iphase_a_min
+          spice_command: min
+          description: Peak negative Phase A output current
+        - name: Iphase_a_rms
+          spice_command: rms
+          description: RMS Phase A output current
+      - ref: I_PHASE_B
+        plot:
+          x_axis: time
+          title: Phase B Output Current
+        component: VSENSE_B
+        quantity: current
+        data:
+        - name: Iphase_b_max
+          spice_command: max
+          description: Peak positive Phase B output current
+        - name: Iphase_b_min
+          spice_command: min
+          description: Peak negative Phase B output current
+        - name: Iphase_b_rms
+          spice_command: rms
+          description: RMS Phase B output current
+      - ref: I_PHASE_C
+        plot:
+          x_axis: time
+          title: Phase C Output Current
+        component: VSENSE_C
+        quantity: current
+        data:
+        - name: Iphase_c_max
+          spice_command: max
+          description: Peak positive Phase C output current
+        - name: Iphase_c_min
+          spice_command: min
+          description: Peak negative Phase C output current
+        - name: Iphase_c_rms
+          spice_command: rms
+          description: RMS Phase C output current
+      - ref: I_REF_A
+        plot:
+          x_axis: time
+          title: Phase A Current Reference (1.0A Peak)
+        component: V_IREF_A
+        quantity: voltage
+        nets:
+        - - V_IREF_A
+          - +
+        - - V_IREF_A
+          - '-'
+        data:
+        - name: Iref_a_max
+          spice_command: max
+          description: Peak reference current command
+      outputs:
+      - var: iphase_a_peak_a
+        formula: '[Iphase_a_max]'
+        description: Peak Phase A current (regulated to 1.0A)
+      - var: iphase_b_peak_a
+        formula: '[Iphase_b_max]'
+        description: Peak Phase B current (regulated to 1.0A)
+      - var: iphase_c_peak_a
+        formula: '[Iphase_c_max]'
+        description: Peak Phase C current (regulated to 1.0A)
+      - var: iphase_a_rms_a
+        formula: '[Iphase_a_rms]'
+        description: RMS Phase A current
+      - var: current_tracking_error_pct
+        formula: 100*abs([Iphase_a_max] - [Iref_a_max])/[Iref_a_max]
+        description: Closed-loop Phase A current tracking error percentage
+    - rid: tr_line_voltage
+      requirement: Three-level Line-to-Line PWM AC voltage (V_N1 - V_N2)
+      criteria:
+        vdc_bus_v: 24
+      environment:
+      - ref: time_domain
+        t_step: 2.0e-07
+        t_stop: 0.06
+        t_max_step: 1.0e-06
+      measurement:
+      - ref: VLINE_AB
+        plot:
+          x_axis: time
+          title: Line-to-Line Output Voltage (V_N1 - V_N2)
+        quantity: voltage
+        nets:
+        - - VSENSE_A
+          - +
+        - - VSENSE_B
+          - +
+        data:
+        - name: Vline_ab_max
+          spice_command: max
+          description: Peak positive line-to-line voltage
+        - name: Vline_ab_min
+          spice_command: min
+          description: Peak negative line-to-line voltage
+        - name: Vline_ab_pp
+          spice_command: pp
+          description: Peak-to-peak line-to-line voltage
+      outputs:
+      - var: vline_ab_max_v
+        formula: '[Vline_ab_max]'
+        description: Peak line-to-line voltage
+      - var: vline_ab_pp_v
+        formula: '[Vline_ab_pp]'
+        description: Peak-to-peak line-to-line voltage
+    - rid: tr_midpoint_balance
+      requirement: DC bus midpoint stability and 3-level pole-to-midpoint voltage
+        (V_N1 - V_N008)
+      criteria:
+        vmid_target_v: 12
+      environment:
+      - ref: time_domain
+        t_step: 2.0e-07
+        t_stop: 0.06
+        t_max_step: 1.0e-06
+      measurement:
+      - ref: VPOLE_A
+        plot:
+          x_axis: time
+          title: Pole-to-Midpoint Voltage V(N1) - V(N008)
+        quantity: voltage
+        nets:
+        - - VSENSE_A
+          - +
+        - - C2
+          - pos
+        data:
+        - name: Vpole_a_max
+          spice_command: max
+          description: Maximum pole-to-midpoint voltage (+12V)
+        - name: Vpole_a_min
+          spice_command: min
+          description: Minimum pole-to-midpoint voltage (-12V)
+      outputs:
+      - var: vmid_avg_v
+        formula: '[Vmid_avg]'
+        description: DC bus midpoint average voltage
+      - var: vmid_ripple_v
+        formula: '[Vmid_pp]'
+        description: DC bus midpoint voltage ripple
+      - var: vpole_a_max_v
+        formula: '[Vpole_a_max]'
+        description: Peak positive pole-to-midpoint voltage
+      - var: vpole_a_min_v
+        formula: '[Vpole_a_min]'
+        description: Peak negative pole-to-midpoint voltage
+metadata:
+  stage:
+  - power_switch
+  - control
+  - filter
+  topology: inverter
+  control: closed-loop_current_pd_pwm
+  tags:
+  - t-type
+  - three-level
+  - multilevel
+  - closed-loop
+  - current-controlled
+  - three-phase
+  - inverter

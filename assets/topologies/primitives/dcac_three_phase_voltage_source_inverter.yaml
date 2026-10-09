@@ -1,0 +1,635 @@
+id: dcac_three_phase_voltage_source_inverter
+name: Three Phase Voltage Source Inverter
+description: A 3-phase sine-PWM voltage source inverter with an RL load, using explicit
+  carrier generation and behavioral comparators for switching logic.
+components:
+  - ref: V1
+    type: custom_spice
+    role: pwm_carrier
+    params:
+      spice_line: V1 Tri 0 PULSE(-10 10 0 0.03124m 0.03124m 0.00002m 0.0625m)
+  - ref: V2
+    type: custom_spice
+    role: mod_a
+    params:
+      spice_line: V2 ControlA 0 SINE(0 8 160)
+  - ref: V3
+    type: custom_spice
+    role: reference_sine_b
+    params:
+      spice_line: V3 ControlB 0 SINE(0 8 160 0 0 120)
+  - ref: V4
+    type: custom_spice
+    role: reference_sine_c
+    params:
+      spice_line: V4 ControlC 0 SINE(0 8 160 0 0 240)
+  - ref: B1
+    type: b_source
+    role: comparator_a_high
+    params:
+      expression: 'V(ControlA) >= V(Tri) ? 1 : 0'
+  - ref: B2
+    type: b_source
+    role: comparator_a_low
+    params:
+      expression: 'V(ControlA) < V(Tri) ? 1 : 0'
+  - ref: B3
+    type: b_source
+    role: comparator_b_high
+    params:
+      expression: 'V(ControlB) >= V(Tri) ? 1 : 0'
+  - ref: B4
+    type: b_source
+    role: comparator_b_low
+    params:
+      expression: 'V(ControlB) < V(Tri) ? 1 : 0'
+  - ref: B5
+    type: b_source
+    role: comparator_c_high
+    params:
+      expression: 'V(ControlC) >= V(Tri) ? 1 : 0'
+  - ref: B6
+    type: b_source
+    role: comparator_c_low
+    params:
+      expression: 'V(ControlC) < V(Tri) ? 1 : 0'
+  - ref: E1
+    type: e_source
+    role: gate_driver_a_high
+    params:
+      gain: 100
+  - ref: R1
+    type: resistor
+    role: gate_resistor_a_high
+    params:
+      resistance: 1k
+  - ref: R2
+    type: resistor
+    role: gate_pulldown_a_high
+    params:
+      resistance: 50k
+  - ref: E2
+    type: e_source
+    role: gate_driver_a_low
+    params:
+      gain: 100
+  - ref: R3
+    type: resistor
+    role: gate_resistor_a_low
+    params:
+      resistance: 1k
+  - ref: R4
+    type: resistor
+    role: gate_pulldown_a_low
+    params:
+      resistance: 50k
+  - ref: E3
+    type: e_source
+    role: gate_driver_b_high
+    params:
+      gain: 100
+  - ref: R5
+    type: resistor
+    role: gate_resistor_b_high
+    params:
+      resistance: 1k
+  - ref: R6
+    type: resistor
+    role: gate_pulldown_b_high
+    params:
+      resistance: 50k
+  - ref: E4
+    type: e_source
+    role: gate_driver_b_low
+    params:
+      gain: 100
+  - ref: R7
+    type: resistor
+    role: gate_resistor_b_low
+    params:
+      resistance: 1k
+  - ref: R8
+    type: resistor
+    role: gate_pulldown_b_low
+    params:
+      resistance: 50k
+  - ref: E5
+    type: e_source
+    role: gate_driver_c_high
+    params:
+      gain: 100
+  - ref: R9
+    type: resistor
+    role: gate_resistor_c_high
+    params:
+      resistance: 1k
+  - ref: R10
+    type: resistor
+    role: gate_pulldown_c_high
+    params:
+      resistance: 50k
+  - ref: E6
+    type: e_source
+    role: gate_driver_c_low
+    params:
+      gain: 100
+  - ref: R11
+    type: resistor
+    role: gate_resistor_c_low
+    params:
+      resistance: 1k
+  - ref: R12
+    type: resistor
+    role: gate_pulldown_c_low
+    params:
+      resistance: 50k
+  - ref: V5
+    type: node
+    role: dc_link_voltage
+    params:
+      node_type: voltage_source
+      source: dc
+      voltage: 380
+  - ref: R13
+    type: resistor
+    role: dc_link_filter_res1
+    params:
+      resistance: 10
+  - ref: C1
+    type: capacitor
+    role: dc_link_filter_cap1
+    params:
+      capacitance: 10u
+  - ref: R14
+    type: resistor
+    role: dc_link_filter_res2
+    params:
+      resistance: 10
+  - ref: C2
+    type: capacitor
+    role: dc_link_filter_cap2
+    params:
+      capacitance: 10u
+  - ref: M1
+    type: transistor
+    role: mosfet_a_high
+    params:
+      family: mosfet
+      type: nmos
+      model: FDH210N08
+      Bv: 500
+  - ref: M2
+    type: transistor
+    role: mosfet_a_low
+    params:
+      family: mosfet
+      type: nmos
+      model: FDH210N08
+      Bv: 500
+  - ref: M3
+    type: transistor
+    role: mosfet_b_high
+    params:
+      family: mosfet
+      type: nmos
+      model: FDH210N08
+      Bv: 500
+  - ref: M4
+    type: transistor
+    role: mosfet_b_low
+    params:
+      family: mosfet
+      type: nmos
+      model: FDH210N08
+      Bv: 500
+  - ref: M5
+    type: transistor
+    role: mosfet_c_high
+    params:
+      family: mosfet
+      type: nmos
+      model: FDH210N08
+      Bv: 500
+  - ref: M6
+    type: transistor
+    role: mosfet_c_low
+    params:
+      family: mosfet
+      type: nmos
+      model: FDH210N08
+      Bv: 500
+  - ref: L1
+    type: inductor
+    role: load_inductor_a
+    params:
+      inductance: 10m
+  - ref: L2
+    type: inductor
+    role: load_inductor_b
+    params:
+      inductance: 10m
+  - ref: L3
+    type: inductor
+    role: load_inductor_c
+    params:
+      inductance: 10m
+  - ref: R15
+    type: resistor
+    role: load_resistor_a
+    params:
+      resistance: 10
+  - ref: R16
+    type: resistor
+    role: load_resistor_b
+    params:
+      resistance: 10
+  - ref: R17
+    type: resistor
+    role: load_resistor_c
+    params:
+      resistance: 10
+nets:
+  - - - E1
+      - +
+    - - R1
+      - neg
+  - - - E1
+      - '-'
+    - - R2
+      - neg
+    - - L1
+      - pos
+    - - M1
+      - source
+    - - M1
+      - body
+    - - M2
+      - drain
+  - - - E1
+      - ctrl+
+    - - B1
+      - +
+  - - - E1
+      - ctrl-
+    - - E2
+      - '-'
+    - - E2
+      - ctrl-
+    - - R4
+      - neg
+    - - E3
+      - ctrl-
+    - - E4
+      - '-'
+    - - E4
+      - ctrl-
+    - - R8
+      - neg
+    - - E5
+      - ctrl-
+    - - E6
+      - '-'
+    - - E6
+      - ctrl-
+    - - R12
+      - neg
+    - - R14
+      - neg
+    - - C2
+      - neg
+    - - B1
+      - '-'
+    - - B2
+      - '-'
+    - - B3
+      - '-'
+    - - B4
+      - '-'
+    - - B5
+      - '-'
+    - - B6
+      - '-'
+    - - M2
+      - source
+    - - M2
+      - body
+    - - M4
+      - source
+    - - M4
+      - body
+    - - M6
+      - source
+    - - M6
+      - body
+    - - V5
+      - '-'
+  - - - R1
+      - pos
+    - - R2
+      - pos
+    - - M1
+      - gate
+  - - - E2
+      - +
+    - - R3
+      - neg
+  - - - E2
+      - ctrl+
+    - - B2
+      - +
+  - - - R3
+      - pos
+    - - R4
+      - pos
+    - - M2
+      - gate
+  - - - E3
+      - +
+    - - R5
+      - neg
+  - - - E3
+      - '-'
+    - - R6
+      - neg
+    - - L2
+      - pos
+    - - M3
+      - source
+    - - M3
+      - body
+    - - M4
+      - drain
+  - - - E3
+      - ctrl+
+    - - B3
+      - +
+  - - - R5
+      - pos
+    - - R6
+      - pos
+    - - M3
+      - gate
+  - - - E4
+      - +
+    - - R7
+      - neg
+  - - - E4
+      - ctrl+
+    - - B4
+      - +
+  - - - R7
+      - pos
+    - - R8
+      - pos
+    - - M4
+      - gate
+  - - - E5
+      - +
+    - - R9
+      - neg
+  - - - E5
+      - '-'
+    - - R10
+      - neg
+    - - L3
+      - pos
+    - - M5
+      - source
+    - - M5
+      - body
+    - - M6
+      - drain
+  - - - E5
+      - ctrl+
+    - - B5
+      - +
+  - - - R9
+      - pos
+    - - R10
+      - pos
+    - - M5
+      - gate
+  - - - E6
+      - +
+    - - R11
+      - neg
+  - - - E6
+      - ctrl+
+    - - B6
+      - +
+  - - - R11
+      - pos
+    - - R12
+      - pos
+    - - M6
+      - gate
+  - - - V5
+      - +
+    - - R13
+      - pos
+    - - C1
+      - pos
+    - - M1
+      - drain
+    - - M3
+      - drain
+    - - M5
+      - drain
+  - - - R13
+      - neg
+    - - C1
+      - neg
+    - - R14
+      - pos
+    - - C2
+      - pos
+  - - - L1
+      - neg
+    - - R15
+      - neg
+  - - - L2
+      - neg
+    - - R16
+      - neg
+  - - - L3
+      - neg
+    - - R17
+      - neg
+  - - - R15
+      - pos
+    - - R16
+      - pos
+    - - R17
+      - pos
+analysis:
+  transient:
+    time_domain:
+      - ref: transient
+        duration: 60m
+        step_size: 5u
+        time_start: 0
+        tmax: 1m
+        uic: true
+    requirements:
+      - rid: tr_comprehensive
+        requirement: Plot all key waveforms
+        criteria:
+          target_vout: 380.0
+        measurement:
+          - ref: VIN
+            plot:
+              x_axis: time
+              title: Input DC Link Voltage
+            quantity: voltage
+            nets:
+              - - V5
+                - +
+              - - V5
+                - '-'
+            data:
+              - name: Vin_avg
+                spice_command: avg
+                description: Average input voltage
+          - ref: VOUT_A
+            plot:
+              x_axis: time
+              title: Phase A Output Voltage
+            quantity: voltage
+            nets:
+              - - L1
+                - pos
+              - - M2
+                - source
+            data:
+              - name: Vout_A_rms
+                spice_command: rms
+                description: RMS output voltage for Phase A
+          - ref: VOUT_B
+            plot:
+              x_axis: time
+              title: Phase B Output Voltage
+            quantity: voltage
+            nets:
+              - - L2
+                - pos
+              - - M4
+                - source
+            data:
+              - name: Vout_B_rms
+                spice_command: rms
+                description: RMS output voltage for Phase B
+          - ref: VOUT_C
+            plot:
+              x_axis: time
+              title: Phase C Output Voltage
+            quantity: voltage
+            nets:
+              - - L3
+                - pos
+              - - M6
+                - source
+            data:
+              - name: Vout_C_rms
+                spice_command: rms
+                description: RMS output voltage for Phase C
+          - ref: IOUT_A
+            plot:
+              x_axis: time
+              title: Phase A Load Current
+            quantity: current
+            component: L1
+            data:
+              - name: Iout_A_rms
+                spice_command: rms
+                description: RMS output current for Phase A
+          - ref: IOUT_B
+            plot:
+              x_axis: time
+              title: Phase B Load Current
+            quantity: current
+            component: L2
+            data:
+              - name: Iout_B_rms
+                spice_command: rms
+                description: RMS output current for Phase B
+          - ref: IOUT_C
+            plot:
+              x_axis: time
+              title: Phase C Load Current
+            quantity: current
+            component: L3
+            data:
+              - name: Iout_C_rms
+                spice_command: rms
+                description: RMS output current for Phase C
+          - ref: GATE_A_HIGH
+            plot:
+              x_axis: time
+              title: Phase A High-Side Gate Pulse (Vgs)
+            quantity: voltage
+            nets:
+              - - M1
+                - gate
+              - - M1
+                - source
+          - ref: GATE_A_LOW
+            plot:
+              x_axis: time
+              title: Phase A Low-Side Gate Pulse (Vgs)
+            quantity: voltage
+            nets:
+              - - M2
+                - gate
+              - - M2
+                - source
+          - ref: GATE_B_HIGH
+            plot:
+              x_axis: time
+              title: Phase B High-Side Gate Pulse (Vgs)
+            quantity: voltage
+            nets:
+              - - M3
+                - gate
+              - - M3
+                - source
+          - ref: GATE_B_LOW
+            plot:
+              x_axis: time
+              title: Phase B Low-Side Gate Pulse (Vgs)
+            quantity: voltage
+            nets:
+              - - M4
+                - gate
+              - - M4
+                - source
+          - ref: GATE_C_HIGH
+            plot:
+              x_axis: time
+              title: Phase C High-Side Gate Pulse (Vgs)
+            quantity: voltage
+            nets:
+              - - M5
+                - gate
+              - - M5
+                - source
+          - ref: GATE_C_LOW
+            plot:
+              x_axis: time
+              title: Phase C Low-Side Gate Pulse (Vgs)
+            quantity: voltage
+            nets:
+              - - M6
+                - gate
+              - - M6
+                - source
+        outputs:
+          - var: vout_a_rms_v
+            formula: '[Vout_A_rms]'
+            description: Phase A RMS Voltage
+  ac:
+    frequency:
+      start: 1
+      stop: 1Meg
+      points_per_decade: 10
+models:
+  - .model FDH210N08 NMOS (LEVEL=1 VTO=2.5 KP=20 LAMBDA=0.001 RD=0.003 RS=0.003)

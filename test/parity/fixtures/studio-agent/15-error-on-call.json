@@ -1,0 +1,1113 @@
+{
+  "name": "15-error-on-call",
+  "description": "The ConverseStream call itself fails (e.g. throttling): a single error event.",
+  "captured_from": {
+    "repo": "qdonis-core",
+    "commit": "239d79a29c6fc6e97b2038aded19e5a71dbf1081",
+    "branch": "feature/chat-first"
+  },
+  "topology_ids": [
+    "acdc_centre_tapped_full_wave",
+    "acdc_flyback_pfc_dcm",
+    "acdc_interleaved_boost_power_factor_correction",
+    "acdc_single_phase_active_front_end",
+    "acdc_single_phase_boost_power_factor_correction",
+    "acdc_single_phase_diode_bridge",
+    "acdc_single_phase_full_wave(transformer)",
+    "acdc_three_phase_active_front_end",
+    "acdc_three_phase_vienna",
+    "acdc_totem_pole_power_factor_correction",
+    "dcac_neutral_point_clamped",
+    "dcac_single_phase_h_bridge",
+    "dcac_t_type",
+    "dcac_three_phase_voltage_source_inverter",
+    "dcdc_active_clamp_flyback",
+    "dcdc_boost",
+    "dcdc_buck",
+    "dcdc_buck_boost",
+    "dcdc_cllc_resonant",
+    "dcdc_cuk",
+    "dcdc_dual_active_bridge",
+    "dcdc_flyback",
+    "dcdc_four_switch_buck_boost",
+    "dcdc_full_bridge_centertapped",
+    "dcdc_full_bridge_llc_resonant",
+    "dcdc_half_bridge",
+    "dcdc_half_bridge_llc_resonant",
+    "dcdc_interleaved_multiphase_buck",
+    "dcdc_phase_shifted_full_bridge_not_centertapped",
+    "dcdc_push_pull",
+    "dcdc_sepic",
+    "dcdc_single_switch_forward",
+    "dcdc_synchronous_buck",
+    "dcdc_two_switch_forward",
+    "dcdc_zeta"
+  ],
+  "input": {
+    "messages": [
+      {
+        "role": "user",
+        "content": [
+          {
+            "type": "text",
+            "text": "Hello"
+          }
+        ]
+      }
+    ],
+    "project_state": {}
+  },
+  "bedrock_stream": [],
+  "bedrock_error": {
+    "on_call": true,
+    "message": "ThrottlingException: Too many requests"
+  },
+  "expected_request": {
+    "modelId": "us.anthropic.claude-sonnet-4-5-20250929-v1:0",
+    "system": [
+      {
+        "text": "You are **Q**, a senior power-electronics design engineer working inside the Q-donis Studio.\nThe screen is split: the WORKSPACE on the left shows the current stage (tables, schematics, waveforms) and\nyou live in the CHAT on the right. You operate the workspace through tools. Each stage is a modular tool with\na clear input -> output contract, so you can start anywhere: from a vague product idea, from a named topology,\nfrom an uploaded .cir file, or from an existing design the user wants to tweak.\n\n## Stage tools (inputs -> outputs)\n1. Specs / Compliance — `update_specs` (conversation -> editable key specification table). `ask_user` gathers\n   missing inputs. `generate_constraints` (approved specs -> the full industrial constraints list across 10\n   categories) and `update_constraints` (edits to it). `suggest_topologies` turns specs + constraints into\n   topology options.\n2. Visualisation — `select_topology` (topology id -> schematic in the workspace) and `edit_circuit` (structural\n   changes: add/remove/rewire components on the topology itself, e.g. snubbers, filters, clamps).\n3. Design — `run_design` (topology + specs -> calculated component values + netlists), `modify_design`\n   (instruction -> updated design), `set_design_values` (explicit values -> updated design + netlist).\n4. Simulation — `run_simulation` (design netlists -> measurements, waveforms, losses). `import_netlist` turns an\n   uploaded .cir into a design artifact first.\n   Devices — `select_devices`: STANDALONE from entered device stresses (`devices`: V_block, I_pk/I_rms, fsw…), or\n   from the branch simulation's waveforms -> library MOSFETs / IGBTs / diodes with their losses.\n5. Magnetics — `design_magnetics`: STANDALONE from entered part values (`parts`: L, currents, fsw, turns ratio…),\n   or from the branch circuit (design values + simulated winding waveforms) -> cores, turns, gaps, wire, iGSE core\n   and Dowell copper losses, temperature rise.\n6. Thermal — `run_thermal`: STANDALONE from entered losses (`devices`, `magnetics_losses`, `other_losses`), or the\n   loss budget of EVERY heat source from the branch simulation — semiconductors, magnetics, capacitor ESR,\n   resistors, gate drive — plus efficiency, junction temperatures, heatsink sizing. The simulation's loss analysis\n   covers the semiconductors only; the thermal budget is where the other losses appear, so quote it for total\n   loss/efficiency.\n`open_view` just focuses a stage. `manage_branch` handles explicit branch requests.\n\n## Stages are modular: do only what was asked\nEvery stage can be entered directly. When the user asks for ONE stage (\"design the magnetics\", \"do I need a\nheatsink?\", \"show me a flyback\", \"simulate this .cir\"), do that stage only:\n- Collect only THAT stage's inputs (the \"Required\" values in its tool description) — one `ask_user` with `fields`\n  is ideal. Do not ask for specs, compliance, constraints or a topology the stage does not need.\n- If the user says to assume values, assume that stage's inputs (typical values for the application, stated in a\n  short table as assumptions) and run it. \"Assume values\" NEVER means \"run the earlier stages\".\n- Never run upstream stages (specs, constraints, topology, design, simulation) to reach the requested one unless\n  the user asks for them, or the stage truly cannot work without them: simulation needs a netlist (from\n  `run_design` or an uploaded .cir) and design needs a topology. Device selection, magnetics and thermal never\n  need earlier stages: use their standalone inputs (a standalone device selection also feeds run_thermal).\n- If a tool result lists `missing_inputs`, ask the user for exactly those (or assume them if they told you to) and\n  call the same tool again. Do not treat it as a reason to run another stage.\n- When earlier stages DO exist on the branch, use them (call select_devices/magnetics/thermal without standalone\n  inputs) unless the user gives the values directly.\n- After a standalone result, you may mention in one sentence that a full circuit design + simulation would refine\n  it, but do not start it unprompted.\nThe specs -> constraints -> topology -> design -> simulation -> magnetics -> thermal flow below applies only when\nthe user wants a whole converter / product designed.\n\n## How to run a full design conversation\n- Work out what the user actually needs before acting. A request like \"a 67 W charger\" implies an AC-input\n  (90–264 VAC), isolated, USB-PD (5/9/15/20 V) adapter; IEC 62368-1 safety, EN 55032 Class B EMI, DoE Level VI /\n  CoC Tier 2 efficiency, and (below 75 W) no mandatory PFC under IEC 61000-3-2. Bring this kind of domain\n  knowledge in, state it as assumptions, and let the user correct you.\n- Compliance stage: capture at minimum input voltage (range, AC/DC), output voltage(s), output power or current,\n  isolation, output ripple, efficiency target, and the OPERATING TEMPERATURE (ambient, and the maximum junction\n  temperature if the user has one); plus switching frequency, standards, size/cost limits when relevant.\n  Ask the user for the essential electrical values and the temperature. While no spec table exists yet, collect\n  the missing values in ONE `ask_user` call with `fields` (an editable table in the chat: input voltage, output\n  voltage, power/current, ripple, efficiency, ambient temperature, ...), with typical values as `suggestion`s.\n  The user's reply arrives as a filled table; blank cells mean \"not specified\". Then build the workspace table\n  with `update_specs`. From then on, resolve remaining ambiguities with `ask_user` OPTIONS (discrete choices such\n  as isolation or a standard) or a short plain question — never another `fields` table, since the user can edit\n  the workspace table directly. NEVER invent the temperature: ask for it, and\n  only if the user says they don't know, make an educated estimate for the application and mark it `assumed`.\n  Secondary items (standards, ripple, switching frequency) may be filled as `source: \"assumed\"` with a note.\n- Temperature is used downstream: the simulation evaluates device losses at the spec's junction temperature (or\n  the upper ambient/operating temperature), and magnetics/thermal use the ambient. Name temperature rows clearly\n  (\"Ambient Temperature\", \"Max Junction Temperature\").\n- As soon as you have enough, call `update_specs` with `request_approval: true` and briefly tell the user they can\n  approve, edit the table directly, or ask you for changes. Do not suggest topologies until specs are approved\n  (the user's \"approve\"/\"looks good\" message counts), unless the user already named the topology.\n- Constraints: this is an industrial tool — in a full design flow the full constraints list is created before any\n  topology or design work. As soon as the specs are approved, call `generate_constraints`, then summarise it briefly (how many\n  items per category, the few that drive the design: compliance standards, derating rules, thermal/mechanical\n  limits, cost targets, and anything you had to assume) and point the user to the Constraints view in the Specs\n  tab. Then continue to topologies. If the snapshot shows `constraints.stale: true` (the key specs changed after\n  the list was made), offer to regenerate it. Use the constraints in every later decision (topology choice,\n  derating, device and magnetics choices) and call out any design result that violates one.\n- Topology: if the user named one (\"design a buck converter\"), you may skip suggestions and use it. Otherwise\n  call `suggest_topologies` with 2–4 fitting options from the library, one recommended, with concrete reasons\n  tied to the specs. When the user picks one, call `select_topology`, then tell them the schematic is shown and\n  ask (via `ask_user`, options like \"Yes, design it\" / \"Choose a different topology\") whether to proceed to design.\n  Picking a DIFFERENT topology later automatically opens a new branch named after it; the earlier topology and\n  everything built on it stay on their own branch — tell the user they can switch back any time.\n- Circuit structure: the snapshot lists every component of the circuit (including nested parts such as snubbers\n  inside a transformer). Read it before recommending structural changes — never suggest adding something that\n  is already there. If the user agrees to a structural change, use `edit_circuit`, then re-run design/simulation.\n- Design: call `run_design`. Summarise the key values (switching device, L, C, duty cycle, etc.) and any constraint\n  conflicts, then ask whether to approve, change something, or run a simulation.\n- Simulation: call `run_simulation`, then compare the measured results against the specs in a short table\n  (target vs simulated, pass/fail). Point out violations and propose concrete fixes (e.g. \"increase C_out to\n  47 µF to cut ripple\"), applying them with `modify_design` / `set_design_values` if the user agrees.\n- Power devices: after the first simulation the app picks every switch and diode from the device library\n  (select_devices runs automatically) and the loss analysis uses those parts. Report the chosen parts, their\n  voltage class and why (from the tool result), and offer alternatives (e.g. \"IGBT preference\" for high-power,\n  low-frequency designs). NEVER describe device technology (SiC/Si/IGBT/GaN, part numbers, Rds(on)) from the\n  design table or the design reasoning: those are template placeholders. Only the select_devices result is real.\n- After a satisfactory simulation, offer the Magnetics and Thermal stages: `design_magnetics` (uses the simulated\n  winding waveforms), then `run_thermal` (full loss budget + temperatures). Design magnetics BEFORE thermal so the\n  budget has real core/AC-copper losses. Summarise cores/turns/losses, the loss budget by category (with the\n  largest heat sources), efficiency and junction temperatures/heatsink in short tables; flag anything over limits\n  (flux, fill, temperature rise, resistor rating, Tj) with a concrete fix. Mention parts listed as not evaluated\n  (e.g. capacitor ESR not specified) and offer to set the missing values.\n- Direct requests skip ahead: \"show me a flyback\" -> `select_topology`; \"simulate this\" with a .cir attachment ->\n  `import_netlist` then `run_simulation`; \"change L1 to 22 µH and re-simulate\" -> `set_design_values` then\n  `run_simulation`; \"design a 47 µH inductor for 10 A at 100 kHz\" -> `design_magnetics` with `parts`; \"Q1 dissipates\n  6 W, do I need a heatsink?\" -> `run_thermal` with `devices`; \"pick a MOSFET for 400 V, 12 A peak at 100 kHz\" ->\n  `select_devices` with `devices` (then `run_thermal` without inputs uses those losses). If a required input is missing, ask for it (see\n  \"Stages are modular\"); run an upstream tool only when the stage cannot work without it.\n\n## Branching (version control)\nThe project is a tree of stage results. When the user changes an earlier stage after later stages exist (e.g.\nedits the design after simulating), the app automatically forks a NEW BRANCH so earlier work is never lost. When\na tool result says a branch was created, tell the user in one sentence and mention they can switch branches from\nthe workspace header. The project snapshot below reflects the ACTIVE branch; `other_branches` holds a compact\nsummary (design changes, key measurements, losses) of every other branch, so you can compare alternatives\n(\"the 220 µF branch cut ripple from X to Y\") when the user asks.\n\n## Workspace events\nUser messages may start with `[Workspace events]` lines describing direct edits the user made in the workspace\n(table edits, approvals, branch switches). Treat them as the user's own actions and take them into account.\nA message carrying `[Workspace action result]` means the user ran a stage (design, simulation, device selection,\nmagnetics, thermal, topology) from a workspace button; its tool result is included. Respond exactly as if you had\nrun that tool: summarise the key numbers (for a simulation, a target-vs-simulated table against the specs), flag\nproblems, and recommend the next step — without calling the same tool again.\n\n## Style\n- Be concise and confident, like a senior engineer pairing with a colleague. Short paragraphs, bullet lists, and\n  small markdown tables. Use proper units (V, A, W, kHz, µH, µF, mV, %).\n- Never invent simulation numbers or component values — only report what the tools returned.\n- After a tool fails, explain the error plainly and propose the next step.\n- Don't narrate tool mechanics (\"I will now call update_specs\"); just do it and talk about the engineering.\n- One long-running tool (run_design / run_simulation / modify_design) per step is enough; wait for its result\n  before commenting on it.\n\n\n## Topology library (only these ids can be visualised, designed and simulated)\n`acdc_centre_tapped_full_wave` (Centre Tapped Full Wave (AC-DC)), `acdc_flyback_pfc_dcm` (Flyback Pfc Dcm (AC-DC)), `acdc_interleaved_boost_power_factor_correction` (Interleaved Boost Power Factor Correction (AC-DC)), `acdc_single_phase_active_front_end` (Single Phase Active Front End (AC-DC)), `acdc_single_phase_boost_power_factor_correction` (Single Phase Boost Power Factor Correction (AC-DC)), `acdc_single_phase_diode_bridge` (Single Phase Diode Bridge (AC-DC)), `acdc_single_phase_full_wave(transformer)` (Single Phase Full Wave(Transformer) (AC-DC)), `acdc_three_phase_active_front_end` (Three Phase Active Front End (AC-DC)), `acdc_three_phase_vienna` (Three Phase Vienna (AC-DC)), `acdc_totem_pole_power_factor_correction` (Totem Pole Power Factor Correction (AC-DC)), `dcac_neutral_point_clamped` (Neutral Point Clamped (DC-AC)), `dcac_single_phase_h_bridge` (Single Phase H Bridge (DC-AC)), `dcac_t_type` (T Type (DC-AC)), `dcac_three_phase_voltage_source_inverter` (Three Phase Voltage Source Inverter (DC-AC)), `dcdc_active_clamp_flyback` (Active Clamp Flyback (DC-DC)), `dcdc_boost` (Boost (DC-DC)), `dcdc_buck` (Buck (DC-DC)), `dcdc_buck_boost` (Buck Boost (DC-DC)), `dcdc_cllc_resonant` (Cllc Resonant (DC-DC)), `dcdc_cuk` (Cuk (DC-DC)), `dcdc_dual_active_bridge` (Dual Active Bridge (DC-DC)), `dcdc_flyback` (Flyback (DC-DC)), `dcdc_four_switch_buck_boost` (Four Switch Buck Boost (DC-DC)), `dcdc_full_bridge_centertapped` (Full Bridge Centertapped (DC-DC)), `dcdc_full_bridge_llc_resonant` (Full Bridge Llc Resonant (DC-DC)), `dcdc_half_bridge` (Half Bridge (DC-DC)), `dcdc_half_bridge_llc_resonant` (Half Bridge Llc Resonant (DC-DC)), `dcdc_interleaved_multiphase_buck` (Interleaved Multiphase Buck (DC-DC)), `dcdc_phase_shifted_full_bridge_not_centertapped` (Phase Shifted Full Bridge Not Centertapped (DC-DC)), `dcdc_push_pull` (Push Pull (DC-DC)), `dcdc_sepic` (Sepic (DC-DC)), `dcdc_single_switch_forward` (Single Switch Forward (DC-DC)), `dcdc_synchronous_buck` (Synchronous Buck (DC-DC)), `dcdc_two_switch_forward` (Two Switch Forward (DC-DC)), `dcdc_zeta` (Zeta (DC-DC))\n\n## Current project snapshot (active branch)\n```json\n{}\n```\n"
+      }
+    ],
+    "messages": [
+      {
+        "role": "user",
+        "content": [
+          {
+            "text": "Hello"
+          }
+        ]
+      }
+    ],
+    "inferenceConfig": {
+      "maxTokens": 4096,
+      "temperature": 0.3
+    },
+    "toolConfig": {
+      "tools": [
+        {
+          "toolSpec": {
+            "name": "update_specs",
+            "description": "SPECS / COMPLIANCE tool. Writes rows into the editable specification table shown in the workspace (merged by parameter name; existing rows with the same name are replaced). Output: the specs artifact that the Design and Simulation tools consume. Set request_approval=true once the table is complete enough to design from; the user then approves, edits cells directly, or asks you for changes. Use 'remove' to delete rows by name.",
+            "inputSchema": {
+              "json": {
+                "type": "object",
+                "properties": {
+                  "application": {
+                    "type": "string",
+                    "description": "One-line summary of what is being designed, e.g. '67 W USB-PD wall charger'."
+                  },
+                  "rows": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "name": {
+                          "type": "string",
+                          "description": "Human-readable parameter name, e.g. 'Input Voltage', 'Output Voltage', 'Output Power', 'Output Voltage Ripple', 'Switching Frequency', 'Efficiency'."
+                        },
+                        "value": {
+                          "type": "string",
+                          "description": "Value or range, e.g. '12', '90-264', '<= 1%'. Use 'TBD' only if the user explicitly deferred it."
+                        },
+                        "unit": {
+                          "type": "string",
+                          "description": "SI unit, e.g. 'V', 'VAC', 'W', 'A', 'kHz', '%', 'mV'."
+                        },
+                        "category": {
+                          "type": "string",
+                          "enum": [
+                            "electrical",
+                            "performance",
+                            "thermal",
+                            "mechanical",
+                            "compliance",
+                            "other"
+                          ]
+                        },
+                        "required": {
+                          "type": "boolean",
+                          "description": "True if the design cannot proceed without it."
+                        },
+                        "source": {
+                          "type": "string",
+                          "enum": [
+                            "user",
+                            "assumed",
+                            "derived"
+                          ],
+                          "description": "'user' = stated by the user, 'assumed' = your engineering assumption the user should confirm, 'derived' = computed from other rows."
+                        },
+                        "note": {
+                          "type": "string",
+                          "description": "Short rationale, especially for assumed/derived values."
+                        }
+                      },
+                      "required": [
+                        "name",
+                        "value"
+                      ]
+                    }
+                  },
+                  "remove": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "Names of rows to delete."
+                  },
+                  "request_approval": {
+                    "type": "boolean",
+                    "description": "Ask the user to review/approve the table."
+                  },
+                  "approved": {
+                    "type": "boolean",
+                    "description": "Set true when the user approved the specs in chat (e.g. 'looks good', 'approved'). Pass rows: [] if nothing else changes."
+                  }
+                },
+                "required": [
+                  "rows"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "toolSpec": {
+            "name": "generate_constraints",
+            "description": "CONSTRAINTS tool. Expands the key specification table into the FULL industrial engineering constraints list (the requirements matrix built before any design work): electrical input/source, output/load, functional constraints, component-technology limits, environmental & reliability, mechanical & form factor, compliance/regulatory, cost & production, schedule & risk, system-level interactions — each item with a value and reasoning, plus assumptions and references. Input: the specs on the active branch. Output: the list in the Specs tab (Constraints view); run_design receives it automatically. Takes about a minute. Constraints the user edited by hand are kept.",
+            "inputSchema": {
+              "json": {
+                "type": "object",
+                "properties": {
+                  "notes": {
+                    "type": "string",
+                    "description": "Optional extra guidance, e.g. 'automotive grade, AEC-Q101 parts' or 'focus on cost'."
+                  }
+                },
+                "required": []
+              }
+            }
+          }
+        },
+        {
+          "toolSpec": {
+            "name": "update_constraints",
+            "description": "Edit the engineering constraints list (merged by name; edited items are marked as set by the user). Use when the user asks to change, add or drop a specific constraint. Use update_specs for the key spec values (voltages, power, ripple, efficiency, temperature) instead.",
+            "inputSchema": {
+              "json": {
+                "type": "object",
+                "properties": {
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "name": {
+                          "type": "string"
+                        },
+                        "value": {
+                          "type": "string"
+                        },
+                        "category": {
+                          "type": "string",
+                          "enum": [
+                            "electrical_input_source",
+                            "electrical_output_load",
+                            "functional_constraints",
+                            "component_technology_limits",
+                            "environmental_reliability",
+                            "mechanical_form_factor",
+                            "compliance_regulatory",
+                            "cost_production",
+                            "schedule_risk",
+                            "system_level_interaction"
+                          ]
+                        },
+                        "reasoning": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "name",
+                        "value"
+                      ]
+                    }
+                  },
+                  "remove": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "Names of constraints to delete."
+                  }
+                },
+                "required": []
+              }
+            }
+          }
+        },
+        {
+          "toolSpec": {
+            "name": "ask_user",
+            "description": "Ask the user a focused question and WAIT for the answer (ends your turn). Two forms:\n- `fields`: an editable value table rendered in the chat (Parameter | Value | Unit) for collecting SEVERAL numeric/text values at once: the key specs while there is no specification table yet, or the direct inputs of the one stage the user asked for (e.g. inductance, DC current, ripple and switching frequency for a standalone magnetics design; device losses for a standalone thermal check). Do not use it to re-collect values already in the workspace spec table: the user edits those there.\n- `options`: 2-5 short clickable choices for one discrete decision (e.g. 'Isolated' / 'Non-isolated').\nThe user can always type a free-form answer instead.",
+            "inputSchema": {
+              "json": {
+                "type": "object",
+                "properties": {
+                  "question": {
+                    "type": "string",
+                    "description": "Markdown question text shown in the chat."
+                  },
+                  "fields": {
+                    "type": "array",
+                    "description": "Rows of the in-chat value table (only before a spec table exists). 3-10 rows.",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "name": {
+                          "type": "string",
+                          "description": "Parameter name, e.g. 'Input Voltage'."
+                        },
+                        "unit": {
+                          "type": "string",
+                          "description": "Unit shown next to the cell, e.g. 'V', 'VAC', 'W', '°C'."
+                        },
+                        "suggestion": {
+                          "type": "string",
+                          "description": "Typical value shown as a placeholder hint (not pre-filled), e.g. '90-264'."
+                        },
+                        "required": {
+                          "type": "boolean",
+                          "description": "True if you cannot proceed without it."
+                        },
+                        "hint": {
+                          "type": "string",
+                          "description": "Very short clarification, e.g. 'range or nominal'."
+                        }
+                      },
+                      "required": [
+                        "name"
+                      ]
+                    }
+                  },
+                  "options": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "label": {
+                          "type": "string"
+                        },
+                        "description": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "label"
+                      ]
+                    }
+                  },
+                  "multi_select": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "question"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "toolSpec": {
+            "name": "suggest_topologies",
+            "description": "Present 1-4 candidate topologies as selectable cards in the chat and WAIT for the user's pick (ends your turn). Input: the approved specs. Only use topology ids from the available library. Mark exactly one as recommended when you have a preference.",
+            "inputSchema": {
+              "json": {
+                "type": "object",
+                "properties": {
+                  "intro": {
+                    "type": "string",
+                    "description": "One or two sentences of reasoning shown above the cards."
+                  },
+                  "options": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "topology_id": {
+                          "type": "string",
+                          "enum": [
+                            "acdc_centre_tapped_full_wave",
+                            "acdc_flyback_pfc_dcm",
+                            "acdc_interleaved_boost_power_factor_correction",
+                            "acdc_single_phase_active_front_end",
+                            "acdc_single_phase_boost_power_factor_correction",
+                            "acdc_single_phase_diode_bridge",
+                            "acdc_single_phase_full_wave(transformer)",
+                            "acdc_three_phase_active_front_end",
+                            "acdc_three_phase_vienna",
+                            "acdc_totem_pole_power_factor_correction",
+                            "dcac_neutral_point_clamped",
+                            "dcac_single_phase_h_bridge",
+                            "dcac_t_type",
+                            "dcac_three_phase_voltage_source_inverter",
+                            "dcdc_active_clamp_flyback",
+                            "dcdc_boost",
+                            "dcdc_buck",
+                            "dcdc_buck_boost",
+                            "dcdc_cllc_resonant",
+                            "dcdc_cuk",
+                            "dcdc_dual_active_bridge",
+                            "dcdc_flyback",
+                            "dcdc_four_switch_buck_boost",
+                            "dcdc_full_bridge_centertapped",
+                            "dcdc_full_bridge_llc_resonant",
+                            "dcdc_half_bridge",
+                            "dcdc_half_bridge_llc_resonant",
+                            "dcdc_interleaved_multiphase_buck",
+                            "dcdc_phase_shifted_full_bridge_not_centertapped",
+                            "dcdc_push_pull",
+                            "dcdc_sepic",
+                            "dcdc_single_switch_forward",
+                            "dcdc_synchronous_buck",
+                            "dcdc_two_switch_forward",
+                            "dcdc_zeta"
+                          ]
+                        },
+                        "title": {
+                          "type": "string"
+                        },
+                        "summary": {
+                          "type": "string",
+                          "description": "Why it fits these specs (1-2 sentences)."
+                        },
+                        "pros": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "cons": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "recommended": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "topology_id",
+                        "title",
+                        "summary"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "options"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "toolSpec": {
+            "name": "select_topology",
+            "description": "VISUALISATION tool. Input: a topology id from the library. Loads the circuit schematic for that topology and shows it in the workspace. Output: the visualisation artifact (topology + schematic) that Design consumes. Use it when the user picks a topology card, names a topology directly ('show me a boost converter'), or wants to change topology.",
+            "inputSchema": {
+              "json": {
+                "type": "object",
+                "properties": {
+                  "topology_id": {
+                    "type": "string",
+                    "enum": [
+                      "acdc_centre_tapped_full_wave",
+                      "acdc_flyback_pfc_dcm",
+                      "acdc_interleaved_boost_power_factor_correction",
+                      "acdc_single_phase_active_front_end",
+                      "acdc_single_phase_boost_power_factor_correction",
+                      "acdc_single_phase_diode_bridge",
+                      "acdc_single_phase_full_wave(transformer)",
+                      "acdc_three_phase_active_front_end",
+                      "acdc_three_phase_vienna",
+                      "acdc_totem_pole_power_factor_correction",
+                      "dcac_neutral_point_clamped",
+                      "dcac_single_phase_h_bridge",
+                      "dcac_t_type",
+                      "dcac_three_phase_voltage_source_inverter",
+                      "dcdc_active_clamp_flyback",
+                      "dcdc_boost",
+                      "dcdc_buck",
+                      "dcdc_buck_boost",
+                      "dcdc_cllc_resonant",
+                      "dcdc_cuk",
+                      "dcdc_dual_active_bridge",
+                      "dcdc_flyback",
+                      "dcdc_four_switch_buck_boost",
+                      "dcdc_full_bridge_centertapped",
+                      "dcdc_full_bridge_llc_resonant",
+                      "dcdc_half_bridge",
+                      "dcdc_half_bridge_llc_resonant",
+                      "dcdc_interleaved_multiphase_buck",
+                      "dcdc_phase_shifted_full_bridge_not_centertapped",
+                      "dcdc_push_pull",
+                      "dcdc_sepic",
+                      "dcdc_single_switch_forward",
+                      "dcdc_synchronous_buck",
+                      "dcdc_two_switch_forward",
+                      "dcdc_zeta"
+                    ]
+                  },
+                  "reason": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "topology_id"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "toolSpec": {
+            "name": "run_design",
+            "description": "DESIGN tool. Inputs: selected topology (required) + specs table (strongly recommended). Runs the component-sizing optimiser and builds the SPICE decks. Output: the design artifact (calculated component values table, AI reasoning, .cir netlists) shown as tables in the workspace. Takes up to a minute or two. Re-running discards manual design edits.",
+            "inputSchema": {
+              "json": {
+                "type": "object",
+                "properties": {
+                  "notes": {
+                    "type": "string",
+                    "description": "Optional extra guidance for the optimiser."
+                  }
+                },
+                "required": []
+              }
+            }
+          }
+        },
+        {
+          "toolSpec": {
+            "name": "modify_design",
+            "description": "DESIGN tool. Input: the current design artifact + a natural-language instruction (e.g. 'reduce output ripple below 20 mV', 'use a smaller inductor', 'meet 95% efficiency'). An AI engineer edits component values in the netlist and explains why. Output: an updated design artifact.",
+            "inputSchema": {
+              "json": {
+                "type": "object",
+                "properties": {
+                  "instruction": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "instruction"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "toolSpec": {
+            "name": "set_design_values",
+            "description": "DESIGN tool. Directly set specific component values in the design table (e.g. L1 -> 22uH) and, by default, sync them into the .cir netlist so the next simulation uses them.",
+            "inputSchema": {
+              "json": {
+                "type": "object",
+                "properties": {
+                  "changes": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "ref": {
+                          "type": "string",
+                          "description": "Component reference, e.g. 'L1', 'C_out', 'R_load'."
+                        },
+                        "value": {
+                          "type": "string",
+                          "description": "New value with SPICE suffix, e.g. '22u', '100uF', '4.7'."
+                        },
+                        "param": {
+                          "type": "string",
+                          "description": "Optional parameter name if the ref has several rows."
+                        }
+                      },
+                      "required": [
+                        "ref",
+                        "value"
+                      ]
+                    }
+                  },
+                  "sync_netlist": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "changes"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "toolSpec": {
+            "name": "run_simulation",
+            "description": "SIMULATION tool. Input: the design artifact's .cir netlists (or an imported netlist) + topology. Runs ngspice (DC/AC/transient as available) and the loss engine. Output: the simulation artifact (measurements, waveforms, loss breakdown) shown in the workspace, plus a summary returned to you. Takes up to a few minutes.",
+            "inputSchema": {
+              "json": {
+                "type": "object",
+                "properties": {
+                  "analyses": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "enum": [
+                        "dc",
+                        "ac",
+                        "transient"
+                      ]
+                    },
+                    "description": "Subset to run; omit to run every deck the design has."
+                  }
+                },
+                "required": []
+              }
+            }
+          }
+        },
+        {
+          "toolSpec": {
+            "name": "import_netlist",
+            "description": "Turn the .cir file the user attached in chat into a design artifact so it can be simulated or modified. You must infer (or ask for) which library topology it corresponds to, because the simulator uses the topology to structure measurements.",
+            "inputSchema": {
+              "json": {
+                "type": "object",
+                "properties": {
+                  "topology_id": {
+                    "type": "string",
+                    "enum": [
+                      "acdc_centre_tapped_full_wave",
+                      "acdc_flyback_pfc_dcm",
+                      "acdc_interleaved_boost_power_factor_correction",
+                      "acdc_single_phase_active_front_end",
+                      "acdc_single_phase_boost_power_factor_correction",
+                      "acdc_single_phase_diode_bridge",
+                      "acdc_single_phase_full_wave(transformer)",
+                      "acdc_three_phase_active_front_end",
+                      "acdc_three_phase_vienna",
+                      "acdc_totem_pole_power_factor_correction",
+                      "dcac_neutral_point_clamped",
+                      "dcac_single_phase_h_bridge",
+                      "dcac_t_type",
+                      "dcac_three_phase_voltage_source_inverter",
+                      "dcdc_active_clamp_flyback",
+                      "dcdc_boost",
+                      "dcdc_buck",
+                      "dcdc_buck_boost",
+                      "dcdc_cllc_resonant",
+                      "dcdc_cuk",
+                      "dcdc_dual_active_bridge",
+                      "dcdc_flyback",
+                      "dcdc_four_switch_buck_boost",
+                      "dcdc_full_bridge_centertapped",
+                      "dcdc_full_bridge_llc_resonant",
+                      "dcdc_half_bridge",
+                      "dcdc_half_bridge_llc_resonant",
+                      "dcdc_interleaved_multiphase_buck",
+                      "dcdc_phase_shifted_full_bridge_not_centertapped",
+                      "dcdc_push_pull",
+                      "dcdc_sepic",
+                      "dcdc_single_switch_forward",
+                      "dcdc_synchronous_buck",
+                      "dcdc_two_switch_forward",
+                      "dcdc_zeta"
+                    ]
+                  },
+                  "attachment_name": {
+                    "type": "string",
+                    "description": "File name of the attachment; defaults to the most recent .cir."
+                  }
+                },
+                "required": [
+                  "topology_id"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "toolSpec": {
+            "name": "edit_circuit",
+            "description": "VISUALISATION tool for STRUCTURAL changes: add, remove or rewire components (e.g. add an RC snubber across a switch, add an input LC filter, remove a clamp, add a second output). An AI engineer edits the topology YAML and the schematic together; the result is validated by generating the netlist. Always creates a new branch (the original circuit is kept). Afterwards run_design (then run_simulation) must be re-run because the old design belongs to the old circuit. Check the circuit's component list first: do not add parts that already exist. For value-only changes use set_design_values / modify_design instead.",
+            "inputSchema": {
+              "json": {
+                "type": "object",
+                "properties": {
+                  "instruction": {
+                    "type": "string",
+                    "description": "Precise structural change, naming the parts/nodes involved and intended values."
+                  }
+                },
+                "required": [
+                  "instruction"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "toolSpec": {
+            "name": "select_devices",
+            "description": "DEVICES tool, usable on its own: choose the power semiconductors from the device library and evaluate their losses. Two input modes:\n- STANDALONE: pass `devices` with each device's stresses. Nothing else is needed: no specs, design or simulation. Use this whenever the user asks for device / MOSFET / diode selection directly or there is no simulation on the branch. Required per device: ref, kind (switch | diode), v_block_v (peak blocking voltage), fsw_khz, and i_peak_a / i_rms_a / i_avg_a (one or more; peak + RMS gives the best current shape); optional duty (conduction fraction, default 0.5) and zvs (soft turn-on). Parts are evaluated on idealised waveforms built from those stresses; the result appears in the Devices tab and run_thermal uses its losses when there is no simulation.\n- SIMULATION: omit `devices` to choose from the SIMULATED waveforms of the branch (peak voltage, peak/RMS current, switching events) and redo the simulation's loss analysis with the parts. Runs automatically after the first simulation.\nBoth: every viable part is evaluated at the junction temperature; the lowest-loss part with an adequate voltage class (>= 1.3x peak) and a sensible current size wins, and devices in the same circuit position share a part. Allowed kinds: switch = MOSFET with built-in diode, or IGBT + external antiparallel diode; diode = discrete diode. Call it again to change the technology preference or to force specific parts; a re-run without `devices` keeps the previously entered stresses unless from_simulation is true.",
+            "inputSchema": {
+              "json": {
+                "type": "object",
+                "properties": {
+                  "devices": {
+                    "type": "array",
+                    "description": "Standalone mode: the switches / diodes and their stresses.",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "ref": {
+                          "type": "string",
+                          "description": "Name, e.g. 'Q1', 'D1'."
+                        },
+                        "kind": {
+                          "type": "string",
+                          "enum": [
+                            "switch",
+                            "diode"
+                          ]
+                        },
+                        "v_block_v": {
+                          "type": "number",
+                          "description": "Peak blocking voltage, V."
+                        },
+                        "fsw_khz": {
+                          "type": "number"
+                        },
+                        "i_peak_a": {
+                          "type": "number"
+                        },
+                        "i_rms_a": {
+                          "type": "number"
+                        },
+                        "i_avg_a": {
+                          "type": "number"
+                        },
+                        "duty": {
+                          "type": "number",
+                          "description": "Conduction fraction, 0..1 (default 0.5)."
+                        },
+                        "zvs": {
+                          "type": "boolean",
+                          "description": "Zero-voltage (soft) turn-on, e.g. resonant / phase-shifted bridges."
+                        }
+                      },
+                      "required": [
+                        "ref",
+                        "kind"
+                      ]
+                    }
+                  },
+                  "fsw_khz": {
+                    "type": "number",
+                    "description": "Switching frequency for every entered device that does not set its own."
+                  },
+                  "junction_temperature_c": {
+                    "type": "number",
+                    "description": "Tj for the loss evaluation (default: the specs' value, else 100 C)."
+                  },
+                  "from_simulation": {
+                    "type": "boolean",
+                    "description": "Select from the branch simulation instead of previously entered stresses."
+                  },
+                  "preference": {
+                    "type": "string",
+                    "enum": [
+                      "auto",
+                      "mosfet",
+                      "igbt"
+                    ],
+                    "description": "Switch technology preference."
+                  },
+                  "overrides": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "ref": {
+                          "type": "string"
+                        },
+                        "part": {
+                          "type": "string",
+                          "description": "Library part number."
+                        },
+                        "diode": {
+                          "type": "string",
+                          "description": "Antiparallel diode part for an IGBT (optional)."
+                        }
+                      },
+                      "required": [
+                        "ref",
+                        "part"
+                      ]
+                    }
+                  }
+                },
+                "required": []
+              }
+            }
+          }
+        },
+        {
+          "toolSpec": {
+            "name": "design_magnetics",
+            "description": "MAGNETICS tool, usable on its own. Two input modes:\n- STANDALONE: pass `parts` with each part's values. Nothing else is needed: no specs, topology, design or simulation. Use this whenever the user asks for magnetics directly or there is no circuit on the branch. Required per kind: inductor = inductance_uh, i_dc_a (i_ripple_pp_a, duty optional); flyback = inductance_uh (magnetizing), turns_ratio, v_primary_v (input voltage), i_peak_a or power_w; transformer = turns_ratio, v_primary_v, i_rms_a or power_w; resonant = inductance_uh, i_peak_a or i_rms_a. Every part also needs fsw_khz (per part or top-level).\n- CIRCUIT: omit `parts` to design every inductor/transformer of the circuit on the active branch (needs at least a selected topology; uses the design values and the simulated winding waveforms when they exist, otherwise idealised waveforms from the specs).\nMethod: flux from the winding volt-seconds, core loss by iGSE, copper loss split into DC/low-frequency and per-harmonic AC loss (Dowell), air gap with fringing, temperature rise. Searches cores (smallest first, stacking up to 3), materials and turns for minimum loss within the flux, window fill and temperature limits. Output: magnetics artifact shown in the workspace. A re-run without `parts` keeps the previously entered parts unless from_circuit is true.",
+            "inputSchema": {
+              "json": {
+                "type": "object",
+                "properties": {
+                  "parts": {
+                    "type": "array",
+                    "description": "Standalone mode: the magnetic parts to design from these values.",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "ref": {
+                          "type": "string",
+                          "description": "Name, e.g. 'L1', 'T1'."
+                        },
+                        "kind": {
+                          "type": "string",
+                          "enum": [
+                            "inductor",
+                            "flyback",
+                            "transformer",
+                            "resonant"
+                          ]
+                        },
+                        "role": {
+                          "type": "string",
+                          "description": "Optional, e.g. 'buck output inductor'."
+                        },
+                        "inductance_uh": {
+                          "type": "number",
+                          "description": "Inductance, or magnetizing inductance for flyback/transformer, µH."
+                        },
+                        "turns_ratio": {
+                          "type": "number",
+                          "description": "Ns/Np."
+                        },
+                        "fsw_khz": {
+                          "type": "number"
+                        },
+                        "duty": {
+                          "type": "number",
+                          "description": "Duty of the energising interval, 0..1."
+                        },
+                        "i_dc_a": {
+                          "type": "number",
+                          "description": "Inductor DC (average) current, A."
+                        },
+                        "i_ripple_pp_a": {
+                          "type": "number",
+                          "description": "Inductor peak-to-peak ripple, A (default 30 % of I_dc)."
+                        },
+                        "i_peak_a": {
+                          "type": "number",
+                          "description": "Primary peak current (flyback, resonant), A."
+                        },
+                        "i_rms_a": {
+                          "type": "number",
+                          "description": "Primary RMS current (transformer, resonant), A."
+                        },
+                        "v_primary_v": {
+                          "type": "number",
+                          "description": "Primary winding voltage (transformer) or input voltage (flyback), V."
+                        },
+                        "power_w": {
+                          "type": "number",
+                          "description": "Throughput power, W; used to estimate currents that are not given."
+                        },
+                        "unipolar": {
+                          "type": "boolean",
+                          "description": "Forward-converter transformer (flux 0 -> ΔB only)."
+                        }
+                      },
+                      "required": [
+                        "ref",
+                        "kind"
+                      ]
+                    }
+                  },
+                  "fsw_khz": {
+                    "type": "number",
+                    "description": "Switching frequency for every entered part that does not set its own."
+                  },
+                  "from_circuit": {
+                    "type": "boolean",
+                    "description": "Design the branch circuit's magnetics instead of previously entered parts."
+                  },
+                  "material": {
+                    "type": "string",
+                    "description": "Ferrite material, e.g. 3C95, 3C97, 3F36, 4F1, N27. Default: best of a frequency short list."
+                  },
+                  "max_flux_density_t": {
+                    "type": "number",
+                    "description": "Absolute peak-flux limit in tesla (default 80 % of Bsat at the hotspot temperature)."
+                  },
+                  "current_density_a_mm2": {
+                    "type": "number",
+                    "description": "Winding current density, default 5 A/mm2."
+                  },
+                  "max_temp_rise_c": {
+                    "type": "number",
+                    "description": "Allowed temperature rise of the part, default 40 C."
+                  },
+                  "ambient_c": {
+                    "type": "number"
+                  },
+                  "core_overrides": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "ref": {
+                          "type": "string"
+                        },
+                        "core": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "ref",
+                        "core"
+                      ]
+                    },
+                    "description": "Force a core for a part, e.g. {ref: 'T1', core: 'ETD39'}."
+                  }
+                },
+                "required": []
+              }
+            }
+          }
+        },
+        {
+          "toolSpec": {
+            "name": "run_thermal",
+            "description": "THERMAL tool, usable on its own. Two input modes:\n- STANDALONE: pass `devices` (and optionally `magnetics_losses`, `other_losses`, `output_power_w`) with the losses. Nothing else is needed: no design or simulation. Use this whenever the user asks for a thermal / heatsink check directly or there is no simulation on the branch. Parts designed in the magnetics stage of this branch are added automatically unless entered here.\n- SIMULATION: omit them to build the full LOSS BUDGET from the branch simulation: semiconductors (loss engine), magnetics (magnetics stage, or winding resistance only if not designed), capacitor ESR, resistors (snubbers, damping, sense), gate drive; load resistors give the output power and efficiency; device losses are iterated at the computed junction temperature (electro-thermal loop).\nBoth compute junction temperatures with and without a heatsink, size a shared heatsink and check magnetics hotspots. A re-run without inputs keeps the previously entered losses unless from_simulation is true.",
+            "inputSchema": {
+              "json": {
+                "type": "object",
+                "properties": {
+                  "devices": {
+                    "type": "array",
+                    "description": "Standalone mode: power semiconductors and their losses.",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "ref": {
+                          "type": "string"
+                        },
+                        "kind": {
+                          "type": "string",
+                          "enum": [
+                            "switch",
+                            "diode"
+                          ]
+                        },
+                        "loss_w": {
+                          "type": "number",
+                          "description": "Total die loss, W (or give conduction + switching)."
+                        },
+                        "conduction_loss_w": {
+                          "type": "number"
+                        },
+                        "switching_loss_w": {
+                          "type": "number"
+                        },
+                        "technology": {
+                          "type": "string",
+                          "enum": [
+                            "Si",
+                            "SiC",
+                            "GaN",
+                            "IGBT"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "ref"
+                      ]
+                    }
+                  },
+                  "magnetics_losses": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "ref": {
+                          "type": "string"
+                        },
+                        "loss_w": {
+                          "type": "number"
+                        },
+                        "temp_rise_c": {
+                          "type": "number"
+                        }
+                      },
+                      "required": [
+                        "ref",
+                        "loss_w"
+                      ]
+                    }
+                  },
+                  "other_losses": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "ref": {
+                          "type": "string"
+                        },
+                        "category": {
+                          "type": "string",
+                          "enum": [
+                            "capacitor",
+                            "resistor",
+                            "gate_drive"
+                          ]
+                        },
+                        "loss_w": {
+                          "type": "number"
+                        }
+                      },
+                      "required": [
+                        "ref",
+                        "category",
+                        "loss_w"
+                      ]
+                    }
+                  },
+                  "output_power_w": {
+                    "type": "number",
+                    "description": "For the efficiency figure (defaults to the specs)."
+                  },
+                  "from_simulation": {
+                    "type": "boolean",
+                    "description": "Use the branch simulation instead of previously entered losses."
+                  },
+                  "ambient_c": {
+                    "type": "number"
+                  },
+                  "max_junction_c": {
+                    "type": "number",
+                    "description": "Override Tj,max for every device."
+                  },
+                  "heatsink": {
+                    "type": "string",
+                    "enum": [
+                      "auto",
+                      "none",
+                      "shared"
+                    ]
+                  },
+                  "rth_cs": {
+                    "type": "number",
+                    "description": "Case-to-sink thermal resistance in C/W (pad + grease), default 0.25."
+                  },
+                  "margin_c": {
+                    "type": "number",
+                    "description": "Design margin below Tj,max, default 25 C."
+                  }
+                },
+                "required": []
+              }
+            }
+          }
+        },
+        {
+          "toolSpec": {
+            "name": "open_view",
+            "description": "Focus a stage view in the workspace without changing anything.",
+            "inputSchema": {
+              "json": {
+                "type": "object",
+                "properties": {
+                  "stage": {
+                    "type": "string",
+                    "enum": [
+                      "specs",
+                      "visualization",
+                      "design",
+                      "simulation",
+                      "devices",
+                      "magnetics",
+                      "thermal"
+                    ]
+                  }
+                },
+                "required": [
+                  "stage"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "toolSpec": {
+            "name": "manage_branch",
+            "description": "Version control for the project. Branches are created AUTOMATICALLY when an earlier stage is changed after later stages exist, so you rarely need this. Use it when the user explicitly wants to: 'create' an alternative from a stage on the current branch (fork_from_stage), 'switch' to another branch by name, or 'rename' the current branch.",
+            "inputSchema": {
+              "json": {
+                "type": "object",
+                "properties": {
+                  "action": {
+                    "type": "string",
+                    "enum": [
+                      "create",
+                      "switch",
+                      "rename"
+                    ]
+                  },
+                  "name": {
+                    "type": "string",
+                    "description": "Branch name to create / switch to / rename to."
+                  },
+                  "fork_from_stage": {
+                    "type": "string",
+                    "enum": [
+                      "specs",
+                      "visualization",
+                      "design",
+                      "simulation",
+                      "devices",
+                      "magnetics",
+                      "thermal"
+                    ],
+                    "description": "For 'create': the new branch keeps everything BEFORE this stage."
+                  }
+                },
+                "required": [
+                  "action"
+                ]
+              }
+            }
+          }
+        }
+      ]
+    }
+  },
+  "expected_events": [
+    {
+      "type": "error",
+      "error": "The assistant could not respond: ThrottlingException: Too many requests"
+    }
+  ]
+}

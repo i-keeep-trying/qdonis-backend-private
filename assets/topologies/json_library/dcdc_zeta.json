@@ -1,0 +1,375 @@
+{
+  "components": [
+    {
+      "id": "Vs",
+      "type": "V",
+      "x": -160,
+      "y": 160,
+      "rotation": 0,
+      "parameters": {
+        "value": "24"
+      }
+    },
+    {
+      "id": "CIN",
+      "type": "C",
+      "x": -40,
+      "y": 160,
+      "rotation": 0,
+      "parameters": {
+        "C": "100u",
+        "esr": "10m",
+        "vC0": "0"
+      }
+    },
+    {
+      "id": "L1",
+      "type": "L",
+      "x": 140,
+      "y": 140,
+      "rotation": 0,
+      "parameters": {
+        "L": "10m",
+        "esr": "50m",
+        "iL0": "0"
+      }
+    },
+    {
+      "id": "SW",
+      "type": "MOSFET",
+      "x": 60,
+      "y": 40,
+      "rotation": 270,
+      "parameters": {
+        "Ron": "10m",
+        "Roff": "1M"
+      }
+    },
+    {
+      "id": "C1",
+      "type": "C",
+      "x": 220,
+      "y": 40,
+      "rotation": 90,
+      "parameters": {
+        "C": "100u",
+        "esr": "10m",
+        "vC0": "0"
+      }
+    },
+    {
+      "id": "L2",
+      "type": "L",
+      "x": 420,
+      "y": 40,
+      "rotation": 270,
+      "parameters": {
+        "L": "10m",
+        "esr": "50m",
+        "iL0": "0"
+      }
+    },
+    {
+      "id": "C2",
+      "type": "C",
+      "x": 480,
+      "y": 140,
+      "rotation": 0,
+      "parameters": {
+        "C": "100u",
+        "esr": "10m",
+        "vC0": "0"
+      }
+    },
+    {
+      "id": "R1",
+      "type": "R",
+      "x": 560,
+      "y": 140,
+      "rotation": 0,
+      "parameters": {
+        "value": "10",
+        "esr": "0"
+      }
+    },
+    {
+      "id": "D1",
+      "type": "D",
+      "x": 340,
+      "y": 140,
+      "rotation": 180,
+      "parameters": {
+        "Vd": "0.7",
+        "Ron": "1m",
+        "Roff": "1M"
+      }
+    }
+  ],
+  "wires": [
+    {
+      "id": "W8",
+      "from": {
+        "type": "pin",
+        "compId": "CIN",
+        "terminal": "B"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "Vs",
+        "terminal": "B"
+      }
+    },
+    {
+      "id": "W16",
+      "from": {
+        "type": "pin",
+        "compId": "SW",
+        "terminal": "D"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "Vs",
+        "terminal": "A"
+      }
+    },
+    {
+      "id": "W17",
+      "from": {
+        "type": "pin",
+        "compId": "CIN",
+        "terminal": "A"
+      },
+      "to": {
+        "type": "wire",
+        "wireId": "W16",
+        "x": -40,
+        "y": 40
+      }
+    },
+    {
+      "id": "W18",
+      "from": {
+        "type": "pin",
+        "compId": "L1",
+        "terminal": "A"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "SW",
+        "terminal": "S"
+      }
+    },
+    {
+      "id": "W19",
+      "from": {
+        "type": "pin",
+        "compId": "C1",
+        "terminal": "B"
+      },
+      "to": {
+        "type": "wire",
+        "wireId": "W18",
+        "x": 135,
+        "y": 40
+      }
+    },
+    {
+      "id": "W20",
+      "from": {
+        "type": "pin",
+        "compId": "CIN",
+        "terminal": "B"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "L1",
+        "terminal": "B"
+      },
+      "manualPath": [
+        {
+          "x": -40,
+          "y": 200
+        },
+        {
+          "x": -40,
+          "y": 220
+        },
+        {
+          "x": 0,
+          "y": 220
+        },
+        {
+          "x": 0,
+          "y": 220
+        },
+        {
+          "x": 140,
+          "y": 220
+        },
+        {
+          "x": 140,
+          "y": 180
+        }
+      ]
+    },
+    {
+      "id": "W21",
+      "from": {
+        "type": "pin",
+        "compId": "D1",
+        "terminal": "B"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "C1",
+        "terminal": "A"
+      }
+    },
+    {
+      "id": "W22",
+      "from": {
+        "type": "pin",
+        "compId": "D1",
+        "terminal": "A"
+      },
+      "to": {
+        "type": "wire",
+        "wireId": "W20",
+        "x": 140,
+        "y": 220
+      },
+      "manualPath": [
+        {
+          "x": 340,
+          "y": 180
+        },
+        {
+          "x": 340,
+          "y": 220
+        },
+        {
+          "x": 140,
+          "y": 220
+        },
+        {
+          "x": 140,
+          "y": 220
+        }
+      ]
+    },
+    {
+      "id": "W24",
+      "from": {
+        "type": "pin",
+        "compId": "L2",
+        "terminal": "A"
+      },
+      "to": {
+        "type": "wire",
+        "wireId": "W21",
+        "x": 340,
+        "y": 40
+      }
+    },
+    {
+      "id": "W25",
+      "from": {
+        "type": "pin",
+        "compId": "L2",
+        "terminal": "B"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "C2",
+        "terminal": "A"
+      }
+    },
+    {
+      "id": "W26",
+      "from": {
+        "type": "pin",
+        "compId": "C2",
+        "terminal": "B"
+      },
+      "to": {
+        "type": "wire",
+        "wireId": "W22",
+        "x": 340,
+        "y": 219
+      },
+      "manualPath": [
+        {
+          "x": 480,
+          "y": 180
+        },
+        {
+          "x": 480,
+          "y": 220
+        },
+        {
+          "x": 340,
+          "y": 220
+        },
+        {
+          "x": 340,
+          "y": 219
+        }
+      ]
+    },
+    {
+      "id": "W27",
+      "from": {
+        "type": "pin",
+        "compId": "R1",
+        "terminal": "A"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "L2",
+        "terminal": "B"
+      }
+    },
+    {
+      "id": "W28",
+      "from": {
+        "type": "pin",
+        "compId": "R1",
+        "terminal": "B"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "C2",
+        "terminal": "B"
+      },
+      "manualPath": [
+        {
+          "x": 560,
+          "y": 180
+        },
+        {
+          "x": 560,
+          "y": 220
+        },
+        {
+          "x": 480,
+          "y": 220
+        },
+        {
+          "x": 480,
+          "y": 180
+        }
+      ]
+    }
+  ],
+  "plotConfiguration": {
+    "plots": []
+  },
+  "simulationSettings": {
+    "stopTime": "0.05",
+    "stepSize": "1e-5",
+    "stepType": "fixed",
+    "solver": "euler"
+  },
+  "id": "dcdc_zeta",
+  "name": "Zeta DC-DC Converter"
+}

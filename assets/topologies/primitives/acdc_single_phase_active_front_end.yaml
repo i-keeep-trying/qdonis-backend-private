@@ -1,0 +1,517 @@
+id: acdc_single_phase_active_front_end
+name: Single Phase Active Front End Rectifier
+description: Single-Phase Active Front End (AFE) Rectifier using a continuous PI control
+  loop and bipolar smooth PWM logic.
+components:
+- ref: GLOBAL_PARAMS
+  type: custom_spice
+  params:
+    spice_line: .param V_TARGET=400 V_PEAK=325.27
+- ref: GND
+  type: node
+  params:
+    node_type: ground
+- ref: VAC
+  type: node
+  role: voltage_source
+  params:
+    node_type: voltage_source
+    source: sine
+    offset: 0
+    amplitude: 325.27
+    frequency: 50
+- ref: R_GND_L
+  type: resistor
+  params:
+    resistance: 10000000.0
+- ref: R_GND_N
+  type: resistor
+  params:
+    resistance: 10000000.0
+- ref: R_GRID_L
+  type: resistor
+  params:
+    resistance: 0.1
+- ref: L_BOOST
+  type: inductor
+  params:
+    inductance: 0.001
+- ref: VSENSE_AC
+  type: node
+  params:
+    node_type: voltage_source
+    source: dc
+    voltage: 0
+- ref: R_GRID_N
+  type: resistor
+  params:
+    resistance: 0.1
+- ref: B_GA_TOP
+  type: b_source
+  params:
+    expression: v(n_duty_A_top)
+- ref: R_GA_TOP
+  type: resistor
+  params:
+    resistance: 10.0
+- ref: M_A_TOP
+  type: transistor
+  params:
+    family: mosfet
+    type: nmos
+    Vto: 3.5
+    Kp: 60
+    Rs: 0.04
+- ref: D_A_TOP
+  type: diode
+  params:
+    Rs: 0.01
+    Cjo: 1.0e-10
+    Tt: 1.0e-08
+    Bv: 800.0
+- ref: B_A_BOT
+  type: b_source
+  params:
+    expression: 7.5 * (1 + tanh((v(n_ctrl) - v(n_tri) - 0.2)*100))
+- ref: R_GA_BOT
+  type: resistor
+  params:
+    resistance: 10.0
+- ref: M_A_BOT
+  type: transistor
+  params:
+    family: mosfet
+    type: nmos
+    Vto: 3.5
+    Kp: 60
+    Rs: 0.04
+- ref: D_A_BOT
+  type: diode
+  params:
+    Rs: 0.01
+    Cjo: 1.0e-10
+    Tt: 1.0e-08
+    Bv: 800.0
+- ref: B_GB_TOP
+  type: b_source
+  params:
+    expression: v(n_duty_B_top)
+- ref: R_GB_TOP
+  type: resistor
+  params:
+    resistance: 10.0
+- ref: M_B_TOP
+  type: transistor
+  params:
+    family: mosfet
+    type: nmos
+    Vto: 3.5
+    Kp: 60
+    Rs: 0.04
+- ref: D_B_TOP
+  type: diode
+  params:
+    Rs: 0.01
+    Cjo: 1.0e-10
+    Tt: 1.0e-08
+    Bv: 800.0
+- ref: B_B_BOT
+  type: b_source
+  params:
+    expression: 7.5 * (1 + tanh((v(n_tri) - v(n_ctrl) - 0.2)*100))
+- ref: R_GB_BOT
+  type: resistor
+  params:
+    resistance: 10.0
+- ref: M_B_BOT
+  type: transistor
+  params:
+    family: mosfet
+    type: nmos
+    Vto: 3.5
+    Kp: 60
+    Rs: 0.04
+- ref: D_B_BOT
+  type: diode
+  params:
+    Rs: 0.01
+    Cjo: 1.0e-10
+    Tt: 1.0e-08
+    Bv: 800.0
+- ref: C_DC
+  type: capacitor
+  params:
+    capacitance: 0.0022
+- ref: R_DC
+  type: resistor
+  params:
+    resistance: 100.0
+- ref: B_ERR
+  type: b_source
+  params:
+    expression: V_TARGET - v(n_DC_BUS)
+- ref: B_P
+  type: b_source
+  params:
+    expression: v(n_err) * 0.1
+- ref: G_INT
+  type: custom_spice
+  params:
+    spice_line: G_INT 0 n_INT n_err 0 0.002
+- ref: C_INT
+  type: capacitor
+  params:
+    capacitance: 0.0001
+- ref: R_INT
+  type: resistor
+  params:
+    resistance: 10000000.0
+- ref: B_MAG
+  type: b_source
+  params:
+    expression: min(max(v(n_P) + v(n_INT), 0), 40)
+- ref: R_MAG_FLT
+  type: resistor
+  params:
+    resistance: 1000.0
+- ref: C_MAG_FLT
+  type: capacitor
+  params:
+    capacitance: 0.00001
+- ref: R_MAG_DC
+  type: resistor
+  params:
+    resistance: 1000000.0
+- ref: B_REF
+  type: b_source
+  params:
+    expression: v(n_mag_flt) * v(n_VAC_P, n_VAC_N) / V_PEAK
+- ref: R_REF
+  type: resistor
+  params:
+    resistance: 1000000.0
+- ref: B_IACT
+  type: b_source
+  params:
+    expression: i(VSENSE_AC)
+- ref: R_IACT
+  type: resistor
+  params:
+    resistance: 1000000.0
+- ref: B_CERR
+  type: b_source
+  params:
+    expression: max(min((v(n_ref) - v(n_iact)) * 10, 10), -10)
+- ref: R_CERR
+  type: resistor
+  params:
+    resistance: 1000000.0
+- ref: R_CP
+  type: resistor
+  params:
+    resistance: 1000.0
+- ref: C_CP
+  type: capacitor
+  params:
+    capacitance: 4.7e-08
+- ref: R_DC_C
+  type: resistor
+  params:
+    resistance: 1000000.0
+- ref: VTRI
+  type: custom_spice
+  params:
+    spice_line: V_TRI_src n_tri 0 PULSE(-10 10 0 5u 5u 0 10u)
+- ref: R_TRI
+  type: resistor
+  params:
+    resistance: 1000000.0
+- ref: B_A_TOP
+  type: b_source
+  params:
+    expression: 7.5 * (1 + tanh((v(n_tri) - v(n_ctrl) - 0.2)*100))
+- ref: B_B_TOP
+  type: b_source
+  params:
+    expression: 7.5 * (1 + tanh((v(n_ctrl) - v(n_tri) - 0.2)*100))
+- ref: IC_CMD
+  type: custom_spice
+  params:
+    spice_line: .ic V(n_DC_BUS)=400 V(n_INT)=29.5 V(n_mag_flt)=29.5
+nets:
+- - - GND
+    - pin
+  - - R_GND_L
+    - neg
+  - - R_GND_N
+    - neg
+  - - M_A_BOT
+    - source
+  - - D_A_BOT
+    - anode
+  - - M_B_BOT
+    - source
+  - - D_B_BOT
+    - anode
+  - - C_DC
+    - neg
+  - - R_DC
+    - neg
+  - - B_ERR
+    - '-'
+  - - B_P
+    - '-'
+  - - C_INT
+    - neg
+  - - R_INT
+    - neg
+  - - B_MAG
+    - '-'
+  - - C_MAG_FLT
+    - neg
+  - - R_MAG_DC
+    - neg
+  - - B_REF
+    - '-'
+  - - R_REF
+    - neg
+  - - B_IACT
+    - '-'
+  - - R_IACT
+    - neg
+  - - B_CERR
+    - '-'
+  - - R_CERR
+    - neg
+  - - C_CP
+    - neg
+  - - R_DC_C
+    - neg
+  - - R_TRI
+    - neg
+  - - B_A_TOP
+    - '-'
+  - - B_A_BOT
+    - '-'
+  - - B_B_TOP
+    - '-'
+  - - B_B_BOT
+    - '-'
+- - - VAC
+    - +
+  - - R_GND_L
+    - pos
+  - - R_GRID_L
+    - pos
+  - n_VAC_P
+- - - VAC
+    - '-'
+  - - R_GND_N
+    - pos
+  - - R_GRID_N
+    - pos
+  - n_VAC_N
+- - - R_GRID_L
+    - neg
+  - - L_BOOST
+    - pos
+- - - L_BOOST
+    - neg
+  - - VSENSE_AC
+    - +
+- - - VSENSE_AC
+    - '-'
+  - - B_GA_TOP
+    - '-'
+  - - M_A_TOP
+    - source
+  - - D_A_TOP
+    - anode
+  - - M_A_BOT
+    - drain
+  - - D_A_BOT
+    - cathode
+  - n_SW_A
+- - - R_GRID_N
+    - neg
+  - - B_GB_TOP
+    - '-'
+  - - M_B_TOP
+    - source
+  - - D_B_TOP
+    - anode
+  - - M_B_BOT
+    - drain
+  - - D_B_BOT
+    - cathode
+  - n_SW_B
+- - - M_A_TOP
+    - drain
+  - - D_A_TOP
+    - cathode
+  - - M_B_TOP
+    - drain
+  - - D_B_TOP
+    - cathode
+  - - C_DC
+    - pos
+  - - R_DC
+    - pos
+  - n_DC_BUS
+- - - B_A_TOP
+    - +
+  - n_duty_A_top
+- - - R_GA_TOP
+    - pos
+  - - B_GA_TOP
+    - +
+- - - R_GA_TOP
+    - neg
+  - - M_A_TOP
+    - gate
+- - - B_A_BOT
+    - +
+  - - R_GA_BOT
+    - pos
+- - - R_GA_BOT
+    - neg
+  - - M_A_BOT
+    - gate
+- - - B_B_TOP
+    - +
+  - n_duty_B_top
+- - - R_GB_TOP
+    - pos
+  - - B_GB_TOP
+    - +
+- - - R_GB_TOP
+    - neg
+  - - M_B_TOP
+    - gate
+- - - B_B_BOT
+    - +
+  - - R_GB_BOT
+    - pos
+- - - R_GB_BOT
+    - neg
+  - - M_B_BOT
+    - gate
+- - - B_ERR
+    - +
+  - n_err
+- - - B_P
+    - +
+  - n_P
+- - - C_INT
+    - pos
+  - - R_INT
+    - pos
+  - n_INT
+- - - B_MAG
+    - +
+  - - R_MAG_FLT
+    - pos
+- - - R_MAG_FLT
+    - neg
+  - - C_MAG_FLT
+    - pos
+  - - R_MAG_DC
+    - pos
+  - n_mag_flt
+- - - B_REF
+    - +
+  - - R_REF
+    - pos
+  - n_ref
+- - - B_IACT
+    - +
+  - - R_IACT
+    - pos
+  - n_iact
+- - - B_CERR
+    - +
+  - - R_CP
+    - pos
+  - - R_CERR
+    - pos
+- - - R_CP
+    - neg
+  - - C_CP
+    - pos
+  - - R_DC_C
+    - pos
+  - n_ctrl
+- - - R_TRI
+    - pos
+  - n_tri
+analysis:
+  transient:
+    spice_settings:
+      tstop: 0.15
+      use_ic: false
+      reltol: 0.01
+      abstol: 1.0e-06
+      vntol: 0.001
+      cshunt: 1.0e-11
+      chgtol: 1.0e-11
+      itl4: 50
+      method: gear
+    requirements:
+    - rid: tr_afe_rectifier
+      requirement: Verify AFE Rectifier active current shaping and output voltage.
+      measurement:
+      - ref: VOUT
+        plot:
+          x_axis: time
+          title: Output DC Voltage
+        quantity: voltage
+        component: R_DC
+        nets:
+        - - R_DC
+          - pos
+        - - R_DC
+          - neg
+        data:
+        - name: Vout_avg
+          spice_command: avg
+          description: Average Output Voltage
+          from: 0.14
+          to: 0.15
+      - ref: IIN_SENSE
+        plot:
+          x_axis: time
+          title: Input AC Current
+        quantity: current
+        component: VSENSE_AC
+        data:
+        - name: Iin_rms
+          spice_command: rms
+          description: RMS Input Current
+          from: 0.14
+          to: 0.15
+        - name: Iin_max
+          spice_command: max
+          description: Peak Input Current
+          from: 0.14
+          to: 0.15
+      outputs:
+      - var: vout_avg_v
+        formula: abs([Vout_avg])
+        description: Average Output Voltage
+      - var: iin_rms_a
+        formula: abs([Iin_rms])
+        description: RMS Input Current
+      - var: iin_peak_a
+        formula: abs([Iin_max])
+        description: Peak Input Current
+metadata:
+  stage:
+  - afe
+  - rectifier
+  topology: single_phase_active_front_end
+  control: continuous_pi_pwm
+  tags:
+  - afe
+  - pfc
+  - sic
+  - acdc
