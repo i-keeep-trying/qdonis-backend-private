@@ -50,6 +50,9 @@ model User {
   teamMemberships            TeamMember[]         @relation("TeamMembership")
   sentTeamInvitations        TeamInvitation[]     @relation("TeamInvitationSender")
   teamTokenUsage             TeamTokenUsage[]     @relation("TeamUsageActor")
+  studioNodes                StudioNode[]         @relation("StudioNodeAuthor")
+  studioBranches             StudioBranch[]       @relation("StudioBranchAuthor")
+  studioBranchCursors        StudioBranchCursor[] @relation("StudioBranchCursorUser")
 
   @@map("users")
 }

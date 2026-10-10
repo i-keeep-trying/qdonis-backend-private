@@ -25,7 +25,6 @@ import { ProjectAccessService } from '../projects/project-access.service';
 import { ProjectsRepository } from '../projects/projects.repository';
 import { ProjectsService } from '../projects/projects.service';
 import { commitStage, type StageKind } from '../projects/studio/studio-graph';
-import { loadStudioProject } from '../projects/studio/studio-persistence';
 import {
   CIRCUIT_DATA_PROVIDER,
   type CircuitDataProvider,
@@ -65,9 +64,11 @@ export class StudioStagesService {
 
   async runMagnetics(user: Actor, projectId: string, dto: RunMagneticsDto) {
     await this.access.require(user, projectId, 'canEdit');
-    const studio = loadStudioProject(await this.dataOf(projectId));
+    const studio = await this.projects.loadStudio(projectId, user.id);
     return this.commit(
       projectId,
+      user.id,
+      studio.activeBranchId,
       'magnetics',
       await planMagnetics(studio, dto, this.circuit),
     );
@@ -75,28 +76,38 @@ export class StudioStagesService {
 
   async runThermal(user: Actor, projectId: string, dto: RunThermalDto) {
     await this.access.require(user, projectId, 'canEdit');
-    const studio = loadStudioProject(await this.dataOf(projectId));
+    const studio = await this.projects.loadStudio(projectId, user.id);
     return this.commit(
       projectId,
+      user.id,
+      studio.activeBranchId,
       'thermal',
       await planThermal(studio, dto, this.circuit),
     );
   }
 
+  /** Stores the result on the branch it was computed from (forks if needed). */
   private async commit(
     projectId: string,
+    userId: string,
+    branchId: string,
     stage: StageKind,
     plan: StagePlan,
   ): Promise<StageResult & { revision: number | null }> {
     if (!plan.ok) return { ...plan.result, revision: null };
     let result: StageResult = plan.result({});
-    const meta = await this.projects.mutateStudio(projectId, (studio) => {
-      const commit = commitStage(studio, stage, plan.data, {
-        summary: plan.summary,
-      });
-      result = plan.result(forkNote(commit));
-      return { ...commit.project, focus: stage };
-    });
+    const meta = await this.projects.mutateStudio(
+      projectId,
+      userId,
+      (studio) => {
+        const commit = commitStage(studio, stage, plan.data, {
+          summary: plan.summary,
+        });
+        result = plan.result(forkNote(commit));
+        return { ...commit.project, focus: stage };
+      },
+      branchId,
+    );
     return { ...result, revision: meta.revision };
   }
 

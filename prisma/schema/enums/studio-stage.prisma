@@ -1,0 +1,12 @@
+/// Studio pipeline stage of a graph node (the `stage` of a StudioNode).
+enum StudioStage {
+  specs
+  visualization
+  design
+  simulation
+  devices
+  magnetics
+  thermal
+
+  @@map("studio_stage")
+}

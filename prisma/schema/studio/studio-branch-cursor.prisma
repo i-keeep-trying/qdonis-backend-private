@@ -1,0 +1,15 @@
+/// The branch one user is working on in a project. Per user, so switching
+/// branch never moves anyone else; removed with the branch (the user then
+/// falls back to the project's default branch).
+model StudioBranchCursor {
+  projectId String   @map("project_id") @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  branchId  String   @map("branch_id") @db.VarChar(100)
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  branch StudioBranch @relation(fields: [projectId, branchId], references: [projectId, id], onDelete: Cascade)
+  user   User         @relation("StudioBranchCursorUser", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([projectId, userId])
+  @@map("studio_branch_cursors")
+}

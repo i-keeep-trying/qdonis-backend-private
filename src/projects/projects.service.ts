@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto';
 
-import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 
 import type { AuthenticatedUser } from '../auth/auth.types';
 import { PaginatedResultDto } from '../common/dto/paginated-result.dto';
@@ -32,6 +32,7 @@ import {
   type Progress,
   studioProgress,
 } from './project-progress';
+import { byteSize, MAX_PROJECT_DATA_BYTES } from './project-limits';
 import { ProjectsRepository, type ProjectMeta } from './projects.repository';
 import {
   createEmptyProject,
@@ -39,15 +40,18 @@ import {
   type StudioProject,
 } from './studio/studio-graph';
 import {
+  revisionConflict,
+  StudioGraphService,
+} from './studio/studio-graph.service';
+import {
   heavyBlobName,
   heavyOf,
+  isGraphInTables,
   loadStudioProject,
   parseStudioProject,
+  projectDataFor,
   toProjectData,
 } from './studio/studio-persistence';
-
-/** Stored `projects.data` cap. Heavy payloads go to S3 instead. */
-export const MAX_PROJECT_DATA_BYTES = 4 * 1024 * 1024;
 
 type Actor = Pick<AuthenticatedUser, 'id' | 'role'>;
 
@@ -57,14 +61,27 @@ const isObject = (value: unknown): value is JsonObject =>
 const sha256 = (text: string): string =>
   createHash('sha256').update(text, 'utf8').digest('hex');
 
-const byteSize = (value: unknown): number =>
-  Buffer.byteLength(JSON.stringify(value), 'utf8');
+function stripStudio(data: JsonObject): JsonObject {
+  const base = { ...data };
+  delete base.studio;
+  return base;
+}
 
-function progressOf(data: JsonObject): Progress {
+/**
+ * Progress derived from `projects.data`, or null when the Studio graph lives
+ * in tables (its writes keep progress up to date, so it is left as stored).
+ */
+function progressOf(data: JsonObject): Progress | null {
+  if (isGraphInTables(data)) return null;
   return isObject(data.studio)
     ? studioProgress(loadStudioProject(data))
     : legacyProgress(data);
 }
+
+const progressColumns = (progress: Progress | null) =>
+  progress
+    ? { progressCompleted: progress.completed, progressTotal: progress.total }
+    : {};
 
 export interface ProjectCreatedEvent {
   projectId: string;
@@ -82,6 +99,7 @@ export class ProjectsService {
     private readonly repository: ProjectsRepository,
     private readonly access: ProjectAccessService,
     private readonly files: StoredFilesService,
+    private readonly graph: StudioGraphService,
   ) {}
 
   // --- create / read -----------------------------------------------------------
@@ -97,7 +115,7 @@ export class ProjectsService {
       throw AppError.notFound(ErrorCode.TeamNotFound, 'Team not found');
     }
     const studio = createEmptyProject(dto.prompt);
-    const data = toProjectData(studio, null);
+    const data = projectDataFor(studio, null);
     this.assertSize(data);
     const progress = studioProgress(studio);
 
@@ -115,6 +133,7 @@ export class ProjectsService {
         },
         tx,
       );
+      await this.graph.initialise(created.id, user.id, studio, tx);
       await this.repository.logActivity(
         {
           projectId: created.id,
@@ -174,6 +193,8 @@ export class ProjectsService {
   /** Full project with data and the Studio graph; refreshes last-accessed. */
   async detail(user: Actor, projectId: string): Promise<ProjectDetailEntity> {
     const access = await this.access.require(user, projectId);
+    // First: moves an old project's graph into tables (rewrites `data`).
+    const studio = await this.graph.load(projectId, user.id);
     const [row, full] = await Promise.all([
       this.repository.findListRow(projectId),
       this.repository.findWithData(projectId),
@@ -191,7 +212,7 @@ export class ProjectsService {
           ),
         );
     }
-    return new ProjectDetailEntity(row, access, data, loadStudioProject(data));
+    return new ProjectDetailEntity(row, access, data, studio);
   }
 
   accessOf(user: Actor, projectId: string): Promise<ProjectAccess> {
@@ -248,36 +269,24 @@ export class ProjectsService {
     await this.access.require(user, projectId, 'canEdit');
     const studio = parseStudioProject(dto.studio);
 
-    const current = await this.repository.findWithData(projectId);
+    const current = await this.repository.findMeta(projectId);
     if (!current)
       throw AppError.notFound(ErrorCode.ProjectNotFound, 'Project not found');
-    if (current.revision !== dto.revision) this.conflict(current.revision);
+    // Cheap early check so a stale client does not upload blobs for nothing.
+    if (current.revision !== dto.revision)
+      throw revisionConflict(current.revision);
 
     const storedBlobs = await this.storeHeavyPayloads(
       projectId,
       user.id,
       studio,
     );
-
-    const base = isObject(current.data) ? { ...current.data } : {};
-    delete base.studio;
-    const data = toProjectData(studio, base);
-    const dataBytes = this.assertSize(data);
-    const progress = studioProgress(studio);
-
-    const saved = await this.repository.saveData(projectId, dto.revision, {
-      data: data as Prisma.InputJsonObject,
-      dataBytes,
-      progressCompleted: progress.completed,
-      progressTotal: progress.total,
+    // The graph as sent replaces the stored one; the revision check under
+    // the row lock guarantees nobody else's change is overwritten.
+    const { meta } = await this.graph.mutate(projectId, user.id, () => studio, {
+      expectedRevision: dto.revision,
     });
-    if (!saved) {
-      const latest = await this.repository.findMeta(projectId);
-      if (!latest)
-        throw AppError.notFound(ErrorCode.ProjectNotFound, 'Project not found');
-      this.conflict(latest.revision);
-    }
-    return new SaveResultEntity(saved, storedBlobs);
+    return new SaveResultEntity(meta, storedBlobs);
   }
 
   /** Moves changed heavy simulation payloads to S3 blobs `studio/<nodeId>`. */
@@ -343,14 +352,18 @@ export class ProjectsService {
     dto: DuplicateProjectDto,
   ): Promise<ProjectDetailEntity> {
     await this.access.require(user, projectId);
-    const source = await this.repository.findWithData(projectId);
-    if (!source)
-      throw AppError.notFound(ErrorCode.ProjectNotFound, 'Project not found');
+    // An old project is moved into tables first, so its graph can be copied.
+    await this.graph.ensureImported(projectId);
 
-    const name =
-      dto.name ?? `${source.name || 'Untitled Project'} - copy`.slice(0, 200);
-    const data = isObject(source.data) ? source.data : {};
     const copy = await this.repository.transaction(async (tx) => {
+      // Locked: data and graph are copied from the same revision.
+      const locked = await this.repository.lockData(projectId, tx);
+      const source = await this.repository.findWithData(projectId, tx);
+      if (!locked || !source)
+        throw AppError.notFound(ErrorCode.ProjectNotFound, 'Project not found');
+      const name =
+        dto.name ?? `${source.name || 'Untitled Project'} - copy`.slice(0, 200);
+      const data = isObject(source.data) ? source.data : {};
       const created = await this.repository.create(
         {
           ownerId: user.id,
@@ -373,7 +386,9 @@ export class ProjectsService {
         },
         tx,
       );
-      return created;
+      // Same node and branch ids: S3 blobs `studio/<nodeId>` keep matching.
+      await this.graph.copyInto(projectId, created.id, user.id, tx);
+      return { id: created.id, data };
     });
 
     try {
@@ -384,15 +399,14 @@ export class ProjectsService {
       );
       if (idMap.size > 0) {
         // File ids referenced inside the data must point at the copies.
-        let json = JSON.stringify(data);
+        let json = JSON.stringify(copy.data);
         for (const [from, to] of idMap) json = json.split(from).join(to);
         const rewritten = JSON.parse(json) as JsonObject;
         await this.repository.saveData(copy.id, null, {
           data: rewritten as Prisma.InputJsonObject,
           dataBytes: byteSize(rewritten),
-          progressCompleted: source.progressCompleted,
-          progressTotal: source.progressTotal,
         });
+        await this.graph.rewriteNodeData(copy.id, idMap);
       }
     } catch (error) {
       await this.repository
@@ -415,13 +429,20 @@ export class ProjectsService {
     dto: CreateVersionDto,
   ): Promise<ProjectVersionEntity> {
     await this.access.require(user, projectId, 'canManageVersions');
+    // A version is self-contained: the whole graph is embedded (version 1
+    // form), so it can be restored even after branches were deleted.
+    const studio = await this.graph.snapshot(projectId, user.id);
     const current = await this.repository.findWithData(projectId);
     if (!current)
       throw AppError.notFound(ErrorCode.ProjectNotFound, 'Project not found');
+    const data = toProjectData(
+      studio,
+      stripStudio(isObject(current.data) ? current.data : {}),
+    );
     const version = await this.repository.createVersion({
       projectId,
       revision: current.revision,
-      data: isObject(current.data) ? current.data : {},
+      data: data as Prisma.InputJsonObject,
       description: dto.description || null,
       createdById: user.id,
     });
@@ -448,22 +469,28 @@ export class ProjectsService {
     if (!version)
       throw AppError.notFound(ErrorCode.VersionNotFound, 'Version not found');
     const data = isObject(version.data) ? version.data : {};
-    const progress = progressOf(data);
-    const saved = await this.repository.saveData(projectId, null, {
-      data: data,
-      dataBytes: byteSize(data),
-      progressCompleted: progress.completed,
-      progressTotal: progress.total,
-    });
-    if (!saved)
-      throw AppError.notFound(ErrorCode.ProjectNotFound, 'Project not found');
+    if (isGraphInTables(data)) {
+      // Holds no results; restoring it would wipe every branch.
+      throw AppError.badRequest(
+        ErrorCode.ValidationFailed,
+        'This version has no saved Studio results and cannot be restored',
+      );
+    }
+    // Old versions hold a version-1 graph or wizard data; both convert.
+    const restored = loadStudioProject(data);
+    const { meta } = await this.graph.mutate(
+      projectId,
+      user.id,
+      () => restored,
+      { baseData: stripStudio(data) },
+    );
     await this.repository.logActivity({
       projectId,
       userId: user.id,
       type: ProjectActivityType.EDIT,
       details: { step_name: 'version restore', version_id: versionId },
     });
-    return new SaveResultEntity(saved, 0);
+    return new SaveResultEntity(meta, 0);
   }
 
   // --- activity ---------------------------------------------------------------
@@ -526,36 +553,45 @@ export class ProjectsService {
         throw AppError.notFound(ErrorCode.ProjectNotFound, 'Project not found');
       const next = mutate(isObject(row.data) ? row.data : {});
       const dataBytes = this.assertSize(next);
-      const progress = progressOf(next);
       const saved = await this.repository.saveData(
         projectId,
         row.revision,
         {
           data: next as Prisma.InputJsonObject,
           dataBytes,
-          progressCompleted: progress.completed,
-          progressTotal: progress.total,
+          ...progressColumns(progressOf(next)),
         },
         tx,
       );
-      if (!saved) this.conflict(row.revision);
+      if (!saved) throw revisionConflict(row.revision);
       return saved;
     });
   }
 
   /**
-   * Applies a change to the Studio graph on the server (load, mutate,
-   * normalise, derive legacy keys), atomically with any other writer.
+   * Applies a change to the Studio graph on the server, atomically with any
+   * other writer. `userId` is whose branch the change starts on (null: the
+   * first branch) and whose cursor follows a fork; `branchId` overrides it.
    */
   async mutateStudio(
     projectId: string,
+    userId: string | null,
     mutate: (studio: StudioProject) => StudioProject,
+    branchId?: string,
   ): Promise<ProjectMeta> {
-    return this.mutateData(projectId, (data) => {
-      const base = { ...data };
-      delete base.studio;
-      return toProjectData(mutate(loadStudioProject(data)), base);
+    const { meta } = await this.graph.mutate(projectId, userId, mutate, {
+      branchId,
     });
+    return meta;
+  }
+
+  /** The Studio graph on the caller's branch (or `branchId`). */
+  loadStudio(
+    projectId: string,
+    userId: string,
+    branchId?: string,
+  ): Promise<StudioProject> {
+    return this.graph.load(projectId, userId, branchId);
   }
 
   /** Sets a generated name unless the project was renamed meanwhile. */
@@ -591,19 +627,6 @@ export class ProjectsService {
       );
     }
     return bytes;
-  }
-
-  /** 409 carrying the stored revision so the client can reload and retry. */
-  private conflict(currentRevision: number): never {
-    throw new HttpException(
-      {
-        message: 'The project was changed elsewhere; reload it and try again',
-        code: ErrorCode.RevisionConflict,
-        error: 'Conflict',
-        meta: { currentRevision },
-      },
-      HttpStatus.CONFLICT,
-    );
   }
 }
 

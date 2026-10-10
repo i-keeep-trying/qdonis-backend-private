@@ -78,6 +78,12 @@ export const ErrorCode = {
   RevisionConflict: 'REVISION_CONFLICT',
   ProjectDataTooLarge: 'PROJECT_DATA_TOO_LARGE',
   VersionNotFound: 'VERSION_NOT_FOUND',
+  // studio graph
+  BranchNotFound: 'BRANCH_NOT_FOUND',
+  BranchNameTaken: 'BRANCH_NAME_TAKEN',
+  LastBranch: 'LAST_BRANCH',
+  NodeNotFound: 'NODE_NOT_FOUND',
+  StudioLimitReached: 'STUDIO_LIMIT_REACHED',
   // sharing
   InvitationNotFound: 'INVITATION_NOT_FOUND',
   InvitationExpired: 'INVITATION_EXPIRED',

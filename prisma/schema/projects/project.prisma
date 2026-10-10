@@ -29,6 +29,8 @@ model Project {
   chatMessages ProjectChatMessage[]
   files        StoredFile[]
   teamUsage    TeamTokenUsage[]
+  studioNodes    StudioNode[]
+  studioBranches StudioBranch[]
 
   @@index([ownerId, lastAccessedAt(sort: Desc)])
   @@index([teamId, lastAccessedAt(sort: Desc)])

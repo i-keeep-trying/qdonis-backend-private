@@ -411,9 +411,108 @@ export function fromLegacyProject(projectData: JsonObject): StudioProject {
   return project;
 }
 
-/** The project's graph: stored one, else converted from legacy wizard data. */
+// --- graph in tables (studio version 2) --------------------------------------
+
+/**
+ * Since the graph moved to the `studio_*` tables, `projects.data.studio`
+ * only keeps the project-wide Studio keys (version 2). Nodes and branches
+ * are never stored in the data blob any more.
+ */
+export interface StudioMeta {
+  version: 2;
+  initialPrompt?: string;
+  focus: StudioProject['focus'];
+  messages: JsonObject[];
+  createdAt: string;
+}
+
+export const isGraphInTables = (projectData: JsonObject): boolean =>
+  isObject(projectData.studio) && projectData.studio.version === 2;
+
+export function studioMetaOf(project: StudioProject): StudioMeta {
+  return {
+    version: 2,
+    ...(project.initialPrompt ? { initialPrompt: project.initialPrompt } : {}),
+    focus: project.focus,
+    messages: project.messages,
+    createdAt: project.createdAt,
+  };
+}
+
+/** Project-wide keys of a version-2 `data.studio` (defaults when absent). */
+export function readStudioMeta(projectData: JsonObject): StudioMeta {
+  const stored = isObject(projectData.studio) ? projectData.studio : {};
+  const prompt = str(stored.initialPrompt);
+  return {
+    version: 2,
+    ...(prompt ? { initialPrompt: prompt.slice(0, 20_000) } : {}),
+    focus: isStageKind(stored.focus) ? stored.focus : null,
+    messages: Array.isArray(stored.messages)
+      ? (stored.messages as unknown[]).filter(isObject).slice(-MAX_MESSAGES)
+      : [],
+    createdAt: str(stored.createdAt) ?? new Date().toISOString(),
+  };
+}
+
+/** `projects.data` for a graph stored in tables: legacy keys + Studio meta. */
+export function projectDataFor(
+  project: StudioProject,
+  base: JsonObject | null,
+): JsonObject {
+  return { ...toProjectData(project, base), studio: studioMetaOf(project) };
+}
+
+/**
+ * Makes a graph fit the table constraints before it is written: branch names
+ * unique per project (older graphs allowed duplicates), fork points that
+ * still exist, and at least one branch.
+ */
+export function normalizeForTables(project: StudioProject): StudioProject {
+  const branches: Record<string, Branch> = {};
+  const taken = new Set<string>();
+  for (const id of project.branchOrder) {
+    const branch = project.branches[id];
+    if (!branch) continue;
+    const root = branch.name.trim().slice(0, 96) || 'branch';
+    let name = root;
+    for (let i = 2; taken.has(name.toLowerCase()); i += 1)
+      name = `${root} ${i}`;
+    taken.add(name.toLowerCase());
+    const forkedFromId =
+      branch.forkedFromId && project.nodes[branch.forkedFromId]
+        ? branch.forkedFromId
+        : null;
+    branches[id] = { ...branch, name, forkedFromId };
+  }
+  const branchOrder = project.branchOrder.filter((id) => branches[id]);
+  if (branchOrder.length === 0) invalid('at least one branch is required');
+  return {
+    ...project,
+    branches,
+    branchOrder,
+    activeBranchId: branches[project.activeBranchId]
+      ? project.activeBranchId
+      : branchOrder[0],
+  };
+}
+
+/**
+ * The graph stored in `projects.data` before the tables existed (version 1),
+ * else one converted from legacy wizard data. Only used to import a project
+ * into the tables the first time it is opened, and to restore old versions.
+ */
 export function loadStudioProject(projectData: JsonObject): StudioProject {
   const stored = projectData.studio;
+  if (isObject(stored) && stored.version === 2) {
+    // Already in tables; a copy of the data blob alone has no results.
+    const meta = readStudioMeta(projectData);
+    return {
+      ...createEmptyProject(meta.initialPrompt),
+      focus: meta.focus,
+      messages: meta.messages,
+      createdAt: meta.createdAt,
+    };
+  }
   if (
     isObject(stored) &&
     stored.version === 1 &&

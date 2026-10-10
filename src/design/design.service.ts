@@ -8,7 +8,10 @@ import type { ProjectAccess } from '../projects/project-permissions';
 import { ProjectsRepository } from '../projects/projects.repository';
 import { ProjectsService } from '../projects/projects.service';
 import { loadStudioProject } from '../projects/studio/studio-persistence';
-import { stageNodeOnBranch } from '../projects/studio/studio-graph';
+import {
+  stageNodeOnBranch,
+  type StudioProject,
+} from '../projects/studio/studio-graph';
 import { AiStepRunner, type AiStepResult } from './ai/ai-step.runner';
 import {
   asArray,
@@ -463,14 +466,16 @@ export class DesignService implements OnModuleInit {
 
   async updateSpecs(user: Actor, projectId: string, dto: UpdateSpecsDto) {
     await this.access.require(user, projectId, 'canEdit');
-    return this.applyStudio(projectId, (studio) =>
+    return this.applyStudio(projectId, user.id, (studio) =>
       updateSpecs(studio, dto, dto.source ?? 'user'),
     );
   }
 
   async approveSpecs(user: Actor, projectId: string) {
     await this.access.require(user, projectId, 'canEdit');
-    return this.applyStudio(projectId, (studio) => approveSpecs(studio));
+    return this.applyStudio(projectId, user.id, (studio) =>
+      approveSpecs(studio),
+    );
   }
 
   async updateConstraints(
@@ -479,7 +484,7 @@ export class DesignService implements OnModuleInit {
     dto: UpdateConstraintsDto,
   ) {
     await this.access.require(user, projectId, 'canEdit');
-    return this.applyStudio(projectId, (studio) =>
+    return this.applyStudio(projectId, user.id, (studio) =>
       updateConstraints(studio, dto, dto.source ?? 'user'),
     );
   }
@@ -491,7 +496,10 @@ export class DesignService implements OnModuleInit {
     dto: GenerateConstraintsDto,
   ) {
     const access = await this.access.require(user, projectId, 'canEdit');
-    const studio = loadStudioProject(await this.dataOf(projectId));
+    const studio = await this.projects.loadStudio(projectId, user.id);
+    // The result lands on the branch it was asked for, even if the user
+    // switches branch while it is generated.
+    const branchId = studio.activeBranchId;
     const node = stageNodeOnBranch(studio, 'specs');
     const specs = specsOf(node);
     if (!node || !specs || specs.rows.length === 0) {
@@ -513,13 +521,17 @@ export class DesignService implements OnModuleInit {
         reviewed: null,
         signal,
       });
-      const outcome = await this.applyStudio(projectId, (current) =>
-        applyGeneratedConstraints(current, nodeId, {
-          derivedParametersList:
-            generated.output.specification.derivedParametersList,
-          assumptionsMade: generated.output.specification.assumptionsMade,
-          citations: generated.output.citations,
-        }),
+      const outcome = await this.applyStudio(
+        projectId,
+        user.id,
+        (current) =>
+          applyGeneratedConstraints(current, nodeId, {
+            derivedParametersList:
+              generated.output.specification.derivedParametersList,
+            assumptionsMade: generated.output.specification.assumptionsMade,
+            citations: generated.output.citations,
+          }),
+        branchId,
       );
       return { ...outcome, usage: usageOf(generated.result) };
     };
@@ -527,14 +539,21 @@ export class DesignService implements OnModuleInit {
 
   private async applyStudio(
     projectId: string,
-    change: (studio: ReturnType<typeof loadStudioProject>) => StageOutcome,
+    userId: string,
+    change: (studio: StudioProject) => StageOutcome,
+    branchId?: string,
   ): Promise<StageResult & { revision: number }> {
     let result: StageResult = { ok: false, summary: '' };
-    const meta = await this.projects.mutateStudio(projectId, (studio) => {
-      const outcome = change(studio);
-      result = outcome.result;
-      return outcome.project;
-    });
+    const meta = await this.projects.mutateStudio(
+      projectId,
+      userId,
+      (studio) => {
+        const outcome = change(studio);
+        result = outcome.result;
+        return outcome.project;
+      },
+      branchId,
+    );
     if (!result.ok) {
       throw AppError.conflict(ErrorCode.StageInputMissing, result.summary);
     }

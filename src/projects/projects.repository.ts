@@ -118,8 +118,11 @@ export class ProjectsRepository {
     });
   }
 
-  findWithData(id: string): Promise<Project | null> {
-    return this.prisma.project.findUnique({ where: { id } });
+  findWithData(
+    id: string,
+    db: DbClient = this.prisma,
+  ): Promise<Project | null> {
+    return db.project.findUnique({ where: { id } });
   }
 
   findListRow(id: string): Promise<ProjectListRow | null> {
@@ -254,8 +257,9 @@ export class ProjectsRepository {
     update: {
       data: Prisma.InputJsonObject;
       dataBytes: number;
-      progressCompleted: number;
-      progressTotal: number;
+      /** Omitted: the stored progress is kept. */
+      progressCompleted?: number;
+      progressTotal?: number;
     },
     db: DbClient = this.prisma,
   ): Promise<ProjectMeta | null> {
