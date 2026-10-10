@@ -1,0 +1,7 @@
+enum TeamRole {
+  OWNER
+  ADMIN
+  MEMBER
+
+  @@map("team_role")
+}

@@ -365,6 +365,92 @@ export class EnvironmentVariables {
   @Max(900_000)
   BEDROCK_TIMEOUT_MS: number = 600_000;
 
+  // --- file storage (S3 + CloudFront) ---------------------------------------
+  /** Private bucket for uploads, stage payloads and exports. Unset = storage off. */
+  @IsOptional()
+  @Matches(/^[a-z0-9][a-z0-9.-]{1,61}[a-z0-9]$/, {
+    message: 'S3_BUCKET must be a valid S3 bucket name',
+  })
+  S3_BUCKET?: string;
+
+  /** Bucket region; falls back to AWS_REGION, then us-east-1. */
+  @IsOptional()
+  @Matches(REGION_PATTERN, { message: 'S3_REGION must look like us-east-1' })
+  S3_REGION?: string;
+
+  /** Optional key prefix shared by every object, e.g. `prod/`. */
+  @Matches(/^([A-Za-z0-9_-]+\/)*$/, {
+    message:
+      'S3_KEY_PREFIX must be empty or like `prod/` (segments ending in /)',
+  })
+  S3_KEY_PREFIX: string = '';
+
+  /** Custom endpoint for S3-compatible stores in development (MinIO, LocalStack). */
+  @IsOptional()
+  @IsUrl({
+    require_tld: false,
+    require_protocol: true,
+    protocols: ['http', 'https'],
+  })
+  S3_ENDPOINT?: string;
+
+  /** Distribution in front of the bucket (origin access control), e.g. https://cdn.example.com */
+  @IsOptional()
+  @IsUrl({ require_tld: false, require_protocol: true, protocols: ['https'] })
+  CLOUDFRONT_DOMAIN?: string;
+
+  /** Public key id of the distribution's trusted key group. */
+  @IsOptional()
+  @Matches(/^[A-Z0-9]{8,32}$/, {
+    message: 'CLOUDFRONT_KEY_PAIR_ID must look like K2JCJMDEHXQW5F',
+  })
+  CLOUDFRONT_KEY_PAIR_ID?: string;
+
+  /** RSA private key (PEM, `\n` escapes allowed, or base64 of the PEM). */
+  @IsOptional()
+  @IsString()
+  @MinLength(64)
+  CLOUDFRONT_PRIVATE_KEY?: string;
+
+  /** Lifetime of signed download and upload URLs. */
+  @toInteger()
+  @IsInt()
+  @Min(60)
+  @Max(86_400)
+  STORAGE_URL_TTL_SECONDS: number = 900;
+
+  /** How often queued S3 deletions and abandoned uploads are cleaned; 0 = off. */
+  @toInteger()
+  @IsInt()
+  @Min(0)
+  STORAGE_SWEEP_INTERVAL_MS: number = 300_000;
+
+  // --- component suppliers ----------------------------------------------------
+  /** Mouser Search API key (server-side only). Unset = sourcing answers 503. */
+  @IsOptional()
+  @IsString()
+  @MinLength(16)
+  MOUSER_API_KEY?: string;
+
+  /** Mouser's per-key limits (fleet-wide, counted in the database). */
+  @toInteger()
+  @IsInt()
+  @Min(1)
+  @Max(1_000)
+  MOUSER_CALLS_PER_MINUTE: number = 30;
+
+  @toInteger()
+  @IsInt()
+  @Min(1)
+  @Max(1_000_000)
+  MOUSER_CALLS_PER_DAY: number = 1_000;
+
+  @toInteger()
+  @IsInt()
+  @Min(0)
+  @Max(720)
+  MOUSER_CACHE_HOURS: number = 24;
+
   // --- mail ----------------------------------------------------------------
   @IsEnum(MailTransportKind)
   MAIL_TRANSPORT: MailTransportKind = MailTransportKind.Log;
@@ -542,7 +628,29 @@ export function crossValidate(env: EnvironmentVariables): string[] {
     );
   }
 
+  const cloudFront = [
+    env.CLOUDFRONT_DOMAIN,
+    env.CLOUDFRONT_KEY_PAIR_ID,
+    env.CLOUDFRONT_PRIVATE_KEY,
+  ].filter(Boolean).length;
+  if (cloudFront !== 0 && cloudFront !== 3) {
+    problems.push(
+      'Set all of CLOUDFRONT_DOMAIN, CLOUDFRONT_KEY_PAIR_ID and CLOUDFRONT_PRIVATE_KEY, or none',
+    );
+  }
+  if (cloudFront === 3 && !env.S3_BUCKET) {
+    problems.push('CLOUDFRONT_* requires S3_BUCKET');
+  }
+
   if (isProduction) {
+    if (!env.S3_BUCKET || cloudFront !== 3) {
+      problems.push(
+        'File storage is required in production: S3_BUCKET and CLOUDFRONT_DOMAIN, CLOUDFRONT_KEY_PAIR_ID, CLOUDFRONT_PRIVATE_KEY',
+      );
+    }
+    if (env.S3_ENDPOINT) {
+      problems.push('S3_ENDPOINT is for local development only');
+    }
     if (!env.BEDROCK_API_KEY && !env.AWS_ACCESS_KEY_ID) {
       problems.push(
         'Bedrock credentials are required in production: AWS_ACCESS_KEY_ID + AWS_SECRET_ACCESS_KEY, or BEDROCK_API_KEY',

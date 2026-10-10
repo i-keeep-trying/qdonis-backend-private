@@ -21,12 +21,19 @@ import { ResponseTransformInterceptor } from './common/interceptors/response-tra
 import { REQUEST_ID_HEADER, resolveRequestId } from './common/request-id';
 import { AppConfigModule } from './config/config.module';
 import type { AppConfiguration } from './config/configuration';
+import { DesignModule } from './design/design.module';
 import { DocumentsModule } from './documents/documents.module';
 import { HealthModule } from './health/health.module';
 import { MailModule } from './mail/mail.module';
 import { PrismaModule } from './prisma/prisma.module';
+import { ProjectChatModule } from './project-chat/project-chat.module';
+import { ProjectsModule } from './projects/projects.module';
 import { SettingsModule } from './settings/settings.module';
+import { SharingModule } from './sharing/sharing.module';
+import { StorageModule } from './storage/storage.module';
 import { StudioModule } from './studio/studio.module';
+import { StudioStagesModule } from './studio-stages/studio-stages.module';
+import { TeamsModule } from './teams/teams.module';
 import { UsersModule } from './users/users.module';
 
 /** Paths whose successful requests are not access-logged (probe noise). */
@@ -91,6 +98,11 @@ const QUIET_PATHS = new Set(['/health', '/health/live', '/favicon.ico']);
                 '*.AWS_SECRET_ACCESS_KEY',
                 '*.AWS_ACCESS_KEY_ID',
                 '*.BEDROCK_API_KEY',
+                // File storage and supplier credentials.
+                '*.privateKey',
+                '*.CLOUDFRONT_PRIVATE_KEY',
+                '*.MOUSER_API_KEY',
+                '*.CLARIVATE_API_KEY',
               ],
               censor: '[redacted]',
             },
@@ -144,6 +156,7 @@ const QUIET_PATHS = new Set(['/health', '/health/live', '/favicon.ico']);
 
     PrismaModule,
     MailModule,
+    StorageModule,
     UsersModule,
     AuthModule,
     SettingsModule,
@@ -152,6 +165,12 @@ const QUIET_PATHS = new Set(['/health', '/health/live', '/favicon.ico']);
     AiModule,
     StudioModule,
     DocumentsModule,
+    ProjectsModule,
+    SharingModule,
+    TeamsModule,
+    ProjectChatModule,
+    DesignModule,
+    StudioStagesModule,
     HealthModule,
   ],
   providers: [

@@ -1,0 +1,14 @@
+/// Cached supplier search results (was Supabase `mouser_search_cache`). Keyed
+/// by a hash of the supplier, component and normalised specifications.
+model SupplierSearchCache {
+  id            String   @id @default(uuid()) @db.Uuid
+  supplier      String
+  key           String   @unique
+  componentName String   @map("component_name")
+  results       Json
+  expiresAt     DateTime @map("expires_at")
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  @@index([expiresAt])
+  @@map("supplier_search_cache")
+}

@@ -76,6 +76,31 @@ export interface AppConfiguration {
     maxOutputTokens: number;
     timeoutMs: number;
   };
+  storage: {
+    /** False when S3_BUCKET is unset: file routes answer 503. */
+    enabled: boolean;
+    bucket?: string;
+    region: string;
+    keyPrefix: string;
+    endpoint?: string;
+    /** AWS key pair when set; otherwise the SDK default chain (IAM role). */
+    accessKeyId?: string;
+    secretAccessKey?: string;
+    cloudFront?: {
+      /** No trailing slash. */
+      domain: string;
+      keyPairId: string;
+      privateKey: string;
+    };
+    urlTtlSeconds: number;
+    sweepIntervalMs: number;
+  };
+  mouser: {
+    apiKey?: string;
+    callsPerMinute: number;
+    callsPerDay: number;
+    cacheHours: number;
+  };
   mail: {
     transport: MailTransportKind;
     from?: string;
@@ -124,6 +149,13 @@ function bedrockAuthMode(env: {
   if (env.AWS_ACCESS_KEY_ID && env.AWS_SECRET_ACCESS_KEY) return 'sigv4';
   if (env.BEDROCK_API_KEY) return 'bearer';
   return 'none';
+}
+
+/** PEM as-is, with literal `\n` escapes, or base64 of the PEM. */
+export function decodePrivateKey(raw: string): string {
+  const value = raw.trim();
+  if (value.includes('-----BEGIN')) return value.replace(/\\n/g, '\n');
+  return Buffer.from(value, 'base64').toString('utf8').trim();
 }
 
 /**
@@ -193,6 +225,33 @@ export function configuration(): AppConfiguration {
         .filter(Boolean),
       maxOutputTokens: env.BEDROCK_MAX_OUTPUT_TOKENS,
       timeoutMs: env.BEDROCK_TIMEOUT_MS,
+    },
+    storage: {
+      enabled: Boolean(env.S3_BUCKET),
+      bucket: env.S3_BUCKET,
+      region: env.S3_REGION ?? env.AWS_REGION ?? 'us-east-1',
+      keyPrefix: env.S3_KEY_PREFIX,
+      endpoint: env.S3_ENDPOINT,
+      accessKeyId: env.AWS_ACCESS_KEY_ID,
+      secretAccessKey: env.AWS_SECRET_ACCESS_KEY,
+      cloudFront:
+        env.CLOUDFRONT_DOMAIN &&
+        env.CLOUDFRONT_KEY_PAIR_ID &&
+        env.CLOUDFRONT_PRIVATE_KEY
+          ? {
+              domain: env.CLOUDFRONT_DOMAIN.replace(/\/+$/, ''),
+              keyPairId: env.CLOUDFRONT_KEY_PAIR_ID,
+              privateKey: decodePrivateKey(env.CLOUDFRONT_PRIVATE_KEY),
+            }
+          : undefined,
+      urlTtlSeconds: env.STORAGE_URL_TTL_SECONDS,
+      sweepIntervalMs: env.STORAGE_SWEEP_INTERVAL_MS,
+    },
+    mouser: {
+      apiKey: env.MOUSER_API_KEY,
+      callsPerMinute: env.MOUSER_CALLS_PER_MINUTE,
+      callsPerDay: env.MOUSER_CALLS_PER_DAY,
+      cacheHours: env.MOUSER_CACHE_HOURS,
     },
     mail: {
       transport: env.MAIL_TRANSPORT,

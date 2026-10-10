@@ -1,0 +1,13 @@
+/// S3 keys waiting to be deleted. Filled by the `stored_files` delete trigger
+/// and drained by StorageSweeperService (retries with backoff on failure).
+model StorageDeletion {
+  id        String   @id @default(uuid()) @db.Uuid
+  key       String
+  attempts  Int      @default(0)
+  lastError String?  @map("last_error")
+  notBefore DateTime @default(now()) @map("not_before")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([notBefore])
+  @@map("storage_deletions")
+}

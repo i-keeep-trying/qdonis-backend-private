@@ -1,0 +1,8 @@
+enum ShareLinkType {
+  ANYONE_WITH_LINK
+  DOMAIN_RESTRICTED
+  ONE_TIME_USE
+  PASSWORD_PROTECTED
+
+  @@map("share_link_type")
+}

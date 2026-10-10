@@ -1,0 +1,36 @@
+/// A design project. `data` holds the whole project state (the Studio graph
+/// under `data.studio`, plus legacy wizard keys). Heavy payloads never live
+/// here: they are `StoredFile` objects in S3, referenced by name.
+model Project {
+  id                String    @id @default(uuid()) @db.Uuid
+  ownerId           String    @map("owner_id") @db.Uuid
+  /// Team projects are visible to every team member (see ProjectAccessService).
+  teamId            String?   @map("team_id") @db.Uuid
+  name              String
+  description       String?
+  data              Json      @default("{}")
+  /// Size of `data` in bytes (UTF-8 JSON), kept for limits and admin views.
+  dataBytes         Int       @default(2) @map("data_bytes")
+  progressCompleted Int       @default(0) @map("progress_completed")
+  progressTotal     Int       @default(10) @map("progress_total")
+  /// Bumped on every data write; clients send it back for optimistic locking.
+  revision          Int       @default(0)
+  lastAccessedAt    DateTime  @default(now()) @map("last_accessed_at")
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
+
+  owner        User                 @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  team         Team?                @relation(fields: [teamId], references: [id], onDelete: SetNull)
+  members      ProjectMember[]
+  invitations  ProjectInvitation[]
+  shareLinks   ShareLink[]
+  activity     ProjectActivity[]
+  versions     ProjectVersion[]
+  chatMessages ProjectChatMessage[]
+  files        StoredFile[]
+  teamUsage    TeamTokenUsage[]
+
+  @@index([ownerId, lastAccessedAt(sort: Desc)])
+  @@index([teamId, lastAccessedAt(sort: Desc)])
+  @@map("projects")
+}

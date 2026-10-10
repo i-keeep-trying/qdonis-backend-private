@@ -1,0 +1,30 @@
+/// An object in the private S3 bucket. Deleting a row (directly or through a
+/// cascade) enqueues its key in `storage_deletions` via a database trigger,
+/// so S3 never keeps orphaned objects.
+model StoredFile {
+  id            String           @id @default(uuid()) @db.Uuid
+  ownerId       String?          @map("owner_id") @db.Uuid
+  projectId     String?          @map("project_id") @db.Uuid
+  kind          StoredFileKind
+  status        StoredFileStatus @default(PENDING)
+  /// Unique per project for stage blobs (e.g. `studio/<nodeId>`); free text otherwise.
+  name          String
+  /// S3 object key.
+  key           String           @unique
+  filename      String
+  contentType   String           @map("content_type")
+  sizeBytes     Int              @map("size_bytes")
+  sha256        String?
+  /// Plain text extracted from DOCX/TXT/MD documents (PDFs go to the model as-is).
+  extractedText String?          @map("extracted_text")
+  createdAt     DateTime         @default(now()) @map("created_at")
+  updatedAt     DateTime         @updatedAt @map("updated_at")
+
+  owner   User?    @relation("StoredFileOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  project Project? @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId, kind])
+  @@index([ownerId, kind])
+  @@index([status, createdAt])
+  @@map("stored_files")
+}

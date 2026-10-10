@@ -1,0 +1,9 @@
+/// Role granted on a project to someone other than its owner. The owner is
+/// `Project.ownerId` and has every permission.
+enum ProjectRole {
+  VIEWER
+  EDITOR
+  ADMIN
+
+  @@map("project_role")
+}

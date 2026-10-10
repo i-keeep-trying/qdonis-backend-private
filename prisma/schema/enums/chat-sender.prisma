@@ -1,0 +1,6 @@
+enum ChatSender {
+  USER
+  AI
+
+  @@map("chat_sender")
+}

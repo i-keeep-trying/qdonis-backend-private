@@ -6,6 +6,7 @@ import {
   ConflictException,
   ForbiddenException,
   NotFoundException,
+  PayloadTooLargeException,
   ServiceUnavailableException,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -62,6 +63,53 @@ export const ErrorCode = {
   StripeError: 'STRIPE_ERROR',
   InvalidSignature: 'INVALID_SIGNATURE',
   Forbidden: 'FORBIDDEN',
+  // storage
+  StorageNotConfigured: 'STORAGE_NOT_CONFIGURED',
+  StorageError: 'STORAGE_ERROR',
+  FileNotFound: 'FILE_NOT_FOUND',
+  FileTooLarge: 'FILE_TOO_LARGE',
+  FileEmpty: 'FILE_EMPTY',
+  UnsupportedFileType: 'UNSUPPORTED_FILE_TYPE',
+  DocumentUnreadable: 'DOCUMENT_UNREADABLE',
+  UploadIncomplete: 'UPLOAD_INCOMPLETE',
+  // projects
+  ProjectNotFound: 'PROJECT_NOT_FOUND',
+  ProjectReadOnly: 'PROJECT_READ_ONLY',
+  RevisionConflict: 'REVISION_CONFLICT',
+  ProjectDataTooLarge: 'PROJECT_DATA_TOO_LARGE',
+  VersionNotFound: 'VERSION_NOT_FOUND',
+  // sharing
+  InvitationNotFound: 'INVITATION_NOT_FOUND',
+  InvitationExpired: 'INVITATION_EXPIRED',
+  InvitationRevoked: 'INVITATION_REVOKED',
+  InvitationAlreadyAccepted: 'INVITATION_ALREADY_ACCEPTED',
+  InvitationEmailMismatch: 'INVITATION_EMAIL_MISMATCH',
+  InvitationPending: 'INVITATION_PENDING',
+  ShareLinkNotFound: 'SHARE_LINK_NOT_FOUND',
+  ShareLinkInactive: 'SHARE_LINK_INACTIVE',
+  ShareLinkExpired: 'SHARE_LINK_EXPIRED',
+  ShareLinkExhausted: 'SHARE_LINK_EXHAUSTED',
+  ShareLinkDomainRestricted: 'SHARE_LINK_DOMAIN_RESTRICTED',
+  ShareLinkPasswordRequired: 'SHARE_LINK_PASSWORD_REQUIRED',
+  ShareLinkPasswordInvalid: 'SHARE_LINK_PASSWORD_INVALID',
+  MemberNotFound: 'MEMBER_NOT_FOUND',
+  OwnerImmutable: 'OWNER_IMMUTABLE',
+  // teams
+  TeamNotFound: 'TEAM_NOT_FOUND',
+  TeamPlanRequired: 'TEAM_PLAN_REQUIRED',
+  TeamTokenLimitInvalid: 'TEAM_TOKEN_LIMIT_INVALID',
+  TeamTokenLimitReached: 'TEAM_TOKEN_LIMIT_REACHED',
+  AlreadyTeamMember: 'ALREADY_TEAM_MEMBER',
+  TeamOwnerImmutable: 'TEAM_OWNER_IMMUTABLE',
+  // chat
+  ChatMessageNotFound: 'CHAT_MESSAGE_NOT_FOUND',
+  // design steps
+  AiResponseInvalid: 'AI_RESPONSE_INVALID',
+  StageInputMissing: 'STAGE_INPUT_MISSING',
+  SupplierNotConfigured: 'SUPPLIER_NOT_CONFIGURED',
+  SupplierError: 'SUPPLIER_ERROR',
+  StageNotAvailable: 'STAGE_NOT_AVAILABLE',
+  StageFailed: 'STAGE_FAILED',
 } as const;
 
 export type ErrorCode = (typeof ErrorCode)[keyof typeof ErrorCode];
@@ -86,6 +134,7 @@ export const AppError = {
   conflict: make(ConflictException, 'Conflict'),
   unavailable: make(ServiceUnavailableException, 'Service Unavailable'),
   badGateway: make(BadGatewayException, 'Bad Gateway'),
+  tooLarge: make(PayloadTooLargeException, 'Payload Too Large'),
   /** 402: the action needs more tokens or a paid plan. */
   paymentRequired: (
     code: ErrorCode,

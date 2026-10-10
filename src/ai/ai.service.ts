@@ -23,6 +23,8 @@ export interface UsageCharge {
   step?: string;
   inputTokens: number;
   outputTokens: number;
+  /** Extra ledger metadata (project, team, acting user). */
+  context?: Record<string, string | null>;
 }
 
 export interface ChargeOutcome {
@@ -119,6 +121,7 @@ export class AiService {
     const multiplier = await this.stepMultiplier(usage.step);
     const amount = Math.ceil(totalTokens * multiplier);
     const { charged, balance } = await this.charge(userId, amount, {
+      ...(usage.context ?? {}),
       modelId: usage.modelId,
       step: usage.step ?? null,
       inputTokens: usage.inputTokens,

@@ -1,0 +1,20 @@
+/// A team sharing its owner's token pool (Teams plan). `tokenLimit` caps what
+/// the team may spend from the pool; null = no cap.
+model Team {
+  id         String   @id @default(uuid()) @db.Uuid
+  name       String
+  ownerId    String   @map("owner_id") @db.Uuid
+  tokenLimit Int?     @map("token_limit")
+  tokensUsed Int      @default(0) @map("tokens_used")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  owner       User             @relation("TeamOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  members     TeamMember[]
+  invitations TeamInvitation[]
+  projects    Project[]
+  usage       TeamTokenUsage[]
+
+  @@index([ownerId])
+  @@map("teams")
+}

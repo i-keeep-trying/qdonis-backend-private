@@ -47,6 +47,9 @@ Object.assign(process.env, {
   AWS_SECRET_ACCESS_KEY: 'e2e-fake-secret-0000000000000000',
   AWS_REGION: 'us-east-1',
   BODY_LIMIT: '5mb',
+  // Storage is on; suites that touch files bind an in-memory ObjectStore.
+  S3_BUCKET: 'qdonis-e2e-bucket',
+  S3_KEY_PREFIX: 'e2e/',
   STRIPE_SECRET_KEY: 'sk_test_e2eFakeKey000000000000',
   STRIPE_WEBHOOK_SECRET: 'whsec_e2eWebhookSecret0000000000',
 });

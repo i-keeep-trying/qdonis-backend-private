@@ -1,0 +1,8 @@
+enum StoredFileStatus {
+  /// Upload URL issued; the object may not exist yet.
+  PENDING
+  /// Object verified in the bucket.
+  READY
+
+  @@map("stored_file_status")
+}
