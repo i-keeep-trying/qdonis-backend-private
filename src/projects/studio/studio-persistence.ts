@@ -27,6 +27,10 @@ export const HEAVY_SIM_KEYS = ['plots', 'raw_time_series_zip'] as const;
 
 export const heavyBlobName = (nodeId: string): string => `studio/${nodeId}`;
 
+/** Raw time series of a simulation node, kept apart from its plots (only the stage engines read it). */
+export const rawSeriesBlobName = (nodeId: string): string =>
+  `studio/${nodeId}/raw`;
+
 const isObject = (value: unknown): value is JsonObject =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
 

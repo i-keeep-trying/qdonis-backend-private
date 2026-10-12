@@ -18,9 +18,9 @@ import type { Prisma, StoredFile } from '../generated/prisma/client';
 import type { Role } from '../generated/prisma/enums';
 import { ProjectsService } from '../projects/projects.service';
 import { patchNode, type StudioProject } from '../projects/studio/studio-graph';
-import { heavyBlobName } from '../projects/studio/studio-persistence';
 import { StoredFilesService } from '../storage/stored-files.service';
 import { TopologiesService } from '../topologies/topologies.service';
+import { SimulationArtifactsService } from './simulation-artifacts.service';
 import { SimulationRunKind } from '../generated/prisma/enums';
 import { ComputeService } from './compute/compute.service';
 import {
@@ -102,6 +102,7 @@ export class SimulationRunsService
     private readonly sizing: DesignSizingService,
     private readonly design: DesignService,
     private readonly config: ConfigService<AppConfiguration, true>,
+    private readonly artifacts: SimulationArtifactsService,
   ) {}
 
   private settings(): AppConfiguration['simulation'] {
@@ -443,16 +444,13 @@ export class SimulationRunsService
     waveforms: WaveformSet,
     zip: Buffer | null,
   ): Promise<void> {
-    let blob: StoredFile | null = null;
+    let blobs: StoredFile[] = [];
     if (this.config.get('storage', { infer: true }).enabled) {
-      blob = await this.files.putStageBlob({
+      blobs = await this.artifacts.store({
         projectId: run.projectId,
-        actorId: null,
-        name: heavyBlobName(run.nodeId),
-        value: {
-          plots: waveforms.plots,
-          raw_time_series_zip: zip ? zip.toString('base64') : null,
-        },
+        nodeId: run.nodeId,
+        waveforms,
+        zipBase64: zip ? zip.toString('base64') : null,
       });
     } else {
       this.logger.warn(
@@ -471,15 +469,17 @@ export class SimulationRunsService
           rev: node.rev + 1,
         }),
     );
-    if (!applied && blob) {
-      // The node was removed or re-run meanwhile: drop the orphan.
-      await this.files
-        .remove(blob)
-        .catch((error: unknown) =>
-          this.logger.warn(
-            `Could not remove orphan waveforms: ${describe(error)}`,
-          ),
-        );
+    if (!applied) {
+      // The node was removed or re-run meanwhile: drop the orphans.
+      for (const blob of blobs) {
+        await this.files
+          .remove(blob)
+          .catch((error: unknown) =>
+            this.logger.warn(
+              `Could not remove orphan waveforms: ${describe(error)}`,
+            ),
+          );
+      }
     }
   }
 

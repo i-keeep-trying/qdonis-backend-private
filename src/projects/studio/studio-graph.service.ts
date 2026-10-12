@@ -36,6 +36,7 @@ import {
 } from './studio-graph.repository';
 import {
   heavyBlobName,
+  rawSeriesBlobName,
   loadStudioProject,
   normalizeForTables,
   parseStudioProject,
@@ -542,11 +543,10 @@ export class StudioGraphService {
   private async removeHeavyBlobs(projectId: string, nodeIds: string[]) {
     for (const nodeId of nodeIds) {
       try {
-        const blob = await this.files.findStageBlob(
-          projectId,
-          heavyBlobName(nodeId),
-        );
-        if (blob) await this.files.remove(blob);
+        for (const name of [heavyBlobName(nodeId), rawSeriesBlobName(nodeId)]) {
+          const blob = await this.files.findStageBlob(projectId, name);
+          if (blob) await this.files.remove(blob);
+        }
       } catch (error) {
         this.logger.warn(
           `Could not remove the stored waveforms of ${projectId}/${nodeId}: ${error instanceof Error ? error.message : String(error)}`,

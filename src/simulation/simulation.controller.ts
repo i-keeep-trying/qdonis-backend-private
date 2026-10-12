@@ -212,6 +212,22 @@ export class SimulationWaveformsController {
     return this.simulation.waveforms(user, projectId, nodeId);
   }
 
+  @Get(':nodeId/waveforms/url')
+  @ApiOperation({
+    summary: 'Signed CDN URL of the plot samples (gzipped `{ plots }`)',
+    description:
+      'Answers `{ url, expiresAt, encoding: "gzip" }`, or `{ url: null }` when the samples must be read through `GET …/waveforms` (simulations stored before the CDN layout, or not finished).',
+  })
+  @ApiNotFoundResponse({ description: 'PROJECT_NOT_FOUND, NODE_NOT_FOUND' })
+  @ApiServiceUnavailableResponse({ description: 'STORAGE_NOT_CONFIGURED' })
+  waveformsUrl(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('projectId', ParseUUIDPipe) projectId: string,
+    @Param('nodeId', ParseGraphIdPipe) nodeId: string,
+  ) {
+    return this.simulation.waveformsUrl(user, projectId, nodeId);
+  }
+
   @Post(':nodeId/verify')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({

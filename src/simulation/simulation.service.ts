@@ -630,6 +630,23 @@ export class SimulationService {
     return this.artifacts.waveforms(projectId, nodeId);
   }
 
+  /** Signed CDN URL of the plot samples (null: use `waveforms`). */
+  async waveformsUrl(user: Actor, projectId: string, nodeId: string) {
+    await this.access.require(user, projectId);
+    const node = await this.graph.node(projectId, nodeId);
+    if (!node || node.stage !== 'simulation') {
+      throw AppError.notFound(
+        ErrorCode.NodeNotFound,
+        'This simulation no longer exists.',
+      );
+    }
+    if (node.status !== 'ready') return { url: null, expiresAt: null };
+    const signed = await this.artifacts.waveformsUrl(projectId, nodeId);
+    return signed
+      ? { url: signed.url, expiresAt: signed.expiresAt, encoding: 'gzip' }
+      : { url: null, expiresAt: null };
+  }
+
   /**
    * Whether a requested netlist change shows in a finished simulation (core
    * `/api/simulate/verify-rerun`). Analysis only; nothing is changed.
@@ -741,8 +758,8 @@ export class SimulationService {
     if (!sim || sim.status !== 'ready') {
       throw missing('Run a simulation first, or enter the device stresses.');
     }
-    const artifacts = await this.artifacts.load(projectId, sim.id);
-    if (!artifacts?.timeSeriesZip) {
+    const timeSeriesZip = await this.artifacts.timeSeriesZip(projectId, sim.id);
+    if (!timeSeriesZip) {
       this.files.assertEnabled();
       throw missing(
         'The raw waveforms of this simulation were not kept. Re-run the simulation, or enter the device stresses.',
@@ -754,7 +771,7 @@ export class SimulationService {
     const { selection: core, lossAnalysis } = await this.compute.run(
       'selectDevices',
       {
-        zipBase64: artifacts.timeSeriesZip,
+        zipBase64: timeSeriesZip,
         tj,
         deviceTypes: topologyId
           ? semiconductorTypesFromYaml(this.topologies.design(topologyId))

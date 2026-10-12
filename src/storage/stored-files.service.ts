@@ -1,4 +1,6 @@
 import { createHash, randomUUID } from 'node:crypto';
+import { promisify } from 'node:util';
+import { gunzip, gzip } from 'node:zlib';
 
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -33,6 +35,12 @@ export interface UploadedBinary {
 
 const sha256 = (bytes: Buffer): string =>
   createHash('sha256').update(bytes).digest('hex');
+
+/** A server read through the CDN gives up after this and falls back to S3. */
+const CDN_READ_TIMEOUT_MS = 120_000;
+
+const gzipAsync = promisify(gzip);
+const gunzipAsync = promisify(gunzip);
 
 const describe = (error: unknown): string =>
   error instanceof Error ? error.message : String(error);
@@ -158,6 +166,24 @@ export class StoredFilesService {
     }
   }
 
+  /** Bytes through the CDN (signed URL) when configured, else (or on failure) from S3. */
+  private async readFast(file: StoredFile): Promise<Buffer> {
+    if (!this.settings().cloudFront) return this.read(file);
+    try {
+      const { url } = await this.downloadUrl(file);
+      const response = await fetch(url, {
+        signal: AbortSignal.timeout(CDN_READ_TIMEOUT_MS),
+      });
+      if (!response.ok) throw new Error(`CDN answered ${response.status}`);
+      return Buffer.from(await response.arrayBuffer());
+    } catch (error) {
+      this.logger.warn(
+        `CDN read of file ${file.id} failed, reading from S3: ${describe(error)}`,
+      );
+      return this.read(file);
+    }
+  }
+
   async downloadUrl(
     file: StoredFile,
   ): Promise<{ url: string; expiresAt: Date }> {
@@ -259,19 +285,26 @@ export class StoredFilesService {
     );
   }
 
-  /** Server-side write of a stage blob (JSON), replacing any previous one. */
+  /**
+   * Server-side write of a stage blob (JSON), replacing any previous one.
+   * `gzip` stores it compressed (`application/gzip`); `readStageBlob`
+   * decompresses either kind.
+   */
   async putStageBlob(input: {
     projectId: string;
     actorId: string | null;
     name: string;
     value: unknown;
+    gzip?: boolean;
   }): Promise<StoredFile> {
     this.assertEnabled();
-    const body = Buffer.from(JSON.stringify(input.value ?? null), 'utf8');
-    this.assertBlob(input.name, 'application/json', body.length);
+    const json = Buffer.from(JSON.stringify(input.value ?? null), 'utf8');
+    const contentType = input.gzip ? 'application/gzip' : 'application/json';
+    const body = input.gzip ? await gzipAsync(json) : json;
+    this.assertBlob(input.name, contentType, body.length);
     const id = randomUUID();
     const key = this.key('projects', input.projectId, 'blobs', id);
-    await this.store.put({ key, body, contentType: 'application/json' });
+    await this.store.put({ key, body, contentType });
     try {
       return await this.repository.transaction(async (tx) => {
         await this.repository.create(
@@ -283,8 +316,8 @@ export class StoredFilesService {
             status: StoredFileStatus.PENDING,
             name: input.name,
             key,
-            filename: `${input.name.replace(/\//g, '_')}.json`,
-            contentType: 'application/json',
+            filename: `${input.name.replace(/\//g, '_')}.json${input.gzip ? '.gz' : ''}`,
+            contentType,
             sizeBytes: body.length,
             sha256: sha256(body),
           },
@@ -294,7 +327,7 @@ export class StoredFilesService {
           id,
           input.projectId,
           input.name,
-          { sizeBytes: body.length, contentType: 'application/json' },
+          { sizeBytes: body.length, contentType },
           tx,
         );
       });
@@ -306,6 +339,18 @@ export class StoredFilesService {
 
   findStageBlob(projectId: string, name: string): Promise<StoredFile | null> {
     return this.repository.findReadyBlob(projectId, name);
+  }
+
+  /**
+   * A stage blob's JSON, decompressed when it was stored gzipped. Read
+   * through CloudFront when it is configured (far faster than a direct S3
+   * GET outside the bucket's region); S3 when that fails.
+   */
+  async readStageBlob(file: StoredFile): Promise<unknown> {
+    const raw = await this.readFast(file);
+    const json =
+      file.contentType === 'application/gzip' ? await gunzipAsync(raw) : raw;
+    return JSON.parse(json.toString('utf8')) as unknown;
   }
 
   listProjectFiles(projectId: string, kind?: StoredFileKind) {
