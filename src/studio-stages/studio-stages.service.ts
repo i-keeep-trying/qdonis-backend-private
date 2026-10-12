@@ -24,7 +24,13 @@ import type {
 import { ProjectAccessService } from '../projects/project-access.service';
 import { ProjectsRepository } from '../projects/projects.repository';
 import { ProjectsService } from '../projects/projects.service';
-import { commitStage, type StageKind } from '../projects/studio/studio-graph';
+import {
+  commitStage,
+  stageNodeOnBranch,
+  type StageKind,
+} from '../projects/studio/studio-graph';
+import { StudioGraphService } from '../projects/studio/studio-graph.service';
+import { SimulationArtifactsService } from '../simulation/simulation-artifacts.service';
 import {
   CIRCUIT_DATA_PROVIDER,
   type CircuitDataProvider,
@@ -33,10 +39,17 @@ import type {
   EmcParametersDto,
   EmcSpectrumDto,
   MtbfDto,
-  RunMagneticsDto,
   RunThermalDto,
 } from './dto/stages.dto';
-import { planMagnetics, type StagePlan } from './magnetics.stage';
+import type {
+  RunMagneticsStageDto,
+  RunThermalStageDto,
+} from './dto/stage-runs.dto';
+import {
+  type MagneticsOptions,
+  planMagnetics,
+  type StagePlan,
+} from './magnetics.stage';
 import { planThermal } from './thermal.stage';
 
 type Actor = Pick<AuthenticatedUser, 'id' | 'role'>;
@@ -60,11 +73,20 @@ export class StudioStagesService {
     private readonly repository: ProjectsRepository,
     @Inject(CIRCUIT_DATA_PROVIDER)
     private readonly circuit: CircuitDataProvider,
+    private readonly artifacts: SimulationArtifactsService,
+    private readonly graph: StudioGraphService,
   ) {}
 
-  async runMagnetics(user: Actor, projectId: string, dto: RunMagneticsDto) {
+  /** `branchId` defaults to the caller's branch (the Studio chat passes its own). */
+  async runMagnetics(
+    user: Actor,
+    projectId: string,
+    dto: MagneticsOptions,
+    branchId?: string,
+  ) {
     await this.access.require(user, projectId, 'canEdit');
-    const studio = await this.projects.loadStudio(projectId, user.id);
+    const studio = await this.projects.loadStudio(projectId, user.id, branchId);
+    await this.artifacts.hydrate(projectId, studio);
     return this.commit(
       projectId,
       user.id,
@@ -74,9 +96,15 @@ export class StudioStagesService {
     );
   }
 
-  async runThermal(user: Actor, projectId: string, dto: RunThermalDto) {
+  async runThermal(
+    user: Actor,
+    projectId: string,
+    dto: RunThermalDto,
+    branchId?: string,
+  ) {
     await this.access.require(user, projectId, 'canEdit');
-    const studio = await this.projects.loadStudio(projectId, user.id);
+    const studio = await this.projects.loadStudio(projectId, user.id, branchId);
+    await this.artifacts.hydrate(projectId, studio);
     return this.commit(
       projectId,
       user.id,
@@ -86,6 +114,198 @@ export class StudioStagesService {
     );
   }
 
+  // --- branch stage runs (qdonis-web) ---------------------------------------------
+
+  /** Magnetics stage of a branch, from its circuit or from entered parts. */
+  async runMagneticsStage(
+    user: Actor,
+    projectId: string,
+    branchId: string,
+    dto: RunMagneticsStageDto,
+  ) {
+    await this.access.require(user, projectId, 'canEdit');
+    const unknownCore = Object.entries(dto.coreOverrides ?? {}).find(
+      ([, core]) => !AVAILABLE_CORES.includes(core),
+    );
+    if (unknownCore) {
+      throw AppError.badRequest(
+        ErrorCode.ValidationFailed,
+        `${unknownCore[1]} is not in the core library.`,
+      );
+    }
+    const parts = dto.origin === 'input' ? (dto.inputs ?? []) : [];
+    if (dto.origin === 'input' && parts.length === 0) {
+      throw AppError.badRequest(
+        ErrorCode.ValidationFailed,
+        'Describe at least one magnetic part.',
+      );
+    }
+    const studio = await this.projects.loadStudio(projectId, user.id, branchId);
+    if (
+      dto.origin === 'circuit' &&
+      !stageNodeOnBranch(studio, 'visualization', branchId)
+    ) {
+      throw AppError.conflict(
+        ErrorCode.StageInputMissing,
+        'Choose a topology first, or describe the parts.',
+      );
+    }
+    await this.artifacts.hydrate(projectId, studio);
+    const s = dto.settings;
+    const plan = await planMagnetics(
+      studio,
+      {
+        material: s.material ?? undefined,
+        maxFluxDensity: s.maxFluxDensityT ?? undefined,
+        currentDensity: s.currentDensity ?? undefined,
+        windowUtilization: s.windowUtilization ?? undefined,
+        maxTempRiseC: s.maxTempRiseC ?? undefined,
+        ambientC: s.ambientC,
+        coreOverrides: dto.coreOverrides,
+        fromCircuit: dto.origin === 'circuit',
+        parts: parts.map((p) => ({
+          ref: p.ref,
+          kind: p.kind,
+          role: p.role ?? undefined,
+          inductance_uh: p.inductanceUh ?? undefined,
+          turns_ratio: p.turnsRatio ?? undefined,
+          fsw_khz: p.fswKhz,
+          duty: p.duty ?? undefined,
+          i_dc_a: p.iDcA ?? undefined,
+          i_ripple_pp_a: p.iRipplePpA ?? undefined,
+          i_peak_a: p.iPeakA ?? undefined,
+          i_rms_a: p.iRmsA ?? undefined,
+          v_primary_v: p.vPrimaryV ?? undefined,
+          power_w: p.powerW ?? undefined,
+          unipolar: p.unipolar,
+        })),
+      },
+      this.circuit,
+    );
+    return this.commitStageRun(user, projectId, branchId, 'magnetics', plan);
+  }
+
+  /** Thermal stage of a branch: from its simulation, its devices, or entered losses. */
+  async runThermalStage(
+    user: Actor,
+    projectId: string,
+    branchId: string,
+    dto: RunThermalStageDto,
+  ) {
+    await this.access.require(user, projectId, 'canEdit');
+    const inputs = dto.origin === 'input' ? dto.inputs : undefined;
+    if (
+      dto.origin === 'input' &&
+      (inputs?.devices.length ?? 0) + (inputs?.magnetics.length ?? 0) === 0
+    ) {
+      throw AppError.badRequest(
+        ErrorCode.ValidationFailed,
+        'Add at least one heat source.',
+      );
+    }
+    const studio = await this.projects.loadStudio(projectId, user.id, branchId);
+    const needs =
+      dto.origin === 'simulation'
+        ? {
+            stage: 'simulation' as const,
+            message: 'Run a simulation first, or enter the losses.',
+          }
+        : dto.origin === 'devices'
+          ? {
+              stage: 'devices' as const,
+              message: 'Select devices first, or enter the losses.',
+            }
+          : null;
+    if (
+      needs &&
+      stageNodeOnBranch(studio, needs.stage, branchId)?.status !== 'ready'
+    ) {
+      throw AppError.conflict(ErrorCode.StageInputMissing, needs.message);
+    }
+    await this.artifacts.hydrate(projectId, studio);
+    const s = dto.settings;
+    const plan = await planThermal(
+      studio,
+      {
+        ambientC: s.ambientC,
+        marginC: s.marginC ?? undefined,
+        maxJunctionC: s.maxJunctionC ?? undefined,
+        rthCs: s.rthCs ?? undefined,
+        strategy: s.strategy,
+        outputPowerW: s.outputPowerW ?? undefined,
+        fromSimulation: dto.origin === 'simulation',
+        fromDevices: dto.origin === 'devices',
+        inputs: inputs
+          ? {
+              devices: inputs.devices.map((d) => ({
+                ref: d.ref,
+                kind: d.kind,
+                loss_w: d.lossW,
+                technology: d.technology,
+              })),
+              magnetics: inputs.magnetics.map((m) => ({
+                ref: m.ref,
+                loss_w: m.lossW,
+                temp_rise_c: m.tempRiseC ?? undefined,
+              })),
+              other_losses: inputs.otherLosses.map((o) => ({
+                ref: o.ref,
+                category: o.category,
+                loss_w: o.lossW,
+              })),
+              output_power_w: inputs.outputPowerW ?? undefined,
+            }
+          : undefined,
+      },
+      this.circuit,
+    );
+    if (plan.ok) {
+      // The user's output power (null: from the load / specs), for the settings form.
+      plan.data.userOutputPowerW = s.outputPowerW;
+    }
+    return this.commitStageRun(user, projectId, branchId, 'thermal', plan);
+  }
+
+  /** Commits a stage plan on `branchId` and answers the Studio stage-action shape. */
+  private async commitStageRun(
+    user: Actor,
+    projectId: string,
+    branchId: string,
+    stage: 'magnetics' | 'thermal',
+    plan: StagePlan,
+  ) {
+    if (!plan.ok) {
+      throw AppError.conflict(ErrorCode.StageInputMissing, plan.result.summary);
+    }
+    let landed = branchId;
+    let forked = false;
+    let branchName = '';
+    const meta = await this.projects.mutateStudio(
+      projectId,
+      user.id,
+      (studio) => {
+        const commit = commitStage(studio, stage, plan.data, {
+          source: 'user',
+          summary: plan.summary,
+        });
+        landed = commit.project.activeBranchId;
+        forked = commit.forked;
+        branchName = commit.branchName;
+        return { ...commit.project, focus: stage };
+      },
+      branchId,
+    );
+    const node = await this.graph.stage(projectId, user.id, landed, stage);
+    if (!node) throw new Error(`The ${stage} result was not recorded`);
+    return {
+      node,
+      branchId: landed,
+      forked,
+      branchName,
+      workspaceVersion: meta.revision,
+    };
+  }
+
   /** Stores the result on the branch it was computed from (forks if needed). */
   private async commit(
     projectId: string,
@@ -93,9 +313,14 @@ export class StudioStagesService {
     branchId: string,
     stage: StageKind,
     plan: StagePlan,
-  ): Promise<StageResult & { revision: number | null }> {
-    if (!plan.ok) return { ...plan.result, revision: null };
+  ): Promise<
+    StageResult & { revision: number | null; branchId: string; forked: boolean }
+  > {
+    if (!plan.ok)
+      return { ...plan.result, revision: null, branchId, forked: false };
     let result: StageResult = plan.result({});
+    let landed = branchId;
+    let forked = false;
     const meta = await this.projects.mutateStudio(
       projectId,
       userId,
@@ -104,11 +329,13 @@ export class StudioStagesService {
           summary: plan.summary,
         });
         result = plan.result(forkNote(commit));
+        landed = commit.project.activeBranchId;
+        forked = commit.forked;
         return { ...commit.project, focus: stage };
       },
       branchId,
     );
-    return { ...result, revision: meta.revision };
+    return { ...result, revision: meta.revision, branchId: landed, forked };
   }
 
   // --- MTBF ----------------------------------------------------------------------

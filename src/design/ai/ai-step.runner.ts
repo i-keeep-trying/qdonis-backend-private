@@ -20,6 +20,14 @@ export interface AiStepInput {
   temperature: number;
   maxTokens: number;
   signal: AbortSignal;
+  /** An allowlisted model for this step; omitted = the default model. */
+  modelId?: string;
+}
+
+/** Who is charged: the caller, or the team owner's pool for team projects. */
+export interface StepPayer {
+  userId: string;
+  teamId: string | null;
 }
 
 export interface AiStepResult {
@@ -61,9 +69,44 @@ export class AiStepRunner {
     await this.ai.prepare(payer.userId);
   }
 
+  /**
+   * For a step the caller streams itself (the Studio chat): who pays and the
+   * model to call, after the same checks as `run`.
+   */
+  async prepareStream(
+    input: Pick<AiStepInput, 'actorId' | 'access'>,
+  ): Promise<{ modelId: string; payer: StepPayer }> {
+    const payer = await this.payer(input);
+    return { modelId: await this.ai.prepare(payer.userId), payer };
+  }
+
+  /** Charges one completed streamed call to `payer`; returns the payer's balance. */
+  async chargeStream(
+    input: Pick<AiStepInput, 'actorId' | 'access' | 'step'> & {
+      payer: StepPayer;
+      modelId: string;
+      inputTokens: number;
+      outputTokens: number;
+    },
+  ): Promise<{ charged: number; balance: number }> {
+    const { charged, balance } = await this.ai.chargeUsage(input.payer.userId, {
+      modelId: input.modelId,
+      step: input.step,
+      inputTokens: input.inputTokens,
+      outputTokens: input.outputTokens,
+      context: {
+        projectId: input.access?.projectId ?? null,
+        teamId: input.payer.teamId,
+        actorId: input.actorId,
+      },
+    });
+    await this.recordTeamUsage(input.payer.teamId, input, charged);
+    return { charged, balance };
+  }
+
   async run(input: AiStepInput): Promise<AiStepResult> {
     const payer = await this.payer(input);
-    const modelId = await this.ai.prepare(payer.userId);
+    const modelId = await this.ai.prepare(payer.userId, input.modelId);
     const started = Date.now();
 
     const result = await this.bedrock.converse({
@@ -92,23 +135,7 @@ export class AiStepRunner {
         actorId: input.actorId,
       },
     });
-    if (payer.teamId && charged > 0) {
-      await this.teams
-        .recordUsage({
-          teamId: payer.teamId,
-          userId: input.actorId,
-          projectId: input.access?.projectId ?? null,
-          tokens: charged,
-          operation: input.step,
-        })
-        .catch((error: unknown) =>
-          // The tokens are already charged; a missing usage row only affects
-          // team analytics, so it is logged rather than failing the step.
-          this.logger.error(
-            `Team usage not recorded for team ${payer.teamId}: ${error instanceof Error ? error.message : String(error)}`,
-          ),
-        );
-    }
+    await this.recordTeamUsage(payer.teamId, input, charged);
 
     return {
       text: result.text,
@@ -123,9 +150,32 @@ export class AiStepRunner {
     };
   }
 
+  private async recordTeamUsage(
+    teamId: string | null,
+    input: Pick<AiStepInput, 'actorId' | 'access' | 'step'>,
+    charged: number,
+  ): Promise<void> {
+    if (!teamId || charged <= 0) return;
+    await this.teams
+      .recordUsage({
+        teamId,
+        userId: input.actorId,
+        projectId: input.access?.projectId ?? null,
+        tokens: charged,
+        operation: input.step,
+      })
+      .catch((error: unknown) =>
+        // The tokens are already charged; a missing usage row only affects
+        // team analytics, so it is logged rather than failing the step.
+        this.logger.error(
+          `Team usage not recorded for team ${teamId}: ${error instanceof Error ? error.message : String(error)}`,
+        ),
+      );
+  }
+
   private async payer(
     input: Pick<AiStepInput, 'actorId' | 'access'>,
-  ): Promise<{ userId: string; teamId: string | null }> {
+  ): Promise<StepPayer> {
     const teamId = input.access?.teamId ?? null;
     if (!teamId) return { userId: input.actorId, teamId: null };
     const team = await this.teams.findTeam(teamId);

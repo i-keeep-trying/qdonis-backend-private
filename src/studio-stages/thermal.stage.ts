@@ -57,6 +57,10 @@ export interface ThermalOptions {
   marginC?: number;
   inputs?: ThermalInputs;
   fromSimulation?: boolean;
+  /** Use the Devices-stage losses even when the branch has a simulation. */
+  fromDevices?: boolean;
+  /** Output power set by the user, W (overrides the load / specs). */
+  outputPowerW?: number;
 }
 
 interface DeviceChoice {
@@ -314,7 +318,13 @@ export async function planThermal(
   options: ThermalOptions,
   provider: CircuitDataProvider,
 ): Promise<StagePlan> {
-  const { inputs: inputsIn, fromSimulation, ...settingOptions } = options;
+  const {
+    inputs: inputsIn,
+    fromSimulation,
+    fromDevices,
+    outputPowerW: userPout,
+    ...settingOptions
+  } = options;
   const sim = stageNodeOnBranch(project, 'simulation');
   const design = stageNodeOnBranch(project, 'design');
   const vis = stageNodeOnBranch(project, 'visualization');
@@ -329,6 +339,7 @@ export async function planThermal(
   const entered: ThermalInputs | null = hasThermalInputs(inputsIn)
     ? inputsIn
     : !fromSimulation &&
+        !fromDevices &&
         previousData.origin === 'input' &&
         hasThermalInputs(previousInputs)
       ? previousInputs
@@ -339,9 +350,15 @@ export async function planThermal(
   const stageDevices =
     devicesNode?.status === 'ready' &&
     lossRows(devicesNode.data.loss_analysis).length > 0 &&
-    (!simReady || entered)
+    (!simReady || entered || fromDevices)
       ? devicesStageInputs(devicesNode.data)
       : null;
+  if (fromDevices && !stageDevices) {
+    return fail(
+      'There are no device losses on this branch. Select the devices first, or enter the losses.',
+      { missing: 'devices' },
+    );
+  }
   let inputs = entered;
   if (stageDevices && !entered?.devices?.length) {
     inputs = {
@@ -468,8 +485,9 @@ export async function planThermal(
         settingOptions.maxJunctionC ??
         temps.maxJunctionC ??
         prevSettings.maxJunctionC,
-      outputPowerW: pout ?? specPout,
-      outputPowerSource: pout !== undefined ? 'input' : 'specs',
+      outputPowerW: pout ?? userPout ?? specPout,
+      outputPowerSource:
+        pout !== undefined || userPout !== undefined ? 'input' : 'specs',
     };
     result = analyzeThermal(devices, mags, others, [], settings);
   } else {
@@ -530,8 +548,13 @@ export async function planThermal(
         settingOptions.maxJunctionC ??
         temps.maxJunctionC ??
         prevSettings.maxJunctionC,
-      outputPowerW: passive.loadW ?? specPout,
-      outputPowerSource: passive.loadW !== null ? 'simulation' : 'specs',
+      outputPowerW: userPout ?? passive.loadW ?? specPout,
+      outputPowerSource:
+        userPout !== undefined
+          ? 'input'
+          : passive.loadW !== null
+            ? 'simulation'
+            : 'specs',
     };
     settings = simSettings;
     const selection = rec(simNode.data.device_selection) as DeviceSelection;

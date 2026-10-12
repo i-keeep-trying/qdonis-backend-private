@@ -1,6 +1,8 @@
 import { Injectable, Logger, type OnModuleInit } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 
 import type { AuthenticatedUser } from '../auth/auth.types';
+import type { AppConfiguration } from '../config/configuration';
 import { AppError, ErrorCode } from '../common/errors/error-codes';
 import { ProjectActivityType, Role } from '../generated/prisma/enums';
 import { ProjectAccessService } from '../projects/project-access.service';
@@ -58,6 +60,7 @@ import {
   applyGeneratedConstraints,
   approveSpecs,
   constraintsPromptInput,
+  type SpecsData,
   type StageOutcome,
   type StageResult,
   specsOf,
@@ -139,6 +142,7 @@ export class DesignService implements OnModuleInit {
     private readonly access: ProjectAccessService,
     private readonly projects: ProjectsService,
     private readonly repository: ProjectsRepository,
+    private readonly config: ConfigService<AppConfiguration, true>,
   ) {}
 
   /** New projects created from a prompt get a generated name in the background. */
@@ -210,6 +214,15 @@ export class DesignService implements OnModuleInit {
       this.logger.warn(
         `Name generation for ${projectId} failed: ${error instanceof Error ? error.message : String(error)}`,
       );
+    } finally {
+      // Clients stop showing the name as loading, whatever the outcome.
+      await this.projects
+        .endNaming(projectId)
+        .catch((error: unknown) =>
+          this.logger.warn(
+            `Could not end naming of ${projectId}: ${error instanceof Error ? error.message : String(error)}`,
+          ),
+        );
     }
   }
 
@@ -223,6 +236,8 @@ export class DesignService implements OnModuleInit {
       actorId,
       access,
       step: 'project_name_generation',
+      // A short, cheap step: BEDROCK_NAMING_MODEL when set.
+      modelId: this.config.get('bedrock', { infer: true }).namingModel,
       prompt: projectNamePrompt(requirements.slice(0, 20_000)),
       temperature: 0.7,
       maxTokens: 8192,
@@ -534,6 +549,37 @@ export class DesignService implements OnModuleInit {
         branchId,
       );
       return { ...outcome, usage: usageOf(generated.result) };
+    };
+  }
+
+  /** Access, AI configuration and balance checks before a constraints run is queued. */
+  async precheckConstraints(user: Actor, projectId: string): Promise<void> {
+    const access = await this.access.require(user, projectId, 'canEdit');
+    await this.runner.precheck({ actorId: user.id, access });
+  }
+
+  /** The constraints list the model derives from a specification (charged; persists nothing). */
+  async constraintsFor(
+    user: Actor,
+    projectId: string,
+    specs: SpecsData,
+    notes: string | undefined,
+    signal: AbortSignal,
+  ) {
+    const access = await this.access.require(user, projectId, 'canEdit');
+    const generated = await this.specification(user.id, access, {
+      userInput: constraintsPromptInput(specs, notes),
+      categories: [...ENGINEERING_CATEGORY_IDS],
+      documentText: null,
+      attachments: [],
+      reviewed: null,
+      signal,
+    });
+    return {
+      derivedParametersList:
+        generated.output.specification.derivedParametersList,
+      assumptionsMade: generated.output.specification.assumptionsMade,
+      citations: generated.output.citations,
     };
   }
 

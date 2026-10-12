@@ -180,10 +180,14 @@ export function serializeProject(project: StudioProject): StudioProject {
   for (const [id, node] of Object.entries(project.nodes)) {
     let data: JsonObject = node.data;
     if (node.stage === 'simulation') {
-      const hadHeavy = HEAVY_SIM_KEYS.some((k) => k in data);
+      // `plots` as an array is the plot index (light); only the legacy
+      // object of samples is heavy.
+      const heavyKeys = HEAVY_SIM_KEYS.filter(
+        (k) => k in data && !(k === 'plots' && Array.isArray(data.plots)),
+      );
       data = { ...data };
-      for (const key of HEAVY_SIM_KEYS) delete data[key];
-      if (hadHeavy || data.plotsCached) data.plotsCached = true;
+      for (const key of heavyKeys) delete data[key];
+      if (heavyKeys.length > 0 || data.plotsCached) data.plotsCached = true;
     }
     if (node.stage === 'visualization' && isObject(data.circuit)) {
       if ('tsx_code' in data.circuit) {
@@ -192,10 +196,12 @@ export function serializeProject(project: StudioProject): StudioProject {
         data = { ...data, circuit };
       }
     }
+    // A queued constraints run (`constraints.runId`) finishes its list itself.
     if (
       node.stage === 'specs' &&
       isObject(data.constraints) &&
-      data.constraints.status === 'running'
+      data.constraints.status === 'running' &&
+      typeof data.constraints.runId !== 'string'
     ) {
       const constraints = data.constraints;
       const hasItems =
@@ -211,7 +217,10 @@ export function serializeProject(project: StudioProject): StudioProject {
             },
       };
     }
-    const running = node.status === 'running';
+    // A server job (`data.runId`, see SimulationRunsService) owns its node
+    // and finishes it; anything else still running can never complete.
+    const running =
+      node.status === 'running' && typeof node.data.runId !== 'string';
     nodes[id] = {
       ...node,
       data,

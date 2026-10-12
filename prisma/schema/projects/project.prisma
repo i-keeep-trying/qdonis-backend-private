@@ -7,6 +7,8 @@ model Project {
   /// Team projects are visible to every team member (see ProjectAccessService).
   teamId            String?   @map("team_id") @db.Uuid
   name              String
+  /// Set while the name is being generated from the creation prompt; cleared when that call ends.
+  namingStartedAt   DateTime? @map("naming_started_at")
   description       String?
   data              Json      @default("{}")
   /// Size of `data` in bytes (UTF-8 JSON), kept for limits and admin views.
@@ -31,6 +33,7 @@ model Project {
   teamUsage    TeamTokenUsage[]
   studioNodes    StudioNode[]
   studioBranches StudioBranch[]
+  simulationRuns SimulationRun[]
 
   @@index([ownerId, lastAccessedAt(sort: Desc)])
   @@index([teamId, lastAccessedAt(sort: Desc)])

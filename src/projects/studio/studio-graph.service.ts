@@ -22,6 +22,7 @@ import {
   renameBranch,
   stageViews,
 } from './studio-branches';
+import { stageDataView } from './stage-views';
 import {
   type JsonObject,
   type StageKind,
@@ -138,8 +139,13 @@ export class StudioGraphService {
       branches: branchViews(project),
       stages: stageViews(project, active, hasSimDevices),
       defaultView: this.defaultView(project, active),
-      // The first chat message is sent by the chat agent, which is not served yet.
-      pendingInitialPrompt: null,
+      // The dashboard prompt is sent once, as the person's first chat message.
+      pendingInitialPrompt:
+        !readOnly &&
+        header.initialPrompt?.trim() &&
+        !(await this.rows.hasChatted(projectId, userId))
+          ? { id: 'initial', text: header.initialPrompt.trim() }
+          : null,
     };
   }
 
@@ -157,6 +163,12 @@ export class StudioGraphService {
     const light = stageNodeOnBranch(project, stage, branchId);
     if (!light) return null;
     const node = await this.rows.nodeWithData(projectId, light.id);
+    return node ? this.nodeView(node) : null;
+  }
+
+  /** One node with its data, by id (any branch); null when it is gone. */
+  async node(projectId: string, nodeId: string) {
+    const node = await this.rows.nodeWithData(projectId, nodeId);
     return node ? this.nodeView(node) : null;
   }
 
@@ -517,7 +529,7 @@ export class StudioGraphService {
       status: node.status,
       error: node.error ?? null,
       rev: node.rev,
-      data: node.data,
+      data: stageDataView(node.stage, node.data),
       source: node.source,
       createdAt: node.createdAt,
       updatedAt: node.updatedAt,

@@ -125,6 +125,8 @@ export class ProjectsService {
           ownerId: user.id,
           teamId: dto.teamId ?? null,
           name: dto.name ?? DEFAULT_PROJECT_NAME,
+          // A prompt without a name gets one generated (DesignService); clients show it loading.
+          namingStartedAt: dto.prompt?.trim() && !dto.name ? new Date() : null,
           description: dto.description || null,
           data: data as Prisma.InputJsonObject,
           dataBytes: byteSize(data),
@@ -597,6 +599,11 @@ export class ProjectsService {
   /** Sets a generated name unless the project was renamed meanwhile. */
   renameIfDefault(projectId: string, name: string): Promise<boolean> {
     return this.repository.renameIf(projectId, DEFAULT_PROJECT_NAME, name);
+  }
+
+  /** The generated-name call ended; the project keeps whatever name it has. */
+  endNaming(projectId: string): Promise<void> {
+    return this.repository.endNaming(projectId);
   }
 
   /** Called after every successful create (e.g. to generate a name). */

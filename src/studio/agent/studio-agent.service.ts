@@ -12,8 +12,8 @@ import {
   type StudioUsage,
 } from '../studio.types';
 import { pythonStrip } from '../../common/python/python-json';
+import { TopologiesService } from '../../topologies/topologies.service';
 import { buildStudioRequest } from './studio-request.builder';
-import { STUDIO_TOPOLOGY_IDS } from './topology-library';
 
 interface PendingToolUse {
   id: string;
@@ -44,6 +44,7 @@ export class StudioAgentService {
   constructor(
     private readonly ai: AiService,
     private readonly bedrock: BedrockClient,
+    private readonly topologies: TopologiesService,
   ) {}
 
   /** Config, model and balance checks; throws before any streaming. */
@@ -61,7 +62,7 @@ export class StudioAgentService {
       modelId,
       messages: dto.messages,
       projectState: dto.project_state,
-      topologyIds: STUDIO_TOPOLOGY_IDS,
+      topologyIds: this.topologies.ids(),
       signal,
     });
     this.logger.log(`Studio agent step: ${request.messages.length} messages`);

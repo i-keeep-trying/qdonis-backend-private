@@ -8,9 +8,11 @@ import {
 } from '../../../test/helpers/bedrock-fakes';
 import {
   loadStudioFixtures,
+  loadTopologyIds,
   type StudioFixture,
 } from '../../../test/parity/studio-agent-fixtures';
 import type { AiService } from '../../ai/ai.service';
+import type { TopologiesService } from '../../topologies/topologies.service';
 import type { StudioAgentRequestDto } from '../dto/studio-agent.dto';
 import { STUDIO_ERROR_PREFIX, type StudioAgentEvent } from '../studio.types';
 import { StudioAgentService } from './studio-agent.service';
@@ -28,6 +30,7 @@ function setup(
   const service = new StudioAgentService(
     ai as unknown as AiService,
     testBedrockClient(runtime),
+    { ids: () => loadTopologyIds() } as unknown as TopologiesService,
   );
   return { service, sent, chargeUsage };
 }

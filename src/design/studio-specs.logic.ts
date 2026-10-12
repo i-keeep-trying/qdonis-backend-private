@@ -55,6 +55,8 @@ export interface ConstraintsData {
   generatedAt: string;
   status?: 'running' | 'error';
   error?: string;
+  /** Queued generation that owns the `running` status (`simulation_runs.id`). */
+  runId?: string;
 }
 
 export interface TopologyOption {
@@ -209,8 +211,88 @@ export function updateSpecs(
   const changed =
     JSON.stringify(merged) !== JSON.stringify(current?.rows ?? []) ||
     Boolean(input.application && input.application !== current?.application);
-  const data: SpecsData = {
+  return writeSpecRows(project, currentNode, current, {
+    rows: merged,
     application: input.application ?? current?.application,
+    changed,
+    source,
+    approved: input.approved,
+    requestApproval: input.requestApproval,
+  });
+}
+
+/**
+ * The whole spec table as edited in the workspace: rows keep their id, an
+ * unchanged row keeps its source (assumed / derived), every other row
+ * becomes the user's. Rows left out are removed.
+ */
+export function replaceSpecs(
+  project: StudioProject,
+  input: {
+    application: string | null;
+    rows: Array<{
+      id?: string;
+      name: string;
+      value: string;
+      unit: string | null;
+      category: SpecCategory;
+      required: boolean;
+    }>;
+  },
+): StageOutcome {
+  const currentNode = stageNodeOnBranch(project, 'specs');
+  const current = specsOf(currentNode);
+  const byId = new Map((current?.rows ?? []).map((r) => [r.id, r]));
+  const rows: SpecRow[] = input.rows.map((incoming) => {
+    const prev = incoming.id ? byId.get(incoming.id) : undefined;
+    const name = incoming.name.trim();
+    const value = incoming.value.trim();
+    const unit = incoming.unit?.trim() ?? '';
+    const same =
+      prev !== undefined &&
+      normName(prev.name) === normName(name) &&
+      prev.value === value &&
+      (prev.unit ?? '') === unit;
+    return {
+      id: prev?.id ?? shortId('row'),
+      name,
+      value,
+      unit,
+      category: incoming.category,
+      required: incoming.required,
+      source: same ? (prev.source ?? 'user') : 'user',
+      note: prev?.note ?? '',
+    };
+  });
+  const application = input.application?.trim() || undefined;
+  const changed =
+    JSON.stringify(rows) !== JSON.stringify(current?.rows ?? []) ||
+    application !== current?.application;
+  return writeSpecRows(project, currentNode, current, {
+    rows,
+    application,
+    changed,
+    source: 'user',
+  });
+}
+
+/** Stores spec rows: in place when nothing changed, else a new version. */
+function writeSpecRows(
+  project: StudioProject,
+  currentNode: StageNode | null,
+  current: SpecsData | null,
+  input: {
+    rows: SpecRow[];
+    application: string | undefined;
+    changed: boolean;
+    source: 'agent' | 'user';
+    approved?: boolean;
+    requestApproval?: boolean;
+  },
+): StageOutcome {
+  const { rows: merged, changed } = input;
+  const data: SpecsData = {
+    application: input.application,
     rows: merged,
     approved: input.approved
       ? true
@@ -220,6 +302,7 @@ export function updateSpecs(
     topologyOptions: changed ? undefined : current?.topologyOptions,
     constraints: current?.constraints,
   };
+  const source = input.source;
 
   let next: StudioProject;
   let commit: Pick<CommitResult, 'nodeId' | 'forked' | 'branchName'>;
@@ -315,7 +398,13 @@ export function updateConstraints(
   }
   const data: SpecsData = {
     ...specs,
-    constraints: { ...current, items, status: undefined, error: undefined },
+    constraints: {
+      ...current,
+      items,
+      status: undefined,
+      error: undefined,
+      runId: undefined,
+    },
   };
   const commit = commitStage(project, 'specs', asData(data), {
     source,
@@ -329,6 +418,42 @@ export function updateConstraints(
       payload: { total: items.length, ...forkNote(commit) },
     },
   };
+}
+
+/** New values for constraints picked by id (the workspace table); edited items become the user's. */
+export function editConstraintValues(
+  project: StudioProject,
+  edits: Array<{ id: string; value: string }>,
+): StageOutcome {
+  const specs = specsOf(stageNodeOnBranch(project, 'specs'));
+  const items = specs?.constraints?.items ?? [];
+  if (!specs || items.length === 0) {
+    return {
+      project,
+      result: { ok: false, summary: 'Generate the constraints list first.' },
+    };
+  }
+  const byId = new Map(items.map((c) => [c.id, c]));
+  const unknown = edits.filter((e) => !byId.has(e.id)).map((e) => e.id);
+  if (unknown.length) {
+    return {
+      project,
+      result: {
+        ok: false,
+        summary: `Unknown constraint: ${unknown.join(', ')}`,
+      },
+    };
+  }
+  return updateConstraints(
+    project,
+    {
+      items: edits.map((e) => {
+        const item = byId.get(e.id)!;
+        return { name: item.name, value: e.value, category: item.category };
+      }),
+    },
+    'user',
+  );
 }
 
 export function recordTopologyOptions(
@@ -346,6 +471,55 @@ export function recordTopologyOptions(
     { rows: [], approved: false, topologyOptions: options },
     { summary: 'Topology options' },
   ).project;
+}
+
+/** Marks the constraints of a specs node as being generated by queued run `runId`. */
+export function markConstraintsRunning(
+  project: StudioProject,
+  nodeId: string,
+  runId: string,
+): StudioProject {
+  const node = project.nodes[nodeId];
+  const specs = specsOf(node ?? null);
+  if (!node || !specs) return project;
+  const constraints: ConstraintsData = {
+    ...(specs.constraints ?? emptyConstraints(specsSignature(specs.rows))),
+    status: 'running',
+    error: undefined,
+    runId,
+  };
+  return patchNode(project, nodeId, {
+    data: asData({ ...specs, constraints }),
+  });
+}
+
+/**
+ * Ends run `runId` on a specs node: clears the running marker, or records
+ * `error`. Null when the node is gone or another run owns it.
+ */
+export function settleConstraints(
+  project: StudioProject,
+  nodeId: string,
+  runId: string,
+  error: string | null,
+): StudioProject | null {
+  const node = project.nodes[nodeId];
+  const specs = specsOf(node ?? null);
+  if (!node || !specs?.constraints || specs.constraints.runId !== runId) {
+    return null;
+  }
+  const rest: ConstraintsData = { ...specs.constraints };
+  delete rest.status;
+  delete rest.error;
+  delete rest.runId;
+  const constraints: ConstraintsData | undefined = error
+    ? { ...rest, status: 'error', error }
+    : rest.items.length || rest.generatedAt
+      ? rest
+      : undefined;
+  return patchNode(project, nodeId, {
+    data: asData({ ...specs, constraints }),
+  });
 }
 
 /** The prompt text the constraints generation sends (old generateConstraints). */

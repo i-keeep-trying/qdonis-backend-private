@@ -32,11 +32,15 @@ const TIMESTAMP =
   /^(?:[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]|[0-9][0-9][0-9][0-9]-[0-9][0-9]?-[0-9][0-9]?(?:[Tt]|[ \t]+)[0-9][0-9]?:[0-9][0-9]:[0-9][0-9](?:\.[0-9]*)?(?:[ \t]*(?:Z|[-+][0-9][0-9]?(?::[0-9][0-9])?))?)$/;
 
 /** Port of `SafeConstructor.construct_yaml_int`. */
-function constructInt(text: string, onError: (message: string) => void) {
+function constructInt(
+  text: string,
+  onError: (message: string) => void,
+  asBigInt = false,
+): number | bigint | string {
   let value = text.replace(/_/g, '');
   const sign = value[0] === '-' ? -1n : 1n;
   if (value[0] === '-' || value[0] === '+') value = value.slice(1);
-  if (value === '0') return 0;
+  if (value === '0') return asBigInt ? 0n : 0;
   let result = 0n;
   try {
     // BigInt rejects an empty digit string, as Python's int() does.
@@ -54,6 +58,7 @@ function constructInt(text: string, onError: (message: string) => void) {
     onError(`invalid integer ${text}`);
     return text;
   }
+  if (asBigInt) return sign * result;
   const number = Number(sign * result);
   if (!Number.isSafeInteger(number)) {
     onError(`integer ${text} is outside the safe JSON range`);
@@ -90,10 +95,12 @@ const scalarTag = (
   resolve: ScalarTag['resolve'],
 ): ScalarTag => ({ tag: TAG + name, default: true, test, resolve });
 
-const PYYAML_SCALARS: ScalarTag[] = [
+const pyyamlScalars = (intsAsBigInt: boolean): ScalarTag[] => [
   scalarTag('bool', BOOL, (text) => BOOL_TRUE.test(text)),
   scalarTag('float', FLOAT, (text, onError) => constructFloat(text, onError)),
-  scalarTag('int', INT, (text, onError) => constructInt(text, onError)),
+  scalarTag('int', INT, (text, onError) =>
+    constructInt(text, onError, intsAsBigInt),
+  ),
   scalarTag('null', NULL, () => null),
   scalarTag('timestamp', TIMESTAMP, (text, onError) => {
     onError(`unsupported YAML timestamp ${text}`);
@@ -101,10 +108,12 @@ const PYYAML_SCALARS: ScalarTag[] = [
   }),
 ];
 
-const customTags = (tags: Tags): Tags => [
-  ...tags.filter((tag) => typeof tag === 'string' || !REPLACED.has(tag.tag)),
-  ...PYYAML_SCALARS,
-];
+const customTags =
+  (intsAsBigInt: boolean) =>
+  (tags: Tags): Tags => [
+    ...tags.filter((tag) => typeof tag === 'string' || !REPLACED.has(tag.tag)),
+    ...pyyamlScalars(intsAsBigInt),
+  ];
 
 const isPlainObject = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' &&
@@ -112,8 +121,14 @@ const isPlainObject = (value: unknown): value is Record<string, unknown> =>
   Object.getPrototypeOf(value) === Object.prototype;
 
 /** Throws unless `value` is made only of plain JSON values. */
-function assertJson(value: unknown, path: string, where: string): void {
+function assertJson(
+  value: unknown,
+  path: string,
+  where: string,
+  allowBigInt = false,
+): void {
   if (value === null || typeof value === 'string') return;
+  if (allowBigInt && typeof value === 'bigint') return;
   if (typeof value === 'boolean') return;
   if (typeof value === 'number') {
     if (!Number.isFinite(value)) {
@@ -123,13 +138,13 @@ function assertJson(value: unknown, path: string, where: string): void {
   }
   if (Array.isArray(value)) {
     value.forEach((item, index) =>
-      assertJson(item, path, `${where}[${index}]`),
+      assertJson(item, path, `${where}[${index}]`, allowBigInt),
     );
     return;
   }
   if (isPlainObject(value)) {
     for (const [key, item] of Object.entries(value)) {
-      assertJson(item, path, `${where}.${key}`);
+      assertJson(item, path, `${where}.${key}`, allowBigInt);
     }
     return;
   }
@@ -142,6 +157,19 @@ function assertJson(value: unknown, path: string, where: string): void {
  * integer-like mapping key, and on values JSON cannot carry.
  */
 export function parsePyYaml(text: string, path: string): JsonValue {
+  return parse(text, path, false) as JsonValue;
+}
+
+/**
+ * Like {@link parsePyYaml}, but YAML integers come back as `bigint`, so
+ * Python's int / float distinction survives (`str(5)` vs `str(5.0)`).
+ * Used for designs fed to the netlist generator.
+ */
+export function parsePyYamlDesign(text: string, path: string): unknown {
+  return parse(text, path, true);
+}
+
+function parse(text: string, path: string, intsAsBigInt: boolean): unknown {
   const doc = parseDocument(text, {
     version: '1.1',
     schema: 'yaml-1.1',
@@ -149,7 +177,7 @@ export function parsePyYaml(text: string, path: string): JsonValue {
     uniqueKeys: false,
     strict: true,
     prettyErrors: true,
-    customTags,
+    customTags: customTags(intsAsBigInt),
   });
   if (doc.errors.length > 0) {
     throw new AssetValidationError(path, doc.errors[0].message);
@@ -186,6 +214,6 @@ export function parsePyYaml(text: string, path: string): JsonValue {
       error instanceof Error ? error.message : String(error),
     );
   }
-  assertJson(value, path, '$');
-  return value as JsonValue;
+  assertJson(value, path, '$', intsAsBigInt);
+  return value;
 }

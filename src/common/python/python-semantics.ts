@@ -69,3 +69,13 @@ export function pythonRound(x: number, digits = 6): number {
   const result = Number(text);
   return x < 0 ? -result : result;
 }
+
+/** Text of a decoded JSON value: scalars as-is, containers as JSON, null/undefined as ''. */
+export function jsonText(value: unknown): string {
+  if (value === null || value === undefined) return '';
+  if (typeof value === 'string') return value;
+  if (typeof value === 'number' || typeof value === 'boolean') {
+    return String(value);
+  }
+  return JSON.stringify(value) ?? '';
+}

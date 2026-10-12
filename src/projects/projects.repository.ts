@@ -20,6 +20,7 @@ export const PROJECT_META = {
   ownerId: true,
   teamId: true,
   name: true,
+  namingStartedAt: true,
   description: true,
   dataBytes: true,
   progressCompleted: true,
@@ -296,6 +297,14 @@ export class ProjectsRepository {
       data: { name },
     });
     return count === 1;
+  }
+
+  /** The generated-name call ended (named or not). */
+  async endNaming(id: string): Promise<void> {
+    await this.prisma.project.updateMany({
+      where: { id, namingStartedAt: { not: null } },
+      data: { namingStartedAt: null },
+    });
   }
 
   async touch(projectId: string, userId: string): Promise<void> {

@@ -73,6 +73,8 @@ export interface AppConfiguration {
     /** BEDROCK_REGION, else AWS_REGION, else `us-east-1`. */
     region: string;
     allowedModels: string[];
+    /** Project-name generation; undefined = the default model. */
+    namingModel?: string;
     maxOutputTokens: number;
     timeoutMs: number;
   };
@@ -100,6 +102,11 @@ export interface AppConfiguration {
     callsPerMinute: number;
     callsPerDay: number;
     cacheHours: number;
+  };
+  simulation: {
+    ngspicePath: string;
+    timeoutSeconds: number;
+    concurrency: number;
   };
   mail: {
     transport: MailTransportKind;
@@ -223,6 +230,7 @@ export function configuration(): AppConfiguration {
       allowedModels: env.BEDROCK_ALLOWED_MODELS.split(',')
         .map((m) => m.trim())
         .filter(Boolean),
+      namingModel: env.BEDROCK_NAMING_MODEL?.trim() || undefined,
       maxOutputTokens: env.BEDROCK_MAX_OUTPUT_TOKENS,
       timeoutMs: env.BEDROCK_TIMEOUT_MS,
     },
@@ -252,6 +260,11 @@ export function configuration(): AppConfiguration {
       callsPerMinute: env.MOUSER_CALLS_PER_MINUTE,
       callsPerDay: env.MOUSER_CALLS_PER_DAY,
       cacheHours: env.MOUSER_CACHE_HOURS,
+    },
+    simulation: {
+      ngspicePath: env.NGSPICE_PATH,
+      timeoutSeconds: env.NGSPICE_TIMEOUT_SECONDS,
+      concurrency: env.SIMULATION_CONCURRENCY,
     },
     mail: {
       transport: env.MAIL_TRANSPORT,

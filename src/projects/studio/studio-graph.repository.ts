@@ -132,6 +132,15 @@ export class StudioGraphRepository {
     return rows[0] ?? null;
   }
 
+  /** Whether the person has written anything in the project chat yet. */
+  async hasChatted(projectId: string, userId: string): Promise<boolean> {
+    const count = await this.prisma.projectChatMessage.count({
+      where: { projectId, userId },
+      take: 1,
+    });
+    return count > 0;
+  }
+
   async load(
     projectId: string,
     options: { withData: boolean },

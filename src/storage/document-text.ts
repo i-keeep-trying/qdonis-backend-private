@@ -21,6 +21,12 @@ const CONTENT_TYPES: Record<DocumentFormat, string> = {
 const extensionOf = (filename: string): string =>
   (filename.toLowerCase().split('.').pop() ?? '').trim();
 
+/** SPICE decks attached in the Studio chat (plain text). */
+const NETLIST_EXTENSIONS = new Set(['cir', 'sp', 'spice', 'net', 'ckt']);
+
+export const isNetlistFile = (filename: string): boolean =>
+  NETLIST_EXTENSIONS.has(extensionOf(filename));
+
 /**
  * Format from the extension, confirmed by the file's magic bytes so a renamed
  * binary cannot pass as a document. Legacy `.doc` is refused: it cannot be
@@ -34,7 +40,7 @@ export function detectDocumentFormat(
   const unsupported = () =>
     AppError.badRequest(
       ErrorCode.UnsupportedFileType,
-      'Unsupported file type. Upload a .pdf, .docx, .txt or .md file',
+      'Unsupported file type. Upload a .pdf, .docx, .txt, .md or SPICE (.cir) file',
     );
 
   if (ext === 'pdf') {
@@ -54,7 +60,7 @@ export function detectDocumentFormat(
     }
     return 'docx';
   }
-  if (ext === 'txt' || ext === 'md') {
+  if (ext === 'txt' || ext === 'md' || NETLIST_EXTENSIONS.has(ext)) {
     if (bytes.includes(0)) throw unsupported();
     return 'text';
   }

@@ -34,7 +34,14 @@ import { StorageModule } from './storage/storage.module';
 import { StudioModule } from './studio/studio.module';
 import { StudioStagesModule } from './studio-stages/studio-stages.module';
 import { TeamsModule } from './teams/teams.module';
+import { TopologiesModule } from './topologies/topologies.module';
 import { UsersModule } from './users/users.module';
+import { CircuitsModule } from './circuits/circuits.module';
+import { DevicesModule } from './devices/devices.module';
+import { VisualizationModule } from './visualization/visualization.module';
+import { SimulationModule } from './simulation/simulation.module';
+import { SpecsModule } from './specs/specs.module';
+import { StudioChatModule } from './studio-chat/studio-chat.module';
 
 /** Paths whose successful requests are not access-logged (probe noise). */
 const QUIET_PATHS = new Set(['/health', '/health/live', '/favicon.ico']);
@@ -171,6 +178,13 @@ const QUIET_PATHS = new Set(['/health', '/health/live', '/favicon.ico']);
     ProjectChatModule,
     DesignModule,
     StudioStagesModule,
+    TopologiesModule,
+    DevicesModule,
+    CircuitsModule,
+    VisualizationModule,
+    SimulationModule,
+    SpecsModule,
+    StudioChatModule,
     HealthModule,
   ],
   providers: [

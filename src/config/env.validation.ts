@@ -353,6 +353,12 @@ export class EnvironmentVariables {
   BEDROCK_ALLOWED_MODELS: string =
     'us.anthropic.claude-sonnet-4-5-20250929-v1:0,anthropic.claude-sonnet-4-5-20250929-v1:0';
 
+  /** Model for project-name generation (must be in the allowlist); unset = the default model. */
+  @IsOptional()
+  @IsString()
+  @IsNotEmpty()
+  BEDROCK_NAMING_MODEL?: string;
+
   @toInteger()
   @IsInt()
   @Min(256)
@@ -450,6 +456,26 @@ export class EnvironmentVariables {
   @Min(0)
   @Max(720)
   MOUSER_CACHE_HOURS: number = 24;
+
+  // --- simulation (ngspice) ---------------------------------------------------
+  /** ngspice executable (path or name on PATH). */
+  @IsString()
+  @MinLength(1)
+  NGSPICE_PATH: string = 'ngspice';
+
+  /** Wall-clock limit of one ngspice analysis run. */
+  @toInteger()
+  @IsInt()
+  @Min(10)
+  @Max(3_600)
+  NGSPICE_TIMEOUT_SECONDS: number = 300;
+
+  /** Simulations running at once on this instance; extra runs wait. */
+  @toInteger()
+  @IsInt()
+  @Min(1)
+  @Max(64)
+  SIMULATION_CONCURRENCY: number = 2;
 
   // --- mail ----------------------------------------------------------------
   @IsEnum(MailTransportKind)
@@ -620,6 +646,15 @@ export function crossValidate(env: EnvironmentVariables): string[] {
 
   if (env.BEDROCK_ALLOWED_MODELS.split(',').every((model) => !model.trim())) {
     problems.push('BEDROCK_ALLOWED_MODELS must list at least one model id');
+  }
+
+  if (
+    env.BEDROCK_NAMING_MODEL &&
+    !env.BEDROCK_ALLOWED_MODELS.split(',')
+      .map((model) => model.trim())
+      .includes(env.BEDROCK_NAMING_MODEL.trim())
+  ) {
+    problems.push('BEDROCK_NAMING_MODEL must be one of BEDROCK_ALLOWED_MODELS');
   }
 
   if (Boolean(env.AWS_ACCESS_KEY_ID) !== Boolean(env.AWS_SECRET_ACCESS_KEY)) {

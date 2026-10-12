@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 
 import { AiModule } from '../ai/ai.module';
+import { TopologiesModule } from '../topologies/topologies.module';
 import { StudioAgentService } from './agent/studio-agent.service';
 import { StudioController } from './studio.controller';
 
@@ -9,7 +10,7 @@ import { StudioController } from './studio.controller';
  * the stage tools it calls are still executed by the frontend.
  */
 @Module({
-  imports: [AiModule],
+  imports: [AiModule, TopologiesModule],
   controllers: [StudioController],
   providers: [StudioAgentService],
 })

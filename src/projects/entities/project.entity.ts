@@ -10,6 +10,9 @@ import type {
 import type { ProjectListRow, ProjectMeta } from '../projects.repository';
 import type { StudioProject } from '../studio/studio-graph';
 
+/** The name call is aborted after 120 s; a little slack on top. */
+const NAMING_TIMEOUT_MS = 150_000;
+
 export class PersonRefEntity {
   @ApiProperty() id: string;
   @ApiPropertyOptional({ type: String, nullable: true }) name: string | null;
@@ -44,6 +47,11 @@ export class ProjectAccessEntity {
 export class ProjectSummaryEntity {
   @ApiProperty() id: string;
   @ApiProperty() name: string;
+  @ApiProperty({
+    description:
+      'True while the name is being generated from the creation prompt (show it as loading)',
+  })
+  naming: boolean;
   @ApiPropertyOptional({ type: String, nullable: true }) description:
     string | null;
   @ApiPropertyOptional({ type: String, nullable: true }) teamId: string | null;
@@ -62,6 +70,10 @@ export class ProjectSummaryEntity {
   constructor(row: ProjectListRow, role: EffectiveRole) {
     this.id = row.id;
     this.name = row.name;
+    // A call that never ended (server restart) stops counting after its timeout.
+    this.naming =
+      row.namingStartedAt !== null &&
+      Date.now() - row.namingStartedAt.getTime() < NAMING_TIMEOUT_MS;
     this.description = row.description;
     this.teamId = row.teamId;
     this.team = row.team;

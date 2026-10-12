@@ -9,12 +9,21 @@ import {
   Patch,
   Post,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiConflictResponse,
+  ApiForbiddenResponse,
+  ApiNotFoundResponse,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
 
 import { BomService } from './bom.service';
 
 import type { AuthenticatedUser } from '../auth/auth.types';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
+import { ParseGraphIdPipe } from '../projects/dto/studio-graph.dto';
+import { RunMagneticsStageDto, RunThermalStageDto } from './dto/stage-runs.dto';
 import {
   BomExportDto,
   BomQuantityDto,
@@ -62,6 +71,54 @@ export class StudioStagesController {
     @Body() dto: RunThermalDto,
   ) {
     return this.stages.runThermal(user, projectId, dto);
+  }
+}
+
+const STAGE_RESULT =
+  'Answers `{ node, branchId, forked, branchName, workspaceVersion }`. Later work on the branch makes the result fork a new branch.';
+
+@ApiTags('studio stages')
+@ApiBearerAuth()
+@Controller('projects/:projectId/branches/:branchId/stages')
+export class StudioStageRunsController {
+  constructor(private readonly stages: StudioStagesService) {}
+
+  @Post('magnetics/run')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary:
+      'Design the magnetic parts of the branch (circuit, or entered parts)',
+    description: STAGE_RESULT,
+  })
+  @ApiForbiddenResponse({ description: 'View-only project' })
+  @ApiNotFoundResponse({ description: 'PROJECT_NOT_FOUND, BRANCH_NOT_FOUND' })
+  @ApiConflictResponse({ description: 'STAGE_INPUT_MISSING' })
+  magnetics(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('projectId', ParseUUIDPipe) projectId: string,
+    @Param('branchId', ParseGraphIdPipe) branchId: string,
+    @Body() dto: RunMagneticsStageDto,
+  ) {
+    return this.stages.runMagneticsStage(user, projectId, branchId, dto);
+  }
+
+  @Post('thermal/run')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary:
+      'Thermal analysis of the branch (simulation, Devices stage, or entered losses)',
+    description: STAGE_RESULT,
+  })
+  @ApiForbiddenResponse({ description: 'View-only project' })
+  @ApiNotFoundResponse({ description: 'PROJECT_NOT_FOUND, BRANCH_NOT_FOUND' })
+  @ApiConflictResponse({ description: 'STAGE_INPUT_MISSING' })
+  thermal(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('projectId', ParseUUIDPipe) projectId: string,
+    @Param('branchId', ParseGraphIdPipe) branchId: string,
+    @Body() dto: RunThermalStageDto,
+  ) {
+    return this.stages.runThermalStage(user, projectId, branchId, dto);
   }
 }
 

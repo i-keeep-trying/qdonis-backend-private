@@ -13,33 +13,33 @@ qdonis-backend (NestJS). qdonis-core will be deleted once every row below is `do
 
 | # | Route (core line) | FE call sites | Planned Nest endpoint / module | Status | Parity evidence |
 |---|---|---|---|---|---|
-| 1 | `GET /health` (512) | `services/assistantService.ts:334`, `services/circuitVisualizationService.ts:203` | existing `GET /health` (`src/health`); add ngspice probe with simulation | todo | |
-| 2 | `GET /health/ready` (525) | none | `GET /health/ready` (ngspice + compiler probes) | todo | |
-| 3 | `GET /api/topologies` (536) | `circuitVisualizationService.ts:234` | `GET /api/v1/topologies` (topology library module) | todo | |
-| 4 | `GET /api/models/mosfet` (576) | `circuitVisualizationService.ts:263` | `GET /api/v1/devices?kind=mosfet` (device library module) | todo | |
-| 5 | `GET /api/models/diode` (593) | `circuitVisualizationService.ts:287` | same, `kind=diode` | todo | |
-| 6 | `GET /api/models/igbt` (608) | `circuitVisualizationService.ts:311` | same, `kind=igbt` | todo | |
-| 7 | `POST /api/visualize` (623) | `circuitVisualizationService.ts:346` (also via `lib/studio/stages.ts`) | `POST /api/v1/visualization` (static json_library + netlist; LLM fallback on shared Bedrock layer) | todo | |
-| 8 | `POST /api/simulate/prepare` (986) | `circuitVisualizationService.ts:556` (studio stages) | `POST /api/v1/simulation/prepare` (async job) | todo | |
-| 9 | `POST /api/simulate/rerun` (1240) | `circuitVisualizationService.ts:496` | `POST /api/v1/simulation/rerun` (async job, ngspice) | todo | |
-| 10 | `POST /api/simulate/sync_parameters` (1304) | `circuitVisualizationService.ts:1076` | `POST /api/v1/simulation/sync-parameters` | todo | |
-| 11 | `POST /api/simulate/verify-rerun` (1370) | `circuitVisualizationService.ts:980` | `POST /api/v1/simulation/verify-rerun` (LLM, shared Bedrock layer, charged) | todo | |
-| 12 | `POST /api/netlist/ai-fix` (1629) | `circuitVisualizationService.ts:624` | `POST /api/v1/netlist/ai-fix` (async LLM, charged) | todo | |
-| 13 | `POST /api/simulate` (1683) | `circuitVisualizationService.ts:402` | `POST /api/v1/simulation` (one-shot async job) | todo | |
-| 14 | `POST /api/simulate/recalculate_loss` (1746) | `circuitVisualizationService.ts:1102` | `POST /api/v1/simulation/recalculate-loss` | todo | |
-| 15 | `GET /api/simulate/status/<task_id>` (1798) | `circuitVisualizationService.ts:435, 519, 578, 664, 1034`; `lib/studio/stages.ts:420` | `GET /api/v1/jobs/:id` (persistent job store, per-user) | todo | |
+| 1 | `GET /health` (512) | `services/assistantService.ts:334`, `services/circuitVisualizationService.ts:203` | existing `GET /health` (unchanged, no ngspice so Bilal's e2e keeps passing) | done | |
+| 2 | `GET /health/ready` (525) | none | `GET /health/ready` (`src/health`, ngspice probe `ngspice/ngspice.probe.ts`, 503 when absent) | done | live |
+| 3 | `GET /api/topologies` (536) | `circuitVisualizationService.ts:234` | `GET /api/v1/topologies` (`src/topologies`) | done | step 2 |
+| 4 | `GET /api/models/mosfet` (576) | `circuitVisualizationService.ts:263` | `GET /api/v1/devices?kind=mosfet` (`src/devices`) | done | step 2 |
+| 5 | `GET /api/models/diode` (593) | `circuitVisualizationService.ts:287` | same, `kind=diode` | done | step 2 |
+| 6 | `GET /api/models/igbt` (608) | `circuitVisualizationService.ts:311` | same, `kind=igbt` | done | step 2 |
+| 7 | `POST /api/visualize` (623) | `circuitVisualizationService.ts:346` (also via `lib/studio/stages.ts`) | `POST /projects/:id/branches/:b/stages/visualization` (`src/visualization`) | done | step 2 |
+| 8 | `POST /api/simulate/prepare` (986) | `circuitVisualizationService.ts:556` (studio stages) | `POST …/stages/design/run` (queued `design` run: AI sizing when specs exist, library values otherwise) + `PUT …/design/decks` | done | `sizing.parity.spec.ts` (70 cases), live Bedrock |
+| 9 | `POST /api/simulate/rerun` (1240) | `circuitVisualizationService.ts:496` | `POST /projects/:id/branches/:b/stages/simulation/run` (202, `simulation_runs` queue, worker thread) + `GET /projects/:id/simulations/:node/waveforms` (S3 blob `studio/<node>`) | done | `simulation.parity.spec.ts` (real ngspice_con, `SIM_PARITY=1`) |
+| 10 | `POST /api/simulate/sync_parameters` (1304) | `circuitVisualizationService.ts:1076` | `PATCH /projects/:id/branches/:b/stages/design/values` (`src/simulation/design-values.ts`) | done | `design-values.spec.ts` (core vectors, `sync_capture.py`) |
+| 11 | `POST /api/simulate/verify-rerun` (1370) | `circuitVisualizationService.ts:980` | `POST /projects/:id/simulations/:node/verify` (sync, charged; `afterDecks` must match `executedDecksSha256`, else `inconclusive`) | done | `netlist-ai.parity.spec.ts`, live |
+| 12 | `POST /api/netlist/ai-fix` (1629) | `circuitVisualizationService.ts:624` | `POST …/stages/design/ai-fix` (queued `design_fix`, commits decks; history replaces core's review step) | done | `netlist-ai.parity.spec.ts`, live |
+| 13 | `POST /api/simulate` (1683) | `circuitVisualizationService.ts:402` | covered by `design/run` + `simulation/run` | done | |
+| 14 | `POST /api/simulate/recalculate_loss` (1746) | `circuitVisualizationService.ts:1102` | `LibraryCircuitDataProvider.recalculateLosses` (ComputeService `losses`) + `POST …/stages/devices/run` | done | `studio.parity.spec.ts` |
+| 15 | `GET /api/simulate/status/<task_id>` (1798) | `circuitVisualizationService.ts:435, 519, 578, 664, 1034`; `lib/studio/stages.ts:420` | none: the Studio node is `running` until its `simulation_runs` row finishes; the web polls the stage | done | |
 | 16 | `POST /api/optimize` (1836) | `circuitVisualizationService.ts:708` (always 501) | none | dropped | stub always answered 501 |
 | 17 | `POST /api/compose` (1892) | `circuitVisualizationService.ts:772` | none | dropped | composer not used (user decision) |
 | 18-28 | `POST /api/editor/{load,state,add-component,delete-component,update-params,add-net,delete-net,update-net,valid-pins,export,recompile}` (2108-2365, 11 routes) | `services/circuitEditorService.ts:413` | none | dropped | editor not used (user decision) |
-| 29 | `POST /api/assistant` (2425) | `services/assistantService.ts:55` | legacy assistant module on the shared Bedrock layer (charged) | todo | |
-| 30 | `POST /api/assistant/stream` (2526) | `services/assistantService.ts:213` | same, SSE (`content`/`tool_call`/`done`/`error`) | todo | |
-| 31 | `POST /api/studio/circuit-info` (2656) | `lib/studio/stages.ts:366` | `POST /api/v1/studio/circuit-info` | todo | |
-| 32 | `POST /api/studio/waveform-stats` (2682) | `lib/studio/stages.ts:1054` | `POST /api/v1/studio/waveform-stats` | todo | |
-| 33 | `POST /api/studio/edit-circuit` (2734) | `lib/studio/stages.ts:448` | `POST /api/v1/studio/edit-circuit` (async LLM, charged) | todo | |
-| 34 | `POST /api/studio/select-devices` (2814) | `lib/studio/stages.ts:863` | `POST /api/v1/studio/select-devices` (async) | todo | |
-| 35 | `GET /api/studio/device-library` (2848) | none found | `GET /api/v1/devices/catalogue` | todo | |
+| 29 | `POST /api/assistant` (2425) | `services/assistantService.ts:55` | none | dropped | wizard assistant not used (user decision) |
+| 30 | `POST /api/assistant/stream` (2526) | `services/assistantService.ts:213` | none | dropped | wizard assistant not used (user decision) |
+| 31 | `POST /api/studio/circuit-info` (2656) | `lib/studio/stages.ts:366` | `POST /api/v1/studio/circuit-info` (`src/circuits`) | done | step 2 |
+| 32 | `POST /api/studio/waveform-stats` (2682) | `lib/studio/stages.ts:1054` | `LibraryCircuitDataProvider.waveformStats` (ComputeService `waveformStats`) | done | `studio.parity.spec.ts` |
+| 33 | `POST /api/studio/edit-circuit` (2734) | `lib/studio/stages.ts:448` | none | dropped | edit-circuit not used (user decision) |
+| 34 | `POST /api/studio/select-devices` (2814) | `lib/studio/stages.ts:863` | `POST …/stages/devices/run`; also automatic after every simulation | done | `studio.parity.spec.ts` |
+| 35 | `GET /api/studio/device-library` (2848) | none found | `GET /api/v1/devices/catalogue` | done | `studio.parity.spec.ts` |
 | 36 | `POST /api/studio/agent` (2855) | `lib/studio/agent.ts` (`openAgentStream`, flag `VITE_STUDIO_AGENT_BACKEND=core`) | `POST /api/v1/studio/agent` (`src/studio`, JWT, charged, step `studio_agent`) | done | see below |
-| 37 | `POST /api/design/modify-netlist` (3076) | `circuitVisualizationService.ts:1004` | `POST /api/v1/design/modify-netlist` (async LLM, charged) | todo | |
+| 37 | `POST /api/design/modify-netlist` (3076) | `circuitVisualizationService.ts:1004` | `POST …/stages/design/modify` (queued `design_modify`, tail frozen) | done | `netlist-ai.parity.spec.ts`, live |
 
 Studio agent (row 36) evidence, 2026-10-09:
 - Fixtures: `test/parity/fixtures/studio-agent/01..16-*.json` + `topology-ids.json`, captured from core `239d79a`
@@ -87,7 +87,7 @@ loader reads every file.
 | `BEDROCK_STREAM_READ_TIMEOUT` (60 s) | constant `STREAM_IDLE_TIMEOUT_MS` | done |
 | `OPENROUTER_API_KEY`, `OPENROUTER_API_BASE`, `LLM_*_MODEL` | dropped with the composer; nothing else should use OpenRouter | dropped (verify when porting 29/30) |
 | `LLM_MAX_TOKENS`, `LLM_TEMPERATURE`, `LLM_TIMEOUT` | per-feature constants | todo |
-| `NGSPICE_EXECUTABLE`, `NGSPICE_PATH`, `NGSPICE_TIMEOUT`, `NGSPICE_LOG_FILE` | `NGSPICE_PATH`, `NGSPICE_TIMEOUT_MS` (validated) | todo |
+| `NGSPICE_EXECUTABLE`, `NGSPICE_PATH`, `NGSPICE_TIMEOUT`, `NGSPICE_LOG_FILE` | `NGSPICE_PATH` (Windows: use `ngspice_con.exe`, as core did), `NGSPICE_TIMEOUT_SECONDS`, `SIMULATION_CONCURRENCY` | done |
 | `MAX_UPLOAD_MB` (50) | `BODY_LIMIT` (now `5mb`; simulation payloads may need more, decide per route) | todo |
 | `ASSISTANT_NETLIST_CHAR_LIMIT`, `ASSISTANT_DESIGN_REASONING_CHAR_LIMIT` | assistant constants | todo |
 | `CORS_ALLOWED_ORIGINS`, `CORS_ORIGINS_REPLACE` | `CORS_ORIGINS` | done (existing) |
@@ -172,7 +172,7 @@ must be removed or hidden before core is deleted.
 
 ## 8. qdonis-core deletion readiness checklist
 
-- [ ] Every row in section 1 is `done` or `dropped` (now: 1 done, 13 dropped, 23 todo).
+- [x] Every row in section 1 is `done` or `dropped`.
 - [ ] Every `todo` asset in section 2 copied into BE with a SHA-256 manifest and a loader test.
 - [ ] ngspice 46 provisioned for the BE runtime (Dockerfile / server setup) and probed by `/health/ready`.
 - [ ] FE has no `VITE_QDONIS_API_URL` / `127.0.0.1:5001` / `127.0.0.1:5000` references.
@@ -181,3 +181,24 @@ must be removed or hidden before core is deleted.
 - [ ] Parity fixtures and capture scripts for every migrated feature live in BE (`test/parity/`), and their
       specs pass without core present.
 - [ ] Ledger reviewed by the user.
+
+Status 2026-10-12: every row in section 1 is `done` or `dropped`. qdonis-web (the old `qdonis` frontend is
+not the target any more) talks only to this backend.
+
+## 9. qdonis-web integration (2026-10-12)
+
+Every `StudioService` call in qdonis-web is served by the backend; no 501 stubs are left.
+
+| Web call | Endpoint | Notes |
+|---|---|---|
+| `updateSpecs` / `approveSpecs` | `PUT …/stages/specs`, `POST …/stages/specs/approve` | `src/specs`; whole-table replace keeps row ids and unchanged sources |
+| `generateConstraints` / `updateConstraints` | `POST` / `PUT …/stages/specs/constraints` | queued `simulation_runs` kind `constraints`; `constraints.status` is `running` until it lands (web polls) |
+| `runMagnetics` / `runThermal` | `POST …/stages/magnetics/run`, `…/thermal/run` | Bilal's planners; `stage-views.ts` maps stored data to the web shapes on read |
+| `modifyDesign` / `fixDesign` / `verifySimulation` | `POST …/stages/design/modify`, `…/design/ai-fix`, `/simulations/:node/verify` | new web UI: "Change with AI" (Design), "Fix with AI" + "Check the change" (Simulation); design data keeps `aiEdit` |
+| `sendMessage` / `answerWidget` / `cancelRun` | `POST /projects/:id/chat/messages`, `…/chat/widgets/:w/answer`, `…/chat/runs/:run/cancel` | `src/studio-chat`: server-side agent loop (Studio tools run on the stage services), SSE, messages + transcript in `project_chat_messages.metadata` |
+| `uploadAttachment` | `POST /projects/:id/attachments` (multipart) | S3 via `StoredFilesService.uploadDocument`; SPICE decks accepted as text |
+| `pendingInitialPrompt` | workspace | the dashboard prompt until the person's first chat message |
+
+Evidence: `test/studio-chat.e2e-spec.ts` (fake Bedrock), live runs on 3199 with real Bedrock + S3 (specs →
+constraints → topologies → design via chat; netlist import from an S3 attachment; simulation waveforms,
+devices, magnetics and thermal from the simulation).

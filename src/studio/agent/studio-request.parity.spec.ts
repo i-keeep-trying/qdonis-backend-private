@@ -3,7 +3,8 @@ import {
   loadTopologyIds,
 } from '../../../test/parity/studio-agent-fixtures';
 import { buildConverseInput } from '../../ai/bedrock/bedrock.client';
-import { STUDIO_TOPOLOGY_IDS } from './topology-library';
+import { ASSETS_ROOT } from '../../common/assets/assets-root';
+import { loadTopologyCatalog } from '../../topologies/library/topology-catalog.loader';
 import { buildStudioRequest } from './studio-request.builder';
 
 const NO_RESULT = '(no result recorded)';
@@ -62,8 +63,9 @@ describe('Studio agent request parity with qdonis-core', () => {
     expect(fixtures.length).toBeGreaterThanOrEqual(10);
   });
 
-  it('uses the same topology library as the core', () => {
-    expect([...STUDIO_TOPOLOGY_IDS]).toEqual(loadTopologyIds());
+  it('uses the same topology library as the core', async () => {
+    const catalog = await loadTopologyCatalog(ASSETS_ROOT);
+    expect([...catalog.ids]).toEqual(loadTopologyIds());
   });
 
   describe.each(fixtures.map((f) => [f.name, f] as const))(

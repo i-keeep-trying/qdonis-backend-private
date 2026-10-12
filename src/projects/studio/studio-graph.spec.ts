@@ -96,6 +96,24 @@ describe('studio persistence', () => {
     expect(thermal.status).toBe('error');
   });
 
+  it('keeps the plot index and server-run jobs on save', () => {
+    const project = commitStage(
+      createEmptyProject(),
+      'simulation',
+      { runId: 'run-1', plots: [{ key: 'V_SW' }], raw_time_series_zip: 'z' },
+      { status: 'running' },
+    ).project;
+    const sim = Object.values(serializeProject(project).nodes).find(
+      (n) => n.stage === 'simulation',
+    )!;
+    expect(sim.status).toBe('running');
+    expect(sim.data).toEqual({
+      runId: 'run-1',
+      plots: [{ key: 'V_SW' }],
+      plotsCached: true,
+    });
+  });
+
   it('derives legacy summary keys and keeps foreign keys', () => {
     let project = createEmptyProject('Build a buck');
     project = commitStage(project, 'specs', {

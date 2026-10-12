@@ -17,6 +17,6 @@ import { DesignService } from './design.service';
   imports: [AiModule, ProjectsModule, TeamsModule],
   controllers: [DesignController],
   providers: [AiStepRunner, SpecDocumentsService, DesignService],
-  exports: [AiStepRunner, SpecDocumentsService],
+  exports: [AiStepRunner, SpecDocumentsService, DesignService],
 })
 export class DesignModule {}

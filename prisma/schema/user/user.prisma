@@ -51,6 +51,7 @@ model User {
   sentTeamInvitations        TeamInvitation[]     @relation("TeamInvitationSender")
   teamTokenUsage             TeamTokenUsage[]     @relation("TeamUsageActor")
   studioNodes                StudioNode[]         @relation("StudioNodeAuthor")
+  simulationRuns             SimulationRun[]      @relation("SimulationRunAuthor")
   studioBranches             StudioBranch[]       @relation("StudioBranchAuthor")
   studioBranchCursors        StudioBranchCursor[] @relation("StudioBranchCursorUser")
 

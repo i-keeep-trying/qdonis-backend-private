@@ -8,5 +8,6 @@ import { ProjectChatService } from './project-chat.service';
   imports: [ProjectsModule],
   controllers: [ProjectChatController],
   providers: [ProjectChatRepository, ProjectChatService],
+  exports: [ProjectChatRepository],
 })
 export class ProjectChatModule {}

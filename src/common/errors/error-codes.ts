@@ -109,6 +109,9 @@ export const ErrorCode = {
   TeamOwnerImmutable: 'TEAM_OWNER_IMMUTABLE',
   // chat
   ChatMessageNotFound: 'CHAT_MESSAGE_NOT_FOUND',
+  ChatBusy: 'CHAT_BUSY',
+  WidgetNotFound: 'WIDGET_NOT_FOUND',
+  WidgetAnswered: 'WIDGET_ANSWERED',
   // design steps
   AiResponseInvalid: 'AI_RESPONSE_INVALID',
   StageInputMissing: 'STAGE_INPUT_MISSING',
@@ -116,6 +119,7 @@ export const ErrorCode = {
   SupplierError: 'SUPPLIER_ERROR',
   StageNotAvailable: 'STAGE_NOT_AVAILABLE',
   StageFailed: 'STAGE_FAILED',
+  StageRunning: 'STAGE_RUNNING',
 } as const;
 
 export type ErrorCode = (typeof ErrorCode)[keyof typeof ErrorCode];

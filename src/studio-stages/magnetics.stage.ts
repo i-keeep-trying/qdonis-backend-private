@@ -51,6 +51,7 @@ export interface MagneticsOptions {
   material?: string;
   maxFluxDensity?: number;
   currentDensity?: number;
+  windowUtilization?: number;
   maxTempRiseC?: number;
   ambientC?: number;
   coreOverrides?: Record<string, string>;

@@ -30,6 +30,48 @@ export class ProjectChatRepository {
     return this.prisma.projectChatMessage.create({ data });
   }
 
+  findOne(projectId: string, userId: string, id: string) {
+    return this.prisma.projectChatMessage.findFirst({
+      where: { id, projectId, userId },
+    });
+  }
+
+  /** Any message with this id (ids are client-chosen for user messages). */
+  exists(id: string): Promise<boolean> {
+    return this.prisma.projectChatMessage
+      .count({ where: { id } })
+      .then((n) => n > 0);
+  }
+
+  update(
+    id: string,
+    data: { content?: string; metadata?: Prisma.InputJsonObject },
+  ) {
+    return this.prisma.projectChatMessage.update({ where: { id }, data });
+  }
+
+  /** Studio chat replies still marked as being written (any project). */
+  streamingStudioMessages() {
+    return this.prisma.projectChatMessage.findMany({
+      where: {
+        AND: [
+          { metadata: { path: ['studio'], equals: 1 } },
+          { metadata: { path: ['status'], equals: 'streaming' } },
+        ],
+      },
+    });
+  }
+
+  /** The newest `take` messages, oldest first. */
+  async recent(projectId: string, userId: string, take: number) {
+    const rows = await this.prisma.projectChatMessage.findMany({
+      where: { projectId, userId },
+      orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+      take,
+    });
+    return rows.reverse();
+  }
+
   async clear(projectId: string, userId: string): Promise<number> {
     const { count } = await this.prisma.projectChatMessage.deleteMany({
       where: { projectId, userId },
