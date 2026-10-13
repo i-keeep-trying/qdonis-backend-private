@@ -30,6 +30,7 @@
     "prisma:studio": "prisma studio",
     "client:serve": "node scripts/serve-client.mjs",
     "db:seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts",
+    "stripe:sync-prices": "node scripts/sync-stripe-prices.mjs",
     "postinstall": "prisma generate"
   },
   "overrides": {
