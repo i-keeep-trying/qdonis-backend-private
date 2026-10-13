@@ -5,6 +5,7 @@ import type { App } from 'supertest/types';
 
 import { AppModule } from '../src/app.module';
 import { configureApp } from '../src/app.setup';
+import type { Prisma } from '../src/generated/prisma/client';
 import { type MailMessage, MailTransport } from '../src/mail/mail.transport';
 import { PrismaService } from '../src/prisma/prisma.service';
 import { ObjectStore } from '../src/storage/object-store';
@@ -524,7 +525,7 @@ describe('Studio branches stored in tables (e2e)', () => {
     };
     await prisma.project.update({
       where: { id: project.id },
-      data: { data: { studio: legacy } },
+      data: { data: { studio: legacy } as unknown as Prisma.InputJsonObject },
     });
 
     const ws = await workspace(owner, project.id);
