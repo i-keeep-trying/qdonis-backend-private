@@ -1,0 +1,11 @@
+/// What a stored object is for. Drives size limits and allowed content types.
+enum StoredFileKind {
+  /// A specification document uploaded by the user (pdf, docx, txt, md).
+  DOCUMENT
+  /// Heavy JSON payload of a Studio stage node (simulation plots, waveforms).
+  STAGE_BLOB
+  /// A generated export (BOM spreadsheet, report PDF).
+  EXPORT
+
+  @@map("stored_file_kind")
+}

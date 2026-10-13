@@ -11,6 +11,9 @@ import {
   humanizeDuration,
   passwordChangedEmail,
   passwordResetEmail,
+  projectInvitationEmail,
+  projectSharedEmail,
+  teamInvitationEmail,
   verificationEmail,
 } from './mail.templates';
 import { type MailMessage, MailTransport } from './mail.transport';
@@ -97,6 +100,73 @@ export class MailService implements OnApplicationBootstrap, OnModuleDestroy {
         resetUrl: `${frontendUrl}/forgot-password`,
       }),
       'password-changed',
+    );
+  }
+
+  sendProjectInvitation(params: {
+    to: string;
+    projectName: string;
+    inviterName: string;
+    role: string;
+    token: string;
+    message?: string | null;
+    expiresAt: Date;
+  }): Promise<void> {
+    return this.send(
+      projectInvitationEmail({
+        to: params.to,
+        projectName: params.projectName,
+        inviterName: params.inviterName,
+        role: params.role,
+        message: params.message,
+        url: this.frontendLink('/accept-invitation', params.token),
+        expiresInText: humanizeDuration(
+          params.expiresAt.getTime() - Date.now(),
+        ),
+      }),
+      'project-invitation',
+    );
+  }
+
+  sendProjectShared(params: {
+    to: string;
+    name: string | null;
+    projectId: string;
+    projectName: string;
+    inviterName: string;
+    role: string;
+    message?: string | null;
+  }): Promise<void> {
+    const { frontendUrl } = this.config.get('app', { infer: true });
+    return this.send(
+      projectSharedEmail({
+        ...params,
+        url: `${frontendUrl}/projects/${encodeURIComponent(params.projectId)}`,
+      }),
+      'project-shared',
+    );
+  }
+
+  sendTeamInvitation(params: {
+    to: string;
+    teamName: string;
+    inviterName: string;
+    role: string;
+    token: string;
+    expiresAt: Date;
+  }): Promise<void> {
+    return this.send(
+      teamInvitationEmail({
+        to: params.to,
+        teamName: params.teamName,
+        inviterName: params.inviterName,
+        role: params.role,
+        url: this.frontendLink('/accept-team-invitation', params.token),
+        expiresInText: humanizeDuration(
+          params.expiresAt.getTime() - Date.now(),
+        ),
+      }),
+      'team-invitation',
     );
   }
 

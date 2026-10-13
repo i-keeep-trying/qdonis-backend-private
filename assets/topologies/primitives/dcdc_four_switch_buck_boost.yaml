@@ -1,0 +1,527 @@
+id: dcdc_four_switch_buck_boost
+name: Four Switch Buck Boost DC-DC Converter
+description: Non-inverting four-switch buck-boost converter for seamless step-up/step-down
+  operation. Converts 12V input to 8V output in buck-boost transition mode where all
+  four switches are actively switching. Left leg (SW1/SW2) acts as the buck input
+  stage; right leg (SW3/SW4) acts as the boost output stage. Suited for automotive
+  USB-C PD and battery management where input voltage crosses the output voltage threshold.
+components:
+  - ref: VIN
+    type: node
+    role: input_source
+    params:
+      node_type: voltage_source
+      source: dc
+      voltage: 12
+      series_resistance: 0.01
+  - ref: PWM1
+    type: node
+    role: pwm_control
+    params:
+      node_type: pwm_control
+      frequency: 200e3
+      duty_cycle: 0.4
+      vhigh: 12.0
+      vlow: 0.0
+      trise: 5e-8
+      tfall: 5e-8
+      tdelay: 0
+      drive_resistance: 10
+  - ref: PWM2
+    type: node
+    role: pwm_control
+    params:
+      node_type: pwm_control
+      frequency: 200e3
+      duty_cycle: 0.6
+      vhigh: 12.0
+      vlow: 0.0
+      trise: 5e-8
+      tfall: 5e-8
+      tdelay: 2.0e-06
+      drive_resistance: 10
+  - ref: PWM3
+    type: node
+    role: pwm_control
+    params:
+      node_type: pwm_control
+      frequency: 200e3
+      duty_cycle: 0.6
+      vhigh: 12.0
+      vlow: 0.0
+      trise: 5e-8
+      tfall: 5e-8
+      tdelay: 2.0e-06
+      drive_resistance: 10
+  - ref: PWM4
+    type: node
+    role: pwm_control
+    params:
+      node_type: pwm_control
+      frequency: 200e3
+      duty_cycle: 0.4
+      vhigh: 12.0
+      vlow: 0.0
+      trise: 5e-8
+      tfall: 5e-8
+      tdelay: 0
+      drive_resistance: 10
+  - ref: SW1
+    type: transistor
+    role: hs_left
+    params:
+      family: mosfet
+      type: nmos
+      mode: enhancement
+      voltage_rating: 100
+      current_rating: 5
+      Vto: 1.5
+      Kn: 100e-3
+      Lambda: 0.01
+      Cgs: 1000e-12
+      Cgd: 200e-12
+      Cdb: 200e-12
+    layout:
+      schX: -2.0
+      schY: -1.0
+      rotation: 90deg
+  - ref: SW2
+    type: transistor
+    role: ls_left
+    params:
+      family: mosfet
+      type: nmos
+      mode: enhancement
+      voltage_rating: 100
+      current_rating: 5
+      Vto: 1.5
+      Kn: 100e-3
+      Lambda: 0.01
+      Cgs: 1000e-12
+      Cgd: 200e-12
+      Cdb: 200e-12
+    layout:
+      schX: -2.0
+      schY: -3.0
+      rotation: 270deg
+  - ref: SW3
+    type: transistor
+    role: hs_right
+    params:
+      family: mosfet
+      type: nmos
+      mode: enhancement
+      voltage_rating: 100
+      current_rating: 5
+      Vto: 1.5
+      Kn: 100e-3
+      Lambda: 0.01
+      Cgs: 1000e-12
+      Cgd: 200e-12
+      Cdb: 200e-12
+    layout:
+      schX: 2.0
+      schY: -1.0
+      rotation: 90deg
+  - ref: SW4
+    type: transistor
+    role: ls_right
+    params:
+      family: mosfet
+      type: nmos
+      mode: enhancement
+      voltage_rating: 100
+      current_rating: 5
+      Vto: 1.5
+      Kn: 100e-3
+      Lambda: 0.01
+      Cgs: 1000e-12
+      Cgd: 200e-12
+      Cdb: 200e-12
+    layout:
+      schX: 2.0
+      schY: -3.0
+      rotation: 270deg
+  - ref: L1
+    type: inductor
+    role: energy_transfer
+    params:
+      inductance: 22e-6
+      series_resistance: 0.05
+      saturation_current: 8.0
+      core_loss_resistance: 1e6
+      parasitic_capacitance: 50e-12
+      ic: 0
+    layout:
+      schX: 0.0
+      schY: -2.0
+      orientation: horizontal
+  - ref: Cout
+    type: capacitor
+    role: output_filter
+    params:
+      capacitance: 100e-6
+      polarized: true
+      voltage_rating: 20
+      tolerance: 0.1
+      esr: 0.02
+      esl: 5e-9
+      leakage_current: 1e-9
+      ic: 0
+    layout:
+      schX: 3.5
+      schY: -1.5
+      orientation: vertical
+  - ref: R_LOAD
+    type: resistor
+    role: load
+    params:
+      resistance: 5
+      tolerance: 0.05
+      temp_coefficient: 100e-6
+      parasitic_inductance: 10e-9
+    layout:
+      schX: 5.0
+      schY: -1.5
+      orientation: vertical
+nets:
+  - - - VIN
+      - +
+    - - SW1
+      - drain
+  - - - PWM1
+      - pos
+    - - SW1
+      - gate
+  - - - PWM1
+      - neg
+    - - SW1
+      - source
+  - - - SW1
+      - source
+    - - SW2
+      - drain
+    - - L1
+      - pin1
+  - - - PWM2
+      - pos
+    - - SW2
+      - gate
+  - - - PWM2
+      - neg
+    - - VIN
+      - '-'
+  - - - SW2
+      - source
+    - - VIN
+      - '-'
+  - - - L1
+      - pin2
+    - - SW3
+      - source
+    - - SW4
+      - drain
+  - - - SW3
+      - drain
+    - - Cout
+      - pos
+    - - R_LOAD
+      - pos
+  - - - PWM3
+      - pos
+    - - SW3
+      - gate
+  - - - PWM3
+      - neg
+    - - SW3
+      - source
+  - - - PWM4
+      - pos
+    - - SW4
+      - gate
+  - - - PWM4
+      - neg
+    - - VIN
+      - '-'
+  - - - SW4
+      - source
+    - - VIN
+      - '-'
+  - - - VIN
+      - '-'
+    - - Cout
+      - neg
+    - - R_LOAD
+      - neg
+analysis:
+  transient:
+    spice_settings:
+      tstop: 0.01
+      use_ic: false
+      reltol: 0.01
+      abstol: 1.0e-06
+      vntol: 0.0001
+      gmin: 1.0e-12
+      method: gear
+      maxord: 2
+    requirements:
+      - rid: tr_reg
+        requirement: Output voltage regulation at 8V in buck-boost transition mode;
+          verify continuity across mode boundaries
+        criteria:
+          target_vout: 8.0
+          regulation_limit_pct: 5
+          ripple_limit_vpp: 50e-3
+        measurement:
+          - ref: VIN
+            plot:
+              x_axis: time
+              title: Input Voltage (tr_reg)
+            quantity: voltage
+            nets:
+              - - VIN
+                - +
+              - - VIN
+                - '-'
+          - ref: VOUT
+            plot:
+              x_axis: time
+              title: Output Voltage FSBB
+            component: R_LOAD
+            quantity: voltage
+            nets:
+              - - R_LOAD
+                - pos
+              - - VIN
+                - '-'
+            data:
+              - name: Vout_avg
+                spice_command: avg
+                description: Average output voltage
+              - name: Vout_ripple_vpp
+                spice_command: pp
+                description: Peak-to-peak output voltage ripple
+          - ref: IOUT
+            plot: false
+            component: R_LOAD
+            quantity: current
+            data:
+              - name: Iout_avg
+                spice_command: avg
+                description: Average load current
+        outputs:
+          - var: load_regulation_pct
+            formula: 100*abs([Vout_avg] - {criteria.target_vout})/{criteria.target_vout}
+            description: Load regulation deviation from target
+          - var: vout_avg_v
+            formula: '[Vout_avg]'
+            description: Average output voltage
+          - var: vout_ripple_vpp_v
+            formula: '[Vout_ripple_vpp]'
+            description: Output voltage peak-to-peak ripple
+      - rid: tr_eff
+        requirement: Efficiency with all four switches active; compare to single-mode
+          buck/boost equivalent
+        criteria:
+          efficiency_target_pct: 92
+        measurement:
+          - ref: IIN
+            plot: false
+            component: VIN
+            quantity: current
+            data:
+              - name: Iin_avg
+                spice_command: avg
+                description: Average input current
+          - ref: IOUT_EFF
+            plot: false
+            component: R_LOAD
+            quantity: current
+            data:
+              - name: Iout_avg
+                spice_command: avg
+                description: Average load current
+          - ref: VOUT_EFF
+            plot: false
+            component: R_LOAD
+            quantity: voltage
+            nets:
+              - - R_LOAD
+                - pos
+              - - VIN
+                - '-'
+            data:
+              - name: Vout_avg
+                spice_command: avg
+                description: Average output voltage
+          - ref: VIN_EFF
+            plot: false
+            component: VIN
+            quantity: voltage
+            nets:
+              - - VIN
+                - +
+              - - VIN
+                - '-'
+            data:
+              - name: Vin_avg
+                spice_command: avg
+                description: Average input voltage
+          - ref: IL1
+            plot:
+              x_axis: time
+              title: Inductor Current FSBB
+            component: L1
+            quantity: current
+            data:
+              - name: IL1_rms
+                spice_command: rms
+                description: RMS inductor current
+              - name: IL1_ripple
+                spice_command: pp
+                description: Inductor current peak-to-peak ripple
+        outputs:
+          - var: Pin_avg
+            formula: abs([Vin_avg]*[Iin_avg])
+            description: Average input power
+          - var: Pout_avg
+            formula: '[Vout_avg]*[Iout_avg]'
+            description: Average output power
+          - var: P_L1_cu
+            formula: '[IL1_rms]**2*{components.L1.series_resistance}'
+            description: Inductor copper loss
+          - var: efficiency_pct
+            formula: 100*[Pout_avg]/[Pin_avg]
+            description: Efficiency percentage
+      - rid: tr_stress
+        requirement: Peak voltage and current stress on all four switches and inductor;
+          SW3 now sees reduced voltage stress since source is at output node (not
+          ground reference)
+        criteria:
+          sw_voltage_margin_pct: 20
+          sw_current_margin_pct: 30
+          l1_current_margin_pct: 30
+        measurement:
+          - ref: VIN
+            plot: false
+            quantity: voltage
+            nets:
+              - - VIN
+                - +
+              - - VIN
+                - '-'
+          - ref: VSW_L
+            plot:
+              x_axis: time
+              title: Left Bridge Switch Node (LX1)
+            component: SW1
+            quantity: voltage
+            nets:
+              - - SW1
+                - source
+              - - VIN
+                - '-'
+            data:
+              - name: Vsw_left_max
+                spice_command: max
+                description: Peak left switch node voltage (between SW1 source and
+                  GND)
+          - ref: VSW_R
+            plot:
+              x_axis: time
+              title: Right Bridge Switch Node (LX2) - SW3 Drain Stress
+            component: SW3
+            quantity: voltage
+            nets:
+              - - SW3
+                - drain
+              - - SW3
+                - source
+            data:
+              - name: Vsw_right_max
+                spice_command: max
+                description: Peak right switch node voltage (SW3 drain-source stress
+                  = LX2 to output voltage)
+          - ref: VOUT_STRESS
+            plot:
+              x_axis: time
+              title: Output Voltage (SW3 Source Node)
+            component: Cout
+            quantity: voltage
+            nets:
+              - - Cout
+                - pos
+              - - VIN
+                - '-'
+            data:
+              - name: Vout_max
+                spice_command: max
+                description: Peak output voltage (SW3 source reference)
+          - ref: ISW1_S
+            plot: false
+            component: SW1
+            quantity: current
+            data:
+              - name: Isw1_peak
+                spice_command: max
+                description: Peak SW1 (HS left) current
+          - ref: ISW2_S
+            plot: false
+            component: SW2
+            quantity: current
+            data:
+              - name: Isw2_peak
+                spice_command: max
+                description: Peak SW2 (LS left) current
+          - ref: ISW3_S
+            plot: false
+            component: SW3
+            quantity: current
+            data:
+              - name: Isw3_peak
+                spice_command: max
+                description: Peak SW3 (source-connected output switch) current
+          - ref: ISW4_S
+            plot: false
+            component: SW4
+            quantity: current
+            data:
+              - name: Isw4_peak
+                spice_command: max
+                description: Peak SW4 (LS right) current
+          - ref: IL1_S
+            plot: false
+            component: L1
+            quantity: current
+            data:
+              - name: IL1_peak
+                spice_command: max
+                description: Peak inductor current
+        outputs:
+          - var: vsw_left_max_v
+            formula: '[Vsw_left_max]'
+            description: Peak left switch node voltage (standard buck-boost stress)
+          - var: vsw_right_max_v
+            formula: '[Vsw_right_max]'
+            description: Peak right switch voltage stress (SW3 Vds = LX2 to output,
+              reduced from full VIN swing)
+          - var: vout_max_v
+            formula: '[Vout_max]'
+            description: Peak output voltage (SW3 source node reference)
+          - var: isw_peak_max_a
+            formula: max([Isw1_peak], max([Isw2_peak], max([Isw3_peak], [Isw4_peak])))
+            description: Maximum peak current across all four switches
+          - var: il1_peak_a
+            formula: '[IL1_peak]'
+            description: Peak inductor current
+metadata:
+  stage:
+    - power_switch
+    - filter
+  topology: non-isolated
+  control: PWM
+  tags:
+    - four-switch-buck-boost
+    - FSBB
+    - step-up-step-down
+    - automotive

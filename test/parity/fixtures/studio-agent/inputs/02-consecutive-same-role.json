@@ -1,0 +1,17 @@
+{
+  "name": "02-consecutive-same-role",
+  "description": "Consecutive user turns and consecutive assistant turns are merged into alternating roles.",
+  "messages": [
+    { "role": "user", "content": [{ "type": "text", "text": "Hi" }] },
+    { "role": "user", "content": [{ "type": "text", "text": "I need a USB-C charger." }] },
+    { "role": "assistant", "content": [{ "type": "text", "text": "Sure." }] },
+    { "role": "assistant", "content": [{ "type": "text", "text": "What output power do you need?" }] },
+    { "role": "user", "content": [{ "type": "text", "text": "67 W, four PD profiles." }] }
+  ],
+  "project_state": {
+    "active_branch": "main",
+    "branches": [{ "name": "main", "stages": [], "active": true }],
+    "workspace_focus": "specs",
+    "specs": null
+  }
+}

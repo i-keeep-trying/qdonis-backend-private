@@ -1,0 +1,11 @@
+## Topology-Specific Rules: Single-Phase H-Bridge Inverter
+- **RMS Output Voltage**: Note that the AC output voltage requested by the user is the **RMS** value, NOT the peak value. You must calculate the peak value (`V_peak = V_rms * sqrt(2)`) when sizing components, calculating the modulation index, or setting the reference sine wave amplitude.
+- **Input Voltage Scaling**: You MUST explicitly update the `value` parameter of the input voltage source `V1` to exactly match the requested input voltage (Vin). Do not use `VIN`.
+- **Modulation**: CCM/DCM calculations do not apply.
+- Ensure the modulation index and carrier/switching frequency are consistent with the target output voltage relative to the DC-link/input voltage.
+- `modulation_index ≈ Vout_peak / Vin`.
+- Keep the output L-C filter consistent with the switching frequency.
+- **Force Continuous Logic**: Never use boolean (>=) or ternary (? 1 : 0) operators for PWM generation. You must replace them with continuous hyperbolic tangent functions: v='0.5 * (1 + tanh((V_control - V_tri) * 1000))'.
+- **Fix the Ideal DC Source**: Never use a perfectly ideal DC voltage source for the main power bus. You must add a small series resistor (e.g., 0.01 Ohms) between the ideal voltage source and the top of the H-bridge to prevent crossover short-circuit singularities. (If V1 is an ideal source, add a series resistance to its parameters or physically in the circuit if instructed, but typically you can specify series_resistance if the model supports it).
+- **Mandate Snubbers**: You must include 100 Ohms + 1nF RC snubbers from every switching node (e.g., OUT1 and OUT2) to ground to stabilize the SPICE solver. (Identify the switching nodes and ensure snubber components are sized accordingly if present).
+- **Force Modulation Math**: Do not guess the reference sine wave amplitude. You must calculate it strictly based on the required AC RMS voltage and DC bus voltage: V_ref_peak = 10 * ((V_ac_rms * sqrt(2)) / V_dc). Ensure V_dc exactly matches the requested input voltage.

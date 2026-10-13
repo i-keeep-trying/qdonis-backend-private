@@ -1,0 +1,13 @@
+{
+  "name": "01-first-turn",
+  "description": "First user message of a new project, empty project state (also used for the live check).",
+  "messages": [
+    {
+      "role": "user",
+      "content": [
+        { "type": "text", "text": "Design a 12 V to 5 V, 3 A buck converter for an industrial sensor board." }
+      ]
+    }
+  ],
+  "project_state": {}
+}

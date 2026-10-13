@@ -3,10 +3,12 @@ import { Test } from '@nestjs/testing';
 import request from 'supertest';
 import type { App } from 'supertest/types';
 
+import { BEDROCK_RUNTIME } from '../src/ai/bedrock/bedrock.types';
 import { AppModule } from '../src/app.module';
 import { configureApp } from '../src/app.setup';
 import { type MailMessage, MailTransport } from '../src/mail/mail.transport';
 import { PrismaService } from '../src/prisma/prisma.service';
+import { fakeRuntime } from './helpers/bedrock-fakes';
 
 class SilentMail extends MailTransport {
   send(_message: MailMessage): Promise<void> {
@@ -44,35 +46,20 @@ describe('AI proxy (e2e)', () => {
   let app: NestExpressApplication;
   let http: App;
   let prisma: PrismaService;
-  const realFetch = global.fetch;
-  let bedrock: { status: number; body: unknown };
-  let lastBedrockBody: { inferenceConfig?: { maxTokens: number } } | null =
-    null;
+  // What the fake Bedrock SDK client answers: a ConverseCommand output, or an
+  // SDK-shaped error to throw.
+  let bedrock: { output?: unknown; error?: Error } = {};
+  const fake = fakeRuntime(() =>
+    bedrock.error ? Promise.reject(bedrock.error) : bedrock.output,
+  );
+  const lastBedrockInput = () => fake.sent[fake.sent.length - 1]?.input;
 
   beforeAll(async () => {
-    jest.spyOn(global, 'fetch').mockImplementation((input, init) => {
-      const url =
-        typeof input === 'string'
-          ? input
-          : input instanceof URL
-            ? input.href
-            : input.url;
-      if (url.includes('bedrock-runtime')) {
-        lastBedrockBody = JSON.parse(
-          typeof init?.body === 'string' ? init.body : '{}',
-        ) as typeof lastBedrockBody;
-        return Promise.resolve(
-          new Response(JSON.stringify(bedrock.body), {
-            status: bedrock.status,
-            headers: { 'Content-Type': 'application/json' },
-          }),
-        );
-      }
-      return realFetch(input, init);
-    });
     const moduleRef = await Test.createTestingModule({ imports: [AppModule] })
       .overrideProvider(MailTransport)
       .useValue(new SilentMail())
+      .overrideProvider(BEDROCK_RUNTIME)
+      .useValue(fake.runtime)
       .compile();
     app = moduleRef.createNestApplication<NestExpressApplication>({
       bodyParser: false,
@@ -89,7 +76,6 @@ describe('AI proxy (e2e)', () => {
       where: { email: { endsWith: '@ai.e2e.test' } },
     });
     await app.close();
-    jest.restoreAllMocks();
   });
 
   async function user(): Promise<{ token: string; id: string }> {
@@ -140,8 +126,7 @@ describe('AI proxy (e2e)', () => {
   it('streams the completion and charges provider-reported tokens server-side', async () => {
     const { token } = await user();
     bedrock = {
-      status: 200,
-      body: {
+      output: {
         output: { message: { content: [{ text: 'Use a 22uH inductor.' }] } },
         usage: { inputTokens: 700, outputTokens: 300 },
       },
@@ -166,19 +151,26 @@ describe('AI proxy (e2e)', () => {
       modelId: 'anthropic.claude-opus-expensive',
     }).expect(400);
     bedrock = {
-      status: 200,
-      body: {
+      output: {
         output: { message: { content: [{ text: 'x' }] } },
         usage: { inputTokens: 1, outputTokens: 1 },
       },
     };
     await converse(token, {}).expect(200);
-    expect(lastBedrockBody?.inferenceConfig?.maxTokens).toBe(64000);
+    expect(lastBedrockInput()?.inferenceConfig?.maxTokens).toBe(64000);
+    expect(lastBedrockInput()?.messages).toEqual([
+      { role: 'user', content: [{ text: 'Design a 12V buck converter' }] },
+    ]);
   });
 
   it('does not charge failed provider calls', async () => {
     const { token } = await user();
-    bedrock = { status: 429, body: { message: 'throttled' } };
+    bedrock = {
+      error: Object.assign(new Error('throttled'), {
+        name: 'ThrottlingException',
+        $metadata: { httpStatusCode: 429 },
+      }),
+    };
     const res = await converse(token, {}).expect(200);
     expect(lastEvent(res.text).error).toMatch(/busy/);
     expect(await balance(token)).toBe(10000);
@@ -187,8 +179,7 @@ describe('AI proxy (e2e)', () => {
   it('refuses to start without tokens and never overcharges past zero', async () => {
     const { token, id } = await user();
     bedrock = {
-      status: 200,
-      body: {
+      output: {
         output: { message: { content: [{ text: 'long answer' }] } },
         usage: { inputTokens: 9000, outputTokens: 6000 },
       },

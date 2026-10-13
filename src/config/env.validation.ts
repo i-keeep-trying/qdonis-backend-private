@@ -74,6 +74,9 @@ const DURATION_MESSAGE = 'must look like 900, 900s, 15m, 2h or 7d';
 /** Minimum secret length: 32 chars of base64url is ~192 bits of entropy. */
 const SECRET_MIN_LENGTH = 32;
 
+/** An AWS region id, e.g. `us-east-1` or `us-gov-west-1`. */
+const REGION_PATTERN = /^[a-z]{2}(-gov)?-[a-z]+-\d$/;
+
 /** Values from `.env.example` that must never reach production. */
 const PLACEHOLDER_PATTERN = /replace-me|changeme|change-me|example|secret123/i;
 
@@ -310,22 +313,51 @@ export class EnvironmentVariables {
   STRIPE_WEBHOOK_SECRET?: string;
 
   // --- AI (AWS Bedrock) ------------------------------------------------------
-  /** Bedrock API key (bearer). AI endpoints answer 503 while unset. */
+  /**
+   * Auth: the AWS key pair (SigV4) wins when both are set; otherwise
+   * BEDROCK_API_KEY (bearer); with neither, AI endpoints answer 503.
+   */
+  @IsOptional()
+  @IsString()
+  @Matches(/^[A-Z0-9]{16,128}$/, {
+    message: 'AWS_ACCESS_KEY_ID must be 16-128 uppercase letters or digits',
+  })
+  AWS_ACCESS_KEY_ID?: string;
+
+  @IsOptional()
+  @IsString()
+  @MinLength(16)
+  AWS_SECRET_ACCESS_KEY?: string;
+
+  /** Region fallback for Bedrock when BEDROCK_REGION is unset. */
+  @IsOptional()
+  @Matches(REGION_PATTERN, { message: 'AWS_REGION must look like us-east-1' })
+  AWS_REGION?: string;
+
+  /** Bedrock API key (bearer), used only when the AWS key pair is unset. */
   @IsOptional()
   @IsString()
   @MinLength(20)
   BEDROCK_API_KEY?: string;
 
-  @Matches(/^[a-z]{2}(-gov)?-[a-z]+-\d$/, {
+  /** Region precedence: BEDROCK_REGION, then AWS_REGION, then us-east-1. */
+  @IsOptional()
+  @Matches(REGION_PATTERN, {
     message: 'BEDROCK_REGION must look like us-east-1',
   })
-  BEDROCK_REGION: string = 'us-east-1';
+  BEDROCK_REGION?: string;
 
   /** Comma-separated allowlist; the first is the default model. */
   @IsString()
   @IsNotEmpty()
   BEDROCK_ALLOWED_MODELS: string =
     'us.anthropic.claude-sonnet-4-5-20250929-v1:0,anthropic.claude-sonnet-4-5-20250929-v1:0';
+
+  /** Model for project-name generation (must be in the allowlist); unset = the default model. */
+  @IsOptional()
+  @IsString()
+  @IsNotEmpty()
+  BEDROCK_NAMING_MODEL?: string;
 
   @toInteger()
   @IsInt()
@@ -338,6 +370,112 @@ export class EnvironmentVariables {
   @Min(10_000)
   @Max(900_000)
   BEDROCK_TIMEOUT_MS: number = 600_000;
+
+  // --- file storage (S3 + CloudFront) ---------------------------------------
+  /** Private bucket for uploads, stage payloads and exports. Unset = storage off. */
+  @IsOptional()
+  @Matches(/^[a-z0-9][a-z0-9.-]{1,61}[a-z0-9]$/, {
+    message: 'S3_BUCKET must be a valid S3 bucket name',
+  })
+  S3_BUCKET?: string;
+
+  /** Bucket region; falls back to AWS_REGION, then us-east-1. */
+  @IsOptional()
+  @Matches(REGION_PATTERN, { message: 'S3_REGION must look like us-east-1' })
+  S3_REGION?: string;
+
+  /** Optional key prefix shared by every object, e.g. `prod/`. */
+  @Matches(/^([A-Za-z0-9_-]+\/)*$/, {
+    message:
+      'S3_KEY_PREFIX must be empty or like `prod/` (segments ending in /)',
+  })
+  S3_KEY_PREFIX: string = '';
+
+  /** Custom endpoint for S3-compatible stores in development (MinIO, LocalStack). */
+  @IsOptional()
+  @IsUrl({
+    require_tld: false,
+    require_protocol: true,
+    protocols: ['http', 'https'],
+  })
+  S3_ENDPOINT?: string;
+
+  /** Distribution in front of the bucket (origin access control), e.g. https://cdn.example.com */
+  @IsOptional()
+  @IsUrl({ require_tld: false, require_protocol: true, protocols: ['https'] })
+  CLOUDFRONT_DOMAIN?: string;
+
+  /** Public key id of the distribution's trusted key group. */
+  @IsOptional()
+  @Matches(/^[A-Z0-9]{8,32}$/, {
+    message: 'CLOUDFRONT_KEY_PAIR_ID must look like K2JCJMDEHXQW5F',
+  })
+  CLOUDFRONT_KEY_PAIR_ID?: string;
+
+  /** RSA private key (PEM, `\n` escapes allowed, or base64 of the PEM). */
+  @IsOptional()
+  @IsString()
+  @MinLength(64)
+  CLOUDFRONT_PRIVATE_KEY?: string;
+
+  /** Lifetime of signed download and upload URLs. */
+  @toInteger()
+  @IsInt()
+  @Min(60)
+  @Max(86_400)
+  STORAGE_URL_TTL_SECONDS: number = 900;
+
+  /** How often queued S3 deletions and abandoned uploads are cleaned; 0 = off. */
+  @toInteger()
+  @IsInt()
+  @Min(0)
+  STORAGE_SWEEP_INTERVAL_MS: number = 300_000;
+
+  // --- component suppliers ----------------------------------------------------
+  /** Mouser Search API key (server-side only). Unset = sourcing answers 503. */
+  @IsOptional()
+  @IsString()
+  @MinLength(16)
+  MOUSER_API_KEY?: string;
+
+  /** Mouser's per-key limits (fleet-wide, counted in the database). */
+  @toInteger()
+  @IsInt()
+  @Min(1)
+  @Max(1_000)
+  MOUSER_CALLS_PER_MINUTE: number = 30;
+
+  @toInteger()
+  @IsInt()
+  @Min(1)
+  @Max(1_000_000)
+  MOUSER_CALLS_PER_DAY: number = 1_000;
+
+  @toInteger()
+  @IsInt()
+  @Min(0)
+  @Max(720)
+  MOUSER_CACHE_HOURS: number = 24;
+
+  // --- simulation (ngspice) ---------------------------------------------------
+  /** ngspice executable (path or name on PATH). */
+  @IsString()
+  @MinLength(1)
+  NGSPICE_PATH: string = 'ngspice';
+
+  /** Wall-clock limit of one ngspice analysis run. */
+  @toInteger()
+  @IsInt()
+  @Min(10)
+  @Max(3_600)
+  NGSPICE_TIMEOUT_SECONDS: number = 300;
+
+  /** Simulations running at once on this instance; extra runs wait. */
+  @toInteger()
+  @IsInt()
+  @Min(1)
+  @Max(64)
+  SIMULATION_CONCURRENCY: number = 2;
 
   // --- mail ----------------------------------------------------------------
   @IsEnum(MailTransportKind)
@@ -510,9 +648,48 @@ export function crossValidate(env: EnvironmentVariables): string[] {
     problems.push('BEDROCK_ALLOWED_MODELS must list at least one model id');
   }
 
+  if (
+    env.BEDROCK_NAMING_MODEL &&
+    !env.BEDROCK_ALLOWED_MODELS.split(',')
+      .map((model) => model.trim())
+      .includes(env.BEDROCK_NAMING_MODEL.trim())
+  ) {
+    problems.push('BEDROCK_NAMING_MODEL must be one of BEDROCK_ALLOWED_MODELS');
+  }
+
+  if (Boolean(env.AWS_ACCESS_KEY_ID) !== Boolean(env.AWS_SECRET_ACCESS_KEY)) {
+    problems.push(
+      'Set both AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY, or neither',
+    );
+  }
+
+  const cloudFront = [
+    env.CLOUDFRONT_DOMAIN,
+    env.CLOUDFRONT_KEY_PAIR_ID,
+    env.CLOUDFRONT_PRIVATE_KEY,
+  ].filter(Boolean).length;
+  if (cloudFront !== 0 && cloudFront !== 3) {
+    problems.push(
+      'Set all of CLOUDFRONT_DOMAIN, CLOUDFRONT_KEY_PAIR_ID and CLOUDFRONT_PRIVATE_KEY, or none',
+    );
+  }
+  if (cloudFront === 3 && !env.S3_BUCKET) {
+    problems.push('CLOUDFRONT_* requires S3_BUCKET');
+  }
+
   if (isProduction) {
-    if (!env.BEDROCK_API_KEY) {
-      problems.push('BEDROCK_API_KEY is required in production');
+    if (!env.S3_BUCKET || cloudFront !== 3) {
+      problems.push(
+        'File storage is required in production: S3_BUCKET and CLOUDFRONT_DOMAIN, CLOUDFRONT_KEY_PAIR_ID, CLOUDFRONT_PRIVATE_KEY',
+      );
+    }
+    if (env.S3_ENDPOINT) {
+      problems.push('S3_ENDPOINT is for local development only');
+    }
+    if (!env.BEDROCK_API_KEY && !env.AWS_ACCESS_KEY_ID) {
+      problems.push(
+        'Bedrock credentials are required in production: AWS_ACCESS_KEY_ID + AWS_SECRET_ACCESS_KEY, or BEDROCK_API_KEY',
+      );
     }
     if (!env.STRIPE_SECRET_KEY) {
       problems.push(

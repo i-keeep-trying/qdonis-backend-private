@@ -1,0 +1,8 @@
+/// State of a stage result.
+enum StudioNodeStatus {
+  running
+  ready
+  error
+
+  @@map("studio_node_status")
+}

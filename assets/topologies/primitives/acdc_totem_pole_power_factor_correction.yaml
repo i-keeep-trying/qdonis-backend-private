@@ -1,0 +1,777 @@
+id: acdc_totem_pole_power_factor_correction
+name: Totem Pole Power Factor Correction Rectifier
+description: 4kW Totem-Pole Bridgeless PFC Rectifier with Active Current Shaping Control
+  Loop. Uses GaN (HF) and Si (LF) legs for synchronous rectification. Converts 200V AC RMS (282.84V peak, 50Hz)
+  to regulated 400V DC bus across a 40 Ohm load (4kW).
+
+models:
+  - ".model nmos_hf NMOS(Vto=2 Lambda=0.01 Kp=100 Rs=0.03)"
+  - ".model nmos_lf NMOS(Vto=3 Lambda=0.01 Kp=100 Rs=0.02)"
+  - ".model Dmodel D(Is=5e-13 n=1.05 Rs=0.005 Cjo=5e-12 Tt=5e-09 Bv=650 Ibv=1e-06)"
+
+components:
+  # Reference & semantic node labels
+  - ref: GND
+    type: node
+    params:
+      node_type: ground
+
+  - ref: n_AC_L_raw
+    type: node
+    params:
+      node_type: label
+
+  - ref: n_AC_N_raw
+    type: node
+    params:
+      node_type: label
+
+  - ref: n_AC_L
+    type: node
+    params:
+      node_type: label
+
+  - ref: n_AC_N
+    type: node
+    params:
+      node_type: label
+
+  - ref: n_SW_HF
+    type: node
+    params:
+      node_type: label
+
+  - ref: n_DC_POS
+    type: node
+    params:
+      node_type: label
+
+  - ref: n_SW_HF_TOP_dsense
+    type: node
+    params:
+      node_type: label
+
+  - ref: n_SW_HF_BOT_dsense
+    type: node
+    params:
+      node_type: label
+
+  - ref: n_SW_LF_TOP_dsense
+    type: node
+    params:
+      node_type: label
+
+  - ref: n_SW_LF_BOT_dsense
+    type: node
+    params:
+      node_type: label
+
+  - ref: n_g_HF_TOP
+    type: node
+    params:
+      node_type: label
+
+  - ref: n_g_HF_BOT
+    type: node
+    params:
+      node_type: label
+
+  - ref: n_g_LF_TOP
+    type: node
+    params:
+      node_type: label
+
+  - ref: n_g_LF_BOT
+    type: node
+    params:
+      node_type: label
+
+  - ref: n_pol
+    type: node
+    params:
+      node_type: label
+
+  - ref: n_pol_sign
+    type: node
+    params:
+      node_type: label
+
+  - ref: n_Verr
+    type: node
+    params:
+      node_type: label
+
+  - ref: n_Vp
+    type: node
+    params:
+      node_type: label
+
+  - ref: n_Vint
+    type: node
+    params:
+      node_type: label
+
+  - ref: n_PI_out
+    type: node
+    params:
+      node_type: label
+
+  - ref: n_Iref
+    type: node
+    params:
+      node_type: label
+
+  - ref: n_Iact_raw
+    type: node
+    params:
+      node_type: label
+
+  - ref: n_Iact_rect
+    type: node
+    params:
+      node_type: label
+
+  - ref: n_Ierr
+    type: node
+    params:
+      node_type: label
+
+  - ref: n_duty
+    type: node
+    params:
+      node_type: label
+
+  - ref: n_duty_c
+    type: node
+    params:
+      node_type: label
+
+  - ref: n_tri
+    type: node
+    params:
+      node_type: label
+
+  - ref: n_pwm
+    type: node
+    params:
+      node_type: label
+
+  # --- Input source (200V AC RMS = 282.84V peak, 50Hz) ---
+  - ref: VAC
+    type: node
+    role: voltage_source
+    params:
+      node_type: voltage_source
+      source: sine
+      offset: 0
+      amplitude: 282.84
+      frequency: 50
+      series_resistance: 0
+
+  - ref: RAC_L_series
+    type: resistor
+    params:
+      resistance: 0.05
+      sense: false
+
+  - ref: RAC_N_series
+    type: resistor
+    params:
+      resistance: 0.05
+      sense: false
+
+  # --- PFC Inductor (480uH) ---
+  - ref: L_PFC
+    type: inductor
+    role: boost_inductor
+    params:
+      inductance: 0.00048
+      series_resistance: 0.01
+
+  # --- High-Frequency Leg (GaN) ---
+  - ref: VSW_HF_TOP_SENSE
+    type: node
+    params:
+      node_type: voltage_source
+      source: dc
+      voltage: 0
+      series_resistance: 0
+
+  - ref: SW_HF_TOP
+    type: transistor
+    role: hf_high_side
+    params:
+      family: mosfet
+      type: nmos
+      model: nmos_hf
+      sense: false
+
+  - ref: DD_HF_TOP
+    type: diode
+    role: body_diode
+    params:
+      model: Dmodel
+      sense: false
+
+  - ref: VSW_HF_BOT_SENSE
+    type: node
+    params:
+      node_type: voltage_source
+      source: dc
+      voltage: 0
+      series_resistance: 0
+
+  - ref: SW_HF_BOT
+    type: transistor
+    role: hf_low_side
+    params:
+      family: mosfet
+      type: nmos
+      model: nmos_hf
+      sense: false
+
+  - ref: DD_HF_BOT
+    type: diode
+    role: body_diode
+    params:
+      model: Dmodel
+      sense: false
+
+  # --- Low-Frequency Leg (Si) ---
+  - ref: VSW_LF_TOP_SENSE
+    type: node
+    params:
+      node_type: voltage_source
+      source: dc
+      voltage: 0
+      series_resistance: 0
+
+  - ref: SW_LF_TOP
+    type: transistor
+    role: lf_high_side
+    params:
+      family: mosfet
+      type: nmos
+      model: nmos_lf
+      sense: false
+
+  - ref: DD_LF_TOP
+    type: diode
+    role: body_diode
+    params:
+      model: Dmodel
+      sense: false
+
+  - ref: VSW_LF_BOT_SENSE
+    type: node
+    params:
+      node_type: voltage_source
+      source: dc
+      voltage: 0
+      series_resistance: 0
+
+  - ref: SW_LF_BOT
+    type: transistor
+    role: lf_low_side
+    params:
+      family: mosfet
+      type: nmos
+      model: nmos_lf
+      sense: false
+
+  - ref: DD_LF_BOT
+    type: diode
+    role: body_diode
+    params:
+      model: Dmodel
+      sense: false
+
+  # --- Output Filter & Load (400V DC, 4kW) ---
+  - ref: Cout
+    type: capacitor
+    role: output_filter_cap
+    params:
+      capacitance: 0.00272
+      series_resistance: 0.01
+      ic: 400.0
+
+  - ref: R_LOAD
+    type: resistor
+    role: load
+    params:
+      resistance: 40.0
+      sense: false
+
+  # ========================================================
+  # --- Active Current Shaping Controller (Closed-Loop) ---
+  # ========================================================
+  # 1. Smooth AC Polarity Detection
+  - ref: B_pol
+    type: b_source
+    params:
+      expression: "0.5 * (1 + tanh(V(n_AC_L, n_AC_N)*100))"
+
+  - ref: B_pol_sign
+    type: b_source
+    params:
+      expression: "tanh(V(n_AC_L, n_AC_N)*100)"
+
+  # 2. Outer Voltage Loop (PI Controller)
+  - ref: B_Verr
+    type: b_source
+    params:
+      expression: "400 - V(n_DC_POS)"
+
+  - ref: B_Vp
+    type: b_source
+    params:
+      expression: "V(n_Verr) * 0.01"
+
+  - ref: G_Vint
+    type: g_source
+    params:
+      gain: 0.1
+
+  - ref: C_Vint
+    type: capacitor
+    params:
+      capacitance: 0.001
+      ic: 28.28
+      sense: false
+
+  - ref: R_Vint
+    type: resistor
+    params:
+      resistance: 100000000.0
+      sense: false
+
+  - ref: B_PI_out
+    type: b_source
+    params:
+      expression: "max(0, min(45, V(n_Vp) + V(n_Vint)))"
+
+  # 3. Dynamic Target Peak Current
+  - ref: B_Iref
+    type: b_source
+    params:
+      expression: "V(n_PI_out) * abs(V(n_AC_L, n_AC_N) / 282.84)"
+
+  # 4. Filtered Synchronously Rectified Actual Current
+  - ref: B_Iact_raw
+    type: b_source
+    params:
+      expression: "I(VL_PFC_SENSE) * V(n_pol_sign)"
+
+  - ref: R_Ifilt
+    type: resistor
+    params:
+      resistance: 100.0
+      sense: false
+
+  - ref: C_Ifilt
+    type: capacitor
+    params:
+      capacitance: 1.0e-07
+      sense: false
+
+  # 5. Current Error Amplifier
+  - ref: B_Ierr
+    type: b_source
+    params:
+      expression: "V(n_Iref) - V(n_Iact_rect)"
+
+  # 6. Duty Cycle Math (Feed-forward + Proportional)
+  - ref: B_Duty
+    type: b_source
+    params:
+      expression: "1 - ( abs(V(n_AC_L, n_AC_N)) / 400 ) + (0.05 * V(n_Ierr))"
+
+  - ref: B_Duty_Clamped
+    type: b_source
+    params:
+      expression: "max(0.02, min(0.98, V(n_duty)))"
+
+  # 7. PWM Generation (100kHz Sawtooth Carrier)
+  - ref: V_tri
+    type: node
+    role: voltage_source
+    params:
+      node_type: voltage_source
+      source: pulse
+      v1: 0
+      v2: 1
+      td: 0
+      tr: 5.0e-06
+      tf: 5.0e-06
+      pw: 0
+      per: 1.0e-05
+      series_resistance: 0
+
+  - ref: B_PWM
+    type: b_source
+    params:
+      expression: "V(n_duty_c) > V(n_tri) ? 1 : 0"
+
+  # 8. Gate Routing
+  - ref: E_g_LF_BOT
+    type: e_source
+    params:
+      expression: "V(n_pol) * 12"
+
+  - ref: E_g_LF_TOP
+    type: e_source
+    params:
+      expression: "(1 - V(n_pol)) * 12"
+
+  - ref: E_g_HF_BOT
+    type: e_source
+    params:
+      expression: "(V(n_pol) * V(n_pwm) + (1 - V(n_pol)) * (1 - V(n_pwm))) * 12"
+
+  - ref: E_g_HF_TOP
+    type: e_source
+    params:
+      expression: "((1 - V(n_pol)) * V(n_pwm) + V(n_pol) * (1 - V(n_pwm))) * 12"
+
+nets:
+  # Circuit Ground (0)
+  - - - GND
+      - pin
+    - - SW_HF_BOT
+      - source
+    - - DD_HF_BOT
+      - anode
+    - - SW_LF_BOT
+      - source
+    - - DD_LF_BOT
+      - anode
+    - - Cout
+      - neg
+    - - R_LOAD
+      - neg
+    - - B_pol
+      - '-'
+    - - B_pol_sign
+      - '-'
+    - - B_Verr
+      - '-'
+    - - B_Vp
+      - '-'
+    - - G_Vint
+      - +
+    - - G_Vint
+      - ctrl-
+    - - C_Vint
+      - neg
+    - - R_Vint
+      - neg
+    - - B_PI_out
+      - '-'
+    - - B_Iref
+      - '-'
+    - - B_Iact_raw
+      - '-'
+    - - C_Ifilt
+      - neg
+    - - B_Ierr
+      - '-'
+    - - B_Duty
+      - '-'
+    - - B_Duty_Clamped
+      - '-'
+    - - V_tri
+      - '-'
+    - - B_PWM
+      - '-'
+    - - E_g_LF_BOT
+      - '-'
+    - - E_g_HF_BOT
+      - '-'
+
+  # AC input lines raw
+  - - - n_AC_L_raw
+      - pin
+    - - VAC
+      - +
+    - - RAC_L_series
+      - pos
+
+  - - - n_AC_N_raw
+      - pin
+    - - VAC
+      - '-'
+    - - RAC_N_series
+      - pos
+
+  # AC input Line L
+  - - - n_AC_L
+      - pin
+    - - RAC_L_series
+      - neg
+    - - L_PFC
+      - pos
+
+  # AC input Neutral N
+  - - - n_AC_N
+      - pin
+    - - RAC_N_series
+      - neg
+    - - SW_LF_TOP
+      - source
+    - - DD_LF_TOP
+      - anode
+    - - VSW_LF_BOT_SENSE
+      - +
+    - - E_g_LF_TOP
+      - '-'
+
+  # HF switch node (between inductor and HF GaN leg)
+  - - - n_SW_HF
+      - pin
+    - - L_PFC
+      - neg
+    - - SW_HF_TOP
+      - source
+    - - DD_HF_TOP
+      - anode
+    - - VSW_HF_BOT_SENSE
+      - +
+    - - E_g_HF_TOP
+      - '-'
+
+  # DC positive bus (400V)
+  - - - n_DC_POS
+      - pin
+    - - VSW_HF_TOP_SENSE
+      - +
+    - - VSW_LF_TOP_SENSE
+      - +
+    - - Cout
+      - pos
+    - - R_LOAD
+      - pos
+
+  # Switch drain sense nodes
+  - - - n_SW_HF_TOP_dsense
+      - pin
+    - - VSW_HF_TOP_SENSE
+      - '-'
+    - - SW_HF_TOP
+      - drain
+    - - DD_HF_TOP
+      - cathode
+
+  - - - n_SW_HF_BOT_dsense
+      - pin
+    - - VSW_HF_BOT_SENSE
+      - '-'
+    - - SW_HF_BOT
+      - drain
+    - - DD_HF_BOT
+      - cathode
+
+  - - - n_SW_LF_TOP_dsense
+      - pin
+    - - VSW_LF_TOP_SENSE
+      - '-'
+    - - SW_LF_TOP
+      - drain
+    - - DD_LF_TOP
+      - cathode
+
+  - - - n_SW_LF_BOT_dsense
+      - pin
+    - - VSW_LF_BOT_SENSE
+      - '-'
+    - - SW_LF_BOT
+      - drain
+    - - DD_LF_BOT
+      - cathode
+
+  # Switch gate nodes
+  - - - n_g_HF_TOP
+      - pin
+    - - SW_HF_TOP
+      - gate
+    - - E_g_HF_TOP
+      - +
+
+  - - - n_g_HF_BOT
+      - pin
+    - - SW_HF_BOT
+      - gate
+    - - E_g_HF_BOT
+      - +
+
+  - - - n_g_LF_TOP
+      - pin
+    - - SW_LF_TOP
+      - gate
+    - - E_g_LF_TOP
+      - +
+
+  - - - n_g_LF_BOT
+      - pin
+    - - SW_LF_BOT
+      - gate
+    - - E_g_LF_BOT
+      - +
+
+  # Control signals
+  - - - n_pol
+      - pin
+    - - B_pol
+      - +
+
+  - - - n_pol_sign
+      - pin
+    - - B_pol_sign
+      - +
+
+  - - - n_Verr
+      - pin
+    - - B_Verr
+      - +
+    - - G_Vint
+      - ctrl+
+
+  - - - n_Vp
+      - pin
+    - - B_Vp
+      - +
+
+  - - - n_Vint
+      - pin
+    - - G_Vint
+      - '-'
+    - - C_Vint
+      - pos
+    - - R_Vint
+      - pos
+
+  - - - n_PI_out
+      - pin
+    - - B_PI_out
+      - +
+
+  - - - n_Iref
+      - pin
+    - - B_Iref
+      - +
+
+  - - - n_Iact_raw
+      - pin
+    - - B_Iact_raw
+      - +
+    - - R_Ifilt
+      - pos
+
+  - - - n_Iact_rect
+      - pin
+    - - R_Ifilt
+      - neg
+    - - C_Ifilt
+      - pos
+
+  - - - n_Ierr
+      - pin
+    - - B_Ierr
+      - +
+
+  - - - n_duty
+      - pin
+    - - B_Duty
+      - +
+
+  - - - n_duty_c
+      - pin
+    - - B_Duty_Clamped
+      - +
+
+  - - - n_tri
+      - pin
+    - - V_tri
+      - +
+
+  - - - n_pwm
+      - pin
+    - - B_PWM
+      - +
+
+analysis:
+  spice_settings:
+    rshunt: 1.0e+06
+    reltol: 0.001
+    abstol: 1.0e-06
+    vntol: 0.001
+    chgtol: 1.0e-07
+    gmin: 1.0e-09
+    method: gear
+    maxord: 2
+    trtol: 4
+  transient:
+    requirements:
+      - rid: tr_totem_pfc
+        requirement: Verify 400V DC output and active current shaping PFC operation
+        environment:
+          - ref: time_domain
+            t_step: 1.0e-06
+            t_stop: 0.04
+            t_max_step: 1.0e-06
+        measurement:
+          - ref: VOUT
+            plot: true
+            quantity: voltage
+            nets:
+              - - R_LOAD
+                - pos
+              - - R_LOAD
+                - neg
+            data:
+              - name: Vout_avg
+                spice_command: avg
+                description: Average Output Voltage in steady state (last 10ms)
+              - name: Vout_ripple_vpp
+                spice_command: pp
+                description: Output Ripple peak-to-peak in steady state
+          - ref: IIN
+            plot: true
+            quantity: current
+            component: L_PFC
+            data:
+              - name: Iin_rms
+                spice_command: rms
+                description: RMS Input AC Inductor Current
+              - name: Iin_peak
+                spice_command: max
+                description: Peak Input AC Inductor Current
+          - ref: VAC
+            plot: true
+            quantity: voltage
+            nets:
+              - - n_AC_L
+                - pin
+              - - n_AC_N
+                - pin
+        outputs:
+          - var: vout_avg_v
+            formula: abs([Vout_avg])
+            description: Average Output Voltage
+          - var: iin_rms_a
+            formula: abs([Iin_rms])
+            description: RMS Input Current
+          - var: pout_avg_w
+            formula: (abs([Vout_avg])**2) / 40.0
+            description: Delivered Output Power
+metadata:
+  stage:
+    - pfc
+    - rectifier
+  topology: totem_pole_pfc
+  control: active_current_shaping
+  tags:
+    - totem-pole
+    - pfc
+    - gan
+    - acdc
+    - bridgeless

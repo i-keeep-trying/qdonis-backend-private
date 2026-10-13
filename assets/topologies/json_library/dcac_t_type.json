@@ -1,0 +1,625 @@
+{
+  "components": [
+    {
+      "id": "VIN_TOP",
+      "type": "V",
+      "x": -520,
+      "y": -620,
+      "rotation": 0,
+      "parameters": {
+        "value": "12"
+      }
+    },
+    {
+      "id": "VIN_BOT",
+      "type": "V",
+      "x": -520,
+      "y": -360,
+      "rotation": 0,
+      "parameters": {
+        "value": "12"
+      }
+    },
+    {
+      "id": "M_S1A",
+      "type": "MOSFET",
+      "x": -140,
+      "y": -660,
+      "rotation": 0,
+      "parameters": {
+        "Ron": "10m",
+        "Roff": "1M"
+      }
+    },
+    {
+      "id": "M_S4A",
+      "type": "MOSFET",
+      "x": -140,
+      "y": -320,
+      "rotation": 0,
+      "parameters": {
+        "Ron": "10m",
+        "Roff": "1M"
+      }
+    },
+    {
+      "id": "M_S1B",
+      "type": "MOSFET",
+      "x": 20,
+      "y": -660,
+      "rotation": 0,
+      "parameters": {
+        "Ron": "10m",
+        "Roff": "1M"
+      }
+    },
+    {
+      "id": "M_S4B",
+      "type": "MOSFET",
+      "x": 20,
+      "y": -320,
+      "rotation": 0,
+      "parameters": {
+        "Ron": "10m",
+        "Roff": "1M"
+      }
+    },
+    {
+      "id": "M_S1C",
+      "type": "MOSFET",
+      "x": 160,
+      "y": -660,
+      "rotation": 0,
+      "parameters": {
+        "Ron": "10m",
+        "Roff": "1M"
+      }
+    },
+    {
+      "id": "M_S4C",
+      "type": "MOSFET",
+      "x": 160,
+      "y": -320,
+      "rotation": 0,
+      "parameters": {
+        "Ron": "10m",
+        "Roff": "1M"
+      }
+    },
+    {
+      "id": "M_S2A",
+      "type": "MOSFET",
+      "x": -380,
+      "y": -540,
+      "rotation": 90,
+      "parameters": {
+        "Ron": "10m",
+        "Roff": "1M"
+      }
+    },
+    {
+      "id": "M_S3A",
+      "type": "MOSFET",
+      "x": -260,
+      "y": -540,
+      "rotation": 270,
+      "parameters": {
+        "Ron": "10m",
+        "Roff": "1M"
+      }
+    },
+    {
+      "id": "L1",
+      "type": "L",
+      "x": 300,
+      "y": -540,
+      "rotation": 270,
+      "parameters": {
+        "L": "10m",
+        "esr": "50m",
+        "iL0": "0"
+      }
+    },
+    {
+      "id": "L2",
+      "type": "L",
+      "x": 300,
+      "y": -480,
+      "rotation": 270,
+      "parameters": {
+        "L": "10m",
+        "esr": "50m",
+        "iL0": "0"
+      }
+    },
+    {
+      "id": "L3",
+      "type": "L",
+      "x": 300,
+      "y": -420,
+      "rotation": 270,
+      "parameters": {
+        "L": "10m",
+        "esr": "50m",
+        "iL0": "0"
+      }
+    },
+    {
+      "id": "R15",
+      "type": "R",
+      "x": 420,
+      "y": -540,
+      "rotation": 270,
+      "parameters": {
+        "value": "10",
+        "esr": "0"
+      }
+    },
+    {
+      "id": "R16",
+      "type": "R",
+      "x": 420,
+      "y": -480,
+      "rotation": 270,
+      "parameters": {
+        "value": "10",
+        "esr": "0"
+      }
+    },
+    {
+      "id": "R17",
+      "type": "R",
+      "x": 420,
+      "y": -420,
+      "rotation": 270,
+      "parameters": {
+        "value": "10",
+        "esr": "0"
+      }
+    },
+    {
+      "id": "M_S2B",
+      "type": "MOSFET",
+      "x": -380,
+      "y": -480,
+      "rotation": 90,
+      "parameters": {
+        "Ron": "10m",
+        "Roff": "1M"
+      }
+    },
+    {
+      "id": "M_S3B",
+      "type": "MOSFET",
+      "x": -260,
+      "y": -480,
+      "rotation": 270,
+      "parameters": {
+        "Ron": "10m",
+        "Roff": "1M"
+      }
+    },
+    {
+      "id": "M_S2C",
+      "type": "MOSFET",
+      "x": -380,
+      "y": -420,
+      "rotation": 90,
+      "parameters": {
+        "Ron": "10m",
+        "Roff": "1M"
+      }
+    },
+    {
+      "id": "M_S3C",
+      "type": "MOSFET",
+      "x": -260,
+      "y": -420,
+      "rotation": 270,
+      "parameters": {
+        "Ron": "10m",
+        "Roff": "1M"
+      }
+    }
+  ],
+  "wires": [
+    {
+      "id": "W_DC_MID",
+      "from": {
+        "type": "pin",
+        "compId": "VIN_TOP",
+        "terminal": "B"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "VIN_BOT",
+        "terminal": "A"
+      }
+    },
+    {
+      "id": "W_DC_POS",
+      "from": {
+        "type": "pin",
+        "compId": "VIN_TOP",
+        "terminal": "A"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "M_S1A",
+        "terminal": "D"
+      },
+      "manualPath": [
+        {
+          "x": -520,
+          "y": -660
+        },
+        {
+          "x": -520,
+          "y": -720
+        },
+        {
+          "x": -140,
+          "y": -720
+        },
+        {
+          "x": -140,
+          "y": -700
+        }
+      ]
+    },
+    {
+      "id": "W_POS_BUS1",
+      "from": {
+        "type": "pin",
+        "compId": "M_S1A",
+        "terminal": "D"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "M_S1B",
+        "terminal": "D"
+      }
+    },
+    {
+      "id": "W_POS_BUS2",
+      "from": {
+        "type": "pin",
+        "compId": "M_S1B",
+        "terminal": "D"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "M_S1C",
+        "terminal": "D"
+      }
+    },
+    {
+      "id": "W_DC_NEG",
+      "from": {
+        "type": "pin",
+        "compId": "VIN_BOT",
+        "terminal": "B"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "M_S4A",
+        "terminal": "S"
+      },
+      "manualPath": [
+        {
+          "x": -520,
+          "y": -320
+        },
+        {
+          "x": -520,
+          "y": -260
+        },
+        {
+          "x": -140,
+          "y": -260
+        },
+        {
+          "x": -140,
+          "y": -280
+        }
+      ]
+    },
+    {
+      "id": "W_NEG_BUS1",
+      "from": {
+        "type": "pin",
+        "compId": "M_S4A",
+        "terminal": "S"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "M_S4B",
+        "terminal": "S"
+      }
+    },
+    {
+      "id": "W_NEG_BUS2",
+      "from": {
+        "type": "pin",
+        "compId": "M_S4B",
+        "terminal": "S"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "M_S4C",
+        "terminal": "S"
+      }
+    },
+    {
+      "id": "W_PHASE_A_MID",
+      "from": {
+        "type": "pin",
+        "compId": "M_S1A",
+        "terminal": "S"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "M_S4A",
+        "terminal": "D"
+      }
+    },
+    {
+      "id": "W_PHASE_B_MID",
+      "from": {
+        "type": "pin",
+        "compId": "M_S1B",
+        "terminal": "S"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "M_S4B",
+        "terminal": "D"
+      }
+    },
+    {
+      "id": "W_PHASE_C_MID",
+      "from": {
+        "type": "pin",
+        "compId": "M_S1C",
+        "terminal": "S"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "M_S4C",
+        "terminal": "D"
+      }
+    },
+    {
+      "id": "W21",
+      "from": {
+        "type": "pin",
+        "compId": "M_S2A",
+        "terminal": "D"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "M_S3A",
+        "terminal": "D"
+      }
+    },
+    {
+      "id": "W1",
+      "from": {
+        "type": "pin",
+        "compId": "M_S2B",
+        "terminal": "D"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "M_S3B",
+        "terminal": "D"
+      }
+    },
+    {
+      "id": "W2",
+      "from": {
+        "type": "pin",
+        "compId": "M_S2C",
+        "terminal": "D"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "M_S3C",
+        "terminal": "D"
+      }
+    },
+    {
+      "id": "W22",
+      "from": {
+        "type": "pin",
+        "compId": "M_S3A",
+        "terminal": "S"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "M_S1A",
+        "terminal": "S"
+      }
+    },
+    {
+      "id": "W23",
+      "from": {
+        "type": "pin",
+        "compId": "M_S3B",
+        "terminal": "S"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "M_S4B",
+        "terminal": "D"
+      }
+    },
+    {
+      "id": "W24",
+      "from": {
+        "type": "pin",
+        "compId": "M_S3C",
+        "terminal": "S"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "M_S4C",
+        "terminal": "D"
+      }
+    },
+    {
+      "id": "W26",
+      "from": {
+        "type": "pin",
+        "compId": "M_S2B",
+        "terminal": "S"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "M_S2A",
+        "terminal": "S"
+      }
+    },
+    {
+      "id": "W27",
+      "from": {
+        "type": "pin",
+        "compId": "M_S2C",
+        "terminal": "S"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "M_S2B",
+        "terminal": "S"
+      }
+    },
+    {
+      "id": "W28",
+      "from": {
+        "type": "pin",
+        "compId": "M_S2B",
+        "terminal": "S"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "VIN_BOT",
+        "terminal": "A"
+      }
+    },
+    {
+      "id": "W29",
+      "from": {
+        "type": "pin",
+        "compId": "L1",
+        "terminal": "B"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "R15",
+        "terminal": "A"
+      }
+    },
+    {
+      "id": "W30",
+      "from": {
+        "type": "pin",
+        "compId": "L2",
+        "terminal": "B"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "R16",
+        "terminal": "A"
+      }
+    },
+    {
+      "id": "W31",
+      "from": {
+        "type": "pin",
+        "compId": "L3",
+        "terminal": "B"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "R17",
+        "terminal": "A"
+      }
+    },
+    {
+      "id": "W32",
+      "from": {
+        "type": "pin",
+        "compId": "L2",
+        "terminal": "A"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "M_S4B",
+        "terminal": "D"
+      }
+    },
+    {
+      "id": "W33",
+      "from": {
+        "type": "pin",
+        "compId": "L3",
+        "terminal": "A"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "M_S4C",
+        "terminal": "D"
+      }
+    },
+    {
+      "id": "W34",
+      "from": {
+        "type": "pin",
+        "compId": "L1",
+        "terminal": "A"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "M_S1A",
+        "terminal": "S"
+      }
+    },
+    {
+      "id": "W35",
+      "from": {
+        "type": "pin",
+        "compId": "R15",
+        "terminal": "B"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "R17",
+        "terminal": "B"
+      }
+    },
+    {
+      "id": "W36",
+      "from": {
+        "type": "pin",
+        "compId": "R16",
+        "terminal": "B"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "R15",
+        "terminal": "B"
+      }
+    }
+  ],
+  "plotConfiguration": {
+    "plots": []
+  },
+  "simulationSettings": {
+    "stopTime": "0.05",
+    "stepSize": "1e-5",
+    "stepType": "fixed",
+    "solver": "euler"
+  },
+  "id": "dcac_t_type",
+  "name": "T Type Inverter"
+}

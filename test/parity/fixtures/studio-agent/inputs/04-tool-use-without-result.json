@@ -1,0 +1,23 @@
+{
+  "name": "04-tool-use-without-result",
+  "description": "Tool uses answered by plain text get synthesized '(no result recorded)' results; a history ending with an assistant tool use gets a synthesized result turn.",
+  "messages": [
+    { "role": "user", "content": [{ "type": "text", "text": "Show me a flyback and ask me about isolation." }] },
+    {
+      "role": "assistant",
+      "content": [
+        { "type": "tool_use", "id": "tu_a", "name": "select_topology", "input": { "topology_id": "acdc_flyback" } },
+        { "type": "tool_use", "id": "tu_b", "name": "ask_user", "input": { "question": "Isolated?", "options": [{ "label": "Yes" }, { "label": "No" }] } }
+      ]
+    },
+    { "role": "user", "content": [{ "type": "text", "text": "Yes, isolated please." }] },
+    {
+      "role": "assistant",
+      "content": [
+        { "type": "text", "text": "Designing now." },
+        { "type": "tool_use", "id": "tu_c", "name": "run_design", "input": {} }
+      ]
+    }
+  ],
+  "project_state": { "visualization": { "topology_id": "acdc_flyback", "status": "done", "has_schematic": true } }
+}

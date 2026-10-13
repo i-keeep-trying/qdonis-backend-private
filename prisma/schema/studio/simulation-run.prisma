@@ -1,0 +1,29 @@
+/// A queued server job for one Studio node (ngspice run, design sizing, constraints). Workers on any
+/// instance claim runs with `FOR UPDATE SKIP LOCKED`; a claim holds a lease
+/// that the worker renews while ngspice runs, so a crashed worker's run is
+/// picked up again (or failed after `maxAttempts`).
+model SimulationRun {
+  id          String              @id @default(uuid()) @db.Uuid
+  projectId   String              @map("project_id") @db.Uuid
+  /// Studio node (`studio_nodes.id`) that receives the result.
+  nodeId      String              @map("node_id") @db.VarChar(100)
+  kind        SimulationRunKind   @default(simulation)
+  status      SimulationRunStatus @default(queued)
+  /// Simulation: `{ topologyId, analysisCirs, ... }`; design: `{ topologyId, parameters, ... }`.
+  input       Json
+  attempts    Int                 @default(0)
+  error       String?
+  /// A running claim expires here unless the worker renews it.
+  leaseUntil  DateTime?           @map("lease_until") @db.Timestamptz(3)
+  createdById String?             @map("created_by_id") @db.Uuid
+  createdAt   DateTime            @default(now()) @map("created_at") @db.Timestamptz(3)
+  startedAt   DateTime?           @map("started_at") @db.Timestamptz(3)
+  finishedAt  DateTime?           @map("finished_at") @db.Timestamptz(3)
+
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  createdBy User?   @relation("SimulationRunAuthor", fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@index([status, createdAt])
+  @@index([projectId, nodeId])
+  @@map("simulation_runs")
+}

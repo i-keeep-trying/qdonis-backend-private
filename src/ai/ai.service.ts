@@ -6,7 +6,7 @@ import { SubscriptionsService } from '../billing/subscriptions.service';
 import { TokensService } from '../billing/tokens.service';
 import { AppError, ErrorCode } from '../common/errors/error-codes';
 import { SettingsService } from '../settings/settings.service';
-import { BedrockClient } from './bedrock.client';
+import { BedrockClient } from './bedrock/bedrock.client';
 import type { ConverseDto } from './dto/converse.dto';
 
 export interface ConverseOutcome {
@@ -15,6 +15,22 @@ export interface ConverseOutcome {
   /** Tokens deducted from the balance (after the step multiplier). */
   charged: number;
   balance: number;
+}
+
+export interface UsageCharge {
+  modelId: string;
+  /** Pipeline step, for the admin step multiplier; none = multiplier 1. */
+  step?: string;
+  inputTokens: number;
+  outputTokens: number;
+  /** Extra ledger metadata (project, team, acting user). */
+  context?: Record<string, string | null>;
+}
+
+export interface ChargeOutcome {
+  charged: number;
+  balance: number;
+  multiplier: number;
 }
 
 /**
@@ -33,10 +49,13 @@ export class AiService {
     private readonly settings: SettingsService,
   ) {}
 
-  /** Validates config, model and balance. Throws before any streaming starts. */
-  async prepare(userId: string, dto: ConverseDto): Promise<string> {
+  /**
+   * Validates config, model and balance; returns the model id to use. Throws
+   * before any streaming starts.
+   */
+  async prepare(userId: string, requestedModel?: string): Promise<string> {
     this.bedrock.assertConfigured();
-    const modelId = this.bedrock.resolveModel(dto.modelId);
+    const modelId = this.bedrock.resolveModel(requestedModel);
     await this.subscriptions.ensureAccount(userId);
     const balance = await this.tokens.balance(userId);
     if (balance <= 0) {
@@ -61,33 +80,55 @@ export class AiService {
   ): Promise<ConverseOutcome> {
     const result = await this.bedrock.converse({
       modelId,
-      messages: dto.messages,
+      messages: dto.messages.map((m) => ({
+        role: m.role,
+        content: [{ text: m.content }],
+      })),
       temperature: dto.temperature ?? 0.25,
       maxTokens: dto.maxTokens ?? 64_000,
       signal,
     });
+    const { inputTokens, outputTokens } = result.usage;
 
-    const totalTokens = result.inputTokens + result.outputTokens;
-    const multiplier = await this.stepMultiplier(dto.step);
-    const amount = Math.ceil(totalTokens * multiplier);
-    const { charged, balance } = await this.charge(userId, amount, {
+    const { charged, balance } = await this.chargeUsage(userId, {
       modelId,
-      step: dto.step ?? null,
-      inputTokens: result.inputTokens,
-      outputTokens: result.outputTokens,
-      multiplier,
+      step: dto.step,
+      inputTokens,
+      outputTokens,
     });
 
     return {
-      content: result.content,
+      content: result.text,
       usage: {
-        inputTokens: result.inputTokens,
-        outputTokens: result.outputTokens,
-        totalTokens,
+        inputTokens,
+        outputTokens,
+        totalTokens: inputTokens + outputTokens,
       },
       charged,
       balance,
     };
+  }
+
+  /**
+   * Charges one completed AI call: `ceil((input + output) * multiplier)`,
+   * under a fresh idempotency key. Call exactly once per provider call.
+   */
+  async chargeUsage(
+    userId: string,
+    usage: UsageCharge,
+  ): Promise<ChargeOutcome> {
+    const totalTokens = usage.inputTokens + usage.outputTokens;
+    const multiplier = await this.stepMultiplier(usage.step);
+    const amount = Math.ceil(totalTokens * multiplier);
+    const { charged, balance } = await this.charge(userId, amount, {
+      ...(usage.context ?? {}),
+      modelId: usage.modelId,
+      step: usage.step ?? null,
+      inputTokens: usage.inputTokens,
+      outputTokens: usage.outputTokens,
+      multiplier,
+    });
+    return { charged, balance, multiplier };
   }
 
   /**

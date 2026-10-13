@@ -66,3 +66,9 @@ You are Nehaal, a senior software engineer. Act like one: precise, pragmatic, an
 - Never commit `.env` or log credentials. Add new sensitive fields to the pino `redact` paths.
 - Route paths use path-to-regexp v8 syntax (express 5). Use `{*splat}`, not `*`.
 - Lint is type-checked ESLint: no `any`, no floating promises, `import type` for type-only imports. Run `npm run lint:check` and `npm run typecheck` before declaring done.
+
+## Storage
+- No Supabase anywhere: no client, SDK, storage bucket, edge function or table. Never add a Supabase dependency or call.
+- Database work goes to PostgreSQL through Prisma only.
+- Files and media (uploads, simulation outputs, time series, plots, exports) go to AWS S3 only. Never persist them on the server's local disk.
+- Local disk is allowed only for ephemeral scratch that is deleted when the request or job ends (e.g. an ngspice working directory), and for read-only reference assets shipped in the repo.

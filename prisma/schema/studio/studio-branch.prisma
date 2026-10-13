@@ -1,0 +1,30 @@
+/// A named line of work in a project's Studio graph, shared by everyone with
+/// access to the project. `headNodeId` is its latest result (null: nothing
+/// yet). The first branch by `position` is the project's default.
+model StudioBranch {
+  id               String   @db.VarChar(100)
+  projectId        String   @map("project_id") @db.Uuid
+  name             String   @db.VarChar(100)
+  /// lower(name): branch names are unique per project, ignoring case.
+  nameKey          String   @map("name_key") @db.VarChar(100)
+  headNodeId       String?  @map("head_node_id") @db.VarChar(100)
+  /// Node the branch was created from (null: the project root).
+  forkedFromNodeId String?  @map("forked_from_node_id") @db.VarChar(100)
+  colorIndex       Int      @default(0) @map("color_index")
+  /// Display and default order (gaps allowed after deletes).
+  position         Int      @default(0)
+  createdById      String?  @map("created_by_id") @db.Uuid
+  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt        DateTime @default(now()) @map("updated_at") @db.Timestamptz(3)
+
+  project    Project              @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  head       StudioNode?          @relation("StudioBranchHead", fields: [projectId, headNodeId], references: [projectId, id], onDelete: NoAction, onUpdate: NoAction)
+  forkedFrom StudioNode?          @relation("StudioBranchForkPoint", fields: [projectId, forkedFromNodeId], references: [projectId, id], onDelete: NoAction, onUpdate: NoAction)
+  createdBy  User?                @relation("StudioBranchAuthor", fields: [createdById], references: [id], onDelete: SetNull)
+  cursors    StudioBranchCursor[]
+
+  @@id([projectId, id])
+  @@unique([projectId, nameKey])
+  @@index([projectId, position])
+  @@map("studio_branches")
+}

@@ -1,0 +1,41 @@
+{
+  "name": "06-empty-and-invalid-blocks",
+  "description": "Empty / whitespace-only text (Python str.strip whitespace incl. U+001F and U+0085, not U+FEFF), a message with no blocks, unknown block types, tool_use in a user turn, tool_result in an assistant turn, missing ids/names, non-object tool input.",
+  "messages": [
+    {
+      "role": "user",
+      "content": [
+        { "type": "text", "text": "   " },
+        { "type": "text" },
+        { "type": "text", "text": "\u001f Hello \u001f" },
+        { "type": "text", "text": "\ufeffBOM stays" },
+        { "type": "text", "text": "\u0085\u00a0 nel and nbsp \u2003" },
+        { "type": "image" },
+        { "type": "tool_use", "id": "tu_user_side", "name": "run_design", "input": {} },
+        { "type": "tool_result", "content": "no id" }
+      ]
+    },
+    { "role": "assistant", "content": [] },
+    {
+      "role": "assistant",
+      "content": [
+        { "type": "text", "text": "\n\t" },
+        { "type": "tool_result", "tool_use_id": "tu_x", "content": "assistant-side result" },
+        { "type": "tool_use", "name": "run_design", "input": {} },
+        { "type": "tool_use", "id": "tu_noname", "input": {} },
+        { "type": "tool_use", "id": "tu_list_input", "name": "update_specs", "input": [1, 2, 3] },
+        { "type": "tool_use", "id": "tu_str_input", "name": "open_view", "input": "design" },
+        { "type": "reasoning", "text": "hidden" }
+      ]
+    },
+    {
+      "role": "user",
+      "content": [
+        { "type": "tool_result", "tool_use_id": "tu_list_input", "content": { "ok": true } },
+        { "type": "tool_result", "tool_use_id": "tu_str_input", "content": "opened", "is_error": false },
+        { "type": "text", "text": "  thanks  " }
+      ]
+    }
+  ],
+  "project_state": { "note": "tabs\tand \"quotes\" and back\\slash and \u0001 control" }
+}

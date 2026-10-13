@@ -1,0 +1,470 @@
+id: dcdc_active_clamp_flyback
+name: Active Clamp Flyback DC-DC Converter
+description: 'Isolated flyback converter with active-clamp circuit for leakage energy
+  recycling and ZVS operation. Converts 12V input to 5V isolated output. The clamp
+  capacitor C_CLAMP in series with auxiliary switch SW_CLAMP forms a lossless snubber:
+  when SW_MAIN turns OFF, leakage energy charges C_CLAMP through the SW_CLAMP body
+  diode; when SW_CLAMP turns ON (complementary), the stored energy is returned to
+  the primary, enabling ZVS turn-on of SW_MAIN. Improves efficiency and reduces EMI
+  vs passive RCD snubbers.'
+components:
+  - ref: VIN
+    type: node
+    role: input_source
+    params:
+      node_type: voltage_source
+      source: dc
+      voltage: 12
+      series_resistance: 0.05
+  - ref: PWM_MAIN
+    type: node
+    role: pwm_control
+    params:
+      node_type: pwm_control
+      frequency: 100e3
+      duty_cycle: 0.5
+      vhigh: 10.0
+      vlow: 0.0
+      trise: 1e-7
+      tfall: 1e-7
+      tdelay: 0
+      drive_resistance: 100
+  - ref: PWM_AUX
+    type: node
+    role: pwm_control
+    params:
+      node_type: pwm_control
+      frequency: 100e3
+      duty_cycle: 0.54
+      vhigh: 10.0
+      vlow: 0.0
+      trise: 1e-7
+      tfall: 1e-7
+      tdelay: 4.5e-06
+      drive_resistance: 100
+  - ref: SW_MAIN
+    type: transistor
+    role: main_switch
+    params:
+      family: mosfet
+      type: nmos
+      mode: enhancement
+      voltage_rating: 100
+      current_rating: 5
+      Vto: 1.5
+      Kn: 25e-3
+      Lambda: 0.005
+      Cgs: 300e-12
+      Cgd: 50e-12
+      Cdb: 50e-12
+    layout:
+      schX: 0.0
+      schY: 0.0
+      rotation: 270deg
+  - ref: SW_CLAMP
+    type: transistor
+    role: clamp_switch
+    params:
+      family: mosfet
+      type: nmos
+      mode: enhancement
+      voltage_rating: 100
+      current_rating: 3
+      Vto: 1.5
+      Kn: 15e-3
+      Lambda: 0.005
+      Cgs: 200e-12
+      Cgd: 30e-12
+      Cdb: 30e-12
+    layout:
+      schX: -1.5
+      schY: 0.5
+      rotation: 0deg
+  - ref: C_CLAMP
+    type: capacitor
+    role: clamp_cap
+    params:
+      capacitance: 100e-9
+      polarized: false
+      voltage_rating: 50
+      tolerance: 0.1
+      esr: 0.005
+      esl: 1e-9
+      leakage_current: 1e-10
+      ic: 0
+    layout:
+      schX: -2.5
+      schY: 2.0
+      orientation: vertical
+  - ref: T1
+    type: transformer
+    role: flyback_transformer
+    params:
+      Lm_primary: 50e-6
+      turns_ratio: 1.0
+      k_coupling: 0.99
+      phase: opposite
+      Rp: 0.15
+      Rs: 0.05
+      core_loss_resistance: 5e6
+    layout:
+      schX: 0.5
+      schY: 2.0
+      configuration: left-to-right
+    internal:
+      - ref: RSN
+        type: resistor
+        role: primary_snubber
+        params:
+          resistance: 10
+        connections:
+          pos:
+            - SW_MAIN
+            - drain
+          neg:
+            - CSN
+            - pos
+      - ref: CSN
+        type: capacitor
+        role: primary_snubber
+        params:
+          capacitance: 1e-9
+        connections:
+          pos:
+            - RSN
+            - neg
+          neg:
+            - VIN
+            - '-'
+      - ref: R_ISO
+        type: resistor
+        role: secondary_ground_anchor
+        params:
+          resistance: 100e6
+        connections:
+          pos:
+            - T1
+            - S2
+          neg:
+            - VIN
+            - '-'
+  - ref: D_SEC
+    type: diode
+    role: secondary_rectifier
+    params:
+      reverse_voltage: 30
+      current_rating: 3
+      Is: 5e-13
+      n: 1.05
+      Rs: 0.02
+      Cjo: 5e-12
+      Tt: 5e-9
+      Bv: 100
+      Ibv: 1e-6
+    layout:
+      schX: 1.5
+      schY: 3.0
+      orientation: horizontal
+  - ref: Cout
+    type: capacitor
+    role: output_filter
+    params:
+      capacitance: 220e-6
+      polarized: true
+      voltage_rating: 16
+      tolerance: 0.1
+      esr: 0.01
+      esl: 3e-9
+      leakage_current: 5e-7
+      ic: 0
+    layout:
+      schX: 2.5
+      schY: 2.0
+      orientation: vertical
+  - ref: R_LOAD
+    type: resistor
+    role: load
+    params:
+      resistance: 10
+      tolerance: 0.05
+      temp_coefficient: 100e-6
+      parasitic_inductance: 10e-9
+    layout:
+      schX: 4.0
+      schY: 2.0
+      orientation: vertical
+nets:
+  - - - VIN
+      - +
+    - - T1
+      - P1
+    - - C_CLAMP
+      - pos
+  - - - T1
+      - P2
+    - - SW_MAIN
+      - drain
+    - - SW_CLAMP
+      - source
+  - - - SW_CLAMP
+      - drain
+    - - C_CLAMP
+      - neg
+  - - - PWM_MAIN
+      - pos
+    - - SW_MAIN
+      - gate
+  - - - PWM_MAIN
+      - neg
+    - - VIN
+      - '-'
+  - - - SW_MAIN
+      - source
+    - - VIN
+      - '-'
+  - - - PWM_AUX
+      - pos
+    - - SW_CLAMP
+      - gate
+  - - - PWM_AUX
+      - neg
+    - - SW_CLAMP
+      - source
+  - - - T1
+      - S1
+    - - D_SEC
+      - anode
+  - - - D_SEC
+      - cathode
+    - - Cout
+      - pos
+    - - R_LOAD
+      - pos
+  - - - T1
+      - S2
+    - - Cout
+      - neg
+    - - R_LOAD
+      - neg
+analysis:
+  transient:
+    spice_settings:
+      reltol: 0.01
+      abstol: 1.0e-10
+      vntol: 1.0e-06
+      gmin: 1.0e-12
+      method: gear
+      maxord: 2
+    requirements:
+      - rid: tr_reg
+        requirement: Secondary output voltage regulation at 5V; verify isolation is
+          maintained
+        criteria:
+          target_vout: 5.0
+          regulation_limit_pct: 5
+          ripple_limit_vpp: 50e-3
+        measurement:
+          - ref: VIN
+            plot:
+              x_axis: time
+              title: Input Voltage (tr_reg)
+            quantity: voltage
+            nets:
+              - - VIN
+                - +
+              - - VIN
+                - '-'
+          - ref: VOUT
+            plot:
+              x_axis: time
+              title: Output Voltage ACF
+            component: R_LOAD
+            quantity: voltage
+            nets:
+              - - R_LOAD
+                - pos
+              - - T1
+                - S2
+            data:
+              - name: Vout_avg
+                spice_command: avg
+                description: Average output voltage
+              - name: Vout_ripple_vpp
+                spice_command: pp
+                description: Peak-to-peak output ripple
+          - ref: IOUT
+            plot: false
+            component: R_LOAD
+            quantity: current
+            data:
+              - name: Iout_avg
+                spice_command: avg
+                description: Average load current
+        outputs:
+          - var: load_regulation_pct
+            formula: 100*abs([Vout_avg] - {criteria.target_vout})/{criteria.target_vout}
+            description: Load regulation deviation from target
+          - var: vout_avg_v
+            formula: '[Vout_avg]'
+            description: Average output voltage
+          - var: vout_ripple_vpp_v
+            formula: '[Vout_ripple_vpp]'
+            description: Output voltage peak-to-peak ripple
+      - rid: tr_eff
+        requirement: Efficiency with clamp energy recycling; compare clamp capacitor
+          voltage to estimate recycled power
+        criteria:
+          efficiency_target_pct: 88
+        measurement:
+          - ref: IIN
+            plot: false
+            component: VIN
+            quantity: current
+            data:
+              - name: Iin_avg
+                spice_command: avg
+                description: Average input current
+          - ref: IOUT_EFF
+            plot: false
+            component: R_LOAD
+            quantity: current
+            data:
+              - name: Iout_avg
+                spice_command: avg
+                description: Average load current
+          - ref: VOUT_EFF
+            plot: false
+            component: R_LOAD
+            quantity: voltage
+            nets:
+              - - R_LOAD
+                - pos
+              - - T1
+                - S2
+            data:
+              - name: Vout_avg
+                spice_command: avg
+                description: Average output voltage
+          - ref: VIN_EFF
+            plot: false
+            component: VIN
+            quantity: voltage
+            nets:
+              - - VIN
+                - +
+              - - VIN
+                - '-'
+            data:
+              - name: Vin_avg
+                spice_command: avg
+                description: Average input voltage
+          - ref: VCLAMP
+            plot:
+              x_axis: time
+              title: Clamp Capacitor Voltage
+            component: C_CLAMP
+            quantity: voltage
+            nets:
+              - - C_CLAMP
+                - pos
+              - - C_CLAMP
+                - neg
+            data:
+              - name: Vclamp_avg
+                spice_command: avg
+                description: Average clamp capacitor voltage
+        outputs:
+          - var: Pin_avg
+            formula: abs([Vin_avg]*[Iin_avg])
+            description: Average input power
+          - var: Pout_avg
+            formula: '[Vout_avg]*[Iout_avg]'
+            description: Average output power
+          - var: efficiency_pct
+            formula: 100*[Pout_avg]/[Pin_avg]
+            description: Efficiency percentage
+          - var: vclamp_avg_v
+            formula: '[Vclamp_avg]'
+            description: Clamp capacitor average voltage (indicates stored energy
+              level)
+      - rid: tr_stress
+        requirement: SW_MAIN peak voltage stress; active clamp should limit Vds_max
+          to VIN + Vclamp
+        criteria:
+          sw_voltage_margin_pct: 20
+          sw_current_margin_pct: 30
+        measurement:
+          - ref: VIN
+            plot: false
+            quantity: voltage
+            nets:
+              - - VIN
+                - +
+              - - VIN
+                - '-'
+          - ref: VSW_MAIN
+            plot:
+              x_axis: time
+              title: Main Switch Drain Voltage (Clamped)
+            component: SW_MAIN
+            quantity: voltage
+            nets:
+              - - SW_MAIN
+                - drain
+              - - VIN
+                - '-'
+            data:
+              - name: Vsw_main_max
+                spice_command: max
+                description: Peak main switch drain voltage (should be VIN + Vclamp)
+          - ref: ISW_MAIN
+            plot: false
+            component: SW_MAIN
+            quantity: current
+            data:
+              - name: Isw_main_peak
+                spice_command: max
+                description: Peak main switch current
+              - name: Isw_main_rms
+                spice_command: rms
+                description: RMS main switch current
+          - ref: ID_SEC
+            plot: false
+            component: D_SEC
+            quantity: current
+            data:
+              - name: Id_sec_peak
+                spice_command: max
+                description: Peak secondary diode current
+          - ref: VOUT
+            plot: false
+            quantity: voltage
+            nets:
+              - - R_LOAD
+                - pos
+              - - R_LOAD
+                - neg
+        outputs:
+          - var: vsw_main_max_v
+            formula: '[Vsw_main_max]'
+            description: Peak main switch voltage
+          - var: isw_main_peak_a
+            formula: '[Isw_main_peak]'
+            description: Peak main switch current
+          - var: id_sec_peak_a
+            formula: '[Id_sec_peak]'
+            description: Peak secondary diode current
+metadata:
+  stage:
+    - power_switch
+    - isolation
+    - rectification
+    - filter
+  topology: isolated
+  control: PWM
+  tags:
+    - active-clamp-flyback
+    - ACF
+    - ZVS
+    - GaN
+    - USB-PD

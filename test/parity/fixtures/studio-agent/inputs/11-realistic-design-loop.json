@@ -1,0 +1,99 @@
+{
+  "name": "11-realistic-design-loop",
+  "description": "Realistic multi-step loop shaped like the frontend: update_specs (approval) -> user approves -> suggest_topologies -> user picks -> select_topology result, with a buildAgentSnapshot-style project_state.",
+  "messages": [
+    { "role": "user", "content": [{ "type": "text", "text": "I need a 12 V to 5 V, 3 A buck converter for a sensor board, ambient up to 70 °C." }] },
+    {
+      "role": "assistant",
+      "content": [
+        { "type": "text", "text": "Here is a first specification table based on your request." },
+        {
+          "type": "tool_use",
+          "id": "tooluse_specs01",
+          "name": "update_specs",
+          "input": {
+            "application": "12 V to 5 V, 3 A sensor-board buck",
+            "rows": [
+              { "name": "Input Voltage", "value": "10.8-13.2", "unit": "V", "category": "electrical", "required": true, "source": "assumed", "note": "±10 % around 12 V" },
+              { "name": "Output Voltage", "value": "5", "unit": "V", "category": "electrical", "required": true, "source": "user" },
+              { "name": "Output Current", "value": "3", "unit": "A", "category": "electrical", "required": true, "source": "user" },
+              { "name": "Ambient Temperature", "value": "-20-70", "unit": "°C", "category": "thermal", "required": true, "source": "user" }
+            ],
+            "request_approval": true
+          }
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "content": [
+        { "type": "tool_result", "tool_use_id": "tooluse_specs01", "content": { "ok": true, "rows": 4, "approval_requested": true, "branch": "main" } }
+      ]
+    },
+    { "role": "assistant", "content": [{ "type": "text", "text": "Approve the table, edit cells directly, or ask me for changes." }] },
+    { "role": "user", "content": [{ "type": "text", "text": "[Workspace events]\n- Approved the specification table\n\nApproved." }] },
+    {
+      "role": "assistant",
+      "content": [
+        {
+          "type": "tool_use",
+          "id": "tooluse_topo02",
+          "name": "suggest_topologies",
+          "input": {
+            "intro": "Non-isolated step-down at 15 W.",
+            "options": [
+              { "topology_id": "dcdc_synchronous_buck", "title": "Synchronous buck", "summary": "Best efficiency at 3 A.", "pros": ["~94 % efficiency"], "cons": ["Needs a high-side driver"], "recommended": true },
+              { "topology_id": "dcdc_buck", "title": "Asynchronous buck", "summary": "Simpler, diode losses.", "pros": ["Simple"], "cons": ["~88 % efficiency"] }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "content": [
+        { "type": "tool_result", "tool_use_id": "tooluse_topo02", "content": { "displayed": ["dcdc_synchronous_buck", "dcdc_buck"], "note": "Cards shown in chat. Stop and wait for the user to pick one." } }
+      ]
+    },
+    { "role": "user", "content": [{ "type": "text", "text": "Go with the synchronous buck." }] },
+    {
+      "role": "assistant",
+      "content": [
+        { "type": "text", "text": "Loading the synchronous buck schematic." },
+        { "type": "tool_use", "id": "tooluse_sel03", "name": "select_topology", "input": { "topology_id": "dcdc_synchronous_buck", "reason": "User pick" } }
+      ]
+    },
+    {
+      "role": "user",
+      "content": [
+        { "type": "tool_result", "tool_use_id": "tooluse_sel03", "content": { "topology_id": "dcdc_synchronous_buck", "components": ["Q1 (mosfet, high-side switch)", "Q2 (mosfet, low-side switch)", "L1 (inductor)", "C_out (capacitor)"] } }
+      ]
+    }
+  ],
+  "project_state": {
+    "active_branch": "main",
+    "branches": [{ "name": "main", "stages": ["specs", "visualization"], "active": true }],
+    "workspace_focus": "visualization",
+    "specs": {
+      "application": "12 V to 5 V, 3 A sensor-board buck",
+      "approved": true,
+      "rows": ["Input Voltage: 10.8-13.2 V [assumed]", "Output Voltage: 5 V [user]", "Output Current: 3 A [user]", "Ambient Temperature: -20-70 °C [user]"],
+      "last_topology_options": ["dcdc_synchronous_buck", "dcdc_buck"],
+      "constraints": null
+    },
+    "visualization": {
+      "topology_id": "dcdc_synchronous_buck",
+      "status": "done",
+      "has_schematic": true,
+      "structurally_edited": false,
+      "components": ["Q1 (mosfet, high-side switch)", "Q2 (mosfet, low-side switch)", "L1 (inductor)", "C_out (capacitor)"]
+    },
+    "design": null,
+    "simulation": null,
+    "devices": null,
+    "magnetics": null,
+    "thermal": null,
+    "attachments": [],
+    "other_branches": []
+  }
+}

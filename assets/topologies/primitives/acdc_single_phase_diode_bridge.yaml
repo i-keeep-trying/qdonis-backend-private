@@ -1,0 +1,127 @@
+id: acdc_single_phase_diode_bridge
+name: Single Phase Diode Bridge Rectifier
+description: A classic AC to DC full-bridge rectifier translating a 24V peak 160Hz
+  AC source into a DC output across a 9-ohm load, utilizing 1N5818 Schottky diodes.
+components:
+  - ref: VAC
+    type: node
+    role: voltage_source
+    params:
+      node_type: voltage_source
+      source: sine
+      offset: 0
+      amplitude: 24
+      frequency: 160
+  - ref: R_LINE
+    type: resistor
+    params:
+      resistance: 1.0
+  - ref: D1
+    type: diode
+    params:
+      Is: 3.17e-05
+      Rs: 0.051
+      n: 1.373
+      Cjo: 1.6e-10
+      Tt: 0
+  - ref: D2
+    type: diode
+    params:
+      Is: 3.17e-05
+      Rs: 0.051
+      n: 1.373
+      Cjo: 1.6e-10
+      Tt: 0
+  - ref: D3
+    type: diode
+    params:
+      Is: 3.17e-05
+      Rs: 0.051
+      n: 1.373
+      Cjo: 1.6e-10
+      Tt: 0
+  - ref: D4
+    type: diode
+    params:
+      Is: 3.17e-05
+      Rs: 0.051
+      n: 1.373
+      Cjo: 1.6e-10
+      Tt: 0
+  - ref: R_LOAD
+    type: resistor
+    params:
+      resistance: 9.0
+nets:
+  - - - VAC
+      - '-'
+    - - D2
+      - cathode
+    - - D4
+      - anode
+    - - GND
+      - pin
+  - - - VAC
+      - +
+    - - R_LINE
+      - pin1
+  - - - R_LINE
+      - pin2
+    - - D1
+      - cathode
+    - - D3
+      - anode
+  - - - D3
+      - cathode
+    - - D4
+      - cathode
+    - - R_LOAD
+      - pos
+  - - - D1
+      - anode
+    - - D2
+      - anode
+    - - R_LOAD
+      - neg
+analysis:
+  transient:
+    requirements:
+      - rid: tr_rectifier
+        requirement: Verify full-wave rectification and output ripple.
+        environment:
+          - ref: time_domain
+            t_step: 1.0e-06
+            t_stop: 0.03
+            t_start: 0.015
+            t_max_step: 1.0e-06
+        measurement:
+          - ref: VOUT
+            plot: true
+            quantity: voltage
+            nets:
+              - - R_LOAD
+                - pos
+              - - R_LOAD
+                - neg
+            data:
+              - name: Vout_avg
+                spice_command: avg
+                description: Average Output Voltage in steady state (last 15ms)
+              - name: Vout_ripple_vpp
+                spice_command: pp
+                description: Output Ripple peak-to-peak in steady state
+          - ref: VIN
+            plot: true
+            quantity: voltage
+            nets:
+              - - VAC
+                - +
+              - - VAC
+                - '-'
+        outputs:
+          - var: vout_avg_v
+            formula: abs([Vout_avg])
+            description: Average Output Voltage (N2 - N1)
+          - var: vout_ripple_vpp
+            formula: '[Vout_ripple_vpp]'
+            description: Output Voltage Ripple peak-to-peak

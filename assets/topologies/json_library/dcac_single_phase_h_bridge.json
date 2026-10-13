@@ -1,0 +1,285 @@
+{
+  "components": [
+    {
+      "id": "S1",
+      "type": "MOSFET",
+      "x": -80,
+      "y": -560,
+      "rotation": 0,
+      "parameters": {
+        "Ron": "10m",
+        "Roff": "1M"
+      }
+    },
+    {
+      "id": "S2",
+      "type": "MOSFET",
+      "x": -80,
+      "y": -320,
+      "rotation": 0,
+      "parameters": {
+        "Ron": "10m",
+        "Roff": "1M"
+      }
+    },
+    {
+      "id": "S3",
+      "type": "MOSFET",
+      "x": 40,
+      "y": -560,
+      "rotation": 0,
+      "parameters": {
+        "Ron": "10m",
+        "Roff": "1M"
+      }
+    },
+    {
+      "id": "S4",
+      "type": "MOSFET",
+      "x": 40,
+      "y": -320,
+      "rotation": 0,
+      "parameters": {
+        "Ron": "10m",
+        "Roff": "1M"
+      }
+    },
+    {
+      "id": "VIN",
+      "type": "V",
+      "x": -260,
+      "y": -420,
+      "rotation": 0,
+      "parameters": {
+        "value": "24"
+      }
+    },
+    {
+      "id": "L_FILT",
+      "type": "L",
+      "x": 200,
+      "y": -500,
+      "rotation": 90,
+      "parameters": {
+        "L": "10m",
+        "esr": "50m",
+        "iL0": "0"
+      }
+    },
+    {
+      "id": "C_FILT",
+      "type": "C",
+      "x": 300,
+      "y": -440,
+      "rotation": 0,
+      "parameters": {
+        "C": "100u",
+        "esr": "10m",
+        "vC0": "0"
+      }
+    },
+    {
+      "id": "R_LOAD",
+      "type": "R",
+      "x": 460,
+      "y": -440,
+      "rotation": 0,
+      "parameters": {
+        "value": "10",
+        "esr": "0"
+      }
+    }
+  ],
+  "wires": [
+    {
+      "id": "W1",
+      "from": {
+        "type": "pin",
+        "compId": "S1",
+        "terminal": "D"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "S3",
+        "terminal": "D"
+      }
+    },
+    {
+      "id": "W2",
+      "from": {
+        "type": "pin",
+        "compId": "S1",
+        "terminal": "S"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "S2",
+        "terminal": "D"
+      }
+    },
+    {
+      "id": "W3",
+      "from": {
+        "type": "pin",
+        "compId": "S3",
+        "terminal": "S"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "S4",
+        "terminal": "D"
+      }
+    },
+    {
+      "id": "W4",
+      "from": {
+        "type": "pin",
+        "compId": "S2",
+        "terminal": "S"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "S4",
+        "terminal": "S"
+      }
+    },
+    {
+      "id": "W5",
+      "from": {
+        "type": "pin",
+        "compId": "L_FILT",
+        "terminal": "A"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "C_FILT",
+        "terminal": "A"
+      }
+    },
+    {
+      "id": "W6",
+      "from": {
+        "type": "pin",
+        "compId": "R_LOAD",
+        "terminal": "A"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "C_FILT",
+        "terminal": "A"
+      }
+    },
+    {
+      "id": "W7",
+      "from": {
+        "type": "pin",
+        "compId": "R_LOAD",
+        "terminal": "B"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "C_FILT",
+        "terminal": "B"
+      }
+    },
+    {
+      "id": "W8",
+      "from": {
+        "type": "pin",
+        "compId": "C_FILT",
+        "terminal": "B"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "S4",
+        "terminal": "D"
+      }
+    },
+    {
+      "id": "W9",
+      "from": {
+        "type": "pin",
+        "compId": "L_FILT",
+        "terminal": "B"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "S1",
+        "terminal": "S"
+      }
+    },
+    {
+      "id": "W10",
+      "from": {
+        "type": "pin",
+        "compId": "VIN",
+        "terminal": "A"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "S1",
+        "terminal": "D"
+      },
+      "manualPath": [
+        {
+          "x": -260,
+          "y": -460
+        },
+        {
+          "x": -260,
+          "y": -620
+        },
+        {
+          "x": -80,
+          "y": -620
+        },
+        {
+          "x": -80,
+          "y": -600
+        }
+      ]
+    },
+    {
+      "id": "W11",
+      "from": {
+        "type": "pin",
+        "compId": "VIN",
+        "terminal": "B"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "S2",
+        "terminal": "S"
+      },
+      "manualPath": [
+        {
+          "x": -260,
+          "y": -380
+        },
+        {
+          "x": -260,
+          "y": -260
+        },
+        {
+          "x": -80,
+          "y": -260
+        },
+        {
+          "x": -80,
+          "y": -280
+        }
+      ]
+    }
+  ],
+  "plotConfiguration": {
+    "plots": []
+  },
+  "simulationSettings": {
+    "stopTime": "0.05",
+    "stepSize": "1e-5",
+    "stepType": "fixed",
+    "solver": "euler"
+  },
+  "id": "dcac_single_phase_h_bridge",
+  "name": "Single Phase H Bridge Inverter"
+}

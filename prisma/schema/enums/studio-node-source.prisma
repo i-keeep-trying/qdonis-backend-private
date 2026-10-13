@@ -1,0 +1,9 @@
+/// What produced a stage result.
+enum StudioNodeSource {
+  agent
+  user
+  upload
+  legacy
+
+  @@map("studio_node_source")
+}

@@ -1,0 +1,304 @@
+id: dcdc_single_switch_forward
+name: Single Switch Forward DC-DC Converter
+description: An idealized, basic isolated DC-DC forward converter using a single primary
+  switch. Converts 48V input to 5V output.
+components:
+  - ref: VIN
+    type: node
+    role: input_source
+    params:
+      node_type: voltage_source
+      source: dc
+      voltage: 48
+      series_resistance: 0.1
+      ramp_rise: 3e-3
+  - ref: PWM1
+    type: node
+    role: pwm_control
+    params:
+      node_type: pwm_control
+      frequency: 100e3
+      duty_cycle: 0.42
+      vhigh: 12.0
+      vlow: 0.0
+      trise: 1e-7
+      tfall: 1e-7
+      tdelay: 0
+      drive_resistance: 100
+  - ref: SW1
+    type: transistor
+    role: primary_switch
+    params:
+      family: mosfet
+      type: nmos
+      mode: enhancement
+      voltage_rating: 200
+      current_rating: 5
+      Vto: 1.5
+      Kn: 50e-3
+      Lambda: 0.01
+      Cgs: 500e-12
+      Cgd: 100e-12
+      Cdb: 100e-12
+    layout:
+      schX: -1.5
+      schY: 0.0
+      rotation: 270deg
+  - ref: T1
+    type: transformer
+    role: power_transformer
+    params:
+      Lm_primary: 500e-6
+      turns_ratio: 2.5
+      k_coupling: 0.99
+      phase: same
+      Rp: 0.5
+      Rs: 0.1
+      core_loss_resistance: 1e6
+    layout:
+      schX: 0.5
+      schY: -1.5
+      configuration: left-to-right
+    internal:
+      - ref: RSN_P
+        type: resistor
+        role: primary_snubber
+        params:
+          resistance: 100
+        connections:
+          pos:
+            - T1
+            - P2
+          neg:
+            - CSN_P
+            - pos
+      - ref: CSN_P
+        type: capacitor
+        role: primary_snubber
+        params:
+          capacitance: 10e-9
+        connections:
+          pos:
+            - RSN_P
+            - neg
+          neg:
+            - T1
+            - P1
+      - ref: R_ISO
+        type: resistor
+        role: secondary_ground_anchor
+        params:
+          resistance: 100e6
+        connections:
+          pos:
+            - T1
+            - S2
+          neg:
+            - VIN
+            - '-'
+  - ref: D_FWD
+    type: diode
+    role: secondary_forward
+    params:
+      reverse_voltage: 50
+      current_rating: 5
+      Is: 1e-12
+      n: 1.1
+      Rs: 0.1
+      Cjo: 10e-12
+      Tt: 15e-9
+      Bv: 100
+      Ibv: 1e-6
+    layout:
+      schX: 1.5
+      schY: -0.5
+      orientation: horizontal
+  - ref: D_FW
+    type: diode
+    role: secondary_freewheeling
+    params:
+      reverse_voltage: 50
+      current_rating: 5
+      Is: 1e-12
+      n: 1.1
+      Rs: 0.1
+      Cjo: 10e-12
+      Tt: 15e-9
+      Bv: 100
+      Ibv: 1e-6
+    layout:
+      schX: 2.5
+      schY: -1.5
+      orientation: pos_bottom
+  - ref: L_OUT
+    type: inductor
+    role: output_filter
+    params:
+      inductance: 100e-6
+      series_resistance: 0.05
+      saturation_current: 5.0
+      core_loss_resistance: 1e6
+      parasitic_capacitance: 30e-12
+      ic: 0
+    layout:
+      schX: 3.5
+      schY: -0.5
+      orientation: horizontal
+  - ref: Cout
+    type: capacitor
+    role: output_filter
+    params:
+      capacitance: 470e-6
+      polarized: true
+      voltage_rating: 16
+      tolerance: 0.1
+      esr: 0.02
+      esl: 5e-9
+      leakage_current: 1e-6
+      ic: 0
+    layout:
+      schX: 4.5
+      schY: -1.5
+      orientation: vertical
+  - ref: R_LOAD
+    type: resistor
+    role: load
+    params:
+      resistance: 5
+      tolerance: 0.05
+      temp_coefficient: 100e-6
+      parasitic_inductance: 10e-9
+    layout:
+      schX: 5.5
+      schY: -1.5
+      orientation: vertical
+nets:
+  - - - VIN
+      - +
+    - - T1
+      - P1
+  - - - SW1
+      - drain
+    - - T1
+      - P2
+  - - - VIN
+      - '-'
+    - - SW1
+      - source
+  - - - PWM1
+      - pos
+    - - SW1
+      - gate
+  - - - T1
+      - S1
+    - - D_FWD
+      - anode
+  - - - D_FWD
+      - cathode
+    - - D_FW
+      - cathode
+    - - L_OUT
+      - pin1
+  - - - T1
+      - S2
+    - - D_FW
+      - anode
+    - - Cout
+      - neg
+    - - R_LOAD
+      - neg
+  - - - L_OUT
+      - pin2
+    - - Cout
+      - pos
+    - - R_LOAD
+      - pos
+analysis:
+  transient:
+    spice_settings:
+      tstop: 0.02
+      reltol: 0.01
+      abstol: 1.0e-10
+      vntol: 1.0e-06
+      gmin: 1.0e-12
+      method: gear
+      maxord: 2
+    requirements:
+      - rid: tr_reg
+        requirement: Output voltage regulation at 5V
+        criteria:
+          target_vout: 5.0
+          regulation_limit_pct: 5
+          ripple_limit_vpp: 30e-3
+          max_duty: 0.45
+        measurement:
+          - ref: VIN
+            plot:
+              x_axis: time
+              title: Input Voltage
+            quantity: voltage
+            nets:
+              - - VIN
+                - +
+              - - VIN
+                - '-'
+          - ref: VOUT
+            plot:
+              x_axis: time
+              title: Output Voltage (Ideal Forward)
+            component: R_LOAD
+            quantity: voltage
+            nets:
+              - - R_LOAD
+                - pos
+              - - T1
+                - S2
+            data:
+              - name: Vout_avg
+                spice_command: avg
+                description: Average output voltage
+              - name: Vout_ripple_vpp
+                spice_command: pp
+                description: Peak-to-peak output ripple
+          - ref: IOUT
+            plot:
+              x_axis: time
+              title: Output Current
+            component: R_LOAD
+            quantity: current
+            data:
+              - name: Iout_avg
+                spice_command: avg
+                description: Average load current
+          - ref: IIN
+            plot:
+              x_axis: time
+              title: Input Current
+            component: VIN
+            quantity: current
+          - ref: IL_OUT
+            plot:
+              x_axis: time
+              title: Inductor Current
+            component: L_OUT
+            quantity: current
+          - ref: VSW1_DS
+            plot:
+              x_axis: time
+              title: SW1 Drain-Source Voltage
+            quantity: voltage
+            nets:
+              - - SW1
+                - drain
+              - - SW1
+                - source
+        outputs:
+          - var: load_regulation_pct
+            formula: 100*abs([Vout_avg] - {criteria.target_vout})/{criteria.target_vout}
+            description: Load regulation deviation from target
+          - var: vout_avg_v
+            formula: '[Vout_avg]'
+            description: Average output voltage
+          - var: vout_ripple_vpp_v
+            formula: '[Vout_ripple_vpp]'
+            description: Output voltage peak-to-peak ripple

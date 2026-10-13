@@ -1,0 +1,396 @@
+{
+  "components": [
+    {
+      "id": "VIN",
+      "type": "V",
+      "x": -60,
+      "y": 140,
+      "rotation": 0,
+      "parameters": {
+        "value": "24"
+      }
+    },
+    {
+      "id": "CIN",
+      "type": "C",
+      "x": 40,
+      "y": 140,
+      "rotation": 0,
+      "parameters": {
+        "C": "100u",
+        "esr": "10m",
+        "vC0": "0"
+      }
+    },
+    {
+      "id": "SW_CLAMP",
+      "type": "MOSFET",
+      "x": 220,
+      "y": 160,
+      "rotation": 270,
+      "parameters": {
+        "Ron": "10m",
+        "Roff": "1M"
+      }
+    },
+    {
+      "id": "C_CLAMP",
+      "type": "C",
+      "x": 140,
+      "y": 60,
+      "rotation": 0,
+      "parameters": {
+        "C": "100u",
+        "esr": "10m",
+        "vC0": "0"
+      }
+    },
+    {
+      "id": "Lk",
+      "type": "L",
+      "x": 220,
+      "y": 0,
+      "rotation": 90,
+      "parameters": {
+        "L": "10m",
+        "esr": "50m",
+        "iL0": "0"
+      }
+    },
+    {
+      "id": "Lm",
+      "type": "L",
+      "x": 300,
+      "y": 80,
+      "rotation": 180,
+      "parameters": {
+        "L": "10m",
+        "esr": "50m",
+        "iL0": "0"
+      }
+    },
+    {
+      "id": "T1",
+      "type": "XFMR",
+      "x": 440,
+      "y": 100,
+      "rotation": 0,
+      "parameters": {
+        "N": "1",
+        "Lp": "10m",
+        "Rw": "10m"
+      }
+    },
+    {
+      "id": "SW_MAIN",
+      "type": "MOSFET",
+      "x": 420,
+      "y": 260,
+      "rotation": 0,
+      "parameters": {
+        "Ron": "10m",
+        "Roff": "1M"
+      }
+    },
+    {
+      "id": "D_SEC",
+      "type": "D",
+      "x": 560,
+      "y": 160,
+      "rotation": 270,
+      "parameters": {
+        "Vd": "0.7",
+        "Ron": "1m",
+        "Roff": "1M"
+      }
+    },
+    {
+      "id": "Cout",
+      "type": "C",
+      "x": 660,
+      "y": 100,
+      "rotation": 180,
+      "parameters": {
+        "C": "100u",
+        "esr": "10m",
+        "vC0": "0"
+      }
+    },
+    {
+      "id": "R_LOAD",
+      "type": "R",
+      "x": 760,
+      "y": 100,
+      "rotation": 180,
+      "parameters": {
+        "value": "10",
+        "esr": "0"
+      }
+    }
+  ],
+  "wires": [
+    {
+      "id": "W1",
+      "from": {
+        "type": "pin",
+        "compId": "VIN",
+        "terminal": "A"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "Lk",
+        "terminal": "B"
+      }
+    },
+    {
+      "id": "W2",
+      "from": {
+        "type": "pin",
+        "compId": "C_CLAMP",
+        "terminal": "A"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "Lk",
+        "terminal": "B"
+      }
+    },
+    {
+      "id": "W3",
+      "from": {
+        "type": "pin",
+        "compId": "CIN",
+        "terminal": "A"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "Lk",
+        "terminal": "B"
+      }
+    },
+    {
+      "id": "W4",
+      "from": {
+        "type": "pin",
+        "compId": "C_CLAMP",
+        "terminal": "B"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "SW_CLAMP",
+        "terminal": "D"
+      }
+    },
+    {
+      "id": "W5",
+      "from": {
+        "type": "pin",
+        "compId": "Lk",
+        "terminal": "A"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "T1",
+        "terminal": "P1"
+      }
+    },
+    {
+      "id": "W6",
+      "from": {
+        "type": "pin",
+        "compId": "Lm",
+        "terminal": "B"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "Lk",
+        "terminal": "A"
+      }
+    },
+    {
+      "id": "W7",
+      "from": {
+        "type": "pin",
+        "compId": "Lm",
+        "terminal": "A"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "SW_CLAMP",
+        "terminal": "S"
+      }
+    },
+    {
+      "id": "W8",
+      "from": {
+        "type": "pin",
+        "compId": "T1",
+        "terminal": "P2"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "SW_CLAMP",
+        "terminal": "S"
+      }
+    },
+    {
+      "id": "W9",
+      "from": {
+        "type": "pin",
+        "compId": "SW_MAIN",
+        "terminal": "D"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "T1",
+        "terminal": "P2"
+      }
+    },
+    {
+      "id": "W10",
+      "from": {
+        "type": "pin",
+        "compId": "SW_MAIN",
+        "terminal": "S"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "VIN",
+        "terminal": "B"
+      },
+      "manualPath": [
+        {
+          "x": 420,
+          "y": 300
+        },
+        {
+          "x": 420,
+          "y": 320
+        },
+        {
+          "x": 360,
+          "y": 320
+        },
+        {
+          "x": 360,
+          "y": 320
+        },
+        {
+          "x": -60,
+          "y": 320
+        },
+        {
+          "x": -60,
+          "y": 180
+        }
+      ]
+    },
+    {
+      "id": "W11",
+      "from": {
+        "type": "pin",
+        "compId": "CIN",
+        "terminal": "B"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "VIN",
+        "terminal": "B"
+      },
+      "manualPath": [
+        {
+          "x": 40,
+          "y": 180
+        },
+        {
+          "x": 40,
+          "y": 320
+        },
+        {
+          "x": -60,
+          "y": 320
+        },
+        {
+          "x": -60,
+          "y": 180
+        }
+      ]
+    },
+    {
+      "id": "W12",
+      "from": {
+        "type": "pin",
+        "compId": "T1",
+        "terminal": "S2"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "D_SEC",
+        "terminal": "A"
+      }
+    },
+    {
+      "id": "W13",
+      "from": {
+        "type": "pin",
+        "compId": "Cout",
+        "terminal": "A"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "D_SEC",
+        "terminal": "B"
+      }
+    },
+    {
+      "id": "W14",
+      "from": {
+        "type": "pin",
+        "compId": "Cout",
+        "terminal": "B"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "T1",
+        "terminal": "S1"
+      }
+    },
+    {
+      "id": "W15",
+      "from": {
+        "type": "pin",
+        "compId": "R_LOAD",
+        "terminal": "B"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "Cout",
+        "terminal": "B"
+      }
+    },
+    {
+      "id": "W16",
+      "from": {
+        "type": "pin",
+        "compId": "R_LOAD",
+        "terminal": "A"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "Cout",
+        "terminal": "A"
+      }
+    }
+  ],
+  "plotConfiguration": {
+    "plots": []
+  },
+  "simulationSettings": {
+    "stopTime": "0.05",
+    "stepSize": "1e-5",
+    "stepType": "fixed",
+    "solver": "euler"
+  },
+  "id": "dcdc_active_clamp_flyback",
+  "name": "Active Clamp Flyback DC-DC Converter"
+}

@@ -1,0 +1,207 @@
+{
+ "extract": [
+  {
+   "raw": "```spice\n* fixed\nV1 in 0 12\nL1 in out 22u\nR1 out 0 10\n.end\n.control\nrun\n.endc\n```",
+   "text": "* fixed\nV1 in 0 12\nL1 in out 22u\nR1 out 0 10\n.end\n.control\nrun\n.endc"
+  },
+  {
+   "raw": "Here you go:\n```\nshort\n```\nand\n```cir\n* longer block\nV1 in 0 12\nL1 in out 10u\n```",
+   "text": "* longer block\nV1 in 0 12\nL1 in out 10u"
+  },
+  {
+   "raw": "",
+   "text": ""
+  },
+  {
+   "raw": "* plain\nV1 in 0 12\n\nL1 in out 33u\n\n\n",
+   "text": "* plain\nV1 in 0 12\n\nL1 in out 33u"
+  }
+ ],
+ "fix": [
+  {
+   "reply": "```spice\n* fixed\nV1 in 0 12\nL1 in out 22u\nR1 out 0 10\n.end\n.control\nrun\n.endc\n```",
+   "deck": "* fixed\nV1 in 0 12\nL1 in out 22u\nR1 out 0 10\n.end\n.control\ntran 1u 1m\nmeas tran v avg v(out)\n.endc\n"
+  },
+  {
+   "reply": "Here you go:\n```\nshort\n```\nand\n```cir\n* longer block\nV1 in 0 12\nL1 in out 10u\n```",
+   "deck": "* longer block\nV1 in 0 12\nL1 in out 10u\n.end\n.control\ntran 1u 1m\nmeas tran v avg v(out)\n.endc\n"
+  },
+  {
+   "reply": "",
+   "deck": "* buck\nV1 in 0 12\nL1 in out 47u\nR1 out 0 10\n.end\n.control\ntran 1u 1m\nmeas tran v avg v(out)\n.endc\n"
+  },
+  {
+   "reply": "* plain\nV1 in 0 12\n\nL1 in out 33u\n\n\n",
+   "deck": "* plain\nV1 in 0 12\n\nL1 in out 33u\n.end\n.control\ntran 1u 1m\nmeas tran v avg v(out)\n.endc\n"
+  }
+ ],
+ "fix_prompt": [
+  {
+   "key": "dc",
+   "prompt": "",
+   "text": "This is the DC analysis deck.\n\nINSTRUCTIONS:\nVerify and correct the netlist. If a user prompt is available, consider that before modifying the netlist.\n\n--- BEGIN DC.cir ---\n* buck\r\nV1 in 0 12\r\nL1 in out 47u\r\nR1 out 0 10\r\n.end\r\n.control\r\ntran 1u 1m\r\nmeas tran v avg v(out)\r\n.endc\r\n\n--- END DC.cir ---\n\nReturn ONLY the corrected DC.cir content."
+  },
+  {
+   "key": "transient",
+   "prompt": "  add snubber  ",
+   "text": "This is the Transient analysis deck.\n\nINSTRUCTIONS:\nadd snubber\n\n--- BEGIN Transient.cir ---\n* buck\r\nV1 in 0 12\r\nL1 in out 47u\r\nR1 out 0 10\r\n.end\r\n.control\r\ntran 1u 1m\r\nmeas tran v avg v(out)\r\n.endc\r\n\n--- END Transient.cir ---\n\nReturn ONLY the corrected Transient.cir content."
+  },
+  {
+   "key": "ac",
+   "prompt": "x",
+   "text": "This is the AC analysis deck.\n\nINSTRUCTIONS:\nx\n\n--- BEGIN AC.cir ---\n* buck\r\nV1 in 0 12\r\nL1 in out 47u\r\nR1 out 0 10\r\n.end\r\n.control\r\ntran 1u 1m\r\nmeas tran v avg v(out)\r\n.endc\r\n\n--- END AC.cir ---\n\nReturn ONLY the corrected AC.cir content."
+  }
+ ],
+ "modify": [
+  {
+   "raw": "<reasoning>\n### Why\nSmaller L1.\n</reasoning>\n<parameters>\n{\"L1\": \"10uH\", \"PWM1\": 0.45, \"N\": 3}\n</parameters>\n<netlist>\n* mod\nV1 in 0 12\nL1 in out 10u\n.control\nbad\n.endc\n</netlist>",
+   "deck": "* mod\nV1 in 0 12\nL1 in out 10u\n.end\n.control\ntran 1u 1m\nmeas tran v avg v(out)\n.endc\n",
+   "reasoning": "### Why\nSmaller L1.",
+   "parameters": {
+    "L1": "10uH",
+    "PWM1": 0.45,
+    "N": 3
+   },
+   "rows": [
+    {
+     "ref": "L1",
+     "param": "L1",
+     "before": null,
+     "after": "10uH"
+    },
+    {
+     "ref": "PWM1",
+     "param": "PWM1",
+     "before": null,
+     "after": "0.45"
+    },
+    {
+     "ref": "N",
+     "param": "N",
+     "before": null,
+     "after": "3"
+    }
+   ],
+   "user": "\nUSER CONSTRAINTS:\n{\n  \"Vin\": \"48 V\",\n  \"n\": 3,\n  \"x\": 1.5,\n  \"\\u00e9\": [\n    \"\\u00fc\"\n  ]\n}\n\nUSER MODIFICATION REQUEST:\nmake it better\n\nCURRENT TRANSIENT NETLIST:\n* buck\r\nV1 in 0 12\r\nL1 in out 47u\r\nR1 out 0 10\r\n.end\r\n.control\r\ntran 1u 1m\r\nmeas tran v avg v(out)\r\n.endc\r\n\n"
+  },
+  {
+   "raw": "<parameters>not json</parameters>```\n* fenced\nV1 in 0 12\n```",
+   "deck": "* fenced\nV1 in 0 12\n.end\n.control\ntran 1u 1m\nmeas tran v avg v(out)\n.endc\n",
+   "reasoning": null,
+   "parameters": {},
+   "rows": [],
+   "user": "\nUSER CONSTRAINTS:\n{\n  \"Vin\": \"48 V\",\n  \"n\": 3,\n  \"x\": 1.5,\n  \"\\u00e9\": [\n    \"\\u00fc\"\n  ]\n}\n\nUSER MODIFICATION REQUEST:\nmake it better\n\nCURRENT TRANSIENT NETLIST:\n* buck\r\nV1 in 0 12\r\nL1 in out 47u\r\nR1 out 0 10\r\n.end\r\n.control\r\ntran 1u 1m\r\nmeas tran v avg v(out)\r\n.endc\r\n\n"
+  },
+  {
+   "raw": "no tags at all",
+   "deck": "no tags at all\n.end\n.control\ntran 1u 1m\nmeas tran v avg v(out)\n.endc\n",
+   "reasoning": null,
+   "parameters": {},
+   "rows": [],
+   "user": "\nUSER CONSTRAINTS:\n{\n  \"Vin\": \"48 V\",\n  \"n\": 3,\n  \"x\": 1.5,\n  \"\\u00e9\": [\n    \"\\u00fc\"\n  ]\n}\n\nUSER MODIFICATION REQUEST:\nmake it better\n\nCURRENT TRANSIENT NETLIST:\n* buck\r\nV1 in 0 12\r\nL1 in out 47u\r\nR1 out 0 10\r\n.end\r\n.control\r\ntran 1u 1m\r\nmeas tran v avg v(out)\r\n.endc\r\n\n"
+  }
+ ],
+ "verify": [
+  {
+   "content": "{\"status\":\"verified\",\"summary\":\"  Vout is 12 V. \",\"evidence\":[{\"source\":\"x\",\"analysis_type\":\"tran\",\"claim\":\"c\",\"observed\":\"o\",\"supports\":\"verified\"},\"bad\",{\"supports\":\"maybe\"}],\"limitations\":[\"\", \"l1\", 5]}",
+   "verification": {
+    "status": "verified",
+    "summary": "Vout is 12 V.",
+    "evidence": [
+     {
+      "source": "simulation_response",
+      "analysis_type": null,
+      "claim": "c",
+      "observed": "o",
+      "supports": "verified"
+     },
+     {
+      "source": "simulation_response",
+      "analysis_type": null,
+      "claim": "Verification evidence",
+      "observed": "No observation supplied",
+      "supports": "inconclusive"
+     }
+    ],
+    "limitations": [
+     "l1",
+     "5"
+    ]
+   }
+  },
+  {
+   "content": "```json\n{\"status\":\"failed\",\"summary\":\"no\",\"evidence\":[]}\n```",
+   "verification": {
+    "status": "inconclusive",
+    "summary": "no",
+    "evidence": [
+     {
+      "source": "simulation_response",
+      "analysis_type": null,
+      "claim": "Verification could not establish the requested outcome.",
+      "observed": "<error>",
+      "supports": "inconclusive"
+     }
+    ],
+    "limitations": []
+   }
+  },
+  {
+   "content": "{\"status\":\"great\",\"summary\":\"s\"}",
+   "verification": {
+    "status": "inconclusive",
+    "summary": "The simulation completed, but the requested outcome could not be verified automatically.",
+    "evidence": [
+     {
+      "source": "simulation_response",
+      "analysis_type": null,
+      "claim": "Verification could not establish the requested outcome.",
+      "observed": "<error>",
+      "supports": "inconclusive"
+     }
+    ],
+    "limitations": [
+     "The verification service did not return a valid result."
+    ]
+   }
+  },
+  {
+   "content": "",
+   "verification": {
+    "status": "inconclusive",
+    "summary": "The simulation completed, but the requirement-verification response was empty.",
+    "evidence": [
+     {
+      "source": "simulation_response",
+      "analysis_type": null,
+      "claim": "Verification could not establish the requested outcome.",
+      "observed": "<error>",
+      "supports": "inconclusive"
+     }
+    ],
+    "limitations": [
+     "The verifier returned no usable conclusion."
+    ]
+   }
+  },
+  {
+   "content": "not json",
+   "verification": {
+    "status": "inconclusive",
+    "summary": "The simulation completed, but the requested outcome could not be verified automatically.",
+    "evidence": [
+     {
+      "source": "simulation_response",
+      "analysis_type": null,
+      "claim": "Verification could not establish the requested outcome.",
+      "observed": "<error>",
+      "supports": "inconclusive"
+     }
+    ],
+    "limitations": [
+     "The verification service did not return a valid result."
+    ]
+   }
+  }
+ ]
+}

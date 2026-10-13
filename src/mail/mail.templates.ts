@@ -87,6 +87,93 @@ export function passwordChangedEmail(params: {
   };
 }
 
+const ROLE_LABEL: Record<string, string> = {
+  VIEWER: 'viewer',
+  EDITOR: 'editor',
+  ADMIN: 'admin',
+  MEMBER: 'member',
+};
+const roleLabel = (role: string): string =>
+  ROLE_LABEL[role] ?? role.toLowerCase();
+
+function quote(message: string | null | undefined): {
+  text: string;
+  html: string;
+} {
+  if (!message) return { text: '', html: '' };
+  return {
+    text: `\n\nMessage:\n"${message}"`,
+    html: `<blockquote style="margin:16px 0;padding:12px 16px;background:#f3f4f6;border-left:4px solid #2563eb;color:#374151">${escapeHtml(message)}</blockquote>`,
+  };
+}
+
+/** Invitation to a project for someone without an account yet. */
+export function projectInvitationEmail(params: {
+  to: string;
+  projectName: string;
+  inviterName: string;
+  role: string;
+  url: string;
+  message?: string | null;
+  expiresInText: string;
+}): MailMessage {
+  const role = roleLabel(params.role);
+  const note = quote(params.message);
+  return {
+    to: params.to,
+    subject: `${params.inviterName} invited you to "${params.projectName}" on ${APP_NAME}`,
+    text: `Hi,\n\n${params.inviterName} invited you to collaborate on "${params.projectName}" as ${role}.${note.text}\n\nAccept the invitation:\n${params.url}\n\nThe invitation expires in ${params.expiresInText}.`,
+    html: layout(
+      'You have been invited to a project',
+      `<p>${escapeHtml(params.inviterName)} invited you to collaborate on <strong>${escapeHtml(params.projectName)}</strong> as ${escapeHtml(role)}.</p>${note.html}${button(params.url, 'Accept invitation')}<p style="font-size:13px;color:#4b5563">The invitation expires in ${escapeHtml(params.expiresInText)}.</p>`,
+    ),
+  };
+}
+
+/** Notice that an existing user was given access to a project. */
+export function projectSharedEmail(params: {
+  to: string;
+  name: string | null;
+  projectName: string;
+  inviterName: string;
+  role: string;
+  url: string;
+  message?: string | null;
+}): MailMessage {
+  const hello = greeting(params.name);
+  const role = roleLabel(params.role);
+  const note = quote(params.message);
+  return {
+    to: params.to,
+    subject: `${params.inviterName} shared "${params.projectName}" with you`,
+    text: `${hello}\n\n${params.inviterName} shared "${params.projectName}" with you as ${role}.${note.text}\n\nOpen it:\n${params.url}`,
+    html: layout(
+      'A project was shared with you',
+      `<p>${escapeHtml(hello)}</p><p>${escapeHtml(params.inviterName)} shared <strong>${escapeHtml(params.projectName)}</strong> with you as ${escapeHtml(role)}.</p>${note.html}${button(params.url, 'Open project')}`,
+    ),
+  };
+}
+
+export function teamInvitationEmail(params: {
+  to: string;
+  teamName: string;
+  inviterName: string;
+  role: string;
+  url: string;
+  expiresInText: string;
+}): MailMessage {
+  const role = roleLabel(params.role);
+  return {
+    to: params.to,
+    subject: `${params.inviterName} invited you to join ${params.teamName} on ${APP_NAME}`,
+    text: `Hi,\n\n${params.inviterName} invited you to join the team "${params.teamName}" as ${role}.\n\nAccept the invitation:\n${params.url}\n\nThe invitation expires in ${params.expiresInText}.`,
+    html: layout(
+      'You have been invited to a team',
+      `<p>${escapeHtml(params.inviterName)} invited you to join <strong>${escapeHtml(params.teamName)}</strong> as ${escapeHtml(role)}.</p>${button(params.url, 'Join team')}<p style="font-size:13px;color:#4b5563">The invitation expires in ${escapeHtml(params.expiresInText)}.</p>`,
+    ),
+  };
+}
+
 /** "30 minutes", "24 hours", "2 days". */
 export function humanizeDuration(ms: number): string {
   const minutes = Math.round(ms / 60_000);

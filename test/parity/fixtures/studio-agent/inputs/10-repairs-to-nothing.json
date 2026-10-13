@@ -1,0 +1,10 @@
+{
+  "name": "10-repairs-to-nothing",
+  "description": "A history with no usable user turn repairs to a single 'Hello' user turn; a non-object project_state is replaced by {}.",
+  "messages": [
+    { "role": "assistant", "content": [{ "type": "text", "text": "Hi, I am Q." }] },
+    { "role": "user", "content": [{ "type": "text", "text": "   " }] }
+  ],
+  "project_state": "not-an-object",
+  "wire_invalid": "project_state is not an object; the Nest DTO answers 400 where Python silently used {}"
+}

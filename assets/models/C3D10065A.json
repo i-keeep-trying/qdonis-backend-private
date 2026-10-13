@@ -1,0 +1,45 @@
+{
+  "turn_on_loss": {
+    "v_axis": [
+      0.0
+    ],
+    "i_axis": [
+      0.0
+    ],
+    "t_axis": [
+      25.0
+    ],
+    "data": [
+      [
+        [
+          0.0
+        ]
+      ]
+    ]
+  },
+  "turn_off_loss": {
+    "v_axis": [
+      0.0
+    ],
+    "i_axis": [
+      0.0
+    ],
+    "t_axis": [
+      25.0
+    ],
+    "data": [
+      [
+        [
+          0.0
+        ]
+      ]
+    ]
+  },
+  "conduction_loss_on": null,
+  "conduction_loss_off": null,
+  "metadata": {
+    "part_number": "C3D10065A",
+    "type": "Diode",
+    "I_leakage_uA": 12.0
+  }
+}

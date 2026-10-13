@@ -1,0 +1,496 @@
+{
+  "components": [
+    {
+      "id": "D4",
+      "type": "D",
+      "x": -300,
+      "y": -460,
+      "rotation": 180,
+      "parameters": {
+        "Vd": "0.7",
+        "Ron": "1m",
+        "Roff": "1M"
+      }
+    },
+    {
+      "id": "D3",
+      "type": "D",
+      "x": -300,
+      "y": -180,
+      "rotation": 180,
+      "parameters": {
+        "Vd": "0.7",
+        "Ron": "1m",
+        "Roff": "1M"
+      }
+    },
+    {
+      "id": "D2",
+      "type": "D",
+      "x": -180,
+      "y": -460,
+      "rotation": 180,
+      "parameters": {
+        "Vd": "0.7",
+        "Ron": "1m",
+        "Roff": "1M"
+      }
+    },
+    {
+      "id": "D1",
+      "type": "D",
+      "x": -180,
+      "y": -180,
+      "rotation": 180,
+      "parameters": {
+        "Vd": "0.7",
+        "Ron": "1m",
+        "Roff": "1M"
+      }
+    },
+    {
+      "id": "L1",
+      "type": "L",
+      "x": -80,
+      "y": -520,
+      "rotation": 90,
+      "parameters": {
+        "L": "10m",
+        "esr": "50m",
+        "iL0": "0"
+      }
+    },
+    {
+      "id": "M1",
+      "type": "MOSFET",
+      "x": 20,
+      "y": -340,
+      "rotation": 0,
+      "parameters": {
+        "Ron": "10m",
+        "Roff": "1M"
+      }
+    },
+    {
+      "id": "D5",
+      "type": "D",
+      "x": 120,
+      "y": -520,
+      "rotation": 270,
+      "parameters": {
+        "Vd": "0.7",
+        "Ron": "1m",
+        "Roff": "1M"
+      }
+    },
+    {
+      "id": "C1",
+      "type": "C",
+      "x": 220,
+      "y": -380,
+      "rotation": 0,
+      "parameters": {
+        "C": "100u",
+        "esr": "10m",
+        "vC0": "0"
+      }
+    },
+    {
+      "id": "R1",
+      "type": "R",
+      "x": 360,
+      "y": -380,
+      "rotation": 0,
+      "parameters": {
+        "value": "10",
+        "esr": "0"
+      }
+    },
+    {
+      "id": "VAC",
+      "type": "AC_V",
+      "x": -460,
+      "y": -320,
+      "rotation": 180,
+      "parameters": {
+        "amplitude": "12",
+        "frequency": "50"
+      }
+    },
+    {
+      "id": "L2",
+      "type": "L",
+      "x": -80,
+      "y": -440,
+      "rotation": 90,
+      "parameters": {
+        "L": "10m",
+        "esr": "50m",
+        "iL0": "0"
+      }
+    },
+    {
+      "id": "D6",
+      "type": "D",
+      "x": 140,
+      "y": -440,
+      "rotation": 270,
+      "parameters": {
+        "Vd": "0.7",
+        "Ron": "1m",
+        "Roff": "1M"
+      }
+    },
+    {
+      "id": "M2",
+      "type": "MOSFET",
+      "x": 80,
+      "y": -340,
+      "rotation": 0,
+      "parameters": {
+        "Ron": "10m",
+        "Roff": "1M"
+      }
+    }
+  ],
+  "wires": [
+    {
+      "id": "W2",
+      "from": {
+        "type": "pin",
+        "compId": "D4",
+        "terminal": "B"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "L1",
+        "terminal": "B"
+      }
+    },
+    {
+      "id": "W3",
+      "from": {
+        "type": "pin",
+        "compId": "D2",
+        "terminal": "B"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "L1",
+        "terminal": "B"
+      }
+    },
+    {
+      "id": "W5",
+      "from": {
+        "type": "pin",
+        "compId": "L1",
+        "terminal": "A"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "D5",
+        "terminal": "A"
+      }
+    },
+    {
+      "id": "W6",
+      "from": {
+        "type": "pin",
+        "compId": "D5",
+        "terminal": "B"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "R1",
+        "terminal": "A"
+      }
+    },
+    {
+      "id": "W7",
+      "from": {
+        "type": "pin",
+        "compId": "C1",
+        "terminal": "A"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "D5",
+        "terminal": "B"
+      }
+    },
+    {
+      "id": "W8",
+      "from": {
+        "type": "pin",
+        "compId": "M1",
+        "terminal": "D"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "L1",
+        "terminal": "A"
+      }
+    },
+    {
+      "id": "W9",
+      "from": {
+        "type": "pin",
+        "compId": "R1",
+        "terminal": "B"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "D1",
+        "terminal": "A"
+      },
+      "manualPath": [
+        {
+          "x": 360,
+          "y": -340
+        },
+        {
+          "x": 360,
+          "y": -120
+        },
+        {
+          "x": -180,
+          "y": -120
+        },
+        {
+          "x": -180,
+          "y": -140
+        }
+      ]
+    },
+    {
+      "id": "W10",
+      "from": {
+        "type": "pin",
+        "compId": "D1",
+        "terminal": "A"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "D3",
+        "terminal": "A"
+      }
+    },
+    {
+      "id": "W11",
+      "from": {
+        "type": "pin",
+        "compId": "M1",
+        "terminal": "S"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "D1",
+        "terminal": "A"
+      },
+      "manualPath": [
+        {
+          "x": 20,
+          "y": -300
+        },
+        {
+          "x": 20,
+          "y": -120
+        },
+        {
+          "x": -180,
+          "y": -120
+        },
+        {
+          "x": -180,
+          "y": -140
+        }
+      ]
+    },
+    {
+      "id": "W12",
+      "from": {
+        "type": "pin",
+        "compId": "C1",
+        "terminal": "B"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "M1",
+        "terminal": "S"
+      },
+      "manualPath": [
+        {
+          "x": 220,
+          "y": -340
+        },
+        {
+          "x": 220,
+          "y": -120
+        },
+        {
+          "x": 20,
+          "y": -120
+        },
+        {
+          "x": 20,
+          "y": -300
+        }
+      ]
+    },
+    {
+      "id": "W15",
+      "from": {
+        "type": "pin",
+        "compId": "L2",
+        "terminal": "B"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "L1",
+        "terminal": "B"
+      }
+    },
+    {
+      "id": "W16",
+      "from": {
+        "type": "pin",
+        "compId": "L2",
+        "terminal": "A"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "D6",
+        "terminal": "A"
+      }
+    },
+    {
+      "id": "W17",
+      "from": {
+        "type": "pin",
+        "compId": "D6",
+        "terminal": "B"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "C1",
+        "terminal": "A"
+      }
+    },
+    {
+      "id": "W18",
+      "from": {
+        "type": "pin",
+        "compId": "M2",
+        "terminal": "D"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "D6",
+        "terminal": "A"
+      }
+    },
+    {
+      "id": "W19",
+      "from": {
+        "type": "pin",
+        "compId": "M2",
+        "terminal": "S"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "M1",
+        "terminal": "S"
+      },
+      "manualPath": [
+        {
+          "x": 80,
+          "y": -300
+        },
+        {
+          "x": 80,
+          "y": -120
+        },
+        {
+          "x": 60,
+          "y": -120
+        },
+        {
+          "x": 60,
+          "y": -120
+        },
+        {
+          "x": 20,
+          "y": -120
+        },
+        {
+          "x": 20,
+          "y": -300
+        }
+      ]
+    },
+    {
+      "id": "W20",
+      "from": {
+        "type": "pin",
+        "compId": "VAC",
+        "terminal": "B"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "D4",
+        "terminal": "A"
+      }
+    },
+    {
+      "id": "W21",
+      "from": {
+        "type": "pin",
+        "compId": "VAC",
+        "terminal": "A"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "D1",
+        "terminal": "B"
+      }
+    },
+    {
+      "id": "W22",
+      "from": {
+        "type": "pin",
+        "compId": "D3",
+        "terminal": "B"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "D4",
+        "terminal": "A"
+      }
+    },
+    {
+      "id": "W23",
+      "from": {
+        "type": "pin",
+        "compId": "D2",
+        "terminal": "A"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "D1",
+        "terminal": "B"
+      }
+    }
+  ],
+  "plotConfiguration": {
+    "plots": []
+  },
+  "simulationSettings": {
+    "stopTime": "0.05",
+    "stepSize": "1e-5",
+    "stepType": "fixed",
+    "solver": "euler"
+  },
+  "id": "acdc_interleaved_boost_power_factor_correction",
+  "name": "Interleaved Boost Power Factor Correction Rectifier"
+}

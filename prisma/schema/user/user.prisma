@@ -36,5 +36,24 @@ model User {
   subscriptionEvents SubscriptionEvent[]
   updatedSettings    AppSetting[]
 
+  ownedProjects              Project[]
+  projectMemberships         ProjectMember[]      @relation("ProjectMembership")
+  grantedProjectMemberships  ProjectMember[]      @relation("ProjectMemberGrantor")
+  sentProjectInvitations     ProjectInvitation[]  @relation("ProjectInvitationSender")
+  acceptedProjectInvitations ProjectInvitation[]  @relation("ProjectInvitationAcceptor")
+  createdShareLinks          ShareLink[]          @relation("ShareLinkCreator")
+  projectActivity            ProjectActivity[]    @relation("ProjectActivityActor")
+  projectVersions            ProjectVersion[]     @relation("ProjectVersionAuthor")
+  projectChatMessages        ProjectChatMessage[] @relation("ProjectChatAuthor")
+  storedFiles                StoredFile[]         @relation("StoredFileOwner")
+  ownedTeams                 Team[]               @relation("TeamOwner")
+  teamMemberships            TeamMember[]         @relation("TeamMembership")
+  sentTeamInvitations        TeamInvitation[]     @relation("TeamInvitationSender")
+  teamTokenUsage             TeamTokenUsage[]     @relation("TeamUsageActor")
+  studioNodes                StudioNode[]         @relation("StudioNodeAuthor")
+  simulationRuns             SimulationRun[]      @relation("SimulationRunAuthor")
+  studioBranches             StudioBranch[]       @relation("StudioBranchAuthor")
+  studioBranchCursors        StudioBranchCursor[] @relation("StudioBranchCursorUser")
+
   @@map("users")
 }

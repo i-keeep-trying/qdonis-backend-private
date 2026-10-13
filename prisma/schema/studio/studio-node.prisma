@@ -1,0 +1,34 @@
+/// One stage result in a project's Studio graph, like a commit. Nodes form a
+/// tree through `parentId`; branches are named pointers to a head node, and
+/// the results a branch shows are its head's ancestry. Keyed per project, so
+/// a graph can never reference another project's nodes.
+model StudioNode {
+  id          String           @db.VarChar(100)
+  projectId   String           @map("project_id") @db.Uuid
+  parentId    String?          @map("parent_id") @db.VarChar(100)
+  stage       StudioStage
+  status      StudioNodeStatus @default(ready)
+  error       String?
+  /// Bumped on every in-place update of the result.
+  rev         Int              @default(1)
+  /// Stage result. Heavy payloads (waveforms) live in S3 blobs `studio/<id>`.
+  data        Json             @default("{}")
+  source      StudioNodeSource @default(agent)
+  summary     String?
+  createdById String?          @map("created_by_id") @db.Uuid
+  createdAt   DateTime         @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt   DateTime         @default(now()) @map("updated_at") @db.Timestamptz(3)
+
+  project   Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  /// NO ACTION: a whole subtree can be removed in one statement (checked at its end).
+  parent    StudioNode?  @relation("StudioNodeTree", fields: [projectId, parentId], references: [projectId, id], onDelete: NoAction, onUpdate: NoAction)
+  children  StudioNode[] @relation("StudioNodeTree")
+  headOf    StudioBranch[] @relation("StudioBranchHead")
+  forkOf    StudioBranch[] @relation("StudioBranchForkPoint")
+  createdBy User?        @relation("StudioNodeAuthor", fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@id([projectId, id])
+  @@index([projectId, parentId])
+  @@index([projectId, createdAt])
+  @@map("studio_nodes")
+}

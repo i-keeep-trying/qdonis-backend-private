@@ -1,0 +1,17 @@
+/// One outbound supplier API call (was `mouser_api_usage`). Drives the
+/// fleet-wide rate limit (calls per minute / day per supplier key).
+model SupplierApiCall {
+  id         String   @id @default(uuid()) @db.Uuid
+  supplier   String
+  endpoint   String
+  statusCode Int?     @map("status_code")
+  durationMs Int      @map("duration_ms")
+  results    Int      @default(0)
+  error      String?
+  userId     String?  @map("user_id") @db.Uuid
+  projectId  String?  @map("project_id") @db.Uuid
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@index([supplier, createdAt])
+  @@map("supplier_api_calls")
+}

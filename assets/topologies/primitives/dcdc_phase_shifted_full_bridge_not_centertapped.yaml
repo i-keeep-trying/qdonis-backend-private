@@ -1,0 +1,596 @@
+id: dcdc_phase_shifted_full_bridge_not_centertapped
+name: Phase Shifted Full Bridge Not Centertapped DC-DC Converter
+description: Isolated kilowatt-class DC-DC converter using a full H-bridge primary
+  with phase-shift control between left and right legs for ZVS. Converts 400V input
+  to 36V output at ~18A load. Left leg (SW1/SW2) runs at 50% duty; right leg (SW3/SW4)
+  is phase-shifted by 2us (72 degrees at 100kHz). The phase difference controls primary
+  voltage pulsewidth and hence power transfer. Series inductor L_R resonates with
+  switch capacitances for ZVS turn-on. Secondary uses a full-bridge rectifier (D1-D4)
+  with LC output filter.
+components:
+  - ref: VIN
+    type: node
+    role: input_source
+    params:
+      node_type: voltage_source
+      source: dc
+      voltage: 400
+      series_resistance: 0.2
+  - ref: PWM1
+    type: node
+    role: pwm_control
+    params:
+      node_type: pwm_control
+      frequency: 100e3
+      duty_cycle: 0.48
+      vhigh: 15.0
+      vlow: 0.0
+      trise: 1e-7
+      tfall: 1e-7
+      tdelay: 0
+      drive_resistance: 50
+  - ref: PWM2
+    type: node
+    role: pwm_control
+    params:
+      node_type: pwm_control
+      frequency: 100e3
+      duty_cycle: 0.48
+      vhigh: 15.0
+      vlow: 0.0
+      trise: 1e-7
+      tfall: 1e-7
+      tdelay: 5.2e-06
+      drive_resistance: 50
+  - ref: PWM3
+    type: node
+    role: pwm_control
+    params:
+      node_type: pwm_control
+      frequency: 100e3
+      duty_cycle: 0.48
+      vhigh: 15.0
+      vlow: 0.0
+      trise: 1e-7
+      tfall: 1e-7
+      tdelay: 2.0e-06
+      drive_resistance: 50
+  - ref: PWM4
+    type: node
+    role: pwm_control
+    params:
+      node_type: pwm_control
+      frequency: 100e3
+      duty_cycle: 0.48
+      vhigh: 15.0
+      vlow: 0.0
+      trise: 1e-7
+      tfall: 1e-7
+      tdelay: 7.2e-06
+      drive_resistance: 50
+  - ref: SW1
+    type: transistor
+    role: hs_left
+    params:
+      family: mosfet
+      type: nmos
+      mode: enhancement
+      voltage_rating: 600
+      current_rating: 10
+      Vto: 1.5
+      Kn: 20e-3
+      Lambda: 0.005
+      Cgs: 1000e-12
+      Cgd: 200e-12
+      Cdb: 200e-12
+    layout:
+      schX: -2.0
+      schY: 0.0
+      rotation: 90deg
+  - ref: SW2
+    type: transistor
+    role: ls_left
+    params:
+      family: mosfet
+      type: nmos
+      mode: enhancement
+      voltage_rating: 600
+      current_rating: 10
+      Vto: 1.5
+      Kn: 20e-3
+      Lambda: 0.005
+      Cgs: 1000e-12
+      Cgd: 200e-12
+      Cdb: 200e-12
+    layout:
+      schX: -2.0
+      schY: -3.0
+      rotation: 270deg
+  - ref: SW3
+    type: transistor
+    role: hs_right
+    params:
+      family: mosfet
+      type: nmos
+      mode: enhancement
+      voltage_rating: 600
+      current_rating: 10
+      Vto: 1.5
+      Kn: 20e-3
+      Lambda: 0.005
+      Cgs: 1000e-12
+      Cgd: 200e-12
+      Cdb: 200e-12
+    layout:
+      schX: 1.0
+      schY: 0.0
+      rotation: 90deg
+  - ref: SW4
+    type: transistor
+    role: ls_right
+    params:
+      family: mosfet
+      type: nmos
+      mode: enhancement
+      voltage_rating: 600
+      current_rating: 10
+      Vto: 1.5
+      Kn: 20e-3
+      Lambda: 0.005
+      Cgs: 1000e-12
+      Cgd: 200e-12
+      Cdb: 200e-12
+    layout:
+      schX: 1.0
+      schY: -3.0
+      rotation: 270deg
+  - ref: L_R
+    type: inductor
+    role: resonant_inductor
+    params:
+      inductance: 10e-6
+      series_resistance: 0.02
+      saturation_current: 30.0
+      core_loss_resistance: 1e6
+      parasitic_capacitance: 20e-12
+      ic: 0
+    layout:
+      schX: -0.5
+      schY: -1.0
+      orientation: horizontal
+  - ref: T1
+    type: transformer
+    role: power_transformer
+    params:
+      Lm_primary: 2000e-6
+      turns_ratio: 0.1
+      k_coupling: 0.99
+      phase: same
+      Rp: 0.1
+      Rs: 0.05
+      core_loss_resistance: 1e6
+    layout:
+      schX: 2.5
+      schY: -1.5
+      configuration: left-to-right
+    internal:
+      - ref: R_ISO
+        type: resistor
+        role: secondary_ground_anchor
+        params:
+          resistance: 100e6
+        connections:
+          pos:
+            - T1
+            - S2
+          neg:
+            - VIN
+            - '-'
+      - ref: R_ISO_S1
+        type: resistor
+        role: secondary_ground_anchor
+        params:
+          resistance: 100e6
+        connections:
+          pos:
+            - T1
+            - S1
+          neg:
+            - VIN
+            - '-'
+  - ref: D1
+    type: diode
+    role: sec_rect_1
+    params:
+      reverse_voltage: 150
+      current_rating: 20
+      Is: 1e-12
+      n: 1.1
+      Rs: 0.05
+      Cjo: 50e-12
+      Tt: 10e-9
+      Bv: 200
+      Ibv: 1e-6
+    layout:
+      schX: 4.0
+      schY: 0.0
+      orientation: pos_bottom
+  - ref: D2
+    type: diode
+    role: sec_rect_2
+    params:
+      reverse_voltage: 150
+      current_rating: 20
+      Is: 1e-12
+      n: 1.1
+      Rs: 0.05
+      Cjo: 50e-12
+      Tt: 10e-9
+      Bv: 200
+      Ibv: 1e-6
+    layout:
+      schX: 6.0
+      schY: -0.0
+      orientation: pos_bottom
+  - ref: D3
+    type: diode
+    role: sec_rect_3
+    params:
+      reverse_voltage: 150
+      current_rating: 20
+      Is: 1e-12
+      n: 1.1
+      Rs: 0.05
+      Cjo: 50e-12
+      Tt: 10e-9
+      Bv: 200
+      Ibv: 1e-6
+    layout:
+      schX: 4.0
+      schY: -3.0
+      orientation: pos_bottom
+  - ref: D4
+    type: diode
+    role: sec_rect_4
+    params:
+      reverse_voltage: 150
+      current_rating: 20
+      Is: 1e-12
+      n: 1.1
+      Rs: 0.05
+      Cjo: 50e-12
+      Tt: 10e-9
+      Bv: 200
+      Ibv: 1e-6
+    layout:
+      schX: 6.0
+      schY: -3.0
+      orientation: pos_bottom
+  - ref: L_OUT
+    type: inductor
+    role: output_filter
+    params:
+      inductance: 50e-6
+      series_resistance: 0.02
+      saturation_current: 30.0
+      core_loss_resistance: 1e6
+      parasitic_capacitance: 30e-12
+      ic: 0
+    layout:
+      schX: 7.0
+      schY: 1.0
+      orientation: horizontal
+  - ref: Cout
+    type: capacitor
+    role: output_filter
+    params:
+      capacitance: 470e-6
+      polarized: true
+      voltage_rating: 100
+      tolerance: 0.1
+      esr: 0.01
+      esl: 5e-9
+      leakage_current: 10e-6
+      ic: 0
+    layout:
+      schX: 8.0
+      schY: -1.0
+      orientation: vertical
+  - ref: R_LOAD
+    type: resistor
+    role: load
+    params:
+      resistance: 2
+      tolerance: 0.05
+      temp_coefficient: 100e-6
+      parasitic_inductance: 10e-9
+    layout:
+      schX: 9.0
+      schY: -1.0
+      orientation: vertical
+nets:
+  - - - VIN
+      - +
+    - - SW1
+      - drain
+    - - SW3
+      - drain
+  - - - PWM1
+      - pos
+    - - SW1
+      - gate
+  - - - PWM1
+      - neg
+    - - SW1
+      - source
+  - - - SW1
+      - source
+    - - SW2
+      - drain
+    - - L_R
+      - pin1
+  - - - L_R
+      - pin2
+    - - T1
+      - P1
+  - - - PWM2
+      - pos
+    - - SW2
+      - gate
+  - - - PWM2
+      - neg
+    - - VIN
+      - '-'
+  - - - SW2
+      - source
+    - - VIN
+      - '-'
+  - - - PWM3
+      - pos
+    - - SW3
+      - gate
+  - - - PWM3
+      - neg
+    - - SW3
+      - source
+  - - - SW3
+      - source
+    - - SW4
+      - drain
+    - - T1
+      - P2
+  - - - PWM4
+      - pos
+    - - SW4
+      - gate
+  - - - PWM4
+      - neg
+    - - VIN
+      - '-'
+  - - - SW4
+      - source
+    - - VIN
+      - '-'
+  - - - T1
+      - S1
+    - - D1
+      - anode
+    - - D3
+      - cathode
+  - - - T1
+      - S2
+    - - D2
+      - anode
+    - - D4
+      - cathode
+  - - - D1
+      - cathode
+    - - D2
+      - cathode
+    - - L_OUT
+      - pin1
+  - - - L_OUT
+      - pin2
+    - - Cout
+      - pos
+    - - R_LOAD
+      - pos
+  - - - D3
+      - anode
+    - - D4
+      - anode
+    - - Cout
+      - neg
+    - - R_LOAD
+      - neg
+analysis:
+  transient:
+    spice_settings:
+      tstop: 0.01
+      use_ic: true
+      reltol: 0.01
+      abstol: 1.0e-06
+      vntol: 0.0001
+      gmin: 1.0e-12
+      method: gear
+      maxord: 2
+    requirements:
+      - rid: tr_reg
+        requirement: Output voltage regulation; verify phase-shift modulation controls
+          output proportionally
+        criteria:
+          target_vout: 36.0
+          regulation_limit_pct: 5
+          ripple_limit_vpp: 360e-3
+        measurement:
+          - ref: VIN
+            plot:
+              x_axis: time
+              title: Input Voltage PSFB
+            component: VIN
+            quantity: voltage
+            nets:
+              - - VIN
+                - +
+              - - VIN
+                - '-'
+          - ref: VOUT
+            plot:
+              x_axis: time
+              title: Output Voltage PSFB
+            component: R_LOAD
+            quantity: voltage
+            nets:
+              - - R_LOAD
+                - pos
+              - - Cout
+                - neg
+            data:
+              - name: Vout_avg
+                spice_command: avg
+                description: Average output voltage
+              - name: Vout_ripple_vpp
+                spice_command: pp
+                description: Peak-to-peak output ripple
+          - ref: IOUT
+            plot: false
+            component: R_LOAD
+            quantity: current
+            data:
+              - name: Iout_avg
+                spice_command: avg
+                description: Average load current
+        outputs:
+          - var: load_regulation_pct
+            formula: 100*abs([Vout_avg] - {criteria.target_vout})/{criteria.target_vout}
+            description: Load regulation deviation from target
+          - var: vout_avg_v
+            formula: '[Vout_avg]'
+            description: Average output voltage
+          - var: vout_ripple_vpp_v
+            formula: '[Vout_ripple_vpp]'
+            description: Output voltage peak-to-peak ripple
+      - rid: tr_zvs
+        requirement: 'ZVS verification: SW1 drain voltage at turn-on instant should
+          be near zero for lossless switching'
+        criteria:
+          zvs_voltage_max_v: 20.0
+        measurement:
+          - ref: VSW1_DS
+            plot:
+              x_axis: time
+              title: SW1 Drain-Source Voltage (ZVS)
+            component: SW1
+            quantity: voltage
+            nets:
+              - - SW1
+                - drain
+              - - SW1
+                - source
+            data:
+              - name: Vsw1_min
+                spice_command: min
+                description: Minimum SW1 Vds at ZVS turn-on (should approach 0V)
+          - ref: ILR
+            plot:
+              x_axis: time
+              title: Resonant Inductor Current
+            component: L_R
+            quantity: current
+            data:
+              - name: ILr_peak
+                spice_command: max
+                description: Peak resonant inductor current
+              - name: ILr_rms
+                spice_command: rms
+                description: RMS resonant inductor current
+        outputs:
+          - var: vsw1_min_v
+            formula: abs([Vsw1_min])
+            description: Minimum SW1 voltage at turn-on (ZVS indicator)
+          - var: ilr_peak_a
+            formula: '[ILr_peak]'
+            description: Peak resonant inductor current
+      - rid: tr_eff
+        requirement: Efficiency measurement at nominal operating point; breakdown
+          switch and diode losses
+        criteria:
+          efficiency_target_pct: 92
+        measurement:
+          - ref: IIN
+            plot: false
+            component: VIN
+            quantity: current
+            data:
+              - name: Iin_avg
+                spice_command: avg
+                description: Average input current
+          - ref: IOUT_EFF
+            plot: false
+            component: R_LOAD
+            quantity: current
+            data:
+              - name: Iout_avg
+                spice_command: avg
+                description: Average load current
+          - ref: VOUT_EFF
+            plot: false
+            component: R_LOAD
+            quantity: voltage
+            nets:
+              - - R_LOAD
+                - pos
+              - - Cout
+                - neg
+            data:
+              - name: Vout_avg
+                spice_command: avg
+                description: Average output voltage
+          - ref: VIN_EFF
+            plot: false
+            component: VIN
+            quantity: voltage
+            nets:
+              - - VIN
+                - +
+              - - VIN
+                - '-'
+            data:
+              - name: Vin_avg
+                spice_command: avg
+                description: Average input voltage
+          - ref: IL_OUT_EFF
+            plot: false
+            component: L_OUT
+            quantity: current
+            data:
+              - name: IL_out_rms
+                spice_command: rms
+                description: RMS output inductor current
+        outputs:
+          - var: Pin_avg
+            formula: abs([Vin_avg]*[Iin_avg])
+            description: Average input power
+          - var: Pout_avg
+            formula: '[Vout_avg]*[Iout_avg]'
+            description: Average output power
+          - var: P_L_out_cu
+            formula: '[IL_out_rms]**2*{components.L_OUT.series_resistance}'
+            description: Output inductor copper loss
+          - var: efficiency_pct
+            formula: 100*[Pout_avg]/[Pin_avg]
+            description: Efficiency percentage
+metadata:
+  stage:
+    - power_switch
+    - isolation
+    - rectification
+    - filter
+  topology: isolated
+  control: phase-shift
+  tags:
+    - PSFB
+    - phase-shifted-full-bridge
+    - ZVS
+    - server
+    - EV-charger

@@ -1,0 +1,15 @@
+/// What a queued run computes for its Studio node.
+enum SimulationRunKind {
+  /// ngspice on the design decks (Simulation stage).
+  simulation
+  /// AI component sizing + decks (Design stage).
+  design
+  /// AI edit of the design decks from an instruction.
+  design_modify
+  /// AI repair of the design decks (syntax / convergence).
+  design_fix
+  /// AI engineering constraints list of a specs node (Specs stage).
+  constraints
+
+  @@map("simulation_run_kind")
+}

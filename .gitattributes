@@ -1,0 +1,3 @@
+# Read-only data copied byte-for-byte from qdonis-core (see assets/MANIFEST.json).
+# Never convert line endings, so every checkout hashes the same as the manifest.
+assets/** -text

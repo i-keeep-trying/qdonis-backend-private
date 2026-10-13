@@ -14,6 +14,7 @@ import { Public } from '../common/decorators/public.decorator';
 import { PrismaService } from '../prisma/prisma.service';
 import { SkipThrottle } from '@nestjs/throttler';
 import type { AppConfiguration } from '../config/configuration';
+import { probeNgspice } from '../simulation/ngspice/ngspice.probe';
 
 /** Heap ceiling above which the process is reported unhealthy. */
 const MAX_HEAP_BYTES = 512 * 1024 * 1024;
@@ -74,6 +75,42 @@ export class HealthController {
       this.pgvectorIndicator(),
       () => this.memory.checkHeap('memory_heap', MAX_HEAP_BYTES),
     ]);
+  }
+
+  /**
+   * Full readiness of a simulation instance (qdonis-core `/health/ready`):
+   * also requires the ngspice binary. Kept off `/health` so an instance
+   * without ngspice still serves everything else.
+   */
+  @Get('ready')
+  @HealthCheck()
+  @ApiOperation({
+    summary: 'Readiness incl. simulation: database, pgvector, ngspice, memory',
+  })
+  ready(): Promise<HealthCheckResult> {
+    return this.health.check([
+      this.databaseIndicator(),
+      this.pgvectorIndicator(),
+      this.ngspiceIndicator(),
+      () => this.memory.checkHeap('memory_heap', MAX_HEAP_BYTES),
+    ]);
+  }
+
+  /** The simulation stage needs the ngspice binary on this instance. */
+  private ngspiceIndicator(): HealthIndicatorFunction {
+    return async () => {
+      const indicator = this.indicator.check('ngspice');
+      const { ngspicePath } = this.config.get('simulation', { infer: true });
+      const probe = await probeNgspice(ngspicePath);
+      return probe.ok
+        ? indicator.up({ version: probe.version })
+        : indicator.down({
+            message: this.failureMessage(
+              new Error(probe.error ?? 'unavailable'),
+              'unavailable',
+            ),
+          });
+    };
   }
 
   private databaseIndicator(): HealthIndicatorFunction {

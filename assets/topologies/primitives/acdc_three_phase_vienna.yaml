@@ -1,0 +1,580 @@
+id: acdc_three_phase_vienna
+name: Three-Phase Vienna Rectifier
+description: Three-phase Vienna rectifier with fully corrected and filtered control
+  loop
+components:
+- ref: GND
+  type: node
+  params:
+    node_type: ground
+- ref: V_AC_A
+  type: node
+  role: voltage_source
+  params:
+    node_type: voltage_source
+    source: sine
+    amplitude: 170.0
+    frequency: 50
+    phase: 0
+- ref: V_AC_B
+  type: node
+  role: voltage_source
+  params:
+    node_type: voltage_source
+    source: sine
+    amplitude: 170.0
+    frequency: 50
+    phase: -120
+- ref: V_AC_C
+  type: node
+  role: voltage_source
+  params:
+    node_type: voltage_source
+    source: sine
+    amplitude: 170.0
+    frequency: 50
+    phase: -240
+- ref: R_neutral
+  type: resistor
+  params:
+    resistance: 10000000.0
+- ref: R_grid_A
+  type: resistor
+  params:
+    resistance: 0.05
+- ref: R_grid_B
+  type: resistor
+  params:
+    resistance: 0.05
+- ref: R_grid_C
+  type: resistor
+  params:
+    resistance: 0.05
+- ref: V_SENSE_A
+  type: node
+  params:
+    node_type: voltage_source
+    source: dc
+    voltage: 0
+- ref: V_SENSE_B
+  type: node
+  params:
+    node_type: voltage_source
+    source: dc
+    voltage: 0
+- ref: V_SENSE_C
+  type: node
+  params:
+    node_type: voltage_source
+    source: dc
+    voltage: 0
+- ref: L_A
+  type: inductor
+  params:
+    inductance: 0.00047
+- ref: L_B
+  type: inductor
+  params:
+    inductance: 0.00047
+- ref: L_C
+  type: inductor
+  params:
+    inductance: 0.00047
+- ref: C_DC_TOP
+  type: capacitor
+  params:
+    capacitance: 0.0022
+    ic: 400
+- ref: C_DC_BOT
+  type: capacitor
+  params:
+    capacitance: 0.0022
+    ic: -400
+- ref: R_LOAD
+  type: resistor
+  params:
+    resistance: 42.66
+- ref: D_A_TOP
+  type: diode
+  params:
+    model: D_SiC
+- ref: D_A_BOT
+  type: diode
+  params:
+    model: D_SiC
+- ref: D_B_TOP
+  type: diode
+  params:
+    model: D_SiC
+- ref: D_B_BOT
+  type: diode
+  params:
+    model: D_SiC
+- ref: D_C_TOP
+  type: diode
+  params:
+    model: D_SiC
+- ref: D_C_BOT
+  type: diode
+  params:
+    model: D_SiC
+- ref: S_A
+  type: switch
+  params:
+    model: sw_mod
+- ref: S_B
+  type: switch
+  params:
+    model: sw_mod
+- ref: S_C
+  type: switch
+  params:
+    model: sw_mod
+- ref: B_VA_grid
+  type: b_source
+  params:
+    expression: V(n_A_raw) - V(n_neutral)
+- ref: B_VB_grid
+  type: b_source
+  params:
+    expression: V(n_B_raw) - V(n_neutral)
+- ref: B_VC_grid
+  type: b_source
+  params:
+    expression: V(n_C_raw) - V(n_neutral)
+- ref: B_Iact_A_raw
+  type: b_source
+  params:
+    expression: abs(I(V_SENSE_A))
+- ref: R_fA
+  type: resistor
+  params:
+    resistance: 10000.0
+- ref: C_fA
+  type: capacitor
+  params:
+    capacitance: 1.0e-07
+- ref: B_Iact_B_raw
+  type: b_source
+  params:
+    expression: abs(I(V_SENSE_B))
+- ref: R_fB
+  type: resistor
+  params:
+    resistance: 10000.0
+- ref: C_fB
+  type: capacitor
+  params:
+    capacitance: 1.0e-07
+- ref: B_Iact_C_raw
+  type: b_source
+  params:
+    expression: abs(I(V_SENSE_C))
+- ref: R_fC
+  type: resistor
+  params:
+    resistance: 10000.0
+- ref: C_fC
+  type: capacitor
+  params:
+    capacitance: 1.0e-07
+- ref: B_VDC_TOTAL
+  type: b_source
+  params:
+    expression: V(n_DC_POS) - V(n_DC_NEG)
+- ref: B_VERR
+  type: b_source
+  params:
+    expression: 800 - V(v_dc_tot)
+- ref: B_VP
+  type: b_source
+  params:
+    expression: V(v_err) * 0.1
+- ref: G_VINT
+  type: custom_spice
+  params:
+    spice_line: G_VINT 0 v_int v_err 0 0.05
+- ref: C_VINT
+  type: capacitor
+  params:
+    capacitance: 1
+- ref: R_VINT
+  type: resistor
+  params:
+    resistance: 100000000.0
+- ref: B_IMAG
+  type: b_source
+  params:
+    expression: max(0, min(50, V(v_p) + V(v_int)))
+- ref: B_Iref_A
+  type: b_source
+  params:
+    expression: V(i_mag) * abs(V(v_a_grid)) / 170.0
+- ref: B_Iref_B
+  type: b_source
+  params:
+    expression: V(i_mag) * abs(V(v_b_grid)) / 170.0
+- ref: B_Iref_C
+  type: b_source
+  params:
+    expression: V(i_mag) * abs(V(v_c_grid)) / 170.0
+- ref: B_Duty_A
+  type: b_source
+  params:
+    expression: 1 - (abs(V(v_a_grid))/400) + 0.01*(V(i_ref_A) - V(i_act_A))
+- ref: B_Duty_B
+  type: b_source
+  params:
+    expression: 1 - (abs(V(v_b_grid))/400) + 0.01*(V(i_ref_B) - V(i_act_B))
+- ref: B_Duty_C
+  type: b_source
+  params:
+    expression: 1 - (abs(V(v_c_grid))/400) + 0.01*(V(i_ref_C) - V(i_act_C))
+- ref: B_Clamp_A
+  type: b_source
+  params:
+    expression: max(0.02, min(0.98, V(n_duty_A)))
+- ref: B_Clamp_B
+  type: b_source
+  params:
+    expression: max(0.02, min(0.98, V(n_duty_B)))
+- ref: B_Clamp_C
+  type: b_source
+  params:
+    expression: max(0.02, min(0.98, V(n_duty_C)))
+- ref: V_TRI
+  type: custom_spice
+  params:
+    spice_line: V_TRI n_tri 0 PULSE(0 1 0 25u 25u 0 50u)
+- ref: B_PWM_A
+  type: b_source
+  params:
+    expression: 10 * (1 + tanh((V(n_d_A) - V(n_tri))*1000))
+- ref: B_PWM_B
+  type: b_source
+  params:
+    expression: 10 * (1 + tanh((V(n_d_B) - V(n_tri))*1000))
+- ref: B_PWM_C
+  type: b_source
+  params:
+    expression: 10 * (1 + tanh((V(n_d_C) - V(n_tri))*1000))
+nets:
+- - - GND
+    - pin
+  - - R_neutral
+    - neg
+  - - C_DC_TOP
+    - neg
+  - - C_DC_BOT
+    - pos
+  - - B_VA_grid
+    - '-'
+  - - B_VB_grid
+    - '-'
+  - - B_VC_grid
+    - '-'
+  - - B_Iact_A_raw
+    - '-'
+  - - C_fA
+    - neg
+  - - B_Iact_B_raw
+    - '-'
+  - - C_fB
+    - neg
+  - - B_Iact_C_raw
+    - '-'
+  - - C_fC
+    - neg
+  - - B_VDC_TOTAL
+    - '-'
+  - - B_VERR
+    - '-'
+  - - B_VP
+    - '-'
+  - - C_VINT
+    - neg
+  - - R_VINT
+    - neg
+  - - B_IMAG
+    - '-'
+  - - B_Iref_A
+    - '-'
+  - - B_Iref_B
+    - '-'
+  - - B_Iref_C
+    - '-'
+  - - B_Duty_A
+    - '-'
+  - - B_Duty_B
+    - '-'
+  - - B_Duty_C
+    - '-'
+  - - B_Clamp_A
+    - '-'
+  - - B_Clamp_B
+    - '-'
+  - - B_Clamp_C
+    - '-'
+  - - B_PWM_A
+    - '-'
+  - - B_PWM_B
+    - '-'
+  - - B_PWM_C
+    - '-'
+  - - S_A
+    - neg
+  - - S_B
+    - neg
+  - - S_C
+    - neg
+  - - S_A
+    - ctrl-
+  - - S_B
+    - ctrl-
+  - - S_C
+    - ctrl-
+- - - n_A_raw
+    - NET
+  - - V_AC_A
+    - plus
+  - - R_grid_A
+    - pos
+- - - n_B_raw
+    - NET
+  - - V_AC_B
+    - plus
+  - - R_grid_B
+    - pos
+- - - n_C_raw
+    - NET
+  - - V_AC_C
+    - plus
+  - - R_grid_C
+    - pos
+- - - n_neutral
+    - NET
+  - - V_AC_A
+    - minus
+  - - V_AC_B
+    - minus
+  - - V_AC_C
+    - minus
+  - - R_neutral
+    - pos
+- - - R_grid_A
+    - neg
+  - - V_SENSE_A
+    - plus
+- - - R_grid_B
+    - neg
+  - - V_SENSE_B
+    - plus
+- - - R_grid_C
+    - neg
+  - - V_SENSE_C
+    - plus
+- - - V_SENSE_A
+    - minus
+  - - L_A
+    - pos
+- - - V_SENSE_B
+    - minus
+  - - L_B
+    - pos
+- - - V_SENSE_C
+    - minus
+  - - L_C
+    - pos
+- - - L_A
+    - neg
+  - - D_A_TOP
+    - anode
+  - - D_A_BOT
+    - cathode
+  - - S_A
+    - pos
+- - - L_B
+    - neg
+  - - D_B_TOP
+    - anode
+  - - D_B_BOT
+    - cathode
+  - - S_B
+    - pos
+- - - L_C
+    - neg
+  - - D_C_TOP
+    - anode
+  - - D_C_BOT
+    - cathode
+  - - S_C
+    - pos
+- - - D_A_TOP
+    - cathode
+  - - D_B_TOP
+    - cathode
+  - - D_C_TOP
+    - cathode
+  - - C_DC_TOP
+    - pos
+  - - R_LOAD
+    - pos
+  - n_DC_POS
+- - - D_A_BOT
+    - anode
+  - - D_B_BOT
+    - anode
+  - - D_C_BOT
+    - anode
+  - - C_DC_BOT
+    - neg
+  - - R_LOAD
+    - neg
+  - n_DC_NEG
+- - - B_VA_grid
+    - +
+  - v_a_grid
+- - - B_VB_grid
+    - +
+  - v_b_grid
+- - - B_VC_grid
+    - +
+  - v_c_grid
+- - - B_Iact_A_raw
+    - +
+  - - R_fA
+    - pos
+- - - R_fA
+    - neg
+  - - C_fA
+    - pos
+  - i_act_A
+- - - B_Iact_B_raw
+    - +
+  - - R_fB
+    - pos
+- - - R_fB
+    - neg
+  - - C_fB
+    - pos
+  - i_act_B
+- - - B_Iact_C_raw
+    - +
+  - - R_fC
+    - pos
+- - - R_fC
+    - neg
+  - - C_fC
+    - pos
+  - i_act_C
+- - - B_VDC_TOTAL
+    - +
+  - v_dc_tot
+- - - B_VERR
+    - +
+  - v_err
+- - - B_VP
+    - +
+  - v_p
+- - - C_VINT
+    - pos
+  - - R_VINT
+    - pos
+  - v_int
+- - - B_IMAG
+    - +
+  - i_mag
+- - - B_Iref_A
+    - +
+  - i_ref_A
+- - - B_Iref_B
+    - +
+  - i_ref_B
+- - - B_Iref_C
+    - +
+  - i_ref_C
+- - - B_Duty_A
+    - +
+  - n_duty_A
+- - - B_Duty_B
+    - +
+  - n_duty_B
+- - - B_Duty_C
+    - +
+  - n_duty_C
+- - - B_Clamp_A
+    - +
+  - n_d_A
+- - - B_Clamp_B
+    - +
+  - n_d_B
+- - - B_Clamp_C
+    - +
+  - n_d_C
+- - - B_PWM_A
+    - +
+- - - B_PWM_B
+    - +
+- - - B_PWM_C
+    - +
+- - - B_PWM_A
+    - +
+  - - S_A
+    - ctrl+
+- - - B_PWM_B
+    - +
+  - - S_B
+    - ctrl+
+- - - B_PWM_C
+    - +
+  - - S_C
+    - ctrl+
+analysis:
+  transient:
+    spice_settings:
+      tstop: 0.06
+      use_ic: true
+      reltol: 0.01
+      abstol: 1.0e-05
+      vntol: 0.01
+      cshunt: 2.0e-11
+      chgtol: 1.0e-10
+      itl4: 50
+      method: gear
+    requirements:
+    - rid: tr_vienna_rectifier
+      requirement: Verify Vienna Rectifier active current shaping and output voltage.
+      measurement:
+      - ref: VOUT_TOT
+        plot:
+          x_axis: time
+          title: Total DC Link Voltage
+        quantity: voltage
+        component: R_LOAD
+        nets:
+        - - R_LOAD
+          - pos
+        - - R_LOAD
+          - neg
+        data:
+        - name: Vout_avg
+          spice_command: avg
+          description: Average Output Voltage
+      outputs:
+      - var: vout_avg_v
+        formula: abs([Vout_avg])
+        description: Average Output Voltage
+metadata:
+  stage:
+  - afe
+  - rectifier
+  topology: three_phase_vienna_rectifier
+  control: continuous_pi_pwm
+  tags:
+  - vienna
+  - pfc
+  - sic
+  - acdc
+models:
+- .model D_SiC D(Is=1e-12 Rs=0.01 N=1.2 Cjo=150p tt=5n)
+- .model sw_mod SW(Ron=0.02 Roff=1Meg Vt=5 Vh=1)

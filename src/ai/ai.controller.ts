@@ -17,7 +17,7 @@ import type { Request, Response } from 'express';
 
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { AiService } from './ai.service';
-import { BedrockError } from './bedrock.client';
+import { BedrockError } from './bedrock/bedrock-errors';
 import { ConverseDto } from './dto/converse.dto';
 
 const HEARTBEAT_MS = 20_000;
@@ -46,7 +46,7 @@ export class AiController {
     @Req() request: Request,
     @Res() response: Response,
   ): Promise<void> {
-    const modelId = await this.ai.prepare(userId, dto);
+    const modelId = await this.ai.prepare(userId, dto.modelId);
 
     const aborter = new AbortController();
     response.on('close', () => {

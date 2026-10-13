@@ -61,6 +61,10 @@ export const ExistingPasswordField = () =>
 export const NameField = () =>
   applyDecorators(Transform(trim), IsString(), MaxLength(120));
 
+/** Free text, trimmed, between `min` and `max` characters after trimming. */
+export const TrimmedString = (min: number, max: number) =>
+  applyDecorators(Transform(trim), IsString(), MinLength(min), MaxLength(max));
+
 /** Opaque emailed token; real ones are 43 chars of base64url. */
 export const EmailTokenField = () =>
   applyDecorators(

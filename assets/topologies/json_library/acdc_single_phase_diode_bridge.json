@@ -1,0 +1,278 @@
+{
+  "components": [
+    {
+      "id": "D1",
+      "type": "D",
+      "x": -240,
+      "y": 680,
+      "rotation": 180,
+      "parameters": {
+        "Vd": "0.7",
+        "Ron": "1m",
+        "Roff": "1M"
+      },
+      "lastClickTime": 1785652939914
+    },
+    {
+      "id": "D3",
+      "type": "D",
+      "x": -240,
+      "y": 520,
+      "rotation": 180,
+      "parameters": {
+        "Vd": "0.7",
+        "Ron": "1m",
+        "Roff": "1M"
+      },
+      "lastClickTime": 1785652953634
+    },
+    {
+      "id": "D2",
+      "type": "D",
+      "x": -100,
+      "y": 680,
+      "rotation": 180,
+      "parameters": {
+        "Vd": "0.7",
+        "Ron": "1m",
+        "Roff": "1M"
+      },
+      "lastClickTime": 1785652950640
+    },
+    {
+      "id": "D4",
+      "type": "D",
+      "x": -100,
+      "y": 520,
+      "rotation": 180,
+      "parameters": {
+        "Vd": "0.7",
+        "Ron": "1m",
+        "Roff": "1M"
+      },
+      "lastClickTime": 1785652952089
+    },
+    {
+      "id": "VAC",
+      "type": "AC_V",
+      "x": -440,
+      "y": 620,
+      "rotation": 0,
+      "parameters": {
+        "amplitude": "220",
+        "frequency": "50",
+        "phase": "0"
+      },
+      "lastClickTime": 1785653016520
+    },
+    {
+      "id": "R_LOAD",
+      "type": "R",
+      "x": 20,
+      "y": 600,
+      "rotation": 0,
+      "parameters": {
+        "value": "10",
+        "esr": "0"
+      },
+      "lastClickTime": 1785653067305
+    }
+  ],
+  "wires": [
+    {
+      "id": "W1",
+      "from": {
+        "type": "pin",
+        "compId": "D1",
+        "terminal": "B"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "D3",
+        "terminal": "A"
+      },
+      "manualPath": null
+    },
+    {
+      "id": "W2",
+      "from": {
+        "type": "pin",
+        "compId": "D2",
+        "terminal": "B"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "D4",
+        "terminal": "A"
+      },
+      "manualPath": null
+    },
+    {
+      "id": "W3",
+      "from": {
+        "type": "pin",
+        "compId": "VAC",
+        "terminal": "A"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "D3",
+        "terminal": "A"
+      },
+      "manualPath": null
+    },
+    {
+      "id": "W4",
+      "from": {
+        "type": "pin",
+        "compId": "VAC",
+        "terminal": "B"
+      },
+      "to": {
+        "type": "wire",
+        "wireId": "W2",
+        "x": -100,
+        "y": 620
+      },
+      "manualPath": null
+    },
+    {
+      "id": "W5",
+      "from": {
+        "type": "pin",
+        "compId": "D1",
+        "terminal": "A"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "R_LOAD",
+        "terminal": "B",
+        "x": 60,
+        "y": 620
+      },
+      "manualPath": [
+        {
+          "x": -240,
+          "y": 720
+        },
+        {
+          "x": -240,
+          "y": 740
+        },
+        {
+          "x": -240,
+          "y": 740
+        },
+        {
+          "x": -240,
+          "y": 780
+        },
+        {
+          "x": 20,
+          "y": 780
+        },
+        {
+          "x": 20,
+          "y": 640
+        }
+      ]
+    },
+    {
+      "id": "W6",
+      "from": {
+        "type": "pin",
+        "compId": "D2",
+        "terminal": "A"
+      },
+      "to": {
+        "type": "wire",
+        "wireId": "W5",
+        "x": -100,
+        "y": 780
+      },
+      "manualPath": null
+    },
+    {
+      "id": "W7",
+      "from": {
+        "type": "pin",
+        "compId": "D3",
+        "terminal": "B"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "R_LOAD",
+        "terminal": "A",
+        "x": 60,
+        "y": 540
+      },
+      "manualPath": [
+        {
+          "x": -240,
+          "y": 480
+        },
+        {
+          "x": -240,
+          "y": 460
+        },
+        {
+          "x": -200,
+          "y": 460
+        },
+        {
+          "x": -200,
+          "y": 460
+        },
+        {
+          "x": 20,
+          "y": 460
+        },
+        {
+          "x": 20,
+          "y": 560
+        }
+      ]
+    },
+    {
+      "id": "W8",
+      "from": {
+        "type": "pin",
+        "compId": "D4",
+        "terminal": "B"
+      },
+      "to": {
+        "type": "wire",
+        "wireId": "W7",
+        "x": -100,
+        "y": 460
+      },
+      "manualPath": null
+    }
+  ],
+  "plotConfiguration": {
+    "plots": [
+      {
+        "title": "Waveform analysis",
+        "variables": [
+          "COMP1.Minus",
+          "COMP1.Out",
+          "COMP1.Plus",
+          "CONST1.Out",
+          "PROBE1.V_R_LOAD",
+          "PROBE1.I_R_LOAD"
+        ]
+      }
+    ]
+  },
+  "simulationSettings": {
+    "stopTime": "0.06",
+    "stepSize": "10u",
+    "solver": "euler",
+    "stepType": "fixed",
+    "simulationMode": "regular",
+    "solverMethod": "non-ideal",
+    "enableLuCache": true
+  },
+  "id": "acdc_single_phase_diode_bridge",
+  "name": "Single Phase Diode Bridge Rectifier"
+}

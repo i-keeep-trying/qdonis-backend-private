@@ -65,11 +65,48 @@ export interface AppConfiguration {
     webhookSecret?: string;
   };
   bedrock: {
+    /** `sigv4` = AWS key pair, `bearer` = BEDROCK_API_KEY, `none` = AI off. */
+    authMode: BedrockAuthMode;
+    accessKeyId?: string;
+    secretAccessKey?: string;
     apiKey?: string;
+    /** BEDROCK_REGION, else AWS_REGION, else `us-east-1`. */
     region: string;
     allowedModels: string[];
+    /** Project-name generation; undefined = the default model. */
+    namingModel?: string;
     maxOutputTokens: number;
     timeoutMs: number;
+  };
+  storage: {
+    /** False when S3_BUCKET is unset: file routes answer 503. */
+    enabled: boolean;
+    bucket?: string;
+    region: string;
+    keyPrefix: string;
+    endpoint?: string;
+    /** AWS key pair when set; otherwise the SDK default chain (IAM role). */
+    accessKeyId?: string;
+    secretAccessKey?: string;
+    cloudFront?: {
+      /** No trailing slash. */
+      domain: string;
+      keyPairId: string;
+      privateKey: string;
+    };
+    urlTtlSeconds: number;
+    sweepIntervalMs: number;
+  };
+  mouser: {
+    apiKey?: string;
+    callsPerMinute: number;
+    callsPerDay: number;
+    cacheHours: number;
+  };
+  simulation: {
+    ngspicePath: string;
+    timeoutSeconds: number;
+    concurrency: number;
   };
   mail: {
     transport: MailTransportKind;
@@ -106,7 +143,27 @@ export interface AppConfiguration {
   };
 }
 
+export type BedrockAuthMode = 'sigv4' | 'bearer' | 'none';
+
 const trimSlashes = (value: string): string => value.replace(/^\/+|\/+$/g, '');
+
+/** The AWS key pair wins over the bearer API key; neither means AI is off. */
+function bedrockAuthMode(env: {
+  AWS_ACCESS_KEY_ID?: string;
+  AWS_SECRET_ACCESS_KEY?: string;
+  BEDROCK_API_KEY?: string;
+}): BedrockAuthMode {
+  if (env.AWS_ACCESS_KEY_ID && env.AWS_SECRET_ACCESS_KEY) return 'sigv4';
+  if (env.BEDROCK_API_KEY) return 'bearer';
+  return 'none';
+}
+
+/** PEM as-is, with literal `\n` escapes, or base64 of the PEM. */
+export function decodePrivateKey(raw: string): string {
+  const value = raw.trim();
+  if (value.includes('-----BEGIN')) return value.replace(/\\n/g, '\n');
+  return Buffer.from(value, 'base64').toString('utf8').trim();
+}
 
 /**
  * Maps the environment onto {@link AppConfiguration}.
@@ -165,13 +222,49 @@ export function configuration(): AppConfiguration {
       webhookSecret: env.STRIPE_WEBHOOK_SECRET,
     },
     bedrock: {
+      authMode: bedrockAuthMode(env),
+      accessKeyId: env.AWS_ACCESS_KEY_ID,
+      secretAccessKey: env.AWS_SECRET_ACCESS_KEY,
       apiKey: env.BEDROCK_API_KEY,
-      region: env.BEDROCK_REGION,
+      region: env.BEDROCK_REGION ?? env.AWS_REGION ?? 'us-east-1',
       allowedModels: env.BEDROCK_ALLOWED_MODELS.split(',')
         .map((m) => m.trim())
         .filter(Boolean),
+      namingModel: env.BEDROCK_NAMING_MODEL?.trim() || undefined,
       maxOutputTokens: env.BEDROCK_MAX_OUTPUT_TOKENS,
       timeoutMs: env.BEDROCK_TIMEOUT_MS,
+    },
+    storage: {
+      enabled: Boolean(env.S3_BUCKET),
+      bucket: env.S3_BUCKET,
+      region: env.S3_REGION ?? env.AWS_REGION ?? 'us-east-1',
+      keyPrefix: env.S3_KEY_PREFIX,
+      endpoint: env.S3_ENDPOINT,
+      accessKeyId: env.AWS_ACCESS_KEY_ID,
+      secretAccessKey: env.AWS_SECRET_ACCESS_KEY,
+      cloudFront:
+        env.CLOUDFRONT_DOMAIN &&
+        env.CLOUDFRONT_KEY_PAIR_ID &&
+        env.CLOUDFRONT_PRIVATE_KEY
+          ? {
+              domain: env.CLOUDFRONT_DOMAIN.replace(/\/+$/, ''),
+              keyPairId: env.CLOUDFRONT_KEY_PAIR_ID,
+              privateKey: decodePrivateKey(env.CLOUDFRONT_PRIVATE_KEY),
+            }
+          : undefined,
+      urlTtlSeconds: env.STORAGE_URL_TTL_SECONDS,
+      sweepIntervalMs: env.STORAGE_SWEEP_INTERVAL_MS,
+    },
+    mouser: {
+      apiKey: env.MOUSER_API_KEY,
+      callsPerMinute: env.MOUSER_CALLS_PER_MINUTE,
+      callsPerDay: env.MOUSER_CALLS_PER_DAY,
+      cacheHours: env.MOUSER_CACHE_HOURS,
+    },
+    simulation: {
+      ngspicePath: env.NGSPICE_PATH,
+      timeoutSeconds: env.NGSPICE_TIMEOUT_SECONDS,
+      concurrency: env.SIMULATION_CONCURRENCY,
     },
     mail: {
       transport: env.MAIL_TRANSPORT,

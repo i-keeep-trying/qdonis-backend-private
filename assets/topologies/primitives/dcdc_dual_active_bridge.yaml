@@ -1,0 +1,1185 @@
+id: dcdc_dual_active_bridge
+name: Dual Active Bridge DC-DC Converter
+description: Bidirectional isolated DC-DC converter with two full H-bridges, high-frequency
+  isolation transformer T1, and a series-damped leakage inductor LLk. Regulates 60V DC
+  bus into a 1.25 Ohm / 4.7mF RC load (2880W) via a closed-loop critically damped PI
+  controller with pole-zero cancellation and active phase-shift modulation at 20kHz.
+
+models:
+  - ".model nmos_model NMOS(Vto=3 Lambda=0.01 Kp=73 Cbd=1n Cbs=1n Cgdo=100p Is=1e-14 Rs=0.01)"
+  - ".model Dmodel D(Is=1e-12 n=1.1 Rs=0.0001 Cjo=3e-11 Tt=100n Bv=1000 Ibv=1e-06)"
+
+components:
+  # Reference & semantic node labels
+  - ref: GND_PRI
+    type: node
+    role: primary_ground
+    params:
+      node_type: ground
+
+  - ref: n0
+    type: node
+    params:
+      node_type: label
+
+  - ref: n_pA
+    type: node
+    params:
+      node_type: label
+
+  - ref: n_pB
+    type: node
+    params:
+      node_type: label
+
+  - ref: n_pA_tx
+    type: node
+    params:
+      node_type: label
+
+  - ref: n_sA
+    type: node
+    params:
+      node_type: label
+
+  - ref: n_sB
+    type: node
+    params:
+      node_type: label
+
+  - ref: n_sec_gnd
+    type: node
+    params:
+      node_type: label
+
+  - ref: n_out
+    type: node
+    params:
+      node_type: label
+
+  - ref: n_g1
+    type: node
+    params:
+      node_type: label
+
+  - ref: n_g2
+    type: node
+    params:
+      node_type: label
+
+  - ref: n_g3
+    type: node
+    params:
+      node_type: label
+
+  - ref: n_g4
+    type: node
+    params:
+      node_type: label
+
+  - ref: n_g5
+    type: node
+    params:
+      node_type: label
+
+  - ref: n_g6
+    type: node
+    params:
+      node_type: label
+
+  - ref: n_g7
+    type: node
+    params:
+      node_type: label
+
+  - ref: n_g8
+    type: node
+    params:
+      node_type: label
+
+  - ref: n_PWM1_int
+    type: node
+    params:
+      node_type: label
+
+  - ref: n_PWM2_int
+    type: node
+    params:
+      node_type: label
+
+  - ref: n_PWM3_int
+    type: node
+    params:
+      node_type: label
+
+  - ref: n_PWM4_int
+    type: node
+    params:
+      node_type: label
+
+  - ref: n_PWM5_int
+    type: node
+    params:
+      node_type: label
+
+  - ref: n_PWM6_int
+    type: node
+    params:
+      node_type: label
+
+  - ref: n_PWM7_int
+    type: node
+    params:
+      node_type: label
+
+  - ref: n_PWM8_int
+    type: node
+    params:
+      node_type: label
+
+  - ref: n_SW1_dsense
+    type: node
+    params:
+      node_type: label
+
+  - ref: n_SW2_dsense
+    type: node
+    params:
+      node_type: label
+
+  - ref: n_SW3_dsense
+    type: node
+    params:
+      node_type: label
+
+  - ref: n_SW4_dsense
+    type: node
+    params:
+      node_type: label
+
+  - ref: n_SW5_dsense
+    type: node
+    params:
+      node_type: label
+
+  - ref: n_SW6_dsense
+    type: node
+    params:
+      node_type: label
+
+  - ref: n_SW7_dsense
+    type: node
+    params:
+      node_type: label
+
+  - ref: n_SW8_dsense
+    type: node
+    params:
+      node_type: label
+
+  - ref: n_Lk_sense
+    type: node
+    params:
+      node_type: label
+
+  - ref: n_Lk_ser
+    type: node
+    params:
+      node_type: label
+
+  - ref: n_ref_raw
+    type: node
+    params:
+      node_type: label
+
+  - ref: n_ref
+    type: node
+    params:
+      node_type: label
+
+  - ref: err
+    type: node
+    params:
+      node_type: label
+
+  - ref: P_term
+    type: node
+    params:
+      node_type: label
+
+  - ref: I_term
+    type: node
+    params:
+      node_type: label
+
+  - ref: ctrl_raw
+    type: node
+    params:
+      node_type: label
+
+  - ref: ctrl
+    type: node
+    params:
+      node_type: label
+
+  - ref: ramp
+    type: node
+    params:
+      node_type: label
+
+  - ref: sec_ramp
+    type: node
+    params:
+      node_type: label
+
+  # Primary DC Input Source (60V)
+  - ref: VIN
+    type: node
+    role: input_source
+    params:
+      node_type: voltage_source
+      source: dc
+      voltage: 60.0
+      series_resistance: 0.01
+
+  # Primary Bridge Current Sense Sources (0V DC)
+  - ref: VSW1_SENSE
+    type: node
+    params:
+      node_type: voltage_source
+      source: dc
+      voltage: 0.0
+      series_resistance: 0.0
+
+  - ref: VSW2_SENSE
+    type: node
+    params:
+      node_type: voltage_source
+      source: dc
+      voltage: 0.0
+      series_resistance: 0.0
+
+  - ref: VSW3_SENSE
+    type: node
+    params:
+      node_type: voltage_source
+      source: dc
+      voltage: 0.0
+      series_resistance: 0.0
+
+  - ref: VSW4_SENSE
+    type: node
+    params:
+      node_type: voltage_source
+      source: dc
+      voltage: 0.0
+      series_resistance: 0.0
+
+  # Primary Bridge Power Switches & Body Diodes
+  - ref: SW1
+    type: transistor
+    role: primary_switch
+    params:
+      family: mosfet
+      type: nmos
+      model: nmos_model
+      sense: false
+
+  - ref: DSW1
+    type: diode
+    role: body_diode
+    params:
+      model: Dmodel
+      sense: false
+
+  - ref: SW2
+    type: transistor
+    role: primary_switch
+    params:
+      family: mosfet
+      type: nmos
+      model: nmos_model
+      sense: false
+
+  - ref: DSW2
+    type: diode
+    role: body_diode
+    params:
+      model: Dmodel
+      sense: false
+
+  - ref: SW3
+    type: transistor
+    role: primary_switch
+    params:
+      family: mosfet
+      type: nmos
+      model: nmos_model
+      sense: false
+
+  - ref: DSW3
+    type: diode
+    role: body_diode
+    params:
+      model: Dmodel
+      sense: false
+
+  - ref: SW4
+    type: transistor
+    role: primary_switch
+    params:
+      family: mosfet
+      type: nmos
+      model: nmos_model
+      sense: false
+
+  - ref: DSW4
+    type: diode
+    role: body_diode
+    params:
+      model: Dmodel
+      sense: false
+
+  # AC Tank & Transformer
+  - ref: VLk_SENSE
+    type: node
+    params:
+      node_type: voltage_source
+      source: dc
+      voltage: 0.0
+      series_resistance: 0.0
+
+  - ref: RLk_ESR
+    type: resistor
+    params:
+      resistance: 0.001
+      sense: false
+
+  - ref: LLk
+    type: inductor
+    role: leakage_inductor
+    params:
+      inductance: 2.0e-06
+      sense: false
+
+  - ref: R_damp
+    type: resistor
+    role: damping_resistor
+    params:
+      resistance: 1000.0
+      sense: false
+
+  - ref: T1
+    type: transformer
+    role: power_transformer
+    params:
+      Lm_primary: 0.01
+      turns_ratio: 1.0
+      k_coupling: 0.99999
+      phase: same
+      Rp: 0.001
+      Rs: 0.001
+      core_loss_resistance: 1000000.0
+      Cww: 2.0e-11
+
+  - ref: RR_ISO
+    type: resistor
+    role: isolation_resistor
+    params:
+      resistance: 100000000.0
+      sense: false
+
+  # Secondary Bridge Current Sense Sources (0V DC)
+  - ref: VSW5_SENSE
+    type: node
+    params:
+      node_type: voltage_source
+      source: dc
+      voltage: 0.0
+      series_resistance: 0.0
+
+  - ref: VSW6_SENSE
+    type: node
+    params:
+      node_type: voltage_source
+      source: dc
+      voltage: 0.0
+      series_resistance: 0.0
+
+  - ref: VSW7_SENSE
+    type: node
+    params:
+      node_type: voltage_source
+      source: dc
+      voltage: 0.0
+      series_resistance: 0.0
+
+  - ref: VSW8_SENSE
+    type: node
+    params:
+      node_type: voltage_source
+      source: dc
+      voltage: 0.0
+      series_resistance: 0.0
+
+  # Secondary Bridge Power Switches & Body Diodes
+  - ref: SW5
+    type: transistor
+    role: secondary_switch
+    params:
+      family: mosfet
+      type: nmos
+      model: nmos_model
+      sense: false
+
+  - ref: DSW5
+    type: diode
+    role: body_diode
+    params:
+      model: Dmodel
+      sense: false
+
+  - ref: SW6
+    type: transistor
+    role: secondary_switch
+    params:
+      family: mosfet
+      type: nmos
+      model: nmos_model
+      sense: false
+
+  - ref: DSW6
+    type: diode
+    role: body_diode
+    params:
+      model: Dmodel
+      sense: false
+
+  - ref: SW7
+    type: transistor
+    role: secondary_switch
+    params:
+      family: mosfet
+      type: nmos
+      model: nmos_model
+      sense: false
+
+  - ref: DSW7
+    type: diode
+    role: body_diode
+    params:
+      model: Dmodel
+      sense: false
+
+  - ref: SW8
+    type: transistor
+    role: secondary_switch
+    params:
+      family: mosfet
+      type: nmos
+      model: nmos_model
+      sense: false
+
+  - ref: DSW8
+    type: diode
+    role: body_diode
+    params:
+      model: Dmodel
+      sense: false
+
+  # Output Load & Capacitor (2880W at 60V)
+  - ref: R_LOAD
+    type: resistor
+    role: load
+    params:
+      resistance: 1.25
+      sense: false
+
+  - ref: C_OUT
+    type: capacitor
+    role: output_filter_cap
+    params:
+      capacitance: 0.0047
+      esr: 0.0
+      esl: 0.0
+
+  # ==========================================
+  # STABILIZED PI CONTROLLER
+  # ==========================================
+  - ref: V_ref_raw
+    type: node
+    role: reference_source
+    params:
+      node_type: voltage_source
+      source: pwl
+      pwl: "0 0 5m 60 40m 60"
+      series_resistance: 0.0
+
+  - ref: R_ref
+    type: resistor
+    params:
+      resistance: 1000.0
+      sense: false
+
+  - ref: C_ref
+    type: capacitor
+    params:
+      capacitance: 2.0e-06
+      esr: 0.0
+      esl: 0.0
+
+  - ref: B_err
+    type: b_source
+    params:
+      expression: "V(n_ref) - (v(n_out) - v(n_sec_gnd))"
+
+  - ref: B_P
+    type: b_source
+    params:
+      expression: "V(err) * 0.002"
+
+  - ref: G_INT
+    type: g_source
+    params:
+      gain: 3.4e-07
+
+  - ref: C_INT
+    type: capacitor
+    params:
+      capacitance: 1.0e-06
+      esr: 0.0
+      esl: 0.0
+
+  - ref: R_INT
+    type: resistor
+    params:
+      resistance: 10000000.0
+      sense: false
+
+  - ref: B_ctrl_raw
+    type: b_source
+    params:
+      expression: "V(P_term) + V(I_term)"
+
+  - ref: B_ctrl
+    type: b_source
+    params:
+      expression: "min(max(V(ctrl_raw), 0.001), 0.25)"
+
+  # ==========================================
+  # PHASE SHIFT MODULATION (20kHz)
+  # ==========================================
+  - ref: Vramp
+    type: node
+    role: carrier_source
+    params:
+      node_type: voltage_source
+      source: pulse
+      v1: 0.0
+      v2: 1.0
+      td: 0.0
+      tr: 4.99e-05
+      tf: 1.0e-07
+      pw: 0.0
+      per: 5.0e-05
+      series_resistance: 0.0
+
+  - ref: B_sec_ramp
+    type: b_source
+    params:
+      expression: "V(ramp) - V(ctrl) + (V(ramp) < V(ctrl))"
+
+  # ==========================================
+  # GATE DRIVE SIGNALS
+  # ==========================================
+  - ref: B_S1
+    type: b_source
+    params:
+      expression: "15 * (V(ramp) < 0.48)"
+
+  - ref: RPWM1_drive
+    type: resistor
+    params:
+      resistance: 10.0
+      sense: false
+
+  - ref: B_S2
+    type: b_source
+    params:
+      expression: "15 * ((V(ramp) > 0.50) * (V(ramp) < 0.98))"
+
+  - ref: RPWM2_drive
+    type: resistor
+    params:
+      resistance: 10.0
+      sense: false
+
+  - ref: B_S3
+    type: b_source
+    params:
+      expression: "15 * ((V(ramp) > 0.50) * (V(ramp) < 0.98))"
+
+  - ref: RPWM3_drive
+    type: resistor
+    params:
+      resistance: 10.0
+      sense: false
+
+  - ref: B_S4
+    type: b_source
+    params:
+      expression: "15 * (V(ramp) < 0.48)"
+
+  - ref: RPWM4_drive
+    type: resistor
+    params:
+      resistance: 10.0
+      sense: false
+
+  - ref: B_S5
+    type: b_source
+    params:
+      expression: "15 * (V(sec_ramp) < 0.48)"
+
+  - ref: RPWM5_drive
+    type: resistor
+    params:
+      resistance: 10.0
+      sense: false
+
+  - ref: B_S6
+    type: b_source
+    params:
+      expression: "15 * ((V(sec_ramp) > 0.50) * (V(sec_ramp) < 0.98))"
+
+  - ref: RPWM6_drive
+    type: resistor
+    params:
+      resistance: 10.0
+      sense: false
+
+  - ref: B_S7
+    type: b_source
+    params:
+      expression: "15 * ((V(sec_ramp) > 0.50) * (V(sec_ramp) < 0.98))"
+
+  - ref: RPWM7_drive
+    type: resistor
+    params:
+      resistance: 10.0
+      sense: false
+
+  - ref: B_S8
+    type: b_source
+    params:
+      expression: "15 * (V(sec_ramp) < 0.48)"
+
+  - ref: RPWM8_drive
+    type: resistor
+    params:
+      resistance: 10.0
+      sense: false
+
+nets:
+  # Primary Ground (mapped to 0)
+  - - - GND_PRI
+      - pin
+    - - VIN
+      - '-'
+    - - SW2
+      - source
+    - - DSW2
+      - anode
+    - - SW4
+      - source
+    - - DSW4
+      - anode
+    - - RR_ISO
+      - neg
+    - - V_ref_raw
+      - '-'
+    - - C_ref
+      - neg
+    - - B_err
+      - '-'
+    - - B_P
+      - '-'
+    - - G_INT
+      - +
+    - - G_INT
+      - ctrl-
+    - - C_INT
+      - neg
+    - - R_INT
+      - neg
+    - - B_ctrl_raw
+      - '-'
+    - - B_ctrl
+      - '-'
+    - - Vramp
+      - '-'
+    - - B_sec_ramp
+      - '-'
+    - - B_S2
+      - '-'
+    - - B_S4
+      - '-'
+
+  # Primary DC Rail
+  - - - n0
+      - pin
+    - - VIN
+      - +
+    - - VSW1_SENSE
+      - +
+    - - VSW3_SENSE
+      - +
+
+  # Switch 1 Drain Sense
+  - - - n_SW1_dsense
+      - pin
+    - - VSW1_SENSE
+      - '-'
+    - - SW1
+      - drain
+    - - DSW1
+      - cathode
+
+  # Switch 2 Drain Sense
+  - - - n_SW2_dsense
+      - pin
+    - - VSW2_SENSE
+      - '-'
+    - - SW2
+      - drain
+    - - DSW2
+      - cathode
+
+  # Switch 3 Drain Sense
+  - - - n_SW3_dsense
+      - pin
+    - - VSW3_SENSE
+      - '-'
+    - - SW3
+      - drain
+    - - DSW3
+      - cathode
+
+  # Switch 4 Drain Sense
+  - - - n_SW4_dsense
+      - pin
+    - - VSW4_SENSE
+      - '-'
+    - - SW4
+      - drain
+    - - DSW4
+      - cathode
+
+  # Primary Left Midpoint (Phase A)
+  - - - n_pA
+      - pin
+    - - SW1
+      - source
+    - - DSW1
+      - anode
+    - - VSW2_SENSE
+      - +
+    - - VLk_SENSE
+      - +
+    - - B_S1
+      - '-'
+
+  # Primary Right Midpoint (Phase B)
+  - - - n_pB
+      - pin
+    - - SW3
+      - source
+    - - DSW3
+      - anode
+    - - VSW4_SENSE
+      - +
+    - - T1
+      - P2
+    - - B_S3
+      - '-'
+
+  # Tank Current Sense
+  - - - n_Lk_sense
+      - pin
+    - - VLk_SENSE
+      - '-'
+    - - RLk_ESR
+      - pos
+
+  # Tank Inductor ESR node
+  - - - n_Lk_ser
+      - pin
+    - - RLk_ESR
+      - neg
+    - - LLk
+      - pos
+    - - R_damp
+      - pos
+
+  # Transformer Primary Phase A input
+  - - - n_pA_tx
+      - pin
+    - - LLk
+      - neg
+    - - R_damp
+      - neg
+    - - T1
+      - P1
+
+  # Secondary Phase A Midpoint
+  - - - n_sA
+      - pin
+    - - T1
+      - S1
+    - - VSW6_SENSE
+      - +
+    - - SW5
+      - source
+    - - DSW5
+      - anode
+    - - B_S5
+      - '-'
+
+  # Secondary Phase B Midpoint
+  - - - n_sB
+      - pin
+    - - T1
+      - S2
+    - - VSW8_SENSE
+      - +
+    - - SW7
+      - source
+    - - DSW7
+      - anode
+    - - B_S7
+      - '-'
+
+  # Switch 5 Drain Sense
+  - - - n_SW5_dsense
+      - pin
+    - - VSW5_SENSE
+      - '-'
+    - - SW5
+      - drain
+    - - DSW5
+      - cathode
+
+  # Switch 6 Drain Sense
+  - - - n_SW6_dsense
+      - pin
+    - - VSW6_SENSE
+      - '-'
+    - - SW6
+      - drain
+    - - DSW6
+      - cathode
+
+  # Switch 7 Drain Sense
+  - - - n_SW7_dsense
+      - pin
+    - - VSW7_SENSE
+      - '-'
+    - - SW7
+      - drain
+    - - DSW7
+      - cathode
+
+  # Switch 8 Drain Sense
+  - - - n_SW8_dsense
+      - pin
+    - - VSW8_SENSE
+      - '-'
+    - - SW8
+      - drain
+    - - DSW8
+      - cathode
+
+  # Secondary Ground
+  - - - n_sec_gnd
+      - pin
+    - - SW6
+      - source
+    - - DSW6
+      - anode
+    - - SW8
+      - source
+    - - DSW8
+      - anode
+    - - R_LOAD
+      - neg
+    - - C_OUT
+      - neg
+    - - RR_ISO
+      - pos
+    - - B_S6
+      - '-'
+    - - B_S8
+      - '-'
+
+  # Secondary Positive Output
+  - - - n_out
+      - pin
+    - - VSW5_SENSE
+      - +
+    - - VSW7_SENSE
+      - +
+    - - R_LOAD
+      - pos
+    - - C_OUT
+      - pos
+
+  # Reference Ramp Nodes
+  - - - n_ref_raw
+      - pin
+    - - V_ref_raw
+      - +
+    - - R_ref
+      - pos
+
+  - - - n_ref
+      - pin
+    - - R_ref
+      - neg
+    - - C_ref
+      - pos
+
+  # Controller Internal Nodes
+  - - - err
+      - pin
+    - - B_err
+      - +
+    - - G_INT
+      - ctrl+
+
+  - - - P_term
+      - pin
+    - - B_P
+      - +
+
+  - - - I_term
+      - pin
+    - - G_INT
+      - '-'
+    - - C_INT
+      - pos
+    - - R_INT
+      - pos
+
+  - - - ctrl_raw
+      - pin
+    - - B_ctrl_raw
+      - +
+
+  - - - ctrl
+      - pin
+    - - B_ctrl
+      - +
+
+  - - - ramp
+      - pin
+    - - Vramp
+      - +
+
+  - - - sec_ramp
+      - pin
+    - - B_sec_ramp
+      - +
+
+  # Gate Drivers
+  - - - n_PWM1_int
+      - pin
+    - - B_S1
+      - +
+    - - RPWM1_drive
+      - pos
+
+  - - - n_g1
+      - pin
+    - - RPWM1_drive
+      - neg
+    - - SW1
+      - gate
+
+  - - - n_PWM2_int
+      - pin
+    - - B_S2
+      - +
+    - - RPWM2_drive
+      - pos
+
+  - - - n_g2
+      - pin
+    - - RPWM2_drive
+      - neg
+    - - SW2
+      - gate
+
+  - - - n_PWM3_int
+      - pin
+    - - B_S3
+      - +
+    - - RPWM3_drive
+      - pos
+
+  - - - n_g3
+      - pin
+    - - RPWM3_drive
+      - neg
+    - - SW3
+      - gate
+
+  - - - n_PWM4_int
+      - pin
+    - - B_S4
+      - +
+    - - RPWM4_drive
+      - pos
+
+  - - - n_g4
+      - pin
+    - - RPWM4_drive
+      - neg
+    - - SW4
+      - gate
+
+  - - - n_PWM5_int
+      - pin
+    - - B_S5
+      - +
+    - - RPWM5_drive
+      - pos
+
+  - - - n_g5
+      - pin
+    - - RPWM5_drive
+      - neg
+    - - SW5
+      - gate
+
+  - - - n_PWM6_int
+      - pin
+    - - B_S6
+      - +
+    - - RPWM6_drive
+      - pos
+
+  - - - n_g6
+      - pin
+    - - RPWM6_drive
+      - neg
+    - - SW6
+      - gate
+
+  - - - n_PWM7_int
+      - pin
+    - - B_S7
+      - +
+    - - RPWM7_drive
+      - pos
+
+  - - - n_g7
+      - pin
+    - - RPWM7_drive
+      - neg
+    - - SW7
+      - gate
+
+  - - - n_PWM8_int
+      - pin
+    - - B_S8
+      - +
+    - - RPWM8_drive
+      - pos
+
+  - - - n_g8
+      - pin
+    - - RPWM8_drive
+      - neg
+    - - SW8
+      - gate
+
+analysis:
+  spice_settings:
+    rshunt: 1.0e+06
+    cshunt: 1.0e-11
+    reltol: 0.01
+    abstol: 1.0e-09
+    vntol: 1.0e-05
+    chgtol: 1.0e-11
+    gmin: 1.0e-10
+    method: gear
+    maxord: 2
+    trtol: 4
+  transient:
+    requirements:
+      - rid: tr_dab_power_transfer
+        requirement: Verify DAB closed-loop voltage regulation to 60V and power transfer into 1.25 Ohm RC load via active phase-shift modulation
+        environment:
+          - ref: time_domain
+            t_step: 2.0e-07
+            t_stop: 0.04
+        measurement:
+          - ref: VOUT
+            plot: true
+            quantity: voltage
+            nets:
+              - - R_LOAD
+                - pos
+              - - R_LOAD
+                - neg
+            data:
+              - name: Vout_avg
+                spice_command: avg
+                description: Average Output Voltage in steady state (last 20ms)
+              - name: Vout_max
+                spice_command: max
+                description: Maximum Output Voltage
+          - ref: ILk
+            plot: true
+            quantity: current
+            component: LLk
+            data:
+              - name: ILk_rms
+                spice_command: rms
+                description: RMS Leakage Inductor Current
+              - name: ILk_peak
+                spice_command: max
+                description: Peak Leakage Inductor Current
+          - ref: VIN
+            plot: true
+            quantity: voltage
+            nets:
+              - - VIN
+                - +
+              - - VIN
+                - '-'
+        outputs:
+          - var: vout_avg_v
+            formula: abs([Vout_avg])
+            description: Average Output Voltage
+          - var: ilk_rms_a
+            formula: abs([ILk_rms])
+            description: RMS Tank Current
+          - var: pout_avg_w
+            formula: (abs([Vout_avg])**2) / 1.25
+            description: Delivered Output Power
+metadata:
+  stage:
+    - power_switch
+    - isolation
+    - filter
+    - controller
+  topology: isolated
+  control: closed-loop phase-shift
+  tags:
+    - DAB
+    - dual-active-bridge
+    - bidirectional
+    - isolated
+    - dcdc
+    - closed-loop

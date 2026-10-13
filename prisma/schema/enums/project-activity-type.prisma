@@ -1,0 +1,17 @@
+enum ProjectActivityType {
+  VIEW
+  EDIT
+  SHARE
+  INVITE
+  COMMENT
+  CREATE
+  DELETE
+  RENAME
+  DUPLICATE
+  EXPORT
+  ACCESS_GRANTED
+  ACCESS_REVOKED
+  ROLE_CHANGED
+
+  @@map("project_activity_type")
+}

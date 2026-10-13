@@ -1,0 +1,23 @@
+/// Invitation to join a team. One row per (team, email); re-inviting after
+/// expiry rotates the token. Only the token's SHA-256 hash is stored.
+model TeamInvitation {
+  id          String    @id @default(uuid()) @db.Uuid
+  teamId      String    @map("team_id") @db.Uuid
+  /// Trimmed and lower-cased.
+  email       String
+  /// ADMIN or MEMBER (enforced in the service).
+  role        TeamRole
+  tokenHash   String    @unique @map("token_hash")
+  invitedById String?   @map("invited_by_id") @db.Uuid
+  expiresAt   DateTime  @map("expires_at")
+  acceptedAt  DateTime? @map("accepted_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  team      Team  @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  invitedBy User? @relation("TeamInvitationSender", fields: [invitedById], references: [id], onDelete: SetNull)
+
+  @@unique([teamId, email])
+  @@index([email])
+  @@map("team_invitations")
+}

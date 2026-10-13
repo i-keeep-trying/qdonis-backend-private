@@ -1,0 +1,5366 @@
+[
+ {
+  "part": "C3D02060A",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 600.0,
+  "i_rating": 2.0,
+  "i_lut": 3.949
+ },
+ {
+  "part": "C3D02060E",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 600.0,
+  "i_rating": 2.0,
+  "i_lut": 3.949
+ },
+ {
+  "part": "C3D02060F",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 600.0,
+  "i_rating": 2.0,
+  "i_lut": 3.949
+ },
+ {
+  "part": "C3D02065E",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 650.0,
+  "i_rating": 2.0,
+  "i_lut": 3.949
+ },
+ {
+  "part": "C3D03060A",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 600.0,
+  "i_rating": 3.0,
+  "i_lut": 9.899
+ },
+ {
+  "part": "C3D03060E",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 600.0,
+  "i_rating": 3.0,
+  "i_lut": 9.899
+ },
+ {
+  "part": "C3D03060F",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 600.0,
+  "i_rating": 3.0,
+  "i_lut": 9.899
+ },
+ {
+  "part": "C3D03065E",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 650.0,
+  "i_rating": 3.0,
+  "i_lut": 9.899
+ },
+ {
+  "part": "C3D04060A",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 600.0,
+  "i_rating": 4.0,
+  "i_lut": 11.88
+ },
+ {
+  "part": "C3D04060E",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 600.0,
+  "i_rating": 4.0,
+  "i_lut": 11.88
+ },
+ {
+  "part": "C3D04060F",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 600.0,
+  "i_rating": 4.0,
+  "i_lut": 11.88
+ },
+ {
+  "part": "C3D04065A",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 650.0,
+  "i_rating": 4.0,
+  "i_lut": 11.88
+ },
+ {
+  "part": "C3D04065E",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 650.0,
+  "i_rating": 4.0,
+  "i_lut": 11.88
+ },
+ {
+  "part": "C3D06060A",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 600.0,
+  "i_rating": 6.0,
+  "i_lut": 13.94
+ },
+ {
+  "part": "C3D06060F",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 600.0,
+  "i_rating": 6.0,
+  "i_lut": 13.94
+ },
+ {
+  "part": "C3D06060G",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 600.0,
+  "i_rating": 6.0,
+  "i_lut": 13.94
+ },
+ {
+  "part": "C3D06065A",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 650.0,
+  "i_rating": 6.0,
+  "i_lut": 13.94
+ },
+ {
+  "part": "C3D06065E",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 650.0,
+  "i_rating": 6.0,
+  "i_lut": 13.94
+ },
+ {
+  "part": "C3D06065I",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 650.0,
+  "i_rating": 6.0,
+  "i_lut": 13.94
+ },
+ {
+  "part": "C3D08060A",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 600.0,
+  "i_rating": 8.0,
+  "i_lut": 19.9
+ },
+ {
+  "part": "C3D08060G",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 600.0,
+  "i_rating": 8.0,
+  "i_lut": 19.9
+ },
+ {
+  "part": "C3D08065A",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 650.0,
+  "i_rating": 8.0,
+  "i_lut": 19.9
+ },
+ {
+  "part": "C3D08065E",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 650.0,
+  "i_rating": 8.0,
+  "i_lut": 19.9
+ },
+ {
+  "part": "C3D08065I",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 650.0,
+  "i_rating": 8.0,
+  "i_lut": 19.9
+ },
+ {
+  "part": "C3D10060A",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 600.0,
+  "i_rating": 10.0,
+  "i_lut": 29.97
+ },
+ {
+  "part": "C3D10060G",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 600.0,
+  "i_rating": 10.0,
+  "i_lut": 29.97
+ },
+ {
+  "part": "C3D10065A",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 650.0,
+  "i_rating": 10.0,
+  "i_lut": 29.97
+ },
+ {
+  "part": "C3D10065E",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 650.0,
+  "i_rating": 10.0,
+  "i_lut": 29.97
+ },
+ {
+  "part": "C3D10065I",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 650.0,
+  "i_rating": 10.0,
+  "i_lut": 29.97
+ },
+ {
+  "part": "C3D10170H",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 1700.0,
+  "i_rating": 10.0,
+  "i_lut": 20.01
+ },
+ {
+  "part": "C3D12065A",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 650.0,
+  "i_rating": 12.0,
+  "i_lut": 36.0
+ },
+ {
+  "part": "C3D16060D",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 600.0,
+  "i_rating": 16.0,
+  "i_lut": 39.8
+ },
+ {
+  "part": "C3D16065D",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 650.0,
+  "i_rating": 16.0,
+  "i_lut": 39.8
+ },
+ {
+  "part": "C3D16065D1",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 650.0,
+  "i_rating": 16.0,
+  "i_lut": 45.0
+ },
+ {
+  "part": "C3D20060D",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 600.0,
+  "i_rating": 20.0,
+  "i_lut": 59.94
+ },
+ {
+  "part": "C3D20065D",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 650.0,
+  "i_rating": 20.0,
+  "i_lut": 59.94
+ },
+ {
+  "part": "C3D25170H",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 1700.0,
+  "i_rating": 25.0,
+  "i_lut": 50.0
+ },
+ {
+  "part": "C4D02120A",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 1200.0,
+  "i_rating": 2.0,
+  "i_lut": 4.0
+ },
+ {
+  "part": "C4D02120E",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 1200.0,
+  "i_rating": 2.0,
+  "i_lut": 4.0
+ },
+ {
+  "part": "C4D05120A",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 1200.0,
+  "i_rating": 5.0,
+  "i_lut": 10.0
+ },
+ {
+  "part": "C4D05120E",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 1200.0,
+  "i_rating": 5.0,
+  "i_lut": 10.0
+ },
+ {
+  "part": "C4D08120A",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 1200.0,
+  "i_rating": 8.0,
+  "i_lut": 14.0
+ },
+ {
+  "part": "C4D08120E",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 1200.0,
+  "i_rating": 8.0,
+  "i_lut": 15.0
+ },
+ {
+  "part": "C4D10120A",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 1200.0,
+  "i_rating": 10.0,
+  "i_lut": 20.0
+ },
+ {
+  "part": "C4D10120D",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 1200.0,
+  "i_rating": 10.0,
+  "i_lut": 20.02
+ },
+ {
+  "part": "C4D10120E",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 1200.0,
+  "i_rating": 10.0,
+  "i_lut": 20.0
+ },
+ {
+  "part": "C4D10120H",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 1200.0,
+  "i_rating": 10.0,
+  "i_lut": 20.0
+ },
+ {
+  "part": "C4D15120A",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 1200.0,
+  "i_rating": 15.0,
+  "i_lut": 30.0
+ },
+ {
+  "part": "C4D15120H",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 1200.0,
+  "i_rating": 15.0,
+  "i_lut": 30.0
+ },
+ {
+  "part": "C4D20120A",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 1200.0,
+  "i_rating": 20.0,
+  "i_lut": 39.91
+ },
+ {
+  "part": "C4D20120D",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 1200.0,
+  "i_rating": 20.0,
+  "i_lut": 39.9
+ },
+ {
+  "part": "C4D20120H",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 1200.0,
+  "i_rating": 20.0,
+  "i_lut": 39.91
+ },
+ {
+  "part": "C4D30120D",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 1200.0,
+  "i_rating": 30.0,
+  "i_lut": 59.88
+ },
+ {
+  "part": "C4D30120H",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 1200.0,
+  "i_rating": 30.0,
+  "i_lut": 60.0
+ },
+ {
+  "part": "C4D40120D",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 1200.0,
+  "i_rating": 40.0,
+  "i_lut": 79.82
+ },
+ {
+  "part": "C4D40120H",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 1200.0,
+  "i_rating": 40.0,
+  "i_lut": 80.0
+ },
+ {
+  "part": "C5D05170H",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 1700.0,
+  "i_rating": 5.0,
+  "i_lut": 10.0
+ },
+ {
+  "part": "C5D10170H",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 1700.0,
+  "i_rating": 10.0,
+  "i_lut": 20.0
+ },
+ {
+  "part": "C5D25170H",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 1700.0,
+  "i_rating": 25.0,
+  "i_lut": 50.0
+ },
+ {
+  "part": "C5D50065D",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 650.0,
+  "i_rating": 50.0,
+  "i_lut": 100.0
+ },
+ {
+  "part": "C6D04065A",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 650.0,
+  "i_rating": 4.0,
+  "i_lut": 12.0
+ },
+ {
+  "part": "C6D04065E",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 650.0,
+  "i_rating": 4.0,
+  "i_lut": 12.0
+ },
+ {
+  "part": "C6D06065A",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 650.0,
+  "i_rating": 6.0,
+  "i_lut": 20.0
+ },
+ {
+  "part": "C6D06065E",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 650.0,
+  "i_rating": 6.0,
+  "i_lut": 20.0
+ },
+ {
+  "part": "C6D06065G",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 650.0,
+  "i_rating": 6.0,
+  "i_lut": 20.0
+ },
+ {
+  "part": "C6D06065Q",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 650.0,
+  "i_rating": 6.0,
+  "i_lut": 20.0
+ },
+ {
+  "part": "C6D08065A",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 650.0,
+  "i_rating": 8.0,
+  "i_lut": 20.0
+ },
+ {
+  "part": "C6D08065E",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 650.0,
+  "i_rating": 8.0,
+  "i_lut": 20.0
+ },
+ {
+  "part": "C6D08065G",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 650.0,
+  "i_rating": 8.0,
+  "i_lut": 20.0
+ },
+ {
+  "part": "C6D08065Q",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 650.0,
+  "i_rating": 8.0,
+  "i_lut": 20.0
+ },
+ {
+  "part": "C6D10065A",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 650.0,
+  "i_rating": 10.0,
+  "i_lut": 20.0
+ },
+ {
+  "part": "C6D10065E",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 650.0,
+  "i_rating": 10.0,
+  "i_lut": 20.0
+ },
+ {
+  "part": "C6D10065G",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 650.0,
+  "i_rating": 10.0,
+  "i_lut": 20.0
+ },
+ {
+  "part": "C6D10065Q",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 650.0,
+  "i_rating": 10.0,
+  "i_lut": 20.0
+ },
+ {
+  "part": "C6D16065D",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 650.0,
+  "i_rating": 16.0,
+  "i_lut": 20.0
+ },
+ {
+  "part": "C6D16065H",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 650.0,
+  "i_rating": 16.0,
+  "i_lut": 20.0
+ },
+ {
+  "part": "C6D20065D",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 650.0,
+  "i_rating": 20.0,
+  "i_lut": 20.0
+ },
+ {
+  "part": "C6D30065H",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 650.0,
+  "i_rating": 30.0,
+  "i_lut": 110.0
+ },
+ {
+  "part": "CAR600M12HN6",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 1200.0,
+  "i_rating": 1200.0,
+  "i_lut": 1200.0
+ },
+ {
+  "part": "CAR600M12HN6_diode",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 1200.0,
+  "i_rating": 1200.0,
+  "i_lut": 1200.0
+ },
+ {
+  "part": "CAR600M17HN6",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 1700.0,
+  "i_rating": 1200.0,
+  "i_lut": 1200.0
+ },
+ {
+  "part": "CAR600M17HN6_diode",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 1700.0,
+  "i_rating": 1200.0,
+  "i_lut": 1200.0
+ },
+ {
+  "part": "CAS120M12BM2_schottkydiode",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 1200.0,
+  "i_rating": 360.0,
+  "i_lut": 360.0
+ },
+ {
+  "part": "CAS175M12BM3_schottkydiode",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 1200.0,
+  "i_rating": 350.0,
+  "i_lut": 350.0
+ },
+ {
+  "part": "CAS300M12BM2_schottkydiode",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 1200.0,
+  "i_rating": 600.0,
+  "i_lut": 600.0
+ },
+ {
+  "part": "CAS300M17BM2_schottkydiode",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 1700.0,
+  "i_rating": 600.2,
+  "i_lut": 600.2
+ },
+ {
+  "part": "CAS310M17BM3_schottkydiode",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 1700.0,
+  "i_rating": 600.0,
+  "i_lut": 600.0
+ },
+ {
+  "part": "CAS350M12BM3_schottkydiode",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 1200.0,
+  "i_rating": 700.0,
+  "i_lut": 700.0
+ },
+ {
+  "part": "CAS380M17HM3_schottkydiode",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 1700.0,
+  "i_rating": 750.0,
+  "i_lut": 750.0
+ },
+ {
+  "part": "CAS480M12HM3_schottkydiode",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 1200.0,
+  "i_rating": 800.0,
+  "i_lut": 800.0
+ },
+ {
+  "part": "CAS530M12BM3_schottkydiode",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 1200.0,
+  "i_rating": 1000.0,
+  "i_lut": 1000.0
+ },
+ {
+  "part": "CSD01060A",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 600.0,
+  "i_rating": 2.0,
+  "i_lut": 2.0
+ },
+ {
+  "part": "CSD01060E",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 600.0,
+  "i_rating": 2.0,
+  "i_lut": 2.0
+ },
+ {
+  "part": "CVFD20065A",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 650.0,
+  "i_rating": 60.0,
+  "i_lut": 60.0
+ },
+ {
+  "part": "DIM1000ACM33-TF001 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 3300.0,
+  "i_rating": 1000.0,
+  "i_lut": 2000.0
+ },
+ {
+  "part": "DIM1000ACM33-TL001 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 3300.0,
+  "i_rating": 1000.0,
+  "i_lut": 1750.0
+ },
+ {
+  "part": "DIM1000ASM65-UF000 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 6500.0,
+  "i_rating": 1000.0,
+  "i_lut": 2000.0
+ },
+ {
+  "part": "DIM1000ECM33-TF000 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 3300.0,
+  "i_rating": 1000.0,
+  "i_lut": 2000.0
+ },
+ {
+  "part": "DIM1000ECM33-TL000 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 3300.0,
+  "i_rating": 1000.0,
+  "i_lut": 1750.0
+ },
+ {
+  "part": "DIM1000ECM33-TS000 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 3300.0,
+  "i_rating": 1000.0,
+  "i_lut": 1750.0
+ },
+ {
+  "part": "DIM1000H1HS17-PA500 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 1700.0,
+  "i_rating": 1000.0,
+  "i_lut": 2000.0
+ },
+ {
+  "part": "DIM1000NSM33-TF000 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 3300.0,
+  "i_rating": 1000.0,
+  "i_lut": 2000.0
+ },
+ {
+  "part": "DIM1000NSM33-TL000 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 3300.0,
+  "i_rating": 1000.0,
+  "i_lut": 1750.0
+ },
+ {
+  "part": "DIM1000NSM33-TS000 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 3300.0,
+  "i_rating": 1000.0,
+  "i_lut": 1750.0
+ },
+ {
+  "part": "DIM1000XSM33-TF000 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 3300.0,
+  "i_rating": 1000.0,
+  "i_lut": 2000.0
+ },
+ {
+  "part": "DIM1000XSM33-TF001 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 3300.0,
+  "i_rating": 1000.0,
+  "i_lut": 2000.0
+ },
+ {
+  "part": "DIM1000XSM33-TL001 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 3300.0,
+  "i_rating": 1000.0,
+  "i_lut": 1750.0
+ },
+ {
+  "part": "DIM1000XSM33-TS001 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 3300.0,
+  "i_rating": 1000.0,
+  "i_lut": 1750.0
+ },
+ {
+  "part": "DIM100PHM33-F000 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 3300.0,
+  "i_rating": 100.0,
+  "i_lut": 150.0
+ },
+ {
+  "part": "DIM1200ASM45-PR501 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 4500.0,
+  "i_rating": 1200.0,
+  "i_lut": 2400.0
+ },
+ {
+  "part": "DIM1200ASM45-TL000 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 4500.0,
+  "i_rating": 1200.0,
+  "i_lut": 2400.0
+ },
+ {
+  "part": "DIM1200ASM45-TL001 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 4500.0,
+  "i_rating": 1200.0,
+  "i_lut": 2400.0
+ },
+ {
+  "part": "DIM1200ASM45-TS000 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 4500.0,
+  "i_rating": 1200.0,
+  "i_lut": 2375.0
+ },
+ {
+  "part": "DIM1200ASM45-TS001 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 4500.0,
+  "i_rating": 1200.0,
+  "i_lut": 2375.0
+ },
+ {
+  "part": "DIM1200ESM33-F000 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 3300.0,
+  "i_rating": 1200.0,
+  "i_lut": 1500.0
+ },
+ {
+  "part": "DIM1200FSM12-A000 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 1200.0,
+  "i_rating": 1200.0,
+  "i_lut": 2400.0
+ },
+ {
+  "part": "DIM1200FSM17-A000 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 1700.0,
+  "i_rating": 1200.0,
+  "i_lut": 2400.0
+ },
+ {
+  "part": "DIM1200FSS12-A000 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 1200.0,
+  "i_rating": 1200.0,
+  "i_lut": 2400.0
+ },
+ {
+  "part": "DIM1200NSM12-A000 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 1200.0,
+  "i_rating": 1200.0,
+  "i_lut": 2400.0
+ },
+ {
+  "part": "DIM1200NSM17-A000 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 1700.0,
+  "i_rating": 1200.0,
+  "i_lut": 3000.0
+ },
+ {
+  "part": "DIM125PHM33-TF000 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 3300.0,
+  "i_rating": 125.0,
+  "i_lut": 1000.0
+ },
+ {
+  "part": "DIM125PHM33-TL000 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 3300.0,
+  "i_rating": 125.0,
+  "i_lut": 1000.0
+ },
+ {
+  "part": "DIM125PHM33-TS000 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 3300.0,
+  "i_rating": 125.0,
+  "i_lut": 1000.0
+ },
+ {
+  "part": "DIM1400H1HS12-PA500 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 1200.0,
+  "i_rating": 1400.0,
+  "i_lut": 2800.0
+ },
+ {
+  "part": "DIM1500ASM33-TF001 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 3300.0,
+  "i_rating": 1500.0,
+  "i_lut": 3000.0
+ },
+ {
+  "part": "DIM1500ASM33-TL001 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 3300.0,
+  "i_rating": 1500.0,
+  "i_lut": 2800.0
+ },
+ {
+  "part": "DIM1500ASM33-TS001 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 3300.0,
+  "i_rating": 1500.0,
+  "i_lut": 2800.0
+ },
+ {
+  "part": "DIM1500ESM33-MS000 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 3300.0,
+  "i_rating": 1500.0,
+  "i_lut": 3000.0
+ },
+ {
+  "part": "DIM1500ESM33-RR500 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 3300.0,
+  "i_rating": 1500.0,
+  "i_lut": 3000.0
+ },
+ {
+  "part": "DIM1500ESM33-TF000 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 3300.0,
+  "i_rating": 1500.0,
+  "i_lut": 3000.0
+ },
+ {
+  "part": "DIM1500ESM33-TL000 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 3300.0,
+  "i_rating": 1500.0,
+  "i_lut": 3000.0
+ },
+ {
+  "part": "DIM1500ESM33-TS000 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 3300.0,
+  "i_rating": 1500.0,
+  "i_lut": 2975.0
+ },
+ {
+  "part": "DIM1600ECM17-A000 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 1700.0,
+  "i_rating": 1600.0,
+  "i_lut": 3200.0
+ },
+ {
+  "part": "DIM1600FSM12-A000 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 1200.0,
+  "i_rating": 1600.0,
+  "i_lut": 3200.0
+ },
+ {
+  "part": "DIM1600FSM17-A000 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 1700.0,
+  "i_rating": 1600.0,
+  "i_lut": 3200.0
+ },
+ {
+  "part": "DIM1600FSS12-A000 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 1200.0,
+  "i_rating": 1600.0,
+  "i_lut": 3200.0
+ },
+ {
+  "part": "DIM1600NSM12-A000 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 1200.0,
+  "i_rating": 1600.0,
+  "i_lut": 3200.0
+ },
+ {
+  "part": "DIM1600NSM17-A000 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 1700.0,
+  "i_rating": 1600.0,
+  "i_lut": 3200.0
+ },
+ {
+  "part": "DIM1800ESM12-A000 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 1200.0,
+  "i_rating": 1800.0,
+  "i_lut": 3600.0
+ },
+ {
+  "part": "DIM1800ESS12-A000 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 1200.0,
+  "i_rating": 1800.0,
+  "i_lut": 3600.0
+ },
+ {
+  "part": "DIM1800H1HS17-PH500 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 1700.0,
+  "i_rating": 1800.0,
+  "i_lut": 3600.0
+ },
+ {
+  "part": "DIM200PHM33-F000 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 3300.0,
+  "i_rating": 200.0,
+  "i_lut": 350.0
+ },
+ {
+  "part": "DIM200PKM33-F000 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 3300.0,
+  "i_rating": 200.0,
+  "i_lut": 350.0
+ },
+ {
+  "part": "DIM200PLM33-F000 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 3300.0,
+  "i_rating": 200.0,
+  "i_lut": 350.0
+ },
+ {
+  "part": "DIM2400ESM12-A000 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 1200.0,
+  "i_rating": 2400.0,
+  "i_lut": 4800.0
+ },
+ {
+  "part": "DIM2400ESM17-A000 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 1700.0,
+  "i_rating": 2400.0,
+  "i_lut": 4800.0
+ },
+ {
+  "part": "DIM2400ESS12-A000 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 1200.0,
+  "i_rating": 2400.0,
+  "i_lut": 4800.0
+ },
+ {
+  "part": "DIM2400NSM17-PT500 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 1700.0,
+  "i_rating": 2400.0,
+  "i_lut": 4800.0
+ },
+ {
+  "part": "DIM250KHM33-TF001 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 3300.0,
+  "i_rating": 250.0,
+  "i_lut": 1000.0
+ },
+ {
+  "part": "DIM250KHM33-TL001 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 3300.0,
+  "i_rating": 250.0,
+  "i_lut": 1000.0
+ },
+ {
+  "part": "DIM250PHM33-TL000 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 3300.0,
+  "i_rating": 250.0,
+  "i_lut": 450.0
+ },
+ {
+  "part": "DIM250PHM33-TS000 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 3300.0,
+  "i_rating": 250.0,
+  "i_lut": 450.0
+ },
+ {
+  "part": "DIM250PKM33-TL000 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 3300.0,
+  "i_rating": 250.0,
+  "i_lut": 450.0
+ },
+ {
+  "part": "DIM250PKM33-TS000 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 3300.0,
+  "i_rating": 250.0,
+  "i_lut": 450.0
+ },
+ {
+  "part": "DIM250PLM33-TL000 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 3300.0,
+  "i_rating": 250.0,
+  "i_lut": 450.0
+ },
+ {
+  "part": "DIM250PLM33-TS000 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 3300.0,
+  "i_rating": 250.0,
+  "i_lut": 450.0
+ },
+ {
+  "part": "DIM250XCM65-TS000 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 6500.0,
+  "i_rating": 250.0,
+  "i_lut": 400.0
+ },
+ {
+  "part": "DIM300WHS12-PA500 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 1200.0,
+  "i_rating": 300.0,
+  "i_lut": 1000.0
+ },
+ {
+  "part": "DIM335XCM65-UF000 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 6500.0,
+  "i_rating": 335.0,
+  "i_lut": 1000.0
+ },
+ {
+  "part": "DIM3600ESM17-PT500 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 1700.0,
+  "i_rating": 3600.0,
+  "i_lut": 7200.0
+ },
+ {
+  "part": "DIM400DCM17-A000 - DIODE - DIODE ARM",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 1700.0,
+  "i_rating": 400.0,
+  "i_lut": 750.0
+ },
+ {
+  "part": "DIM400DCM17-A000 - DIODE - IGBT ARM",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 1700.0,
+  "i_rating": 400.0,
+  "i_lut": 750.0
+ },
+ {
+  "part": "DIM400DDM12-A000 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 1200.0,
+  "i_rating": 400.0,
+  "i_lut": 750.0
+ },
+ {
+  "part": "DIM400DDM17-A000 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 1700.0,
+  "i_rating": 400.0,
+  "i_lut": 750.0
+ },
+ {
+  "part": "DIM400DDS12-A000 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 1200.0,
+  "i_rating": 400.0,
+  "i_lut": 750.0
+ },
+ {
+  "part": "DIM400GCM33-F000 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 3300.0,
+  "i_rating": 400.0,
+  "i_lut": 750.0
+ },
+ {
+  "part": "DIM400GDM33-F000 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 3300.0,
+  "i_rating": 400.0,
+  "i_lut": 750.0
+ },
+ {
+  "part": "DIM400NCM17-A000 - DIODE - DIODE ARM",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 1700.0,
+  "i_rating": 400.0,
+  "i_lut": 750.0
+ },
+ {
+  "part": "DIM400NCM17-A000 - DIODE - IGBT ARM",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 1700.0,
+  "i_rating": 400.0,
+  "i_lut": 750.0
+ },
+ {
+  "part": "DIM400NSM33-F000 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 3300.0,
+  "i_rating": 400.0,
+  "i_lut": 750.0
+ },
+ {
+  "part": "DIM400PBM17-A000 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 1700.0,
+  "i_rating": 400.0,
+  "i_lut": 750.0
+ },
+ {
+  "part": "DIM400PHM17-A000 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 1700.0,
+  "i_rating": 400.0,
+  "i_lut": 750.0
+ },
+ {
+  "part": "DIM400XCM33-F000 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 3300.0,
+  "i_rating": 400.0,
+  "i_lut": 750.0
+ },
+ {
+  "part": "DIM400XCM45-TS000 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 4500.0,
+  "i_rating": 400.0,
+  "i_lut": 800.0
+ },
+ {
+  "part": "DIM400XCM45-TS001 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 4500.0,
+  "i_rating": 400.0,
+  "i_lut": 800.0
+ },
+ {
+  "part": "DIM400XSM45-TS000 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 4500.0,
+  "i_rating": 400.0,
+  "i_lut": 800.0
+ },
+ {
+  "part": "DIM400XSM45-TS001 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 4500.0,
+  "i_rating": 400.0,
+  "i_lut": 800.0
+ },
+ {
+  "part": "DIM450M1HS12-PB500 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 1200.0,
+  "i_rating": 450.0,
+  "i_lut": 1000.0
+ },
+ {
+  "part": "DIM450M1HS17-PA500 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 1700.0,
+  "i_rating": 450.0,
+  "i_lut": 1000.0
+ },
+ {
+  "part": "DIM500ACM65-TS000 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 6500.0,
+  "i_rating": 500.0,
+  "i_lut": 1000.0
+ },
+ {
+  "part": "DIM500GCM33-TL000 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 3300.0,
+  "i_rating": 500.0,
+  "i_lut": 875.0
+ },
+ {
+  "part": "DIM500GCM33-TS000 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 3300.0,
+  "i_rating": 500.0,
+  "i_lut": 875.0
+ },
+ {
+  "part": "DIM500GDM33-TL000 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 3300.0,
+  "i_rating": 500.0,
+  "i_lut": 875.0
+ },
+ {
+  "part": "DIM500GDM33-TS000 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 3300.0,
+  "i_rating": 500.0,
+  "i_lut": 875.0
+ },
+ {
+  "part": "DIM500XSM65-TS000 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 6500.0,
+  "i_rating": 500.0,
+  "i_lut": 1000.0
+ },
+ {
+  "part": "DIM600DCM17-A000 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 1700.0,
+  "i_rating": 600.0,
+  "i_lut": 1125.0
+ },
+ {
+  "part": "DIM600DDM12-A000 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 1200.0,
+  "i_rating": 600.0,
+  "i_lut": 1500.0
+ },
+ {
+  "part": "DIM600DDM17-A000 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 1700.0,
+  "i_rating": 600.0,
+  "i_lut": 1125.0
+ },
+ {
+  "part": "DIM600M1HS12-PC500 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 1200.0,
+  "i_rating": 600.0,
+  "i_lut": 1200.0
+ },
+ {
+  "part": "DIM600M1HS17-PA500 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 1700.0,
+  "i_rating": 600.0,
+  "i_lut": 1300.0
+ },
+ {
+  "part": "DIM600WHS12-PC500 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 1200.0,
+  "i_rating": 600.0,
+  "i_lut": 1200.0
+ },
+ {
+  "part": "DIM650H2HS17-PA500 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 1700.0,
+  "i_rating": 650.0,
+  "i_lut": 1300.0
+ },
+ {
+  "part": "DIM670ACM65-UF000 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 6500.0,
+  "i_rating": 670.0,
+  "i_lut": 1400.0
+ },
+ {
+  "part": "DIM670XSM65-UF000 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 6500.0,
+  "i_rating": 670.0,
+  "i_lut": 1400.0
+ },
+ {
+  "part": "DIM750ASM65-TF000 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 6500.0,
+  "i_rating": 750.0,
+  "i_lut": 1500.0
+ },
+ {
+  "part": "DIM750ASM65-TS000 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 6500.0,
+  "i_rating": 750.0,
+  "i_lut": 1500.0
+ },
+ {
+  "part": "DIM800DCM17-A000 - DIODE - DIODE ARM",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 1700.0,
+  "i_rating": 800.0,
+  "i_lut": 1500.0
+ },
+ {
+  "part": "DIM800DCM17-A000 - DIODE - IGBT ARM",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 1700.0,
+  "i_rating": 800.0,
+  "i_lut": 1625.0
+ },
+ {
+  "part": "DIM800DDM12-A000 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 1200.0,
+  "i_rating": 800.0,
+  "i_lut": 1500.0
+ },
+ {
+  "part": "DIM800DDM17-A000 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 1700.0,
+  "i_rating": 800.0,
+  "i_lut": 1625.0
+ },
+ {
+  "part": "DIM800DDS12-A000 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 1200.0,
+  "i_rating": 800.0,
+  "i_lut": 1500.0
+ },
+ {
+  "part": "DIM800ECM33-F000 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 3300.0,
+  "i_rating": 800.0,
+  "i_lut": 1500.0
+ },
+ {
+  "part": "DIM800FSM12-A000 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 1200.0,
+  "i_rating": 800.0,
+  "i_lut": 1500.0
+ },
+ {
+  "part": "DIM800FSM17-A000 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 1700.0,
+  "i_rating": 800.0,
+  "i_lut": 1625.0
+ },
+ {
+  "part": "DIM800FSS12-A000 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 1200.0,
+  "i_rating": 800.0,
+  "i_lut": 1500.0
+ },
+ {
+  "part": "DIM800M1HS17-PG500 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 1700.0,
+  "i_rating": 800.0,
+  "i_lut": 1600.0
+ },
+ {
+  "part": "DIM800NCM17-A000 - DIODE - DIODE ARM",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 1700.0,
+  "i_rating": 800.0,
+  "i_lut": 1500.0
+ },
+ {
+  "part": "DIM800NCM17-A000 - DIODE - IGBT ARM",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 1700.0,
+  "i_rating": 800.0,
+  "i_lut": 1625.0
+ },
+ {
+  "part": "DIM800NSM12-A000 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 1200.0,
+  "i_rating": 800.0,
+  "i_lut": 1500.0
+ },
+ {
+  "part": "DIM800NSM17-A000 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 1700.0,
+  "i_rating": 800.0,
+  "i_lut": 1625.0
+ },
+ {
+  "part": "DIM800NSM33-F000 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 3300.0,
+  "i_rating": 800.0,
+  "i_lut": 1500.0
+ },
+ {
+  "part": "DIM800WHS12-PF500 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 1200.0,
+  "i_rating": 800.0,
+  "i_lut": 1600.0
+ },
+ {
+  "part": "DIM800XSM33-F000 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 3300.0,
+  "i_rating": 800.0,
+  "i_lut": 1500.0
+ },
+ {
+  "part": "DIM800XSM45-TF000 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 4500.0,
+  "i_rating": 800.0,
+  "i_lut": 1600.0
+ },
+ {
+  "part": "DIM800XSM45-TF001 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 4500.0,
+  "i_rating": 800.0,
+  "i_lut": 1600.0
+ },
+ {
+  "part": "DIM800XSM45-TL000 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 4500.0,
+  "i_rating": 800.0,
+  "i_lut": 1625.0
+ },
+ {
+  "part": "DIM800XSM45-TL001 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 4500.0,
+  "i_rating": 800.0,
+  "i_lut": 1625.0
+ },
+ {
+  "part": "DIM800XSM45-TS000 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 4500.0,
+  "i_rating": 800.0,
+  "i_lut": 1500.0
+ },
+ {
+  "part": "DIM800XSM45-TS001 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 4500.0,
+  "i_rating": 800.0,
+  "i_lut": 1500.0
+ },
+ {
+  "part": "DIM900M1HS12-PG500 - DIODE",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si diode (IGBT module)",
+  "v_rating": 1200.0,
+  "i_rating": 900.0,
+  "i_lut": 1800.0
+ },
+ {
+  "part": "E3D08065G",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 650.0,
+  "i_rating": 8.0,
+  "i_lut": 19.9
+ },
+ {
+  "part": "E3D20065D",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 650.0,
+  "i_rating": 20.0,
+  "i_lut": 40.0
+ },
+ {
+  "part": "E3D30065D",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 650.0,
+  "i_rating": 30.0,
+  "i_lut": 90.0
+ },
+ {
+  "part": "E4D02120E",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 1200.0,
+  "i_rating": 2.0,
+  "i_lut": 10.0
+ },
+ {
+  "part": "E4D10120A",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 1200.0,
+  "i_rating": 10.0,
+  "i_lut": 20.0
+ },
+ {
+  "part": "E4D20120A",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 1200.0,
+  "i_rating": 20.0,
+  "i_lut": 40.0
+ },
+ {
+  "part": "E4D20120D",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 1200.0,
+  "i_rating": 20.0,
+  "i_lut": 40.0
+ },
+ {
+  "part": "E4D20120G",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 1200.0,
+  "i_rating": 20.0,
+  "i_lut": 40.0
+ },
+ {
+  "part": "E6D10065A",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 650.0,
+  "i_rating": 10.0,
+  "i_lut": 40.0
+ },
+ {
+  "part": "E6D10065G",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 650.0,
+  "i_rating": 10.0,
+  "i_lut": 40.0
+ },
+ {
+  "part": "E6D16065A",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 650.0,
+  "i_rating": 16.0,
+  "i_lut": 64.0
+ },
+ {
+  "part": "E6D16065D1",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 650.0,
+  "i_rating": 16.0,
+  "i_lut": 55.0
+ },
+ {
+  "part": "E6D16065G",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 650.0,
+  "i_rating": 16.0,
+  "i_lut": 55.0
+ },
+ {
+  "part": "E6D16065H",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 650.0,
+  "i_rating": 16.0,
+  "i_lut": 55.0
+ },
+ {
+  "part": "E6D20065A",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 650.0,
+  "i_rating": 20.0,
+  "i_lut": 135.0
+ },
+ {
+  "part": "E6D20065D",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 650.0,
+  "i_rating": 20.0,
+  "i_lut": 40.0
+ },
+ {
+  "part": "E6D20065G",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 650.0,
+  "i_rating": 20.0,
+  "i_lut": 135.0
+ },
+ {
+  "part": "E6D20065H",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 650.0,
+  "i_rating": 20.0,
+  "i_lut": 135.0
+ },
+ {
+  "part": "E6D30065A",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 650.0,
+  "i_rating": 30.0,
+  "i_lut": 120.0
+ },
+ {
+  "part": "E6D30065D",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 650.0,
+  "i_rating": 30.0,
+  "i_lut": 55.0
+ },
+ {
+  "part": "E6D30065G",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 650.0,
+  "i_rating": 30.0,
+  "i_lut": 120.0
+ },
+ {
+  "part": "E6D30065H",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 650.0,
+  "i_rating": 30.0,
+  "i_lut": 120.0
+ },
+ {
+  "part": "E6D40065A",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 650.0,
+  "i_rating": 40.0,
+  "i_lut": 160.0
+ },
+ {
+  "part": "E6D40065D",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 650.0,
+  "i_rating": 40.0,
+  "i_lut": 135.0
+ },
+ {
+  "part": "E6D40065G",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 650.0,
+  "i_rating": 40.0,
+  "i_lut": 160.0
+ },
+ {
+  "part": "E6D40065H",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "SiC Schottky diode",
+  "v_rating": 650.0,
+  "i_rating": 40.0,
+  "i_lut": 160.0
+ },
+ {
+  "part": "DIM1000ACM33-TF001",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 3300.0,
+  "i_rating": 1000.0,
+  "i_lut": 2000.0
+ },
+ {
+  "part": "DIM1000ACM33-TL001",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 3300.0,
+  "i_rating": 1000.0,
+  "i_lut": 2000.0
+ },
+ {
+  "part": "DIM1000ASM65-UF000",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 6500.0,
+  "i_rating": 1000.0,
+  "i_lut": 2000.0
+ },
+ {
+  "part": "DIM1000ECM33-TF000",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 3300.0,
+  "i_rating": 1000.0,
+  "i_lut": 2000.0
+ },
+ {
+  "part": "DIM1000ECM33-TL000",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 3300.0,
+  "i_rating": 1000.0,
+  "i_lut": 2000.0
+ },
+ {
+  "part": "DIM1000ECM33-TS000",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 3300.0,
+  "i_rating": 1000.0,
+  "i_lut": 1875.0
+ },
+ {
+  "part": "DIM1000H1HS17-PA500",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 1700.0,
+  "i_rating": 1000.0,
+  "i_lut": 2000.0
+ },
+ {
+  "part": "DIM1000NSM33-TF000",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 3300.0,
+  "i_rating": 1000.0,
+  "i_lut": 2000.0
+ },
+ {
+  "part": "DIM1000NSM33-TL000",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 3300.0,
+  "i_rating": 1000.0,
+  "i_lut": 2000.0
+ },
+ {
+  "part": "DIM1000NSM33-TS000",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 3300.0,
+  "i_rating": 1000.0,
+  "i_lut": 1875.0
+ },
+ {
+  "part": "DIM1000XSM33-TF000",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 3300.0,
+  "i_rating": 1000.0,
+  "i_lut": 2000.0
+ },
+ {
+  "part": "DIM1000XSM33-TF001",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 3300.0,
+  "i_rating": 1000.0,
+  "i_lut": 2000.0
+ },
+ {
+  "part": "DIM1000XSM33-TL001",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 3300.0,
+  "i_rating": 1000.0,
+  "i_lut": 2000.0
+ },
+ {
+  "part": "DIM1000XSM33-TS001",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 3300.0,
+  "i_rating": 1000.0,
+  "i_lut": 1875.0
+ },
+ {
+  "part": "DIM100PHM33-F000",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 3300.0,
+  "i_rating": 100.0,
+  "i_lut": 200.0
+ },
+ {
+  "part": "DIM1200ASM45-PR501",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 4500.0,
+  "i_rating": 1200.0,
+  "i_lut": 2400.0
+ },
+ {
+  "part": "DIM1200ASM45-TL000",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 4500.0,
+  "i_rating": 1200.0,
+  "i_lut": 2400.0
+ },
+ {
+  "part": "DIM1200ASM45-TL001",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 4500.0,
+  "i_rating": 1200.0,
+  "i_lut": 2400.0
+ },
+ {
+  "part": "DIM1200ASM45-TS000",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 4500.0,
+  "i_rating": 1200.0,
+  "i_lut": 2375.0
+ },
+ {
+  "part": "DIM1200ASM45-TS001",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 4500.0,
+  "i_rating": 1200.0,
+  "i_lut": 2375.0
+ },
+ {
+  "part": "DIM1200ESM33-F000",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 3300.0,
+  "i_rating": 1200.0,
+  "i_lut": 2400.0
+ },
+ {
+  "part": "DIM1200FSM12-A000",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 1200.0,
+  "i_rating": 1200.0,
+  "i_lut": 3000.0
+ },
+ {
+  "part": "DIM1200FSM17-A000",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 1700.0,
+  "i_rating": 1200.0,
+  "i_lut": 2400.0
+ },
+ {
+  "part": "DIM1200FSS12-A000",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 1200.0,
+  "i_rating": 1200.0,
+  "i_lut": 3000.0
+ },
+ {
+  "part": "DIM1200NSM12-A000",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 1200.0,
+  "i_rating": 1200.0,
+  "i_lut": 3000.0
+ },
+ {
+  "part": "DIM1200NSM17-A000",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 1700.0,
+  "i_rating": 1200.0,
+  "i_lut": 2600.0
+ },
+ {
+  "part": "DIM125PHM33-TF000",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 3300.0,
+  "i_rating": 125.0,
+  "i_lut": 250.0
+ },
+ {
+  "part": "DIM125PHM33-TL000",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 3300.0,
+  "i_rating": 125.0,
+  "i_lut": 250.0
+ },
+ {
+  "part": "DIM125PHM33-TS000",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 3300.0,
+  "i_rating": 125.0,
+  "i_lut": 250.0
+ },
+ {
+  "part": "DIM1400H1HS12-PA500",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 1200.0,
+  "i_rating": 1400.0,
+  "i_lut": 2800.0
+ },
+ {
+  "part": "DIM1500ASM33-TF001",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 3300.0,
+  "i_rating": 1500.0,
+  "i_lut": 3000.0
+ },
+ {
+  "part": "DIM1500ASM33-TL001",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 3300.0,
+  "i_rating": 1500.0,
+  "i_lut": 2800.0
+ },
+ {
+  "part": "DIM1500ASM33-TS001",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 3300.0,
+  "i_rating": 1500.0,
+  "i_lut": 2800.0
+ },
+ {
+  "part": "DIM1500ESM33-MS000",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 3300.0,
+  "i_rating": 1500.0,
+  "i_lut": 3000.0
+ },
+ {
+  "part": "DIM1500ESM33-RR500",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 3300.0,
+  "i_rating": 1500.0,
+  "i_lut": 3000.0
+ },
+ {
+  "part": "DIM1500ESM33-TF000",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 3300.0,
+  "i_rating": 1500.0,
+  "i_lut": 3000.0
+ },
+ {
+  "part": "DIM1500ESM33-TL000",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 3300.0,
+  "i_rating": 1500.0,
+  "i_lut": 3000.0
+ },
+ {
+  "part": "DIM1500ESM33-TS000",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 3300.0,
+  "i_rating": 1500.0,
+  "i_lut": 2975.0
+ },
+ {
+  "part": "DIM1600ECM17-A000",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 1700.0,
+  "i_rating": 1600.0,
+  "i_lut": 3600.0
+ },
+ {
+  "part": "DIM1600FSM12-A000",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 1200.0,
+  "i_rating": 1600.0,
+  "i_lut": 4000.0
+ },
+ {
+  "part": "DIM1600FSM17-A000",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 1700.0,
+  "i_rating": 1600.0,
+  "i_lut": 3600.0
+ },
+ {
+  "part": "DIM1600FSS12-A000",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 1200.0,
+  "i_rating": 1600.0,
+  "i_lut": 4000.0
+ },
+ {
+  "part": "DIM1600NSM12-A000",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 1200.0,
+  "i_rating": 1600.0,
+  "i_lut": 4000.0
+ },
+ {
+  "part": "DIM1600NSM17-A000",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 1700.0,
+  "i_rating": 1600.0,
+  "i_lut": 3600.0
+ },
+ {
+  "part": "DIM1800ESM12-A000",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 1200.0,
+  "i_rating": 1800.0,
+  "i_lut": 4600.0
+ },
+ {
+  "part": "DIM1800ESS12-A000",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 1200.0,
+  "i_rating": 1800.0,
+  "i_lut": 4600.0
+ },
+ {
+  "part": "DIM1800H1HS17-PH500",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 1700.0,
+  "i_rating": 1800.0,
+  "i_lut": 3600.0
+ },
+ {
+  "part": "DIM200PHM33-F000",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 3300.0,
+  "i_rating": 200.0,
+  "i_lut": 400.0
+ },
+ {
+  "part": "DIM200PKM33-F000",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 3300.0,
+  "i_rating": 200.0,
+  "i_lut": 400.0
+ },
+ {
+  "part": "DIM200PLM33-F000",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 3300.0,
+  "i_rating": 200.0,
+  "i_lut": 400.0
+ },
+ {
+  "part": "DIM2400ESM12-A000",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 1200.0,
+  "i_rating": 2400.0,
+  "i_lut": 6000.0
+ },
+ {
+  "part": "DIM2400ESM17-A000",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 1700.0,
+  "i_rating": 2400.0,
+  "i_lut": 5000.0
+ },
+ {
+  "part": "DIM2400ESS12-A000",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 1200.0,
+  "i_rating": 2400.0,
+  "i_lut": 6000.0
+ },
+ {
+  "part": "DIM2400NSM17-PT500",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 1700.0,
+  "i_rating": 2400.0,
+  "i_lut": 4800.0
+ },
+ {
+  "part": "DIM250KHM33-TF001",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 3300.0,
+  "i_rating": 250.0,
+  "i_lut": 500.0
+ },
+ {
+  "part": "DIM250KHM33-TL001",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 3300.0,
+  "i_rating": 250.0,
+  "i_lut": 500.0
+ },
+ {
+  "part": "DIM250PHM33-TL000",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 3300.0,
+  "i_rating": 250.0,
+  "i_lut": 500.0
+ },
+ {
+  "part": "DIM250PHM33-TS000",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 3300.0,
+  "i_rating": 250.0,
+  "i_lut": 450.0
+ },
+ {
+  "part": "DIM250PKM33-TL000",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 3300.0,
+  "i_rating": 250.0,
+  "i_lut": 500.0
+ },
+ {
+  "part": "DIM250PKM33-TS000",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 3300.0,
+  "i_rating": 250.0,
+  "i_lut": 450.0
+ },
+ {
+  "part": "DIM250PLM33-TL000",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 3300.0,
+  "i_rating": 250.0,
+  "i_lut": 500.0
+ },
+ {
+  "part": "DIM250PLM33-TS000",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 3300.0,
+  "i_rating": 250.0,
+  "i_lut": 450.0
+ },
+ {
+  "part": "DIM250XCM65-TS000",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 6500.0,
+  "i_rating": 250.0,
+  "i_lut": 400.0
+ },
+ {
+  "part": "DIM300WHS12-PA500",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 1200.0,
+  "i_rating": 300.0,
+  "i_lut": 600.0
+ },
+ {
+  "part": "DIM335XCM65-UF000",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 6500.0,
+  "i_rating": 335.0,
+  "i_lut": 700.0
+ },
+ {
+  "part": "DIM3600ESM17-PT500",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 1700.0,
+  "i_rating": 3600.0,
+  "i_lut": 7200.0
+ },
+ {
+  "part": "DIM400DCM17-A000",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 1700.0,
+  "i_rating": 400.0,
+  "i_lut": 1000.0
+ },
+ {
+  "part": "DIM400DDM12-A000",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 1200.0,
+  "i_rating": 400.0,
+  "i_lut": 1000.0
+ },
+ {
+  "part": "DIM400DDM17-A000",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 1700.0,
+  "i_rating": 400.0,
+  "i_lut": 1000.0
+ },
+ {
+  "part": "DIM400DDS12-A000",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 1200.0,
+  "i_rating": 400.0,
+  "i_lut": 1000.0
+ },
+ {
+  "part": "DIM400GCM33-F000",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 3300.0,
+  "i_rating": 400.0,
+  "i_lut": 750.0
+ },
+ {
+  "part": "DIM400GDM33-F000",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 3300.0,
+  "i_rating": 400.0,
+  "i_lut": 750.0
+ },
+ {
+  "part": "DIM400NCM17-A000",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 1700.0,
+  "i_rating": 400.0,
+  "i_lut": 1000.0
+ },
+ {
+  "part": "DIM400NSM33-F000",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 3300.0,
+  "i_rating": 400.0,
+  "i_lut": 750.0
+ },
+ {
+  "part": "DIM400PBM17-A000",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 1700.0,
+  "i_rating": 400.0,
+  "i_lut": 1000.0
+ },
+ {
+  "part": "DIM400PHM17-A000",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 1700.0,
+  "i_rating": 400.0,
+  "i_lut": 1000.0
+ },
+ {
+  "part": "DIM400XCM33-F000",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 3300.0,
+  "i_rating": 400.0,
+  "i_lut": 750.0
+ },
+ {
+  "part": "DIM400XCM45-TS000",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 4500.0,
+  "i_rating": 400.0,
+  "i_lut": 800.0
+ },
+ {
+  "part": "DIM400XCM45-TS001",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 4500.0,
+  "i_rating": 400.0,
+  "i_lut": 800.0
+ },
+ {
+  "part": "DIM400XSM45-TS000",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 4500.0,
+  "i_rating": 400.0,
+  "i_lut": 800.0
+ },
+ {
+  "part": "DIM400XSM45-TS001",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 4500.0,
+  "i_rating": 400.0,
+  "i_lut": 800.0
+ },
+ {
+  "part": "DIM450M1HS12-PB500",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 1200.0,
+  "i_rating": 450.0,
+  "i_lut": 900.0
+ },
+ {
+  "part": "DIM450M1HS17-PA500",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 1700.0,
+  "i_rating": 450.0,
+  "i_lut": 900.0
+ },
+ {
+  "part": "DIM500ACM65-TS000",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 6500.0,
+  "i_rating": 500.0,
+  "i_lut": 1000.0
+ },
+ {
+  "part": "DIM500GCM33-TL000",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 3300.0,
+  "i_rating": 500.0,
+  "i_lut": 1000.0
+ },
+ {
+  "part": "DIM500GCM33-TS000",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 3300.0,
+  "i_rating": 500.0,
+  "i_lut": 1000.0
+ },
+ {
+  "part": "DIM500GDM33-TL000",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 3300.0,
+  "i_rating": 500.0,
+  "i_lut": 1000.0
+ },
+ {
+  "part": "DIM500GDM33-TS000",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 3300.0,
+  "i_rating": 500.0,
+  "i_lut": 1000.0
+ },
+ {
+  "part": "DIM500XSM65-TS000",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 6500.0,
+  "i_rating": 500.0,
+  "i_lut": 1000.0
+ },
+ {
+  "part": "DIM600DCM17-A000",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 1700.0,
+  "i_rating": 600.0,
+  "i_lut": 1250.0
+ },
+ {
+  "part": "DIM600DDM12-A000",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 1200.0,
+  "i_rating": 600.0,
+  "i_lut": 1500.0
+ },
+ {
+  "part": "DIM600DDM17-A000",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 1700.0,
+  "i_rating": 600.0,
+  "i_lut": 1250.0
+ },
+ {
+  "part": "DIM600M1HS12-PC500",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 1200.0,
+  "i_rating": 600.0,
+  "i_lut": 1200.0
+ },
+ {
+  "part": "DIM600M1HS17-PA500",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 1700.0,
+  "i_rating": 600.0,
+  "i_lut": 1200.0
+ },
+ {
+  "part": "DIM600WHS12-PC500",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 1200.0,
+  "i_rating": 600.0,
+  "i_lut": 1200.0
+ },
+ {
+  "part": "DIM650H2HS17-PA500",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 1700.0,
+  "i_rating": 650.0,
+  "i_lut": 1300.0
+ },
+ {
+  "part": "DIM670ACM65-UF000",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 6500.0,
+  "i_rating": 670.0,
+  "i_lut": 1400.0
+ },
+ {
+  "part": "DIM670XSM65-UF000",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 6500.0,
+  "i_rating": 670.0,
+  "i_lut": 1400.0
+ },
+ {
+  "part": "DIM750ASM65-TF000",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 6500.0,
+  "i_rating": 750.0,
+  "i_lut": 1500.0
+ },
+ {
+  "part": "DIM750ASM65-TS000",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 6500.0,
+  "i_rating": 750.0,
+  "i_lut": 1500.0
+ },
+ {
+  "part": "DIM800DCM17-A000",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 1700.0,
+  "i_rating": 800.0,
+  "i_lut": 2000.0
+ },
+ {
+  "part": "DIM800DDM12-A000",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 1200.0,
+  "i_rating": 800.0,
+  "i_lut": 2000.0
+ },
+ {
+  "part": "DIM800DDM17-A000",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 1700.0,
+  "i_rating": 800.0,
+  "i_lut": 2000.0
+ },
+ {
+  "part": "DIM800DDS12-A000",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 1200.0,
+  "i_rating": 800.0,
+  "i_lut": 2000.0
+ },
+ {
+  "part": "DIM800ECM33-F000",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 3300.0,
+  "i_rating": 800.0,
+  "i_lut": 1500.0
+ },
+ {
+  "part": "DIM800FSM12-A000",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 1200.0,
+  "i_rating": 800.0,
+  "i_lut": 2000.0
+ },
+ {
+  "part": "DIM800FSM17-A000",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 1700.0,
+  "i_rating": 800.0,
+  "i_lut": 2000.0
+ },
+ {
+  "part": "DIM800FSS12-A000",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 1200.0,
+  "i_rating": 800.0,
+  "i_lut": 2000.0
+ },
+ {
+  "part": "DIM800M1HS17-PG500",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 1700.0,
+  "i_rating": 800.0,
+  "i_lut": 1600.0
+ },
+ {
+  "part": "DIM800NCM17-A000",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 1700.0,
+  "i_rating": 800.0,
+  "i_lut": 2000.0
+ },
+ {
+  "part": "DIM800NSM12-A000",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 1200.0,
+  "i_rating": 800.0,
+  "i_lut": 2000.0
+ },
+ {
+  "part": "DIM800NSM17-A000",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 1700.0,
+  "i_rating": 800.0,
+  "i_lut": 2000.0
+ },
+ {
+  "part": "DIM800NSM33-F000",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 3300.0,
+  "i_rating": 800.0,
+  "i_lut": 1500.0
+ },
+ {
+  "part": "DIM800WHS12-PF500",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 1200.0,
+  "i_rating": 800.0,
+  "i_lut": 1600.0
+ },
+ {
+  "part": "DIM800XSM33-F000",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 3300.0,
+  "i_rating": 800.0,
+  "i_lut": 1500.0
+ },
+ {
+  "part": "DIM800XSM45-TF000",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 4500.0,
+  "i_rating": 800.0,
+  "i_lut": 2000.0
+ },
+ {
+  "part": "DIM800XSM45-TF001",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 4500.0,
+  "i_rating": 800.0,
+  "i_lut": 2000.0
+ },
+ {
+  "part": "DIM800XSM45-TL000",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 4500.0,
+  "i_rating": 800.0,
+  "i_lut": 1625.0
+ },
+ {
+  "part": "DIM800XSM45-TL001",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 4500.0,
+  "i_rating": 800.0,
+  "i_lut": 1625.0
+ },
+ {
+  "part": "DIM800XSM45-TS000",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 4500.0,
+  "i_rating": 800.0,
+  "i_lut": 1500.0
+ },
+ {
+  "part": "DIM800XSM45-TS001",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 4500.0,
+  "i_rating": 800.0,
+  "i_lut": 1500.0
+ },
+ {
+  "part": "DIM900M1HS12-PG500",
+  "type": "IGBT",
+  "kind": "switch",
+  "family": "Si IGBT module",
+  "v_rating": 1200.0,
+  "i_rating": 900.0,
+  "i_lut": 1800.0
+ },
+ {
+  "part": "C2M0025120D",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 1200.0,
+  "i_rating": 149.9,
+  "i_lut": 149.9
+ },
+ {
+  "part": "C2M0040120D",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 1200.0,
+  "i_rating": 99.97,
+  "i_lut": 99.97
+ },
+ {
+  "part": "C2M0045170D",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 1700.0,
+  "i_rating": 130.0,
+  "i_lut": 130.0
+ },
+ {
+  "part": "C2M0045170P",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 1700.0,
+  "i_rating": 130.0,
+  "i_lut": 130.0
+ },
+ {
+  "part": "C2M0080120D",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 1200.0,
+  "i_rating": 52.0,
+  "i_lut": 52.0
+ },
+ {
+  "part": "C2M1000170D",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 1700.0,
+  "i_rating": 5.994,
+  "i_lut": 5.994
+ },
+ {
+  "part": "C2M1000170J",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 1700.0,
+  "i_rating": 12.0,
+  "i_lut": 12.0
+ },
+ {
+  "part": "C3M0015065D",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 650.0,
+  "i_rating": 225.0,
+  "i_lut": 225.0
+ },
+ {
+  "part": "C3M0015065K",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 650.0,
+  "i_rating": 225.0,
+  "i_lut": 225.0
+ },
+ {
+  "part": "C3M0016120D",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 1200.0,
+  "i_rating": 250.0,
+  "i_lut": 250.0
+ },
+ {
+  "part": "C3M0016120K",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 1200.0,
+  "i_rating": 250.0,
+  "i_lut": 250.0
+ },
+ {
+  "part": "C3M0016120K1",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 1200.0,
+  "i_rating": 230.0,
+  "i_lut": 230.0
+ },
+ {
+  "part": "C3M0021120D",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 1200.0,
+  "i_rating": 180.0,
+  "i_lut": 180.0
+ },
+ {
+  "part": "C3M0021120J2",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 1200.0,
+  "i_rating": 230.0,
+  "i_lut": 230.0
+ },
+ {
+  "part": "C3M0021120K",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 1200.0,
+  "i_rating": 180.0,
+  "i_lut": 180.0
+ },
+ {
+  "part": "C3M0021120K1",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 1200.0,
+  "i_rating": 230.0,
+  "i_lut": 230.0
+ },
+ {
+  "part": "C3M0025065D",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 650.0,
+  "i_rating": 140.0,
+  "i_lut": 140.0
+ },
+ {
+  "part": "C3M0025065J1",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 650.0,
+  "i_rating": 140.0,
+  "i_lut": 140.0
+ },
+ {
+  "part": "C3M0025065K",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 650.0,
+  "i_rating": 140.0,
+  "i_lut": 140.0
+ },
+ {
+  "part": "C3M0025065L",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 650.0,
+  "i_rating": 150.0,
+  "i_lut": 150.0
+ },
+ {
+  "part": "C3M0025075K1",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 750.0,
+  "i_rating": 170.0,
+  "i_lut": 170.0
+ },
+ {
+  "part": "C3M0030090K",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 900.0,
+  "i_rating": 200.0,
+  "i_lut": 200.0
+ },
+ {
+  "part": "C3M0032120D",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 1200.0,
+  "i_rating": 120.0,
+  "i_lut": 120.0
+ },
+ {
+  "part": "C3M0032120J1",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 1200.0,
+  "i_rating": 120.0,
+  "i_lut": 120.0
+ },
+ {
+  "part": "C3M0032120J2",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 1200.0,
+  "i_rating": 130.0,
+  "i_lut": 130.0
+ },
+ {
+  "part": "C3M0032120K",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 1200.0,
+  "i_rating": 120.0,
+  "i_lut": 120.0
+ },
+ {
+  "part": "C3M0032120K1",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 1200.0,
+  "i_rating": 110.0,
+  "i_lut": 110.0
+ },
+ {
+  "part": "C3M0040120D",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 1200.0,
+  "i_rating": 120.0,
+  "i_lut": 120.0
+ },
+ {
+  "part": "C3M0040120J1",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 1200.0,
+  "i_rating": 120.0,
+  "i_lut": 120.0
+ },
+ {
+  "part": "C3M0040120K",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 1200.0,
+  "i_rating": 120.0,
+  "i_lut": 120.0
+ },
+ {
+  "part": "C3M0040120K1",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 1200.0,
+  "i_rating": 110.0,
+  "i_lut": 110.0
+ },
+ {
+  "part": "C3M0045065D",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 650.0,
+  "i_rating": 100.0,
+  "i_lut": 100.0
+ },
+ {
+  "part": "C3M0045065J1",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 650.0,
+  "i_rating": 100.0,
+  "i_lut": 100.0
+ },
+ {
+  "part": "C3M0045065K",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 650.0,
+  "i_rating": 100.0,
+  "i_lut": 100.0
+ },
+ {
+  "part": "C3M0045065L",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 650.0,
+  "i_rating": 100.0,
+  "i_lut": 100.0
+ },
+ {
+  "part": "C3M0045075K1",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 750.0,
+  "i_rating": 70.0,
+  "i_lut": 70.0
+ },
+ {
+  "part": "C3M0060065D",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 650.0,
+  "i_rating": 75.0,
+  "i_lut": 75.0
+ },
+ {
+  "part": "C3M0060065J",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 650.0,
+  "i_rating": 90.0,
+  "i_lut": 90.0
+ },
+ {
+  "part": "C3M0060065K",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 650.0,
+  "i_rating": 90.0,
+  "i_lut": 90.0
+ },
+ {
+  "part": "C3M0060065L",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 650.0,
+  "i_rating": 75.0,
+  "i_lut": 75.0
+ },
+ {
+  "part": "C3M0060075K1",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 750.0,
+  "i_rating": 70.0,
+  "i_lut": 70.0
+ },
+ {
+  "part": "C3M0065090D",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 900.0,
+  "i_rating": 80.0,
+  "i_lut": 80.0
+ },
+ {
+  "part": "C3M0065090J",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 900.0,
+  "i_rating": 80.0,
+  "i_lut": 80.0
+ },
+ {
+  "part": "C3M0065100J",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 1000.0,
+  "i_rating": 100.0,
+  "i_lut": 100.0
+ },
+ {
+  "part": "C3M0065100K",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 1000.0,
+  "i_rating": 70.0,
+  "i_lut": 70.0
+ },
+ {
+  "part": "C3M0075120D",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 1200.0,
+  "i_rating": 64.5,
+  "i_lut": 64.5
+ },
+ {
+  "part": "C3M0075120J",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 1200.0,
+  "i_rating": 60.0,
+  "i_lut": 60.0
+ },
+ {
+  "part": "C3M0075120J2",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 1200.0,
+  "i_rating": 70.0,
+  "i_lut": 70.0
+ },
+ {
+  "part": "C3M0075120K",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 1200.0,
+  "i_rating": 50.0,
+  "i_lut": 50.0
+ },
+ {
+  "part": "C3M0075120K1",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 1200.0,
+  "i_rating": 50.0,
+  "i_lut": 50.0
+ },
+ {
+  "part": "C3M0120065D",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 650.0,
+  "i_rating": 40.0,
+  "i_lut": 40.0
+ },
+ {
+  "part": "C3M0120065J",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 650.0,
+  "i_rating": 40.0,
+  "i_lut": 40.0
+ },
+ {
+  "part": "C3M0120065K",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 650.0,
+  "i_rating": 40.0,
+  "i_lut": 40.0
+ },
+ {
+  "part": "C3M0120065L",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 650.0,
+  "i_rating": 40.0,
+  "i_lut": 40.0
+ },
+ {
+  "part": "C3M0120090D",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 900.0,
+  "i_rating": 45.0,
+  "i_lut": 45.0
+ },
+ {
+  "part": "C3M0120090J",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 900.0,
+  "i_rating": 45.0,
+  "i_lut": 45.0
+ },
+ {
+  "part": "C3M0120100J",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 1000.0,
+  "i_rating": 45.0,
+  "i_lut": 45.0
+ },
+ {
+  "part": "C3M0120100K",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 1000.0,
+  "i_rating": 45.0,
+  "i_lut": 45.0
+ },
+ {
+  "part": "C3M0160120D",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 1200.0,
+  "i_rating": 30.0,
+  "i_lut": 30.0
+ },
+ {
+  "part": "C3M0160120J",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 1200.0,
+  "i_rating": 30.0,
+  "i_lut": 30.0
+ },
+ {
+  "part": "C3M0160120K1",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 1200.0,
+  "i_rating": 30.0,
+  "i_lut": 30.0
+ },
+ {
+  "part": "C3M0280090D",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 900.0,
+  "i_rating": 20.0,
+  "i_lut": 20.0
+ },
+ {
+  "part": "C3M0280090J",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 900.0,
+  "i_rating": 20.0,
+  "i_lut": 20.0
+ },
+ {
+  "part": "C3M0350120D",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 1200.0,
+  "i_rating": 12.5,
+  "i_lut": 12.5
+ },
+ {
+  "part": "C3M0350120J",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 1200.0,
+  "i_rating": 12.5,
+  "i_lut": 12.5
+ },
+ {
+  "part": "C4MS008065L",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 650.0,
+  "i_rating": 200.0,
+  "i_lut": 200.0
+ },
+ {
+  "part": "C4MS008075J2",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 750.0,
+  "i_rating": 200.0,
+  "i_lut": 200.0
+ },
+ {
+  "part": "C4MS008075K1",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 750.0,
+  "i_rating": 200.0,
+  "i_lut": 200.0
+ },
+ {
+  "part": "C4MS008075QT",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 750.0,
+  "i_rating": 200.0,
+  "i_lut": 200.0
+ },
+ {
+  "part": "C4MS008075U2",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 750.0,
+  "i_rating": 200.0,
+  "i_lut": 200.0
+ },
+ {
+  "part": "C4MS009120K",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 1200.0,
+  "i_rating": 200.0,
+  "i_lut": 200.0
+ },
+ {
+  "part": "C4MS009120K1",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 1200.0,
+  "i_rating": 200.0,
+  "i_lut": 200.0
+ },
+ {
+  "part": "C4MS009120QT",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 1200.0,
+  "i_rating": 200.0,
+  "i_lut": 200.0
+ },
+ {
+  "part": "C4MS009120U2",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 1200.0,
+  "i_rating": 200.0,
+  "i_lut": 200.0
+ },
+ {
+  "part": "C4MS012120QT",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 1200.0,
+  "i_rating": 200.0,
+  "i_lut": 200.0
+ },
+ {
+  "part": "C4MS015075J2",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 750.0,
+  "i_rating": 100.0,
+  "i_lut": 100.0
+ },
+ {
+  "part": "C4MS015075K1",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 750.0,
+  "i_rating": 100.0,
+  "i_lut": 100.0
+ },
+ {
+  "part": "C4MS015075QT",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 750.0,
+  "i_rating": 100.0,
+  "i_lut": 100.0
+ },
+ {
+  "part": "C4MS015075U2",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 750.0,
+  "i_rating": 100.0,
+  "i_lut": 100.0
+ },
+ {
+  "part": "C4MS025065L",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 650.0,
+  "i_rating": 100.0,
+  "i_lut": 100.0
+ },
+ {
+  "part": "C4MS025075J2",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 750.0,
+  "i_rating": 100.0,
+  "i_lut": 100.0
+ },
+ {
+  "part": "C4MS025075K1",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 750.0,
+  "i_rating": 100.0,
+  "i_lut": 100.0
+ },
+ {
+  "part": "C4MS025075QT",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 750.0,
+  "i_rating": 100.0,
+  "i_lut": 100.0
+ },
+ {
+  "part": "C4MS025075U2",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 750.0,
+  "i_rating": 100.0,
+  "i_lut": 100.0
+ },
+ {
+  "part": "C4MS025120J2",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 1200.0,
+  "i_rating": 100.0,
+  "i_lut": 100.0
+ },
+ {
+  "part": "C4MS025120K",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 1200.0,
+  "i_rating": 100.0,
+  "i_lut": 100.0
+ },
+ {
+  "part": "C4MS025120K1",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 1200.0,
+  "i_rating": 100.0,
+  "i_lut": 100.0
+ },
+ {
+  "part": "C4MS025120QT",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 1200.0,
+  "i_rating": 100.0,
+  "i_lut": 100.0
+ },
+ {
+  "part": "C4MS025120U2",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 1200.0,
+  "i_rating": 100.0,
+  "i_lut": 100.0
+ },
+ {
+  "part": "C4MS035065L",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 650.0,
+  "i_rating": 100.0,
+  "i_lut": 100.0
+ },
+ {
+  "part": "C4MS035075K1 \u00a0",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 750.0,
+  "i_rating": 100.0,
+  "i_lut": 100.0
+ },
+ {
+  "part": "C4MS036120J2",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 1200.0,
+  "i_rating": 100.0,
+  "i_lut": 100.0
+ },
+ {
+  "part": "C4MS036120K",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 1200.0,
+  "i_rating": 100.0,
+  "i_lut": 100.0
+ },
+ {
+  "part": "C4MS036120K1",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 1200.0,
+  "i_rating": 100.0,
+  "i_lut": 100.0
+ },
+ {
+  "part": "C4MS036120QT",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 1200.0,
+  "i_rating": 100.0,
+  "i_lut": 100.0
+ },
+ {
+  "part": "C4MS036120U2",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 1200.0,
+  "i_rating": 100.0,
+  "i_lut": 100.0
+ },
+ {
+  "part": "C4MS045065L",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 650.0,
+  "i_rating": 100.0,
+  "i_lut": 100.0
+ },
+ {
+  "part": "C4MS045075J2",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 750.0,
+  "i_rating": 100.0,
+  "i_lut": 100.0
+ },
+ {
+  "part": "C4MS045075K1",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 750.0,
+  "i_rating": 100.0,
+  "i_lut": 100.0
+ },
+ {
+  "part": "C4MS045075QT",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 750.0,
+  "i_rating": 100.0,
+  "i_lut": 100.0
+ },
+ {
+  "part": "C4MS045075U2",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 750.0,
+  "i_rating": 100.0,
+  "i_lut": 100.0
+ },
+ {
+  "part": "C4MS047120J2",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 1200.0,
+  "i_rating": 100.0,
+  "i_lut": 100.0
+ },
+ {
+  "part": "C4MS047120K",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 1200.0,
+  "i_rating": 100.0,
+  "i_lut": 100.0
+ },
+ {
+  "part": "C4MS047120K1",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 1200.0,
+  "i_rating": 100.0,
+  "i_lut": 100.0
+ },
+ {
+  "part": "C4MS047120QT",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 1200.0,
+  "i_rating": 100.0,
+  "i_lut": 100.0
+ },
+ {
+  "part": "C4MS047120U2",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 1200.0,
+  "i_rating": 100.0,
+  "i_lut": 100.0
+ },
+ {
+  "part": "C4MS065120J2",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 1200.0,
+  "i_rating": 100.0,
+  "i_lut": 100.0
+ },
+ {
+  "part": "C4MS065120K",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 1200.0,
+  "i_rating": 100.0,
+  "i_lut": 100.0
+ },
+ {
+  "part": "C4MS065120K1",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 1200.0,
+  "i_rating": 100.0,
+  "i_lut": 100.0
+ },
+ {
+  "part": "C4MS065120U2",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 1200.0,
+  "i_rating": 100.0,
+  "i_lut": 100.0
+ },
+ {
+  "part": "C4MS080120J2",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 1200.0,
+  "i_rating": 100.0,
+  "i_lut": 100.0
+ },
+ {
+  "part": "C4MS080120K",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 1200.0,
+  "i_rating": 100.0,
+  "i_lut": 100.0
+ },
+ {
+  "part": "C4MS080120U2",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 1200.0,
+  "i_rating": 100.0,
+  "i_lut": 100.0
+ },
+ {
+  "part": "CAB003M09DM3",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET module",
+  "v_rating": 900.0,
+  "i_rating": 800.0,
+  "i_lut": 800.0
+ },
+ {
+  "part": "CAB004A12GM4",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 1200.0,
+  "i_rating": 400.0,
+  "i_lut": 400.0
+ },
+ {
+  "part": "CAB004M12GM4",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET module",
+  "v_rating": 1200.0,
+  "i_rating": 400.0,
+  "i_lut": 400.0
+ },
+ {
+  "part": "CAB006A12GM3",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 1200.0,
+  "i_rating": 400.0,
+  "i_lut": 400.0
+ },
+ {
+  "part": "CAB006A12GM4",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 1200.0,
+  "i_rating": 400.0,
+  "i_lut": 400.0
+ },
+ {
+  "part": "CAB006M12GM3",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET module",
+  "v_rating": 1200.0,
+  "i_rating": 400.0,
+  "i_lut": 400.0
+ },
+ {
+  "part": "CAB008A12GM3",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 1200.0,
+  "i_rating": 300.0,
+  "i_lut": 300.0
+ },
+ {
+  "part": "CAB008M12GM3",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET module",
+  "v_rating": 1200.0,
+  "i_rating": 300.0,
+  "i_lut": 300.0
+ },
+ {
+  "part": "CAB011A12GM3",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 1200.0,
+  "i_rating": 300.0,
+  "i_lut": 300.0
+ },
+ {
+  "part": "CAB011M12FM3",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET module",
+  "v_rating": 1200.0,
+  "i_rating": 200.0,
+  "i_lut": 200.0
+ },
+ {
+  "part": "CAB016M12FM3",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET module",
+  "v_rating": 1200.0,
+  "i_rating": 160.0,
+  "i_lut": 160.0
+ },
+ {
+  "part": "CAB320M17XM3",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET module",
+  "v_rating": 1700.0,
+  "i_rating": 650.0,
+  "i_lut": 650.0
+ },
+ {
+  "part": "CAB3R5M12DM4",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET module",
+  "v_rating": 1200.0,
+  "i_rating": 600.0,
+  "i_lut": 600.0
+ },
+ {
+  "part": "CAB400M12XM3",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET module",
+  "v_rating": 1200.0,
+  "i_rating": 800.0,
+  "i_lut": 800.0
+ },
+ {
+  "part": "CAB425M12XM3",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET module",
+  "v_rating": 1200.0,
+  "i_rating": 850.0,
+  "i_lut": 850.0
+ },
+ {
+  "part": "CAB450M12XM3",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET module",
+  "v_rating": 1200.0,
+  "i_rating": 900.0,
+  "i_lut": 900.0
+ },
+ {
+  "part": "CAB500M17HM3",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET module",
+  "v_rating": 1700.0,
+  "i_rating": 1000.0,
+  "i_lut": 1000.0
+ },
+ {
+  "part": "CAB525F12XM3",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 800.0,
+  "i_rating": 1100.0,
+  "i_lut": 1100.0
+ },
+ {
+  "part": "CAB530M12BM3",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET module",
+  "v_rating": 1200.0,
+  "i_rating": 1100.0,
+  "i_lut": 1100.0
+ },
+ {
+  "part": "CAB5R0A23GM4",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 2300.0,
+  "i_rating": 500.0,
+  "i_lut": 500.0
+ },
+ {
+  "part": "CAB600M33LM3",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET module",
+  "v_rating": 3300.0,
+  "i_rating": 1200.0,
+  "i_lut": 1200.0
+ },
+ {
+  "part": "CAB650M17HM3",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET module",
+  "v_rating": 1700.0,
+  "i_rating": 1300.0,
+  "i_lut": 1300.0
+ },
+ {
+  "part": "CAB6R0A23GM4",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 2300.0,
+  "i_rating": 400.0,
+  "i_lut": 400.0
+ },
+ {
+  "part": "CAB760M12HM3",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET module",
+  "v_rating": 1200.0,
+  "i_rating": 1600.0,
+  "i_lut": 1600.0
+ },
+ {
+  "part": "CAB7R5A23GM4",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 2300.0,
+  "i_rating": 320.0,
+  "i_lut": 320.0
+ },
+ {
+  "part": "CBB010A12FM4",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 1200.0,
+  "i_rating": 200.0,
+  "i_lut": 200.0
+ },
+ {
+  "part": "CBB010A23GM4",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 2300.0,
+  "i_rating": 250.0,
+  "i_lut": 250.0
+ },
+ {
+  "part": "CBB011M12GM4",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET module",
+  "v_rating": 1200.0,
+  "i_rating": 200.0,
+  "i_lut": 200.0
+ },
+ {
+  "part": "CBB014A12FM4",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 1200.0,
+  "i_rating": 160.0,
+  "i_lut": 160.0
+ },
+ {
+  "part": "CBB017M12FM4",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET module",
+  "v_rating": 1200.0,
+  "i_rating": 120.0,
+  "i_lut": 120.0
+ },
+ {
+  "part": "CBB021M12FM3",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET module",
+  "v_rating": 1200.0,
+  "i_rating": 100.0,
+  "i_lut": 100.0
+ },
+ {
+  "part": "CBB030A23FM4",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 2300.0,
+  "i_rating": 100.0,
+  "i_lut": 100.0
+ },
+ {
+  "part": "CBB032M12FM3",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET module",
+  "v_rating": 1200.0,
+  "i_rating": 100.0,
+  "i_lut": 100.0
+ },
+ {
+  "part": "CCB016M12GM3",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET module",
+  "v_rating": 1200.0,
+  "i_rating": 100.0,
+  "i_lut": 100.0
+ },
+ {
+  "part": "CCB021M12FM3",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET module",
+  "v_rating": 1200.0,
+  "i_rating": 100.0,
+  "i_lut": 100.0
+ },
+ {
+  "part": "CCB032M12FM3",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET module",
+  "v_rating": 1200.0,
+  "i_rating": 100.0,
+  "i_lut": 100.0
+ },
+ {
+  "part": "CHB011M12GM4",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET module",
+  "v_rating": 1200.0,
+  "i_rating": 200.0,
+  "i_lut": 200.0
+ },
+ {
+  "part": "CHB7R5A23GM4_M11",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 2300.0,
+  "i_rating": 320.0,
+  "i_lut": 320.0
+ },
+ {
+  "part": "CHB7R5A23GM4_M13",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 2300.0,
+  "i_rating": 250.0,
+  "i_lut": 250.0
+ },
+ {
+  "part": "CLB650M17HM3",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET module",
+  "v_rating": 1700.0,
+  "i_rating": 1300.0,
+  "i_lut": 1300.0
+ },
+ {
+  "part": "CLB800M12HM3P",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET module",
+  "v_rating": 1200.0,
+  "i_rating": 1600.0,
+  "i_lut": 1600.0
+ },
+ {
+  "part": "E3M0016120K",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 1200.0,
+  "i_rating": 290.0,
+  "i_lut": 290.0
+ },
+ {
+  "part": "E3M0021120J2",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 1200.0,
+  "i_rating": 200.0,
+  "i_lut": 200.0
+ },
+ {
+  "part": "E3M0021120K",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 1200.0,
+  "i_rating": 180.0,
+  "i_lut": 180.0
+ },
+ {
+  "part": "E3M0032120J2",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 1200.0,
+  "i_rating": 120.0,
+  "i_lut": 120.0
+ },
+ {
+  "part": "E3M0032120K",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 1200.0,
+  "i_rating": 120.0,
+  "i_lut": 120.0
+ },
+ {
+  "part": "E3M0040120J2",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 1200.0,
+  "i_rating": 120.0,
+  "i_lut": 120.0
+ },
+ {
+  "part": "E3M0040120K",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 1200.0,
+  "i_rating": 110.0,
+  "i_lut": 110.0
+ },
+ {
+  "part": "E3M0045065K",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 650.0,
+  "i_rating": 100.0,
+  "i_lut": 100.0
+ },
+ {
+  "part": "E3M0060065D",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 650.0,
+  "i_rating": 75.0,
+  "i_lut": 75.0
+ },
+ {
+  "part": "E3M0060065K",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 650.0,
+  "i_rating": 75.0,
+  "i_lut": 75.0
+ },
+ {
+  "part": "E3M0075120D",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 1200.0,
+  "i_rating": 50.0,
+  "i_lut": 50.0
+ },
+ {
+  "part": "E3M0075120J2",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 1200.0,
+  "i_rating": 70.0,
+  "i_lut": 70.0
+ },
+ {
+  "part": "E3M0075120K",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 1200.0,
+  "i_rating": 50.0,
+  "i_lut": 50.0
+ },
+ {
+  "part": "E3M0120090J",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 900.0,
+  "i_rating": 30.0,
+  "i_lut": 30.0
+ },
+ {
+  "part": "E3M0160120D",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 1200.0,
+  "i_rating": 30.0,
+  "i_lut": 30.0
+ },
+ {
+  "part": "E3M0160120J2",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 1200.0,
+  "i_rating": 30.0,
+  "i_lut": 30.0
+ },
+ {
+  "part": "E3M0160120K",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 1200.0,
+  "i_rating": 30.0,
+  "i_lut": 30.0
+ },
+ {
+  "part": "E4M0013120K",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 1200.0,
+  "i_rating": 290.0,
+  "i_lut": 290.0
+ },
+ {
+  "part": "E4M0015075J2",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 750.0,
+  "i_rating": 210.0,
+  "i_lut": 210.0
+ },
+ {
+  "part": "E4M0015075K1",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 750.0,
+  "i_rating": 210.0,
+  "i_lut": 210.0
+ },
+ {
+  "part": "E4M0025075J2",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 750.0,
+  "i_rating": 170.0,
+  "i_lut": 170.0
+ },
+ {
+  "part": "E4M0025075K1",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 750.0,
+  "i_rating": 170.0,
+  "i_lut": 170.0
+ },
+ {
+  "part": "E4M0045075J2",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 750.0,
+  "i_rating": 70.0,
+  "i_lut": 70.0
+ },
+ {
+  "part": "E4M0045075K1",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 750.0,
+  "i_rating": 70.0,
+  "i_lut": 70.0
+ },
+ {
+  "part": "E4M0060075J2",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 750.0,
+  "i_rating": 70.0,
+  "i_lut": 70.0
+ },
+ {
+  "part": "E4M0060075K1",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 750.0,
+  "i_rating": 70.0,
+  "i_lut": 70.0
+ },
+ {
+  "part": "E4MS008075J2",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 750.0,
+  "i_rating": 200.0,
+  "i_lut": 200.0
+ },
+ {
+  "part": "E4MS008075K1",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 750.0,
+  "i_rating": 200.0,
+  "i_lut": 200.0
+ },
+ {
+  "part": "E4MS008075QT",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 750.0,
+  "i_rating": 200.0,
+  "i_lut": 200.0
+ },
+ {
+  "part": "E4MS008075U2",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 750.0,
+  "i_rating": 200.0,
+  "i_lut": 200.0
+ },
+ {
+  "part": "E4MS009120K",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 1200.0,
+  "i_rating": 200.0,
+  "i_lut": 200.0
+ },
+ {
+  "part": "E4MS009120QT",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 1200.0,
+  "i_rating": 200.0,
+  "i_lut": 200.0
+ },
+ {
+  "part": "E4MS015075J2",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 750.0,
+  "i_rating": 100.0,
+  "i_lut": 100.0
+ },
+ {
+  "part": "E4MS015075K1",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 750.0,
+  "i_rating": 100.0,
+  "i_lut": 100.0
+ },
+ {
+  "part": "E4MS015075QT",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 750.0,
+  "i_rating": 100.0,
+  "i_lut": 100.0
+ },
+ {
+  "part": "E4MS015075U2",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 750.0,
+  "i_rating": 100.0,
+  "i_lut": 100.0
+ },
+ {
+  "part": "E4MS018120QT",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 1200.0,
+  "i_rating": 200.0,
+  "i_lut": 200.0
+ },
+ {
+  "part": "E4MS025075J2",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 750.0,
+  "i_rating": 100.0,
+  "i_lut": 100.0
+ },
+ {
+  "part": "E4MS025075K1",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 750.0,
+  "i_rating": 100.0,
+  "i_lut": 100.0
+ },
+ {
+  "part": "E4MS025075U2",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 750.0,
+  "i_rating": 100.0,
+  "i_lut": 100.0
+ },
+ {
+  "part": "E4MS025120J2",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 1200.0,
+  "i_rating": 100.0,
+  "i_lut": 100.0
+ },
+ {
+  "part": "E4MS025120K",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 1200.0,
+  "i_rating": 100.0,
+  "i_lut": 100.0
+ },
+ {
+  "part": "E4MS025120QT",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 1200.0,
+  "i_rating": 100.0,
+  "i_lut": 100.0
+ },
+ {
+  "part": "E4MS025120U2",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 1200.0,
+  "i_rating": 100.0,
+  "i_lut": 100.0
+ },
+ {
+  "part": "E4MS036120J2",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 1200.0,
+  "i_rating": 100.0,
+  "i_lut": 100.0
+ },
+ {
+  "part": "E4MS036120K",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 1200.0,
+  "i_rating": 100.0,
+  "i_lut": 100.0
+ },
+ {
+  "part": "E4MS036120U2",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 1200.0,
+  "i_rating": 100.0,
+  "i_lut": 100.0
+ },
+ {
+  "part": "E4MS045075J2",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 750.0,
+  "i_rating": 100.0,
+  "i_lut": 100.0
+ },
+ {
+  "part": "E4MS045075K1",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 750.0,
+  "i_rating": 100.0,
+  "i_lut": 100.0
+ },
+ {
+  "part": "E4MS045075U2",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 750.0,
+  "i_rating": 100.0,
+  "i_lut": 100.0
+ },
+ {
+  "part": "E4MS047120J2",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 1200.0,
+  "i_rating": 100.0,
+  "i_lut": 100.0
+ },
+ {
+  "part": "E4MS047120K",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 1200.0,
+  "i_rating": 100.0,
+  "i_lut": 100.0
+ },
+ {
+  "part": "E4MS047120U2",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 1200.0,
+  "i_rating": 100.0,
+  "i_lut": 100.0
+ },
+ {
+  "part": "E4MS065120J2",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 1200.0,
+  "i_rating": 100.0,
+  "i_lut": 100.0
+ },
+ {
+  "part": "E4MS065120K",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 1200.0,
+  "i_rating": 100.0,
+  "i_lut": 100.0
+ },
+ {
+  "part": "E4MS065120U2",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 1200.0,
+  "i_rating": 100.0,
+  "i_lut": 100.0
+ },
+ {
+  "part": "E4MS080120J2",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 1200.0,
+  "i_rating": 100.0,
+  "i_lut": 100.0
+ },
+ {
+  "part": "E4MS080120K",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 1200.0,
+  "i_rating": 100.0,
+  "i_lut": 100.0
+ },
+ {
+  "part": "E4MS080120QT",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 1200.0,
+  "i_rating": 100.0,
+  "i_lut": 100.0
+ },
+ {
+  "part": "E4MS080120U2",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET",
+  "v_rating": 1200.0,
+  "i_rating": 100.0,
+  "i_lut": 100.0
+ },
+ {
+  "part": "ECB1R6M12YM4",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET module",
+  "v_rating": 1200.0,
+  "i_rating": 1400.0,
+  "i_lut": 1400.0
+ },
+ {
+  "part": "ECB2R1M12YM3",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET module",
+  "v_rating": 1200.0,
+  "i_rating": 1200.0,
+  "i_lut": 1200.0
+ },
+ {
+  "part": "ECB2R1M12YM4",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET module",
+  "v_rating": 1200.0,
+  "i_rating": 1100.0,
+  "i_lut": 1100.0
+ },
+ {
+  "part": "ECB2R8M12YM3",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET module",
+  "v_rating": 1200.0,
+  "i_rating": 900.0,
+  "i_lut": 900.0
+ },
+ {
+  "part": "ECB3R1M12YM4",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET module",
+  "v_rating": 1200.0,
+  "i_rating": 800.0,
+  "i_lut": 800.0
+ },
+ {
+  "part": "ECB4R3M12YM3",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET module",
+  "v_rating": 1200.0,
+  "i_rating": 700.0,
+  "i_lut": 700.0
+ },
+ {
+  "part": "EDB003M06TM3",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET module",
+  "v_rating": 650.0,
+  "i_rating": 650.0,
+  "i_lut": 650.0
+ },
+ {
+  "part": "EDB004M06TM3",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET module",
+  "v_rating": 650.0,
+  "i_rating": 480.0,
+  "i_lut": 480.0
+ },
+ {
+  "part": "EDB005M12TM4",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET module",
+  "v_rating": 1200.0,
+  "i_rating": 440.0,
+  "i_lut": 440.0
+ },
+ {
+  "part": "EDB007M06TM3",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET module",
+  "v_rating": 650.0,
+  "i_rating": 320.0,
+  "i_lut": 320.0
+ },
+ {
+  "part": "EDB007M12TM4",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET module",
+  "v_rating": 1200.0,
+  "i_rating": 400.0,
+  "i_lut": 400.0
+ },
+ {
+  "part": "EDB010M12TM4",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET module",
+  "v_rating": 1200.0,
+  "i_rating": 300.0,
+  "i_lut": 300.0
+ },
+ {
+  "part": "WAB300M12BM3",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET module",
+  "v_rating": 1200.0,
+  "i_rating": 600.0,
+  "i_lut": 600.0
+ },
+ {
+  "part": "WAB400M12BM3",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "SiC MOSFET module",
+  "v_rating": 1200.0,
+  "i_rating": 800.0,
+  "i_lut": 800.0
+ }
+]

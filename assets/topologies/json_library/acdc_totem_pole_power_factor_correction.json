@@ -1,0 +1,324 @@
+{
+  "components": [
+    {
+      "id": "VAC",
+      "type": "AC_V",
+      "x": -500,
+      "y": -520,
+      "rotation": 0,
+      "parameters": {
+        "amplitude": "12",
+        "frequency": "50"
+      }
+    },
+    {
+      "id": "SW_HF_TOP",
+      "type": "MOSFET",
+      "x": -300,
+      "y": -680,
+      "rotation": 0,
+      "parameters": {
+        "Ron": "10m",
+        "Roff": "1M"
+      }
+    },
+    {
+      "id": "SW_HF_BOT",
+      "type": "MOSFET",
+      "x": -300,
+      "y": -400,
+      "rotation": 0,
+      "parameters": {
+        "Ron": "10m",
+        "Roff": "1M"
+      }
+    },
+    {
+      "id": "D1",
+      "type": "D",
+      "x": -100,
+      "y": -680,
+      "rotation": 180,
+      "parameters": {
+        "Vd": "0.7",
+        "Ron": "1m",
+        "Roff": "1M"
+      }
+    },
+    {
+      "id": "D2",
+      "type": "D",
+      "x": -100,
+      "y": -400,
+      "rotation": 180,
+      "parameters": {
+        "Vd": "0.7",
+        "Ron": "1m",
+        "Roff": "1M"
+      }
+    },
+    {
+      "id": "Cout",
+      "type": "C",
+      "x": 60,
+      "y": -560,
+      "rotation": 0,
+      "parameters": {
+        "C": "100u",
+        "esr": "10m",
+        "vC0": "0"
+      }
+    },
+    {
+      "id": "R_LOAD",
+      "type": "R",
+      "x": 240,
+      "y": -560,
+      "rotation": 0,
+      "parameters": {
+        "value": "10",
+        "esr": "0"
+      }
+    },
+    {
+      "id": "L_PFC",
+      "type": "L",
+      "x": -400,
+      "y": -600,
+      "rotation": 90,
+      "parameters": {
+        "L": "10m",
+        "esr": "50m",
+        "iL0": "0"
+      }
+    }
+  ],
+  "wires": [
+    {
+      "id": "W1",
+      "from": {
+        "type": "pin",
+        "compId": "SW_HF_TOP",
+        "terminal": "D"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "D1",
+        "terminal": "B"
+      }
+    },
+    {
+      "id": "W2",
+      "from": {
+        "type": "pin",
+        "compId": "D2",
+        "terminal": "A"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "SW_HF_BOT",
+        "terminal": "S"
+      }
+    },
+    {
+      "id": "W3",
+      "from": {
+        "type": "pin",
+        "compId": "SW_HF_TOP",
+        "terminal": "S"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "SW_HF_BOT",
+        "terminal": "D"
+      }
+    },
+    {
+      "id": "W4",
+      "from": {
+        "type": "pin",
+        "compId": "D1",
+        "terminal": "A"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "D2",
+        "terminal": "B"
+      }
+    },
+    {
+      "id": "W5",
+      "from": {
+        "type": "pin",
+        "compId": "Cout",
+        "terminal": "A"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "D1",
+        "terminal": "B"
+      },
+      "manualPath": [
+        {
+          "x": 60,
+          "y": -600
+        },
+        {
+          "x": 60,
+          "y": -740
+        },
+        {
+          "x": -100,
+          "y": -740
+        },
+        {
+          "x": -100,
+          "y": -720
+        }
+      ]
+    },
+    {
+      "id": "W6",
+      "from": {
+        "type": "pin",
+        "compId": "R_LOAD",
+        "terminal": "A"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "Cout",
+        "terminal": "A"
+      },
+      "manualPath": [
+        {
+          "x": 240,
+          "y": -600
+        },
+        {
+          "x": 240,
+          "y": -740
+        },
+        {
+          "x": 60,
+          "y": -740
+        },
+        {
+          "x": 60,
+          "y": -600
+        }
+      ]
+    },
+    {
+      "id": "W7",
+      "from": {
+        "type": "pin",
+        "compId": "VAC",
+        "terminal": "A"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "L_PFC",
+        "terminal": "B"
+      }
+    },
+    {
+      "id": "W8",
+      "from": {
+        "type": "pin",
+        "compId": "L_PFC",
+        "terminal": "A"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "SW_HF_TOP",
+        "terminal": "S"
+      }
+    },
+    {
+      "id": "W9",
+      "from": {
+        "type": "pin",
+        "compId": "VAC",
+        "terminal": "B"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "D2",
+        "terminal": "B"
+      }
+    },
+    {
+      "id": "W10",
+      "from": {
+        "type": "pin",
+        "compId": "Cout",
+        "terminal": "B"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "D2",
+        "terminal": "A"
+      },
+      "manualPath": [
+        {
+          "x": 60,
+          "y": -520
+        },
+        {
+          "x": 60,
+          "y": -340
+        },
+        {
+          "x": -100,
+          "y": -340
+        },
+        {
+          "x": -100,
+          "y": -360
+        }
+      ]
+    },
+    {
+      "id": "W11",
+      "from": {
+        "type": "pin",
+        "compId": "R_LOAD",
+        "terminal": "B"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "Cout",
+        "terminal": "B"
+      },
+      "manualPath": [
+        {
+          "x": 240,
+          "y": -520
+        },
+        {
+          "x": 240,
+          "y": -340
+        },
+        {
+          "x": 60,
+          "y": -340
+        },
+        {
+          "x": 60,
+          "y": -520
+        }
+      ]
+    }
+  ],
+  "plotConfiguration": {
+    "plots": []
+  },
+  "simulationSettings": {
+    "stopTime": "0.05",
+    "stepSize": "1e-5",
+    "stepType": "fixed",
+    "solver": "euler"
+  },
+  "id": "acdc_totem_pole_power_factor_correction",
+  "name": "Totem Pole Power Factor Correction Rectifier"
+}

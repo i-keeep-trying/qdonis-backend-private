@@ -1,0 +1,12 @@
+## Topology-Specific Rules: LLC Resonant Converter (Half-Bridge)
+- **Turns Ratio**: The half-bridge applies only `Vin / 2` to the primary. You MUST use the formula `turns_ratio = 2 * (Vout / Vin)`.
+- **Resonant Frequency Lock**: Operate EXACTLY at the resonant frequency!
+  - `fsw = f_r`.
+  - Calculate Quality Factor `Q = Zo / Rac` (where `Zo = sqrt(L_r / C_r)`) to be between 0.3 and 0.5. For high power, this means large C_r (e.g. 3.3uF) and small L_r (e.g. 0.7uH).
+  - Explicitly satisfy `f_r = 1 / (2 * pi * sqrt(L_r * C_r))`.
+- **Duty Cycle & Dead Time**: DO NOT use duty cycle to regulate. Leave `duty_cycle = 0.45`.
+  - **CRITICAL DEAD-TIME**: You MUST emit `tdelay` for the second switch (PWM2): `tdelay = 0.5 / frequency`.
+- **Center-Tapped Transformer (`ct_transformer`)**:
+  - DO NOT emit `K1`, `K2`, or `K12`. Emit ONLY `k_coupling = 0.99999`. Do not use coupling to define L_r.
+  - Anti-phase secondaries are expressed ONLY via `phase_s1` / `phase_s2` (`same` or `opposite`), never by sign-flipping `k_coupling`.
+- **Diode Margin**: Center-tapped secondary `Bv >= 2.5 * Vout`.

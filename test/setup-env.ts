@@ -42,7 +42,14 @@ Object.assign(process.env, {
   // Fake credentials: API calls are stubbed in tests; the webhook secret is
   // real enough to sign and verify events locally.
   BEDROCK_API_KEY: 'e2e-bedrock-key-000000000000',
+  // Set so the real AWS keys in `.env` never load in tests.
+  AWS_ACCESS_KEY_ID: 'AKIAE2EFAKEKEY000000',
+  AWS_SECRET_ACCESS_KEY: 'e2e-fake-secret-0000000000000000',
+  AWS_REGION: 'us-east-1',
   BODY_LIMIT: '5mb',
+  // Storage is on; suites that touch files bind an in-memory ObjectStore.
+  S3_BUCKET: 'qdonis-e2e-bucket',
+  S3_KEY_PREFIX: 'e2e/',
   STRIPE_SECRET_KEY: 'sk_test_e2eFakeKey000000000000',
   STRIPE_WEBHOOK_SECRET: 'whsec_e2eWebhookSecret0000000000',
 });

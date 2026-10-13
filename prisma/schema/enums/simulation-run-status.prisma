@@ -1,0 +1,9 @@
+/// Lifecycle of a queued ngspice run.
+enum SimulationRunStatus {
+  queued
+  running
+  succeeded
+  failed
+
+  @@map("simulation_run_status")
+}

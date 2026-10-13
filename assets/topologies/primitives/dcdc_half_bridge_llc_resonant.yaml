@@ -1,0 +1,1111 @@
+id: dcdc_half_bridge_llc_resonant
+name: Half Bridge LLC Resonant DC-DC Converter
+description: Isolated resonant DC-DC converter with an L-L-C tank for soft switching.
+  Converts 24V input to 12V isolated output (0.6:1 step-down transformer) using frequency
+  modulation for voltage regulation. All-NMOS half-bridge implementation.
+components:
+  - ref: VIN
+    type: node
+    role: voltage_source
+    params:
+      node_type: voltage_source
+      voltage: 24
+      source: dc
+      series_resistance: 0.01
+  - ref: SW1
+    type: transistor
+    role: half-bridge_upper
+    params:
+      family: mosfet
+      type: nmos
+      mode: enhancement
+      voltage_rating: 100
+      current_rating: 30
+      Vto: 2.5
+      Kn: 20.0
+      Lambda: 0.02
+      Cgs: 1200e-12
+      Cgd: 400e-12
+      Cdb: 150e-12
+      Tpd: 5e-9
+    transient:
+      tstep: 0.1u
+      tstop: 0.01
+    layout:
+      schX: 0.0
+      schY: 2.0
+      rotation: 90deg
+  - ref: SW2
+    type: transistor
+    role: half-bridge_lower
+    params:
+      family: mosfet
+      type: nmos
+      mode: enhancement
+      voltage_rating: 100
+      current_rating: 30
+      Vto: 2.5
+      Kn: 20.0
+      Lambda: 0.02
+      Cgs: 1200e-12
+      Cgd: 400e-12
+      Cdb: 150e-12
+      Tpd: 5e-9
+    layout:
+      schX: 0.0
+      schY: -1.5
+      rotation: 270deg
+  - ref: Cr
+    type: capacitor
+    role: resonant_cap
+    params:
+      capacitance: 220e-9
+      polarized: false
+      voltage_rating: 100
+      tolerance: 0.05
+      esr: 0.1
+      esl: 2e-9
+      leakage_current: 1e-12
+    layout:
+      schX: 2.0
+      schY: -2.0
+      orientation: vertical
+  - ref: Lr
+    type: inductor
+    role: resonant_inductor
+    params:
+      inductance: 10e-6
+      series_resistance: 0.05
+      saturation_current: 15.0
+      core_loss_resistance: 1e6
+      parasitic_capacitance: 30e-12
+    layout:
+      schX: 1.0
+      schY: 1.0
+      orientation: horizontal
+  - ref: T1
+    type: ct_transformer
+    role: resonant_transformer
+    layout:
+      schX: 2.0
+      schY: 0.0
+      configuration: left-to-right
+    params:
+      name: T1
+      Lm_primary: 100e-6
+      turns_ratio: 1.2
+      k_coupling: 0.98
+      phase_s1: same
+      phase_s2: opposite
+      Rp: 0.1
+      Rs1: 0.05
+      Rs2: 0.05
+      core_loss_resistance: 1e6
+      center_tap_resistance: 100e6
+      center_tap_capacitance: 0
+      interwinding_capacitance_s1: 2e-11
+      interwinding_capacitance_s2: 2e-11
+    internal:
+      - ref: RSN_P
+        type: resistor
+        role: primary_snubber
+        params:
+          resistance: 50
+        connections:
+          pos:
+            - SW2
+            - drain
+          neg:
+            - CSN_P
+            - pos
+      - ref: CSN_P
+        type: capacitor
+        role: primary_snubber
+        params:
+          capacitance: 1e-9
+        connections:
+          pos:
+            - RSN_P
+            - neg
+          neg:
+            - VIN
+            - '-'
+      - ref: RSN_S1
+        type: resistor
+        role: snubber_d1
+        params:
+          resistance: 50
+        connections:
+          pos:
+            - D1
+            - anode
+          neg:
+            - CSN_S1
+            - pos
+      - ref: CSN_S1
+        type: capacitor
+        role: snubber_d1
+        params:
+          capacitance: 1e-9
+        connections:
+          pos:
+            - RSN_S1
+            - neg
+          neg:
+            - D1
+            - cathode
+      - ref: RSN_S2
+        type: resistor
+        role: snubber_d2
+        params:
+          resistance: 50
+        connections:
+          pos:
+            - D2
+            - anode
+          neg:
+            - CSN_S2
+            - pos
+      - ref: CSN_S2
+        type: capacitor
+        role: snubber_d2
+        params:
+          capacitance: 1e-9
+        connections:
+          pos:
+            - RSN_S2
+            - neg
+          neg:
+            - D2
+            - cathode
+      - ref: R_ISO
+        type: resistor
+        role: secondary_ground_anchor
+        params:
+          resistance: 100e6
+        connections:
+          pos:
+            - T1
+            - CT
+          neg:
+            - VIN
+            - '-'
+  - ref: D1
+    type: diode
+    role: rectifier_diode_1
+    params:
+      name: D1
+      reverse_voltage: 50
+      current_rating: 5
+      Is: 1e-12
+      n: 1.1
+      Rs: 0.3
+      Cjo: 30e-12
+      Tt: 0
+      Bv: 50
+      Ibv: 1e-6
+    layout:
+      schX: 3.0
+      schY: 1.0
+      orientation: horizontal
+  - ref: D2
+    type: diode
+    role: rectifier_diode_2
+    params:
+      name: D2
+      reverse_voltage: 50
+      current_rating: 5
+      Is: 1e-12
+      n: 1.1
+      Rs: 0.3
+      Cjo: 30e-12
+      Tt: 0
+      Bv: 50
+      Ibv: 1e-6
+    layout:
+      schX: 3.0
+      schY: -1.0
+      orientation: horizontal
+  - ref: Cout
+    type: capacitor
+    role: output_filter
+    params:
+      capacitance: 470e-6
+      polarized: true
+      voltage_rating: 50
+      tolerance: 0.2
+      esr: 0.02
+      esl: 8e-9
+      leakage_current: 10e-6
+    layout:
+      schX: 4.5
+      schY: 0.0
+      orientation: vertical
+  - ref: Rout
+    type: resistor
+    role: load
+    params:
+      resistance: 10
+      tolerance: 0.05
+      temp_coefficient: 100e-6
+      parasitic_inductance: 10e-9
+    layout:
+      schX: 6.0
+      schY: 0.0
+      orientation: vertical
+  - ref: PWM1
+    type: node
+    role: pwm_control
+    params:
+      node_type: pwm_control
+      frequency: 100e3
+      duty_cycle: 0.45
+      vhigh: 12.0
+      vlow: 0.0
+      trise: 1e-7
+      tfall: 1e-7
+      tdelay: 0
+      drive_resistance: 100
+  - ref: PWM2
+    type: node
+    role: pwm_control
+    params:
+      node_type: pwm_control
+      frequency: 100e3
+      duty_cycle: 0.45
+      vhigh: 12.0
+      vlow: 0.0
+      trise: 1e-7
+      tfall: 1e-7
+      tdelay: 5.0e-06
+      drive_resistance: 100
+nets:
+  - - - VIN
+      - +
+    - - SW1
+      - drain
+  - - - VIN
+      - '-'
+    - - SW2
+      - source
+    - - Cr
+      - neg
+    - - PWM2
+      - neg
+  - - - SW1
+      - source
+    - - SW2
+      - drain
+    - - Lr
+      - pin1
+    - - PWM1
+      - neg
+  - - - PWM1
+      - pos
+    - - SW1
+      - gate
+  - - - PWM2
+      - pos
+    - - SW2
+      - gate
+  - - - Lr
+      - pin2
+    - - T1
+      - P1
+  - - - Cr
+      - pos
+    - - T1
+      - P2
+  - - - T1
+      - S1
+    - - D1
+      - anode
+  - - - T1
+      - S2
+    - - D2
+      - anode
+  - - - T1
+      - CT
+    - - Cout
+      - neg
+    - - Rout
+      - neg
+  - - - D1
+      - cathode
+    - - D2
+      - cathode
+    - - Cout
+      - pos
+    - - Rout
+      - pos
+analysis:
+  transient:
+    spice_settings:
+      reltol: 0.01
+      abstol: 1.0e-10
+      vntol: 1.0e-06
+      chgtol: 1.0e-13
+      gmin: 1.0e-12
+      method: gear
+      maxord: 2
+      trtol: 2.0
+      use_ic: true
+    requirements:
+      - rid: tr_startup
+        requirement: Startup transient from 0V to regulated 12V output. LLC resonant
+          converter is NON-INVERTING (output positive terminal at [Rout, pos] and
+          [Cout, pos]). Measure VOUT at [Rout, pos] or [Cout, pos]. Verify soft-start
+          behavior with minimal inrush current and overshoot.
+        criteria:
+          target_vout: 12.0
+          overshoot_pct: 10.0
+          settle_time_ms: 10.0
+          vin: 24.0
+        environment:
+          - ref: time_domain
+            t_start: 0.012
+            t_stop: 0.015
+            t_step: 1.0e-07
+            description: 15ms startup transient with 100ns timestep for resonant
+              tank resolution
+        measurement:
+          - ref: VIN
+            plot:
+              x_axis: time
+              title: Input Voltage
+            quantity: voltage
+            nets:
+              - - VIN
+                - +
+              - - VIN
+                - '-'
+          - ref: VOUT
+            plot:
+              x_axis: time
+              title: Output Voltage Startup Transient
+            quantity: voltage
+            nets:
+              - - Rout
+                - pos
+              - - Cout
+                - neg
+            data:
+              - name: vout_final
+                spice_command: avg
+                description: Final steady-state output voltage
+              - name: vout_peak
+                spice_command: max
+                description: Peak output voltage during startup
+            description: Output voltage measurement for startup transient
+          - ref: IIN
+            plot:
+              x_axis: time
+              title: Input Current During Startup
+            component: VIN
+            quantity: current
+            data:
+              - name: iin_peak
+                spice_command: max
+                description: Peak inrush current during startup
+            description: Input current for inrush verification
+          - ref: VOUT_SETTLE
+            plot: false
+            quantity: voltage
+            nets:
+              - - Rout
+                - pos
+              - - Cout
+                - neg
+            data:
+              - name: t_settle
+                spice_command: TRIG AT=0.0001 TARG [VOUT] VAL={{criteria.target_vout}*0.95}
+                  CROSS=LAST
+                description: Time when output settles to 95% of target (last crossing)
+            description: Settling time measurement
+        outputs:
+          - var: vout_final_v
+            formula: '[vout_final]'
+            description: Final output voltage in volts
+          - var: overshoot_pct
+            formula: 100 * abs([vout_peak] - {criteria.target_vout}) / {criteria.target_vout}
+            description: Overshoot percentage relative to target
+          - var: settle_time_ms
+            formula: '[t_settle] * 1000'
+            description: Settling time in milliseconds
+          - var: iin_peak_a
+            formula: '[iin_peak]'
+            description: Peak inrush current in amperes
+      - rid: tr_steady_state
+        requirement: Steady-state operation at nominal 24V input and full load. Verify
+          output voltage regulation at 12V with acceptable ripple. Measure resonant
+          tank currents (Lr) and transformer primary voltage for ZVS verification.
+        criteria:
+          target_vout: 12.0
+          vout_ripple_max_mv: 120.0
+          vin: 24.0
+          efficiency_min_pct: 90.0
+        environment:
+          - ref: time_domain
+            t_start: 0.012
+            t_stop: 0.015
+            t_step: 1.0e-07
+            description: 15ms steady-state with 100ns resolution for resonant frequency
+              capture
+        measurement:
+          - ref: VIN
+            plot: false
+            quantity: voltage
+            nets:
+              - - VIN
+                - +
+              - - VIN
+                - '-'
+          - ref: VOUT
+            plot: false
+            quantity: voltage
+            nets:
+              - - Rout
+                - pos
+              - - Cout
+                - neg
+            data:
+              - name: vout_avg
+                spice_command: avg
+                description: Average output voltage
+              - name: vout_ripple_pp
+                spice_command: pp
+                description: Peak-to-peak output voltage ripple
+            description: Output voltage for steady-state regulation
+          - ref: ILR
+            plot:
+              x_axis: time
+              title: Resonant Inductor Current
+            component: Lr
+            quantity: current
+            data:
+              - name: ilr_rms
+                spice_command: rms
+                description: RMS resonant inductor current
+              - name: ilr_peak
+                spice_command: max
+                description: Peak resonant inductor current
+            description: Resonant tank inductor current
+          - ref: VCR
+            plot:
+              x_axis: time
+              title: Resonant Capacitor Voltage
+            quantity: voltage
+            nets:
+              - - Cr
+                - pos
+              - - Cr
+                - neg
+            data:
+              - name: vcr_peak
+                spice_command: max
+                description: Peak resonant capacitor voltage
+            description: Resonant capacitor voltage
+          - ref: VT1_PRI
+            plot:
+              x_axis: time
+              title: Transformer Primary Voltage
+            quantity: voltage
+            nets:
+              - - T1
+                - P1
+              - - T1
+                - P2
+            data:
+              - name: vt1_pri_peak
+                spice_command: max
+                description: Peak transformer primary voltage
+            description: Transformer primary voltage for ZVS verification
+          - ref: IIN
+            plot: false
+            component: VIN
+            quantity: current
+            data:
+              - name: iin_avg
+                spice_command: avg
+                description: Average input current
+            description: Input current for efficiency calculation
+          - ref: IOUT
+            plot: false
+            component: Rout
+            quantity: current
+            data:
+              - name: iout_avg
+                spice_command: avg
+                description: Average output current
+            description: Output current for efficiency calculation
+        outputs:
+          - var: vout_avg_v
+            formula: '[vout_avg]'
+            description: Average output voltage in volts
+          - var: vout_ripple_mv
+            formula: '[vout_ripple_pp] * 1000'
+            description: Output voltage ripple in millivolts
+          - var: efficiency_pct
+            formula: 100 * abs([vout_avg] * [iout_avg]) / abs({criteria.vin} * [iin_avg])
+            description: Converter efficiency percentage
+          - var: ilr_rms_a
+            formula: '[ilr_rms]'
+            description: RMS resonant inductor current in amperes
+          - var: ilr_peak_a
+            formula: '[ilr_peak]'
+            description: Peak resonant inductor current in amperes
+      - rid: tr_line_regulation
+        requirement: "Line regulation test: input voltage step from 20V to 28V (\xC3\
+          \u201A\xC2\xB120% variation). Verify output voltage remains regulated at\
+          \ 12V with minimal transient deviation. LLC uses frequency modulation for\
+          \ regulation."
+        criteria:
+          target_vout: 12.0
+          vin_min: 20.0
+          vin_max: 28.0
+          vout_deviation_max_mv: 300.0
+          recovery_time_ms: 2.0
+        environment:
+          - ref: time_domain
+            t_start: 0.01125
+            t_stop: 0.015
+            t_step: 1.0e-07
+            description: 15ms transient for line step response with resonant settling
+        measurement:
+          - ref: VIN
+            plot: false
+            quantity: voltage
+            nets:
+              - - VIN
+                - +
+              - - VIN
+                - '-'
+          - ref: VOUT
+            plot: false
+            quantity: voltage
+            nets:
+              - - Rout
+                - pos
+              - - Cout
+                - neg
+            data:
+              - name: vout_avg
+                spice_command: avg
+                description: Average output voltage
+              - name: vout_max
+                spice_command: max
+                description: Maximum output voltage during transient
+              - name: vout_min
+                spice_command: min
+                description: Minimum output voltage during transient
+            description: Output voltage for line regulation
+          - ref: VOUT_RECOVERY
+            plot: false
+            quantity: voltage
+            nets:
+              - - Rout
+                - pos
+              - - Cout
+                - neg
+            data:
+              - name: t_recovery
+                spice_command: TRIG AT=0.0001 TARG [VOUT] VAL={{criteria.target_vout}*0.98}
+                  CROSS=LAST
+                description: Recovery time to 98% of target (last crossing)
+            description: Recovery time measurement
+        outputs:
+          - var: vout_avg_v
+            formula: '[vout_avg]'
+            description: Average output voltage in volts
+          - var: vout_deviation_max_mv
+            formula: max(abs([vout_max] - {criteria.target_vout}), abs([vout_min]
+              - {criteria.target_vout})) * 1000
+            description: Maximum output voltage deviation in millivolts
+          - var: recovery_time_ms
+            formula: '[t_recovery] * 1000'
+            description: Recovery time in milliseconds
+      - rid: tr_load_transient
+        requirement: 'Load transient response: step load change from 50% to 100% (light
+          to heavy load). Verify output voltage recovery and transient overshoot/undershoot
+          within acceptable limits. Measure resonant tank current change.'
+        criteria:
+          target_vout: 12.0
+          load_step_pct: 50.0
+          vout_deviation_max_mv: 400.0
+          recovery_time_ms: 3.0
+          vin: 24.0
+        environment:
+          - ref: time_domain
+            t_start: 0.01125
+            t_stop: 0.015
+            t_step: 1.0e-07
+            description: 15ms transient for load step with resonant tank settling
+        measurement:
+          - ref: VIN
+            plot: false
+            quantity: voltage
+            nets:
+              - - VIN
+                - +
+              - - VIN
+                - '-'
+          - ref: VOUT
+            plot: false
+            quantity: voltage
+            nets:
+              - - Rout
+                - pos
+              - - Cout
+                - neg
+            data:
+              - name: vout_avg
+                spice_command: avg
+                description: Average output voltage
+              - name: vout_max
+                spice_command: max
+                description: Maximum output voltage during transient
+              - name: vout_min
+                spice_command: min
+                description: Minimum output voltage during transient
+            description: Output voltage for load transient
+          - ref: ILR
+            plot: false
+            component: Lr
+            quantity: current
+            data:
+              - name: ilr_max
+                spice_command: max
+                description: Maximum resonant current during load step
+              - name: ilr_min
+                spice_command: min
+                description: Minimum resonant current during load step
+            description: Resonant tank current change
+          - ref: VOUT_RECOVERY
+            plot: false
+            quantity: voltage
+            nets:
+              - - Rout
+                - pos
+              - - Cout
+                - neg
+            data:
+              - name: t_recovery
+                spice_command: TRIG AT=0.0001 TARG [VOUT] VAL={{criteria.target_vout}*0.97}
+                  CROSS=LAST
+                description: Recovery time to 97% of target (last crossing)
+            description: Recovery time measurement
+        outputs:
+          - var: vout_avg_v
+            formula: '[vout_avg]'
+            description: Average output voltage in volts
+          - var: vout_deviation_max_mv
+            formula: max(abs([vout_max] - {criteria.target_vout}), abs([vout_min]
+              - {criteria.target_vout})) * 1000
+            description: Maximum output voltage deviation in millivolts
+          - var: recovery_time_ms
+            formula: '[t_recovery] * 1000'
+            description: Recovery time in milliseconds
+          - var: ilr_change_a
+            formula: abs([ilr_max] - [ilr_min])
+            description: Resonant current change in amperes
+      - rid: tr_efficiency
+        requirement: Efficiency measurement at nominal operating point (24V input,
+          12V output, full load). Calculate input power vs output power. Verify losses
+          in resonant tank, transformer, and rectifier diodes.
+        criteria:
+          target_vout: 12.0
+          vin: 24.0
+          efficiency_min_pct: 92.0
+          power_loss_max_w: 5.0
+        environment:
+          - ref: time_domain
+            t_start: 0.012
+            t_stop: 0.015
+            t_step: 1.0e-07
+            description: 15ms steady-state for power averaging over multiple resonant
+              cycles
+        measurement:
+          - ref: VIN_MEAS
+            plot:
+              x_axis: time
+              title: Input Voltage (tr_efficiency)
+            quantity: voltage
+            nets:
+              - - VIN
+                - +
+              - - VIN
+                - '-'
+            data:
+              - name: vin_avg
+                spice_command: avg
+                description: Average input voltage
+            description: Input voltage measurement
+          - ref: IIN
+            plot: false
+            component: VIN
+            quantity: current
+            data:
+              - name: iin_avg
+                spice_command: avg
+                description: Average input current
+              - name: iin_rms
+                spice_command: rms
+                description: RMS input current
+            description: Input current for power calculation
+          - ref: VOUT
+            plot: false
+            quantity: voltage
+            nets:
+              - - Rout
+                - pos
+              - - Cout
+                - neg
+            data:
+              - name: vout_avg
+                spice_command: avg
+                description: Average output voltage
+            description: Output voltage for power calculation
+          - ref: IOUT
+            plot: false
+            component: Rout
+            quantity: current
+            data:
+              - name: iout_avg
+                spice_command: avg
+                description: Average output current
+            description: Output current for power calculation
+          - ref: ILR
+            plot: false
+            component: Lr
+            quantity: current
+            data:
+              - name: ilr_rms
+                spice_command: rms
+                description: RMS resonant inductor current for loss calculation
+            description: Resonant inductor current for loss analysis
+          - ref: ID1
+            plot: false
+            component: D1
+            quantity: current
+            data:
+              - name: id1_avg
+                spice_command: avg
+                description: Average D1 current for loss calculation
+            description: Rectifier diode D1 current
+          - ref: ID2
+            plot: false
+            component: D2
+            quantity: current
+            data:
+              - name: id2_avg
+                spice_command: avg
+                description: Average D2 current for loss calculation
+            description: Rectifier diode D2 current
+        outputs:
+          - var: pin_w
+            formula: abs([vin_avg] * [iin_avg])
+            description: Input power in watts
+          - var: pout_w
+            formula: abs([vout_avg] * [iout_avg])
+            description: Output power in watts
+          - var: efficiency_pct
+            formula: 100 * abs([vout_avg] * [iout_avg]) / abs([vin_avg] * [iin_avg])
+            description: Converter efficiency percentage
+          - var: power_loss_w
+            formula: abs([vin_avg] * [iin_avg]) - abs([vout_avg] * [iout_avg])
+            description: Total power loss in watts
+      - rid: tr_zvs_verification
+        requirement: Zero-Voltage Switching (ZVS) verification for primary-side MOSFETs
+          (SW1, SW2). Measure drain-source voltage and gate drive timing to confirm
+          voltage crosses zero before gate turn-on. Verify resonant tank current leads
+          voltage for inductive operation.
+        criteria:
+          vin: 24.0
+          target_vout: 12.0
+          zvs_margin_min_ns: 50.0
+          resonant_current_lead_min_deg: 10.0
+        environment:
+          - ref: time_domain
+            t_start: 0.012
+            t_stop: 0.015
+            t_step: 5.0e-08
+            description: 15ms with 50ns timestep for precise ZVS transition capture
+        measurement:
+          - ref: VIN
+            plot: false
+            quantity: voltage
+            nets:
+              - - VIN
+                - +
+              - - VIN
+                - '-'
+          - ref: VSW1_DS
+            plot:
+              x_axis: time
+              title: SW1 Drain-Source Voltage
+            quantity: voltage
+            nets:
+              - - SW1
+                - drain
+              - - SW1
+                - source
+            data:
+              - name: vsw1_min
+                spice_command: min
+                description: Minimum SW1 drain-source voltage (ZVS verification)
+            description: SW1 drain-source voltage for ZVS verification
+          - ref: VSW2_DS
+            plot:
+              x_axis: time
+              title: SW2 Drain-Source Voltage
+            quantity: voltage
+            nets:
+              - - SW2
+                - drain
+              - - SW2
+                - source
+            data:
+              - name: vsw2_min
+                spice_command: min
+                description: Minimum SW2 drain-source voltage (ZVS verification)
+            description: SW2 drain-source voltage for ZVS verification
+          - ref: ILR
+            plot: false
+            component: Lr
+            quantity: current
+            data:
+              - name: ilr_peak
+                spice_command: max
+                description: Peak resonant current for ZVS margin
+              - name: ilr_avg
+                spice_command: avg
+                description: Average resonant current
+            description: Resonant tank current for inductive operation verification
+          - ref: VCR
+            plot: false
+            quantity: voltage
+            nets:
+              - - Cr
+                - pos
+              - - Cr
+                - neg
+            data:
+              - name: vcr_peak
+                spice_command: max
+                description: Peak resonant capacitor voltage
+            description: Resonant capacitor voltage
+          - ref: VOUT
+            plot: false
+            quantity: voltage
+            nets:
+              - - R_LOAD
+                - pos
+              - - R_LOAD
+                - neg
+        outputs:
+          - var: vsw1_min_v
+            formula: abs([vsw1_min])
+            description: Minimum SW1 voltage (ZVS indicator)
+          - var: vsw2_min_v
+            formula: abs([vsw2_min])
+            description: Minimum SW2 voltage (ZVS indicator)
+          - var: zvs_voltage_min_v
+            formula: max(abs([vsw1_min]), abs([vsw2_min]))
+            description: Minimum switch voltage across both switches
+          - var: ilr_peak_a
+            formula: '[ilr_peak]'
+            description: Peak resonant current in amperes
+      - rid: tr_component_stress
+        requirement: 'Component stress analysis: measure peak voltages and currents
+          on resonant components (Lr, Cr), transformer primary/secondary, and rectifier
+          diodes (D1, D2). Verify components operate within safe operating area.'
+        criteria:
+          vin: 24.0
+          target_vout: 12.0
+          lr_current_peak_max_a: 10.0
+          cr_voltage_peak_max_v: 50.0
+          diode_voltage_peak_max_v: 30.0
+          transformer_primary_voltage_peak_max_v: 50.0
+        environment:
+          - ref: time_domain
+            t_start: 0.012
+            t_stop: 0.015
+            t_step: 1.0e-07
+            description: 15ms for peak stress measurement over resonant cycles
+        measurement:
+          - ref: VIN
+            plot: false
+            quantity: voltage
+            nets:
+              - - VIN
+                - +
+              - - VIN
+                - '-'
+          - ref: ILR
+            plot: false
+            component: Lr
+            quantity: current
+            data:
+              - name: ilr_peak
+                spice_command: max
+                description: Peak resonant inductor current
+              - name: ilr_rms
+                spice_command: rms
+                description: RMS resonant inductor current
+            description: Resonant inductor current stress
+          - ref: VCR
+            plot: false
+            quantity: voltage
+            nets:
+              - - Cr
+                - pos
+              - - Cr
+                - neg
+            data:
+              - name: vcr_peak
+                spice_command: max
+                description: Peak resonant capacitor voltage
+              - name: vcr_min
+                spice_command: min
+                description: Minimum resonant capacitor voltage
+            description: Resonant capacitor voltage stress
+          - ref: VT1_PRI
+            plot: false
+            quantity: voltage
+            nets:
+              - - T1
+                - P1
+              - - T1
+                - P2
+            data:
+              - name: vt1_pri_peak
+                spice_command: max
+                description: Peak transformer primary voltage
+              - name: vt1_pri_min
+                spice_command: min
+                description: Minimum transformer primary voltage
+            description: Transformer primary voltage stress
+          - ref: VD1
+            plot:
+              x_axis: time
+              title: Diode D1 Voltage Stress
+            quantity: voltage
+            nets:
+              - - D1
+                - cathode
+              - - D1
+                - anode
+            data:
+              - name: vd1_peak
+                spice_command: max
+                description: Peak reverse voltage across D1
+            description: Rectifier diode D1 voltage stress
+          - ref: VD2
+            plot:
+              x_axis: time
+              title: Diode D2 Voltage Stress
+            quantity: voltage
+            nets:
+              - - D2
+                - cathode
+              - - D2
+                - anode
+            data:
+              - name: vd2_peak
+                spice_command: max
+                description: Peak reverse voltage across D2
+            description: Rectifier diode D2 voltage stress
+          - ref: ID1
+            plot: false
+            component: D1
+            quantity: current
+            data:
+              - name: id1_peak
+                spice_command: max
+                description: Peak D1 current
+            description: Rectifier diode D1 current stress
+          - ref: ID2
+            plot: false
+            component: D2
+            quantity: current
+            data:
+              - name: id2_peak
+                spice_command: max
+                description: Peak D2 current
+            description: Rectifier diode D2 current stress
+          - ref: VSW1_DS
+            plot: false
+            quantity: voltage
+            nets:
+              - - SW1
+                - drain
+              - - SW1
+                - source
+            data:
+              - name: vsw1_peak
+                spice_command: max
+                description: Peak SW1 drain-source voltage
+            description: SW1 voltage stress
+          - ref: VSW2_DS
+            plot: false
+            quantity: voltage
+            nets:
+              - - SW2
+                - drain
+              - - SW2
+                - source
+            data:
+              - name: vsw2_peak
+                spice_command: max
+                description: Peak SW2 drain-source voltage
+            description: SW2 voltage stress
+          - ref: VOUT
+            plot: false
+            quantity: voltage
+            nets:
+              - - R_LOAD
+                - pos
+              - - R_LOAD
+                - neg
+        outputs:
+          - var: ilr_peak_a
+            formula: '[ilr_peak]'
+            description: Peak resonant inductor current in amperes
+          - var: ilr_rms_a
+            formula: '[ilr_rms]'
+            description: RMS resonant inductor current in amperes
+          - var: vcr_peak_v
+            formula: max(abs([vcr_peak]), abs([vcr_min]))
+            description: Peak resonant capacitor voltage in volts
+          - var: vt1_pri_peak_v
+            formula: max(abs([vt1_pri_peak]), abs([vt1_pri_min]))
+            description: Peak transformer primary voltage in volts
+          - var: vd1_peak_v
+            formula: '[vd1_peak]'
+            description: Peak D1 reverse voltage in volts
+          - var: vd2_peak_v
+            formula: '[vd2_peak]'
+            description: Peak D2 reverse voltage in volts
+          - var: diode_voltage_peak_max_v
+            formula: max([vd1_peak], [vd2_peak])
+            description: Maximum diode reverse voltage across both diodes
+          - var: id1_peak_a
+            formula: '[id1_peak]'
+            description: Peak D1 current in amperes
+          - var: id2_peak_a
+            formula: '[id2_peak]'
+            description: Peak D2 current in amperes
+          - var: vsw1_peak_v
+            formula: '[vsw1_peak]'
+            description: Peak SW1 voltage in volts
+          - var: vsw2_peak_v
+            formula: '[vsw2_peak]'
+            description: Peak SW2 voltage in volts
+    metrics:
+      objectives: []
+      constraints: []
+metadata:
+  stage: []
+  topology: ''
+  control: ''
+  tags: []

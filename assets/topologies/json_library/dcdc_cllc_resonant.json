@@ -1,0 +1,665 @@
+{
+  "components": [
+    {
+      "id": "VIN",
+      "type": "V",
+      "x": -580,
+      "y": -300,
+      "rotation": 0,
+      "parameters": {
+        "value": "24"
+      }
+    },
+    {
+      "id": "CIN",
+      "type": "C",
+      "x": -460,
+      "y": -300,
+      "rotation": 0,
+      "parameters": {
+        "C": "100u",
+        "esr": "10m",
+        "vC0": "0"
+      }
+    },
+    {
+      "id": "SW1",
+      "type": "MOSFET",
+      "x": -360,
+      "y": -480,
+      "rotation": 0,
+      "parameters": {
+        "Ron": "10m",
+        "Roff": "1M"
+      }
+    },
+    {
+      "id": "SW2",
+      "type": "MOSFET",
+      "x": -360,
+      "y": -120,
+      "rotation": 0,
+      "parameters": {
+        "Ron": "10m",
+        "Roff": "1M"
+      }
+    },
+    {
+      "id": "SW3",
+      "type": "MOSFET",
+      "x": -240,
+      "y": -480,
+      "rotation": 0,
+      "parameters": {
+        "Ron": "10m",
+        "Roff": "1M"
+      }
+    },
+    {
+      "id": "SW4",
+      "type": "MOSFET",
+      "x": -240,
+      "y": -120,
+      "rotation": 0,
+      "parameters": {
+        "Ron": "10m",
+        "Roff": "1M"
+      }
+    },
+    {
+      "id": "T1",
+      "type": "XFMR",
+      "x": -60,
+      "y": -280,
+      "rotation": 0,
+      "parameters": {
+        "N": "1",
+        "Lp": "10m",
+        "Rw": "10m"
+      }
+    },
+    {
+      "id": "Lr",
+      "type": "L",
+      "x": -140,
+      "y": -360,
+      "rotation": 90,
+      "parameters": {
+        "L": "10m",
+        "esr": "50m",
+        "iL0": "0"
+      }
+    },
+    {
+      "id": "SW5",
+      "type": "MOSFET",
+      "x": 140,
+      "y": -420,
+      "rotation": 0,
+      "parameters": {
+        "Ron": "10m",
+        "Roff": "1M"
+      }
+    },
+    {
+      "id": "SW6",
+      "type": "MOSFET",
+      "x": 140,
+      "y": -140,
+      "rotation": 0,
+      "parameters": {
+        "Ron": "10m",
+        "Roff": "1M"
+      }
+    },
+    {
+      "id": "SW7",
+      "type": "MOSFET",
+      "x": 240,
+      "y": -420,
+      "rotation": 0,
+      "parameters": {
+        "Ron": "10m",
+        "Roff": "1M"
+      }
+    },
+    {
+      "id": "SW8",
+      "type": "MOSFET",
+      "x": 240,
+      "y": -140,
+      "rotation": 0,
+      "parameters": {
+        "Ron": "10m",
+        "Roff": "1M"
+      }
+    },
+    {
+      "id": "Cout",
+      "type": "C",
+      "x": 320,
+      "y": -300,
+      "rotation": 0,
+      "parameters": {
+        "C": "100u",
+        "esr": "10m",
+        "vC0": "0"
+      }
+    },
+    {
+      "id": "Lm",
+      "type": "L",
+      "x": -120,
+      "y": -280,
+      "rotation": 0,
+      "parameters": {
+        "L": "10m",
+        "esr": "50m",
+        "iL0": "0"
+      }
+    },
+    {
+      "id": "Cr_P",
+      "type": "C",
+      "x": -180,
+      "y": -200,
+      "rotation": 90,
+      "parameters": {
+        "C": "100u",
+        "esr": "10m",
+        "vC0": "0"
+      }
+    },
+    {
+      "id": "Ls",
+      "type": "L",
+      "x": 40,
+      "y": -340,
+      "rotation": 90,
+      "parameters": {
+        "L": "10m",
+        "esr": "50m",
+        "iL0": "0"
+      }
+    },
+    {
+      "id": "Cr_S",
+      "type": "C",
+      "x": 40,
+      "y": -220,
+      "rotation": 90,
+      "parameters": {
+        "C": "100u",
+        "esr": "10m",
+        "vC0": "0"
+      }
+    },
+    {
+      "id": "V2",
+      "type": "V",
+      "x": 460,
+      "y": -300,
+      "rotation": 0,
+      "mirrorX": false,
+      "mirrorY": false,
+      "parameters": {
+        "value": "24"
+      }
+    }
+  ],
+  "wires": [
+    {
+      "id": "W3",
+      "from": {
+        "type": "pin",
+        "compId": "SW3",
+        "terminal": "D"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "SW1",
+        "terminal": "D"
+      }
+    },
+    {
+      "id": "W4",
+      "from": {
+        "type": "pin",
+        "compId": "SW4",
+        "terminal": "S"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "SW2",
+        "terminal": "S"
+      }
+    },
+    {
+      "id": "W7",
+      "from": {
+        "type": "pin",
+        "compId": "SW1",
+        "terminal": "S"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "SW2",
+        "terminal": "D"
+      }
+    },
+    {
+      "id": "W8",
+      "from": {
+        "type": "pin",
+        "compId": "Lr",
+        "terminal": "B"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "SW2",
+        "terminal": "D"
+      }
+    },
+    {
+      "id": "W9",
+      "from": {
+        "type": "pin",
+        "compId": "SW3",
+        "terminal": "S"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "SW4",
+        "terminal": "D"
+      }
+    },
+    {
+      "id": "W10",
+      "from": {
+        "type": "pin",
+        "compId": "Lr",
+        "terminal": "A"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "T1",
+        "terminal": "P1"
+      }
+    },
+    {
+      "id": "W12",
+      "from": {
+        "type": "pin",
+        "compId": "SW7",
+        "terminal": "D"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "SW5",
+        "terminal": "D"
+      }
+    },
+    {
+      "id": "W13",
+      "from": {
+        "type": "pin",
+        "compId": "SW8",
+        "terminal": "S"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "SW6",
+        "terminal": "S"
+      }
+    },
+    {
+      "id": "W14",
+      "from": {
+        "type": "pin",
+        "compId": "SW5",
+        "terminal": "S"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "SW6",
+        "terminal": "D"
+      }
+    },
+    {
+      "id": "W15",
+      "from": {
+        "type": "pin",
+        "compId": "SW7",
+        "terminal": "S"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "SW8",
+        "terminal": "D"
+      }
+    },
+    {
+      "id": "W22",
+      "from": {
+        "type": "pin",
+        "compId": "Lm",
+        "terminal": "A"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "T1",
+        "terminal": "P1"
+      }
+    },
+    {
+      "id": "W23",
+      "from": {
+        "type": "pin",
+        "compId": "Lm",
+        "terminal": "B"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "T1",
+        "terminal": "P2"
+      }
+    },
+    {
+      "id": "W24",
+      "from": {
+        "type": "pin",
+        "compId": "Cr_P",
+        "terminal": "A"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "T1",
+        "terminal": "P2"
+      }
+    },
+    {
+      "id": "W25",
+      "from": {
+        "type": "pin",
+        "compId": "Cr_P",
+        "terminal": "B"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "SW4",
+        "terminal": "D"
+      }
+    },
+    {
+      "id": "W27",
+      "from": {
+        "type": "pin",
+        "compId": "T1",
+        "terminal": "S1"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "Ls",
+        "terminal": "B"
+      }
+    },
+    {
+      "id": "W28",
+      "from": {
+        "type": "pin",
+        "compId": "Ls",
+        "terminal": "A"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "SW7",
+        "terminal": "S"
+      }
+    },
+    {
+      "id": "W29",
+      "from": {
+        "type": "pin",
+        "compId": "T1",
+        "terminal": "S2"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "Cr_S",
+        "terminal": "B"
+      }
+    },
+    {
+      "id": "W30",
+      "from": {
+        "type": "pin",
+        "compId": "Cr_S",
+        "terminal": "A"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "SW6",
+        "terminal": "D"
+      }
+    },
+    {
+      "id": "W31",
+      "from": {
+        "type": "pin",
+        "compId": "VIN",
+        "terminal": "B"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "CIN",
+        "terminal": "B"
+      }
+    },
+    {
+      "id": "W32",
+      "from": {
+        "type": "pin",
+        "compId": "VIN",
+        "terminal": "A"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "CIN",
+        "terminal": "A"
+      }
+    },
+    {
+      "id": "W33",
+      "from": {
+        "type": "pin",
+        "compId": "SW1",
+        "terminal": "D"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "CIN",
+        "terminal": "A"
+      },
+      "manualPath": [
+        {
+          "x": -360,
+          "y": -520
+        },
+        {
+          "x": -360,
+          "y": -540
+        },
+        {
+          "x": -460,
+          "y": -540
+        },
+        {
+          "x": -460,
+          "y": -360
+        },
+        {
+          "x": -460,
+          "y": -360
+        },
+        {
+          "x": -460,
+          "y": -340
+        }
+      ]
+    },
+    {
+      "id": "W34",
+      "from": {
+        "type": "pin",
+        "compId": "SW2",
+        "terminal": "S"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "CIN",
+        "terminal": "B"
+      },
+      "manualPath": [
+        {
+          "x": -360,
+          "y": -80
+        },
+        {
+          "x": -360,
+          "y": -60
+        },
+        {
+          "x": -460,
+          "y": -60
+        },
+        {
+          "x": -460,
+          "y": -240
+        },
+        {
+          "x": -460,
+          "y": -240
+        },
+        {
+          "x": -460,
+          "y": -260
+        }
+      ]
+    },
+    {
+      "id": "W35",
+      "from": {
+        "type": "pin",
+        "compId": "V2",
+        "terminal": "A"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "Cout",
+        "terminal": "A"
+      }
+    },
+    {
+      "id": "W36",
+      "from": {
+        "type": "pin",
+        "compId": "V2",
+        "terminal": "B"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "Cout",
+        "terminal": "B"
+      }
+    },
+    {
+      "id": "W37",
+      "from": {
+        "type": "pin",
+        "compId": "SW7",
+        "terminal": "D"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "Cout",
+        "terminal": "A"
+      },
+      "manualPath": [
+        {
+          "x": 240,
+          "y": -460
+        },
+        {
+          "x": 240,
+          "y": -480
+        },
+        {
+          "x": 320,
+          "y": -480
+        },
+        {
+          "x": 320,
+          "y": -360
+        },
+        {
+          "x": 320,
+          "y": -360
+        },
+        {
+          "x": 320,
+          "y": -340
+        }
+      ]
+    },
+    {
+      "id": "W38",
+      "from": {
+        "type": "pin",
+        "compId": "SW8",
+        "terminal": "S"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "Cout",
+        "terminal": "B"
+      },
+      "manualPath": [
+        {
+          "x": 240,
+          "y": -100
+        },
+        {
+          "x": 240,
+          "y": -80
+        },
+        {
+          "x": 320,
+          "y": -80
+        },
+        {
+          "x": 320,
+          "y": -240
+        },
+        {
+          "x": 320,
+          "y": -240
+        },
+        {
+          "x": 320,
+          "y": -260
+        }
+      ]
+    }
+  ],
+  "plotConfiguration": {
+    "plots": []
+  },
+  "simulationSettings": {
+    "stopTime": "0.05",
+    "stepSize": "1e-5",
+    "stepType": "fixed",
+    "solver": "euler"
+  },
+  "id": "dcdc_cllc_resonant",
+  "name": "CLLC Resonant DC-DC Converter"
+}

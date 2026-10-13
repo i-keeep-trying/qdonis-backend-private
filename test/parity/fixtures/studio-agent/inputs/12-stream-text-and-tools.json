@@ -1,0 +1,28 @@
+{
+  "name": "12-stream-text-and-tools",
+  "description": "Scripted stream: text deltas (one empty), two toolUse blocks started at indexes 2 and 1 (emitted sorted by index), malformed JSON input -> {}, empty input -> {}, a delta for an index without a start, a nameless block (skipped), messageStop tool_use, metadata usage.",
+  "messages": [
+    { "role": "user", "content": [{ "type": "text", "text": "Design a 12 V to 5 V, 3 A buck converter." }] }
+  ],
+  "project_state": {},
+  "bedrock_stream": [
+    { "messageStart": { "role": "assistant" } },
+    { "contentBlockDelta": { "contentBlockIndex": 0, "delta": { "text": "Let me set up " } } },
+    { "contentBlockDelta": { "contentBlockIndex": 0, "delta": { "text": "" } } },
+    { "contentBlockDelta": { "contentBlockIndex": 0, "delta": { "text": "the specs — 5 V µ-check." } } },
+    { "contentBlockStop": { "contentBlockIndex": 0 } },
+    { "contentBlockStart": { "contentBlockIndex": 2, "start": { "toolUse": { "toolUseId": "tooluse_B", "name": "ask_user" } } } },
+    { "contentBlockDelta": { "contentBlockIndex": 2, "delta": { "toolUse": { "input": "" } } } },
+    { "contentBlockStop": { "contentBlockIndex": 2 } },
+    { "contentBlockStart": { "contentBlockIndex": 1, "start": { "toolUse": { "toolUseId": "tooluse_A", "name": "update_specs" } } } },
+    { "contentBlockDelta": { "contentBlockIndex": 1, "delta": { "toolUse": { "input": "{\"rows\": [{\"name\": \"Output Voltage\", " } } } },
+    { "contentBlockDelta": { "contentBlockIndex": 1, "delta": { "toolUse": { "input": "\"value\": \"5\", \"unit\": \"V\"}], \"request_approval\": true}" } } } },
+    { "contentBlockStop": { "contentBlockIndex": 1 } },
+    { "contentBlockStart": { "contentBlockIndex": 3, "start": { "toolUse": { "toolUseId": "tooluse_C", "name": "run_design" } } } },
+    { "contentBlockDelta": { "contentBlockIndex": 3, "delta": { "toolUse": { "input": "{\"notes\": \"unterminated" } } } },
+    { "contentBlockStop": { "contentBlockIndex": 3 } },
+    { "contentBlockDelta": { "contentBlockIndex": 4, "delta": { "toolUse": { "input": "{\"orphan\": true}" } } } },
+    { "messageStop": { "stopReason": "tool_use" } },
+    { "metadata": { "usage": { "inputTokens": 5120, "outputTokens": 230, "totalTokens": 5350 }, "metrics": { "latencyMs": 1800 } } }
+  ]
+}

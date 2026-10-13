@@ -1,0 +1,558 @@
+id: dcdc_boost
+name: Boost DC-DC Converter
+description: Step-up DC-DC converter using a single NMOS switch, diode, input inductor,
+  and output capacitor. Boosts 12V input to 30V output at 0.5A load. The inductor
+  stores energy while the switch is on and transfers it to the  output when the switch
+  turns off.
+components:
+  - ref: VIN
+    type: node
+    role: input_source
+    params:
+      node_type: voltage_source
+      voltage: 12
+      source: dc
+      series_resistance: 0.01
+      ramp_rise: 2e-3
+  - ref: L1
+    type: inductor
+    role: energy_storage
+    params:
+      inductance: 1e-3
+      series_resistance: 0.01
+      saturation_current: 5.0
+      core_loss_resistance: 1e6
+      parasitic_capacitance: 50e-12
+      ic: 0
+    layout:
+      schX: 0.0
+      schY: 0.0
+      orientation: horizontal
+  - ref: SW
+    type: transistor
+    role: power_switch
+    params:
+      family: mosfet
+      type: nmos
+      mode: enhancement
+      voltage_rating: 100
+      current_rating: 5
+      Vto: 2.0
+      Kn: 5.0
+      Lambda: 0.01
+      Cgs: 500e-12
+      Cgd: 100e-12
+      Cdb: 100e-12
+    layout:
+      schX: 1.0
+      schY: -1.0
+      rotation: 270deg
+  - ref: D
+    type: diode
+    role: boost_diode
+    params:
+      reverse_voltage: 50
+      current_rating: 3
+      Is: 1e-12
+      n: 1.1
+      Rs: 0.1
+      Cjo: 10e-12
+      Tt: 20e-9
+      Bv: 100
+      Ibv: 1e-6
+    layout:
+      schX: 2.0
+      schY: 0.0
+      orientation: horizontal
+  - ref: Cout
+    type: capacitor
+    role: output_filter
+    params:
+      capacitance: 1000e-6
+      polarized: true
+      voltage_rating: 100
+      tolerance: 0.1
+      esr: 0.02
+      esl: 5e-9
+      leakage_current: 1e-9
+      ic: 0
+    layout:
+      schX: 3.0
+      schY: -1.0
+      orientation: vertical
+  - ref: R_LOAD
+    type: resistor
+    role: load
+    params:
+      resistance: 60
+      tolerance: 0.05
+      temp_coefficient: 100e-6
+      parasitic_inductance: 10e-9
+    layout:
+      schX: 4.0
+      schY: -1.0
+      orientation: vertical
+  - ref: PWM
+    type: node
+    role: pwm_control
+    params:
+      node_type: pwm_control
+      frequency: 100e3
+      duty_cycle: 0.6
+      vhigh: 12.0
+      vlow: 0.0
+      trise: 1e-7
+      tfall: 1e-7
+      tdelay: 0
+      drive_resistance: 10
+nets:
+  - - - VIN
+      - +
+    - - L1
+      - pos
+  - - - L1
+      - neg
+    - - SW
+      - drain
+    - - D
+      - anode
+  - - - PWM
+      - pos
+    - - SW
+      - gate
+  - - - PWM
+      - neg
+    - - SW
+      - source
+  - - - D
+      - cathode
+    - - Cout
+      - pos
+    - - R_LOAD
+      - pos
+  - - - VIN
+      - '-'
+    - - SW
+      - source
+    - - Cout
+      - neg
+    - - R_LOAD
+      - neg
+analysis:
+  transient:
+    spice_settings:
+      reltol: 0.005
+      abstol: 1.0e-09
+      vntol: 1.0e-05
+      chgtol: 1.0e-12
+      gmin: 1.0e-10
+      trtol: 1.0
+      method: gear
+      maxord: 2
+    requirements:
+      - rid: tr_reg
+        requirement: Meet target Vout across line (Vin) and load changes
+        criteria:
+          target_vout: 30.0
+          regulation_limit_pct: 3
+        environment:
+          - ref: time_domain
+            t_start: 0.0135
+            t_stop: 0.015
+            t_step: 1.0e-07
+        measurement:
+          - ref: VOUT
+            plot:
+              x_axis: time
+              title: Regulation Response Output Voltage
+            component: R_LOAD
+            quantity: voltage
+            nets:
+              - - R_LOAD
+                - pos
+              - - VIN
+                - '-'
+            data:
+              - name: Vout_avg
+                spice_command: avg
+                description: Average output voltage
+              - name: Vout_ripple_vpp
+                spice_command: pp
+                description: Peak-to-peak ripple
+          - ref: VIN
+            plot:
+              x_axis: time
+              title: Regulation Response Input Voltage
+            component: VIN
+            quantity: voltage
+            nets:
+              - - VIN
+                - +
+              - - VIN
+                - '-'
+            data:
+              - name: Vin_avg
+                spice_command: avg
+                description: Average input voltage
+          - ref: IIN
+            plot:
+              x_axis: time
+              title: Regulation Response Input Current
+            component: VIN
+            quantity: current
+            data:
+              - name: Iin_avg
+                spice_command: avg
+                description: Average input current
+          - ref: IOUT
+            plot: false
+            component: R_LOAD
+            quantity: current
+            data:
+              - name: Iout_avg
+                spice_command: avg
+                description: Average load current
+        outputs:
+          - var: line_regulation_pct
+            formula: 100*([Vout_avg]/[Vin_avg])
+            description: Line regulation percentage
+          - var: load_regulation_pct
+            formula: 100*abs([Vout_avg] - {criteria.target_vout})/{criteria.target_vout}
+            description: Load regulation deviation from target
+          - var: vout_avg_v
+            formula: '[Vout_avg]'
+            description: Average output voltage
+          - var: vout_ripple_vpp_v
+            formula: '[Vout_ripple_vpp]'
+            description: Peak-to-peak output voltage ripple
+      - rid: tr_dyn
+        requirement: 'Dynamic response: step changes (line/load) with minimal overshoot
+          and fast settling'
+        criteria:
+          target_vout: 30.0
+          overshoot_limit_pct: 3
+          undershoot_limit_pct: 3
+          settle_band_pct: 0.5
+          settle_time_limit: 0.0005
+        environment:
+          - ref: time_domain
+            t_step: 1e-6
+            description: Time domain simulation settings
+            t_stop: 0.015
+            t_start: 0.0135
+        measurement:
+          - ref: VIN
+            plot: false
+            quantity: voltage
+            nets:
+              - - VIN
+                - +
+              - - VIN
+                - '-'
+          - ref: VOUT
+            plot: false
+            component: R_LOAD
+            quantity: voltage
+            nets:
+              - - R_LOAD
+                - pos
+              - - VIN
+                - '-'
+            data:
+              - name: Vout_max
+                spice_command: max
+                description: Max output voltage during step
+              - name: Vout_min
+                spice_command: min
+                description: Min output voltage during step
+              - name: Vout_avg
+                spice_command: avg
+                description: Average output voltage
+              - name: rise_time_10_90
+                spice_command: TRIG [VOUT] VAL={{{{components.VIN.voltage}}+0.1*({criteria.target_vout}-{{components.VIN.voltage}})}}
+                  RISE=1 TARG [VOUT] VAL={{{{components.VIN.voltage}}+0.9*({criteria.target_vout}-{{components.VIN.voltage}})}}
+                  RISE=1
+                description: 10% to 90% rise time
+              - name: settle_to_upper
+                spice_command: TRIG AT={{{{environment.time_domain.t_step}}}} TARG
+                  [VOUT] VAL={{{{criteria.target_vout}}*(1+{{criteria.settle_band_pct}}/100)}}
+                  CROSS=LAST
+                description: Time to upper settling band
+              - name: settle_to_lower
+                spice_command: TRIG AT={{{{environment.time_domain.t_step}}}} TARG
+                  [VOUT] VAL={{{{criteria.target_vout}}*(1-{{criteria.settle_band_pct}}/100)}}
+                  CROSS=LAST
+                description: Time to lower settling band
+          - ref: IL
+            plot:
+              x_axis: time
+              title: Dynamic Response Inductor Current
+            component: L1
+            quantity: current
+            data:
+              - name: il_peak
+                spice_command: max
+                description: Peak inductor current
+              - name: il_ripple
+                spice_command: pp
+                description: Inductor current ripple (p-p)
+          - ref: VSW
+            plot:
+              x_axis: time
+              title: Dynamic Response Switch Voltage
+            component: SW
+            quantity: voltage
+            nets:
+              - - SW
+                - drain
+              - - VIN
+                - '-'
+            data:
+              - name: vsw_overshoot
+                spice_command: max
+                description: Max switch-node voltage
+        outputs:
+          - var: overshoot_pct
+            formula: 100*([Vout_max] - {criteria.target_vout})/{criteria.target_vout}
+            description: Overshoot percentage
+          - var: undershoot_pct
+            formula: 100*({criteria.target_vout} - [Vout_min])/{criteria.target_vout}
+            description: Undershoot percentage
+          - var: settle_time
+            formula: max([settle_to_upper], [settle_to_lower])
+            description: Settling time to within band
+          - var: vout_max_v
+            formula: '[Vout_max]'
+            description: Maximum output voltage
+          - var: vout_min_v
+            formula: '[Vout_min]'
+            description: Minimum output voltage
+          - var: il_peak_a
+            formula: '[il_peak]'
+            description: Peak inductor current
+          - var: vsw_overshoot_v
+            formula: '[vsw_overshoot]'
+            description: Peak switch node voltage
+      - rid: tr_eff
+        requirement: Efficiency across load points with loss breakdown
+        criteria:
+          efficiency_target_pct: 92
+        measurement:
+          - ref: IIN
+            plot: false
+            component: VIN
+            quantity: current
+            data:
+              - name: Iin_avg
+                spice_command: avg
+                description: Average input current
+          - ref: IOUT
+            plot: false
+            component: R_LOAD
+            quantity: current
+            data:
+              - name: Iout_avg
+                spice_command: avg
+                description: Average load current
+          - ref: VOUT
+            plot: false
+            component: R_LOAD
+            quantity: voltage
+            nets:
+              - - R_LOAD
+                - pos
+              - - VIN
+                - '-'
+            data:
+              - name: Vout_avg
+                spice_command: avg
+                description: Average output voltage
+          - ref: VIN
+            plot: false
+            component: VIN
+            quantity: voltage
+            nets:
+              - - VIN
+                - +
+              - - VIN
+                - '-'
+            data:
+              - name: Vin_avg
+                spice_command: avg
+                description: Average input voltage
+          - ref: VSW
+            plot: false
+            component: SW
+            quantity: voltage
+            nets:
+              - - SW
+                - drain
+              - - VIN
+                - '-'
+            data:
+              - name: Vsw_collector_avg
+                spice_command: avg
+                description: Average collector node voltage
+          - ref: ISW
+            plot:
+              x_axis: time
+              title: Efficiency Test Switch Current
+            component: SW
+            quantity: current
+            data:
+              - name: Isw_avg
+                spice_command: avg
+                description: Average switch current
+          - ref: VD
+            plot: false
+            component: D
+            quantity: voltage
+            nets:
+              - - D
+                - cathode
+              - - VIN
+                - '-'
+            data:
+              - name: Vd_avg
+                spice_command: avg
+                description: Average diode voltage
+          - ref: ID
+            plot: false
+            component: D
+            quantity: current
+            data:
+              - name: Id_avg
+                spice_command: avg
+                description: Average diode current
+          - ref: IL1
+            plot: false
+            component: L1
+            quantity: current
+            data:
+              - name: Il1_rms
+                spice_command: rms
+                description: RMS inductor current
+          - ref: ICOUT
+            plot: false
+            component: Cout
+            quantity: current
+            data:
+              - name: Icout_rms
+                spice_command: rms
+                description: RMS capacitor current
+        outputs:
+          - var: Pout_avg
+            formula: '[Vout_avg]*[Iout_avg]'
+            description: Average output power
+          - var: Pin_avg
+            formula: abs([Vin_avg]*[Iin_avg])
+            description: Average input power
+          - var: P_switch_avg
+            formula: '[Vsw_collector_avg]*[Isw_avg]'
+            description: Average switch power dissipation
+          - var: P_diode_avg
+            formula: '[Vd_avg]*[Id_avg]'
+            description: Average diode power loss
+          - var: P_L1_cu
+            formula: '[Il1_rms]**2*{components.L1.series_resistance}'
+            description: Inductor copper loss
+          - var: P_Cout_esr
+            formula: '[Icout_rms]**2*{components.Cout.esr}'
+            description: Capacitor ESR loss
+          - var: efficiency_pct
+            formula: 100*[Pout_avg]/[Pin_avg]
+            description: Efficiency percentage
+      - rid: tr_stress
+        requirement: Stress & thermal margins for key devices
+        criteria:
+          SW_voltage_margin_pct: 20
+          SW_current_margin_pct: 30
+          D_current_margin_pct: 30
+          L1_current_margin_pct: 30
+        measurement:
+          - ref: VIN
+            plot: false
+            quantity: voltage
+            nets:
+              - - VIN
+                - +
+              - - VIN
+                - '-'
+          - ref: VSW
+            plot: false
+            component: SW
+            quantity: voltage
+            nets:
+              - - SW
+                - drain
+              - - VIN
+                - '-'
+            data:
+              - name: Vsw_max
+                spice_command: max
+                description: Max switch-node voltage
+          - ref: IL
+            plot: false
+            component: L1
+            quantity: current
+            data:
+              - name: IL_rms
+                spice_command: rms
+                description: RMS inductor current
+              - name: IL_ripple
+                spice_command: pp
+                description: Inductor current ripple (p-p)
+          - ref: ISW
+            plot: false
+            component: SW
+            quantity: current
+            data:
+              - name: Isw_peak
+                spice_command: max
+                description: Peak switch current
+              - name: Isw_rms
+                spice_command: rms
+                description: RMS switch current
+          - ref: ID
+            plot: false
+            component: D
+            quantity: current
+            data:
+              - name: Id_peak
+                spice_command: max
+                description: Peak diode current
+          - ref: VOUT
+            plot: false
+            quantity: voltage
+            nets:
+              - - R_LOAD
+                - pos
+              - - R_LOAD
+                - neg
+        outputs:
+          - var: vsw_max_v
+            formula: '[Vsw_max]'
+            description: Maximum switch voltage stress
+          - var: isw_peak_a
+            formula: '[Isw_peak]'
+            description: Peak switch current stress
+          - var: id_peak_a
+            formula: '[Id_peak]'
+            description: Peak diode current stress
+          - var: il_rms_a
+            formula: '[IL_rms]'
+            description: RMS inductor current
+metadata:
+  stage:
+    - power_switch
+    - energy_storage
+    - filter
+  topology: non-isolated
+  control: PWM
+  function: step-up
+  tags:
+    - boost
+    - step-up
+    - MPPT
+    - solar
+    - continuous_conduction
