@@ -54,6 +54,11 @@ import {
   truthy,
   type Dict,
 } from './py';
+import {
+  CONTROL_BLOCK_TYPES,
+  emitControlBlock,
+  isControlBlock,
+} from './signal-blocks';
 import { requirementsOf } from './spice-command';
 
 export type AnalysisKind = 'dc' | 'ac' | 'transient';
@@ -769,6 +774,8 @@ function emitElements(
       lines.push(
         `${spiceDevName('S', refValue)} ${pins.get('pos')} ${pins.get('neg')} ${pins.get('ctrl+')} ${pins.get('ctrl-')} ${model}`,
       );
+    } else if (isControlBlock(ctype)) {
+      lines.push(...emitControlBlock(ref, ctype, params, nets));
     } else if (ctype === 'custom_spice') {
       const raw = p('spice_line', `* Empty custom spice for ${ref}`);
       if (typeof raw !== 'string') {
@@ -783,7 +790,8 @@ function emitElements(
       throw new PyError(
         'ValueError',
         `Unknown component type '${pyStr(ctype)}' for component ${ref}. ` +
-          'Valid types: node, resistor, capacitor, inductor, diode, led, transistor, transformer, ct_transformer, dual_ct_transformer, b_source, e_source, g_source, custom_spice, switch. ' +
+          'Valid types: node, resistor, capacitor, inductor, diode, transistor, transformer, ct_transformer, dual_ct_transformer, b_source, e_source, g_source, custom_spice, switch, ' +
+          `and control blocks: ${Object.keys(CONTROL_BLOCK_TYPES).join(', ')}. ` +
           'Check circuit.yaml and Pydantic schema for supported component types.',
       );
     }
