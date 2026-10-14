@@ -3,8 +3,9 @@
 The synced schematic exists on qdonis-core `feature/synced-schematic` only, so point --core at a
 checkout of that branch:
   python -B test\\parity\\capture\\schematic_capture.py --core D:\\path\\to\\qdonis-core
-Writes test/parity/fixtures/schematic/<topology>.json: every sheet of the library layout, plus
-project-layout variants (moved parts, dropped wires) that exercise the placer and the wire builder.
+Writes test/parity/fixtures/schematic/<topology>.json: every sheet of the library layout, every sheet
+laid out from scratch (Auto-arrange, and the automatic grouping), plus project-layout variants (moved
+parts, dropped wires) that exercise the placer and the wire builder.
 
 `build_comp_nets` iterates Python sets, so its member order depends on the hash seed. The capture
 runs it with an insertion-ordered set instead (same nets, same names; only the iteration order is
@@ -99,6 +100,20 @@ def main() -> int:
                 r = ss.render_for_topology(topology, copy.deepcopy(circuit), sheet=entry["id"])
                 r.pop("palette"), r["schematic"].pop("symbols")
                 cases.append({"name": f"sheet:{entry['id']}", "sheet": entry["id"], "layout": None, "result": r})
+            # Layouts from scratch: Auto-arrange (grouping kept) on every sheet, and the automatic grouping.
+            for entry in [{"id": None}, *top["sheets"]]:
+                r = ss.render_for_topology(topology, copy.deepcopy(circuit), fresh=True, sheet=entry["id"])
+                r.pop("palette"), r["schematic"].pop("symbols")
+                cases.append({"name": f"fresh:{entry['id'] or 'top'}", "sheet": entry["id"], "layout": None,
+                              "fresh": True, "result": r})
+            r = ss.render_for_topology(topology, copy.deepcopy(circuit), regroup=True)
+            r.pop("palette"), r["schematic"].pop("symbols")
+            cases.append({"name": "regroup", "sheet": None, "layout": None, "regroup": True, "result": r})
+            for entry in r["sheets"]:
+                rs = ss.render_for_topology(topology, copy.deepcopy(circuit), regroup=True, sheet=entry["id"])
+                rs.pop("palette"), rs["schematic"].pop("symbols")
+                cases.append({"name": f"regroup:{entry['id']}", "sheet": entry["id"], "layout": None,
+                              "regroup": True, "result": rs})
             library = ss.library_layout(circuit) or {}
             for name, layout in variants(library):
                 project = {**layout, "groups": library.get("groups")}

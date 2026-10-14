@@ -19,6 +19,7 @@ import { placeEntry } from './layout';
 import {
   byRef,
   cmpTuple,
+  expressionNets,
   flat,
   pinKey,
   sortedStr,
@@ -26,7 +27,6 @@ import {
   type Region,
   type Symbols,
 } from './model';
-import { expressionNets } from './sheets';
 import { TRANSISTOR_SYMBOLS, paramsOf } from './symbols';
 import { parseNumber } from './values';
 

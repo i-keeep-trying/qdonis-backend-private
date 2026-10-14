@@ -11,6 +11,8 @@ interface RenderCase {
   name: string;
   sheet: string | null;
   layout: SchematicLayout | null;
+  fresh?: boolean;
+  regroup?: boolean;
   result: Record<string, unknown>;
 }
 
@@ -42,6 +44,14 @@ const circuitOf = (topology: string) =>
     topology,
   ) as Record<string, unknown>;
 
+const drawingOf = (topology: string) =>
+  JSON.parse(
+    readFileSync(
+      join(ASSETS_ROOT, 'topologies', 'json_library', `${topology}.json`),
+      'utf8',
+    ),
+  ) as Record<string, unknown>;
+
 /** What the engine receives (JSON): drops undefined, turns -0 into 0. */
 const asJson = (value: unknown): unknown =>
   JSON.parse(JSON.stringify(value)) as unknown;
@@ -66,6 +76,9 @@ describe('schematic render parity with qdonis-core schematic_sync.py', () => {
         const result = renderForTopology(circuitOf(topology), {
           layout: c.layout,
           sheet: c.sheet,
+          fresh: c.fresh,
+          regroup: c.regroup,
+          drawing: drawingOf(topology),
         });
         const { palette, ...rest } = result;
         delete rest.schematic.symbols;

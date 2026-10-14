@@ -349,3 +349,18 @@ export function netNamer(
     return reps.length ? `${reps[0][0]}.${reps[0][1]}` : net;
   };
 }
+
+const EXPR_REF = /\b[VI]\(\s*([^,\s()]+)(?:\s*,\s*([^\s()]+))?\s*\)/gi;
+
+/** Nodes a behavioural part reads in its expressions (V(node), V(a,b), I(Vx)). */
+export function expressionNets(comp: Dict): Set<string> {
+  const out = new Set<string>();
+  for (const value of Object.values(paramsOf(comp))) {
+    if (typeof value !== 'string' || !value.includes('(')) continue;
+    for (const m of value.matchAll(EXPR_REF)) {
+      if (m[1]) out.add(m[1]);
+      if (m[2]) out.add(m[2]);
+    }
+  }
+  return out;
+}

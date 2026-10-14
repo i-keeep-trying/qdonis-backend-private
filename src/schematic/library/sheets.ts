@@ -14,7 +14,14 @@ import type {
   SchematicLayout,
   SchematicSymbol,
 } from '../schematic.types';
-import { byRef, cmpStr, sortedStr, type Symbols } from './model';
+import {
+  byRef,
+  cmpStr,
+  expressionNets,
+  sortedStr,
+  type Symbols,
+} from './model';
+import { autoGroups } from './auto-groups';
 import { paramsOf } from './symbols';
 import { roundHalfEven } from './geometry';
 
@@ -55,32 +62,24 @@ const DRIVER_PINS: Readonly<Record<string, ReadonlySet<string>>> = {
   ),
 };
 
-const EXPR_REF = /\b[VI]\(\s*([^,\s()]+)(?:\s*,\s*([^\s()]+))?\s*\)/gi;
-
-/** Nodes a behavioural part reads in its expressions (V(node), V(a,b), I(Vx)). */
-export function expressionNets(comp: Dict): Set<string> {
-  const out = new Set<string>();
-  for (const value of Object.values(paramsOf(comp))) {
-    if (typeof value !== 'string' || !value.includes('(')) continue;
-    for (const m of value.matchAll(EXPR_REF)) {
-      if (m[1]) out.add(m[1]);
-      if (m[2]) out.add(m[2]);
-    }
-  }
-  return out;
-}
-
-/**
- * [groups, explicit]: the layout's grouping when it has one. Without one the
- * circuit is drawn on one sheet (the automatic proposal is not ported yet).
- */
+/** [groups, explicit]: the layout's grouping wins; otherwise the automatic proposal. */
 export function resolveGroups(
+  circuit: Dict,
+  compNets: CompNets,
   symbols: Symbols,
   layout: SchematicLayout | null,
+  drawing: Dict | null,
 ): [Groups, boolean] {
   const stored = layout?.groups as unknown;
+  if (!isDict(stored)) {
+    const drawn = new Set(
+      (Array.isArray(drawing?.components) ? drawing.components : [])
+        .filter(isDict)
+        .map((c) => pyStr(c.id ?? null)),
+    );
+    return [autoGroups(circuit, compNets, symbols, drawn), false];
+  }
   const out: Groups = new Map();
-  if (!isDict(stored)) return [out, false];
   for (const [gid, g] of Object.entries(stored)) {
     if (!isDict(g)) continue;
     const members = Array.isArray(g.members) ? (g.members as unknown[]) : [];

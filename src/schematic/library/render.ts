@@ -40,6 +40,8 @@ import {
   type Region,
   type Symbols,
 } from './model';
+import { seedFromDrawing, type TerminalNeighbours } from './drawing-seed';
+import { skeleton } from './power';
 import { membership, resolveGroups, sheetView, type Sheet } from './sheets';
 import { paletteForEngine, symbolsForEngine } from './symbols';
 import {
@@ -186,11 +188,18 @@ const textLength = (value: unknown) =>
 export function render(
   circuit: Dict,
   layout: SchematicLayout | null = null,
+  drawing: Dict | null = null,
   sheet: Sheet = null,
 ): RenderResult {
   const fullCompNets = connectivity(circuit);
   const fullSymbols = buildSymbols(circuit, fullCompNets);
-  const [groups, explicitGroups] = resolveGroups(fullSymbols, layout);
+  const [groups, explicitGroups] = resolveGroups(
+    circuit,
+    fullCompNets,
+    fullSymbols,
+    layout,
+    drawing,
+  );
   if (sheet !== null && !groups.has(sheet)) {
     throw new SheetNotFoundError(sheet);
   }
@@ -206,6 +215,7 @@ export function render(
     namer,
   );
   const nets = netsByName(compNets);
+  if (sheet !== null) drawing = null; // the old drawings only show the top level
   const sheetWires =
     sheet === null ? layout?.wires : layout?.sheets?.[sheet]?.wires;
 
@@ -223,6 +233,7 @@ export function render(
   // Part adjacency (through small nets) and terminal neighbours. Islands are
   // separated by ground (channels of a gate drive are laid out side by side).
   let adjacency = new Map<string, Set<string>>();
+  const terminalNeighbours: TerminalNeighbours = new Map();
   const signalAdjacency = new Map<string, Set<string>>();
   const adj = (map: Map<string, Set<string>>, cid: string) => {
     if (!map.has(cid)) map.set(cid, new Set());
@@ -234,8 +245,19 @@ export function render(
       return t ? [t] : [];
     });
     const cids = new Set(ids.map(([cid]) => cid));
-    for (const [cid] of ids) {
+    for (const [cid, terminal] of ids) {
+      if (!terminalNeighbours.has(cid)) terminalNeighbours.set(cid, new Map());
+      const byTerminal = terminalNeighbours.get(cid) as Map<
+        string,
+        Set<string>
+      >;
+      if (!byTerminal.has(terminal)) byTerminal.set(terminal, new Set());
+      for (const other of cids) {
+        if (other !== cid) byTerminal.get(terminal)?.add(other);
+      }
       if (cids.size > 8) continue;
+      adj(adjacency, cid);
+      if (net !== '0') adj(signalAdjacency, cid);
       for (const other of cids) {
         if (other === cid) continue;
         adj(adjacency, cid).add(other);
@@ -253,6 +275,29 @@ export function render(
   }
   // This sheet has a layout of its own (not just positions from other sheets).
   const stored = new Map(positions);
+  let fromSkeleton = false;
+  if (!stored.size) {
+    // A bridge power stage is laid out from its structure; otherwise the old
+    // hand-drawn schematic seeds the positions.
+    const structured = skeleton(
+      circuit,
+      compNets,
+      symbols,
+      regions(circuit, compNets, symbols, new Set()),
+    );
+    if (structured.size) {
+      for (const [cid, place] of structured) positions.set(cid, place);
+      fromSkeleton = true;
+    } else if (drawing) {
+      const seeded = seedFromDrawing(
+        symbols,
+        adjacency,
+        terminalNeighbours,
+        drawing,
+      );
+      for (const [cid, place] of seeded) positions.set(cid, place);
+    }
+  }
 
   // Power stage and control circuitry are laid out apart; labels and grounds
   // follow the part they hang on.
@@ -285,14 +330,44 @@ export function render(
     ]),
   );
   const adjacent = (cid: string) => adjacency.get(cid) ?? new Set<string>();
-
   const sym = (cid: string) => symbols.get(cid) as SchematicSymbol;
+
+  // The old drawings are tight: spread the seeded power stage in proportion
+  // to the power parts that still have to fit in around it.
+  if (!stored.size && positions.size && !fromSkeleton) {
+    const extra = [...symbols.keys()].filter(
+      (c) =>
+        !positions.has(c) &&
+        region.get(c) === 'main' &&
+        !['LABEL', 'GND'].includes(sym(c).type),
+    ).length;
+    const factor = 1.2 + Math.min(0.4, extra / Math.max(1, 2 * positions.size));
+    const places = [...positions.values()];
+    const cx = places.reduce((t, p) => t + p.x, 0) / places.length;
+    const cy = places.reduce((t, p) => t + p.y, 0) / places.length;
+    for (const p of places) {
+      p.x = snap(cx + (p.x - cx) * factor);
+      p.y = snap(cy + (p.y - cy) * factor);
+    }
+  }
+
   for (const [cid, place] of positions) Object.assign(sym(cid), place);
   let occupancy = new Occupancy();
   for (const cid of [...positions.keys()].sort(
     (a, b) => orderOf(a) - orderOf(b),
   )) {
-    occupancy.add(cid, sym(cid));
+    const s = sym(cid);
+    if (!stored.size) {
+      // Seeded parts can collide: nudge them apart.
+      const [hw, hh] = extent(s);
+      if (!occupancy.free(s.x ?? 0, s.y ?? 0, hw, hh, 0)) {
+        [s.x, s.y] = occupancy.spot(s.x ?? 0, s.y ?? 0, hw, hh, 20, 10);
+        const place = positions.get(cid) as Placement;
+        place.x = s.x;
+        place.y = s.y;
+      }
+    }
+    occupancy.add(cid, s);
   }
 
   const termNet = new Map<string, string>();
@@ -744,7 +819,13 @@ export function render(
       id: sheet,
       label: sheet !== null ? (groups.get(sheet)?.label ?? sheet) : 'Top level',
     },
-    basis: stored.size ? 'saved' : 'auto',
+    basis: stored.size
+      ? 'saved'
+      : fromSkeleton
+        ? 'structure'
+        : drawing && positions.size
+          ? 'drawing'
+          : 'auto',
     sheets: sheetList,
     groups_explicit: explicitGroups,
   };
@@ -768,6 +849,8 @@ export interface RenderOptions {
   /** Also drop the saved grouping. */
   regroup?: boolean;
   sheet?: Sheet;
+  /** The topology's old hand-drawn schematic (`json_library`), to seed a fresh layout. */
+  drawing?: Dict | null;
 }
 
 export interface TopologyRender extends RenderResult {
@@ -791,14 +874,23 @@ export function renderForTopology(
     const groups = options.regroup ? undefined : merged?.groups;
     merged = isDict(groups) ? { groups } : null;
   }
-  const result = render(effective, merged, options.sheet ?? null);
+  const result = render(
+    effective,
+    merged,
+    options.drawing ?? null,
+    options.sheet ?? null,
+  );
   // pin geometry from the symbol registry: the engine draws with exactly this table
   result.schematic.symbols = symbolsForEngine();
   const section = circuit.schematic;
+  const saved = merged?.components ?? {};
+  const hasPositions = result.schematic.components.some((c) =>
+    Object.hasOwn(saved, c.id),
+  );
   return {
     ...result,
     palette: paletteForEngine(),
-    seeded_from_drawing: false,
+    seeded_from_drawing: result.basis === 'drawing' && !hasPositions,
     library_layout: {
       present: library !== null,
       tuned: isDict(section) && Boolean(section.tuned),

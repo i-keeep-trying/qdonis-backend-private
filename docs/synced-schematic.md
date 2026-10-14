@@ -60,21 +60,28 @@ and the parameter forms the library uses); `signal-blocks.parity.spec.ts` replay
   tree; far-apart pieces get drawing-only labels (`~NAME@REF.pin`); lone labels and >= 1 MOhm resistors to ground
   are hidden (`meta.hidden`), not removed.
 
-Not ported yet (needed only for a layout from scratch, part 3b): the power-stage structure placement
-(`schematic_power.py`), seeding from the old `json_library` drawings, and the automatic grouping proposal. All 35
-library topologies have a saved layout and grouping, so the library draws without them.
+Layouts from scratch (a sheet with no saved positions: Auto-arrange, a new group, a circuit without a layout):
+- `power.ts` — when the sheet's power stage has a real bridge (two or more legs, or a 3+ device leg): legs as
+  vertical columns between the DC rails, rail columns (DC link, source) on the source side, anti-parallel diodes /
+  snubbers beside each device, gate drive left of the gate, the power-flow chain from the midpoints outwards
+  (`basis: structure`).
+- `drawing-seed.ts` — otherwise the old `json_library` drawing seeds the top level (match by name, name family,
+  then type + connectivity), spread 1.2-1.6x and nudged apart (`basis: drawing`).
+- `auto-groups.ts` — without a saved grouping: control parts per phase / channel, then by connected cluster
+  (over 14 parts split by networkx's greedy modularity, ported), named by function. The power stage stays on top.
 
 Parity: `test/parity/capture/schematic_capture.py` renders every sheet of every topology plus four project-layout
 variants (a moved part, half / no wires, two unplaced parts) in the core; `render.parity.spec.ts` compares the
-whole result. The capture runs the core's `build_comp_nets` with an insertion-ordered set (its member order
-otherwise depends on the hash seed); the output was checked to be identical across seeds.
+whole result. The fixtures also hold every sheet laid out from scratch and the automatic grouping (with its sheets). The capture
+runs the core's `build_comp_nets` with an insertion-ordered set (its member order otherwise depends on the hash
+seed); the output was checked to be identical across seeds.
 
 ## Plan
 
 1. Control blocks in the netlist generator — done.
 2. Topology library refreshed from core `feature/synced-schematic` (layouts, block-based control loops) — done.
-3. YAML -> drawing (`src/schematic/`): symbol registry, placement, wires, sheets — done (3a). 3b: power-stage
-   structure placement, seeding from the old drawings, automatic grouping (layouts from scratch).
+3. YAML -> drawing (`src/schematic/`): symbol registry, placement, wires, sheets (3a), layouts from scratch (3b) —
+   done.
 4. Drawing -> YAML: check / apply endpoints; the Circuit stage stores the edited circuit and layout.
 5. Edited circuits are designed and simulated (today the design stage refuses them).
 6. qdonis-web: engine synced mode and wire router.
@@ -82,6 +89,16 @@ otherwise depends on the hash seed); the output was checked to be identical acro
 8. Developer layout tool (temporary, tagged `DEV-LAYOUT`).
 
 ## Change log
+
+### 2026-10-15 — Layouts from scratch (part 3b)
+- `library/power.ts` (port of `schematic_power.py`), `library/drawing-seed.ts` (`_seed_from_drawing`),
+  `library/auto-groups.ts` (`auto_groups`, with networkx `connected_components` / `greedy_modularity_communities`
+  ported: each merge takes the largest gain, ties to the smallest pair, as networkx's heaps order).
+- `render` takes the old drawing (`RenderOptions.drawing`), reports `basis` structure / drawing and
+  `seeded_from_drawing`; `resolveGroups` falls back to the automatic proposal. `expressionNets` moved to `model.ts`.
+- Checks: 374 render cases identical to the core, now including Auto-arrange of every sheet and every sheet of the
+  automatic grouping (of these from-scratch layouts, 35 are by structure and 35 seeded from the old drawing;
+  11 topologies get automatic sheets, the modularity split runs on 7); all unit tests pass (873).
 
 ### 2026-10-15 — YAML -> drawing renderer (part 3a)
 - New `src/schematic/` (`schematic.types.ts`, `library/{symbols,values,geometry,model,layout,sheets,wiring,render}.ts`):
