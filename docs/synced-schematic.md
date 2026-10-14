@@ -124,7 +124,8 @@ edited circuit, so the next simulation runs exactly what is drawn. Simulation an
    done.
 4. Drawing -> YAML: check / apply endpoints; the Circuit stage stores the edited circuit and layout — done.
 5. Edited circuits are designed and simulated; the design is carried over an edit — done.
-6. qdonis-web: engine synced mode and wire router.
+6. qdonis-web: engine synced mode and wire router — done (engine protocol and web change log:
+   `qdonis-web/docs/synced-schematic.md`).
 7. qdonis-web: synced schematic in the Circuit tab (sheets, check, apply).
 8. Developer layout tool (temporary, tagged `DEV-LAYOUT`).
 
