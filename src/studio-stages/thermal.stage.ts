@@ -613,6 +613,7 @@ export async function planThermal(
             break;
           const updated = await provider.recalculateLosses({
             topologyId: topologyId || '',
+            circuit: vis?.data.customCircuit,
             componentModels: selection.component_models || {},
             rawTimeSeriesZip: zip,
             junctionC: hottest,

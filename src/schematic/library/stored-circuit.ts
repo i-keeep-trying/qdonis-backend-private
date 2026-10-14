@@ -45,3 +45,14 @@ export function fromStoredCircuit(
     out.schematic = structuredClone(librarySchematic);
   return out;
 }
+
+/**
+ * The circuit a branch designs and simulates: its edited circuit when the
+ * schematic was edited, else the library topology (`library`, as
+ * `TopologiesService.design` returns it).
+ */
+export function branchCircuit(customCircuit: unknown, library: Dict): Dict {
+  return isDict(customCircuit)
+    ? fromStoredCircuit(customCircuit, library.schematic)
+    : library;
+}

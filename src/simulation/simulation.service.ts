@@ -37,12 +37,14 @@ import {
 } from './devices.format';
 import { catalogue, type Preference } from './loss/device-selection';
 import { semiconductorTypesFromYaml } from './loss/loss-engine';
+import { branchCircuit } from '../schematic/library/stored-circuit';
 import { SimulationArtifactsService } from './simulation-artifacts.service';
 import {
   applyParameterUpdates,
   currentValue,
   designParameters,
   hasComponent,
+  rowUpdates,
   syncedDecks,
 } from './design-values';
 import type {
@@ -93,6 +95,19 @@ const normalizeDecks = (
 
 const missing = (message: string) =>
   AppError.conflict(ErrorCode.StageInputMissing, message);
+
+const isObject = (value: unknown): value is JsonObject =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
+/** The branch's edited circuit for a queued run (absent: the library topology). */
+const editedCircuit = (
+  studio: StudioProject,
+  branchId: string,
+): { circuit?: JsonObject } => {
+  const custom = stageNodeOnBranch(studio, 'visualization', branchId)?.data
+    .customCircuit;
+  return isObject(custom) ? { circuit: custom } : {};
+};
 
 /** Commands an uploaded deck may not run (old frontend `UNSAFE_CONTROL`). */
 const UNSAFE_CONTROL =
@@ -173,13 +188,10 @@ export class SimulationService {
           : null;
       if (!topologyId)
         throw missing('Pick a circuit before running the design.');
-      if (vis?.data.customStructure === true) {
-        throw AppError.unavailable(
-          ErrorCode.StageNotAvailable,
-          'Designing an edited circuit is not available yet.',
-        );
-      }
-      const design = this.topologies.design(topologyId);
+      const design = branchCircuit(
+        vis?.data.customCircuit,
+        this.topologies.design(topologyId),
+      );
       const parameters = designParameters(design);
       const decks = Object.fromEntries(
         Object.entries(generateAnalysisCirs(design, 'all').analysis_cirs).map(
@@ -220,6 +232,7 @@ export class SimulationService {
     await this.sizing.precheck(user, projectId);
     const runId = randomUUID();
     let topologyId = '';
+    let circuit: JsonObject | undefined;
     const result = await this.commit(
       user,
       projectId,
@@ -232,13 +245,10 @@ export class SimulationService {
             ? this.topologies.resolveId(vis.data.topologyId)
             : null;
         if (!id) throw missing('Pick a circuit before running the design.');
-        if (vis?.data.customStructure === true) {
-          throw AppError.unavailable(
-            ErrorCode.StageNotAvailable,
-            'Designing an edited circuit is not available yet.',
-          );
-        }
         topologyId = id;
+        circuit = isObject(vis?.data.customCircuit)
+          ? vis.data.customCircuit
+          : undefined;
         return {
           data: {
             runId,
@@ -263,6 +273,7 @@ export class SimulationService {
       topologyId,
       parameters,
       actor: { id: user.id, role: user.role },
+      ...(circuit ? { circuit } : {}),
     };
     try {
       await this.runs.enqueue({
@@ -460,7 +471,11 @@ export class SimulationService {
       if (!topologyId) {
         throw missing('The design does not name a library topology.');
       }
-      const library = this.topologies.design(topologyId);
+      const library = branchCircuit(
+        stageNodeOnBranch(studio, 'visualization', branchId)?.data
+          .customCircuit,
+        this.topologies.design(topologyId),
+      );
       const rows: RecalculatedParameter[] = Array.isArray(
         node.data.recalculatedParameters,
       )
@@ -490,15 +505,7 @@ export class SimulationService {
         }
       }
 
-      // Only changed rows: the table shows rounded values (6 digits).
-      const updates = new Map<string, Map<string, string>>();
-      for (const row of rows) {
-        if (row.after === row.before) continue;
-        const params = updates.get(row.ref) ?? new Map<string, string>();
-        params.set(row.param, row.after);
-        updates.set(row.ref, params);
-      }
-      applyParameterUpdates(library, updates);
+      applyParameterUpdates(library, rowUpdates(rows));
       const decks = syncedDecks(library);
       return {
         data: {
@@ -569,6 +576,7 @@ export class SimulationService {
           analysisCirs: Object.fromEntries(wanted.map((k) => [k, decks[k]])),
           componentModels: {},
           junctionTemperature: null,
+          ...editedCircuit(studio, branchId),
         };
         const data = pendingSimulation({
           runId,
@@ -774,7 +782,13 @@ export class SimulationService {
         zipBase64: timeSeriesZip,
         tj,
         deviceTypes: topologyId
-          ? semiconductorTypesFromYaml(this.topologies.design(topologyId))
+          ? semiconductorTypesFromYaml(
+              branchCircuit(
+                stageNodeOnBranch(studio, 'visualization', branchId)?.data
+                  .customCircuit,
+                this.topologies.design(topologyId),
+              ),
+            )
           : null,
         preference: dto.preference ?? 'auto',
         overrides: mergeOverrides(

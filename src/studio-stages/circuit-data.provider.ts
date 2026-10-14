@@ -95,6 +95,8 @@ export interface CircuitDataProvider {
   }): Promise<WaveformStats | null>;
   recalculateLosses(input: {
     topologyId: string;
+    /** The branch's edited circuit (absent: the library topology). */
+    circuit?: unknown;
     componentModels: Record<string, string>;
     rawTimeSeriesZip: unknown;
     junctionC: number;

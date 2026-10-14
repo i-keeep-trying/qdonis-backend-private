@@ -23,6 +23,7 @@ import {
 } from './sizing.logic';
 import { sizingSystemPrompt } from './sizing.prompts';
 import { decksSha256 } from './decks-hash';
+import { branchCircuit } from '../../schematic/library/stored-circuit';
 import {
   buildAiFixUserPrompt,
   buildModifyUserPrompt,
@@ -56,6 +57,8 @@ export interface DesignRunInput {
   /** Specs as the sizing step expects them (old `specsToParameters`). */
   parameters: Dict;
   actor: Pick<AuthenticatedUser, 'id' | 'role'>;
+  /** The branch's edited circuit (absent: the library topology). */
+  circuit?: Record<string, unknown>;
 }
 
 /** Core `LLM_MAX_TOKENS` / `LLM_TEMPERATURE` defaults for the sizing call. */
@@ -284,7 +287,10 @@ export class DesignSizingService {
 
   /** Sizes the design; the AI call is billed to the actor (or the team pool). */
   async size(input: DesignRunInput, projectId: string): Promise<DesignData> {
-    const template = this.topologies.design(input.topologyId);
+    const template = branchCircuit(
+      input.circuit,
+      this.topologies.design(input.topologyId),
+    );
     const params = pyTyped(input.parameters) as Dict;
     const prepared = prepareSizing(structuredClone(template), params);
     let outcome: SizingOutcome;

@@ -102,7 +102,19 @@ Routes (`projects/:projectId/branches/:branchId/stages/visualization/schematic`,
 - The engine runs sandboxed, so `readDrawing` / `readLayout` keep only the fields editing uses, with types and
   sizes checked (5000 parts, 20000 wires); only that is stored. Wires' `hidden` flag is dropped (the render derives
   it).
-- Still refused until part 5: designing a branch whose circuit was edited.
+
+## Edited circuits downstream
+
+Every step that reads the circuit takes the branch's (`branchCircuit(customCircuit, library)` in
+`stored-circuit.ts`): the design (library defaults and the queued AI sizing: `DesignRunInput.circuit`), design
+value edits, the simulation (`SimulationRunInput.circuit`: loss device types, measurements), device selection and
+the thermal stage's loss recalculation; magnetics / thermal inventories already took `customCircuit`.
+
+Editing a circuit that has a design: the apply forks (later stages build on it), and the design is carried onto
+the new branch (`carriedDesignValues` in `simulation/design-values.ts`): its rows are kept (rows of removed parts
+dropped, values edited in the schematic replace the row value, as typed), and the decks are regenerated from the
+edited circuit, so the next simulation runs exactly what is drawn. Simulation and later stages are not carried
+(run them again). Not carried: an uploaded deck, or decks that can not be generated (`designCarried: false`).
 
 ## Plan
 
@@ -111,12 +123,23 @@ Routes (`projects/:projectId/branches/:branchId/stages/visualization/schematic`,
 3. YAML -> drawing (`src/schematic/`): symbol registry, placement, wires, sheets (3a), layouts from scratch (3b) —
    done.
 4. Drawing -> YAML: check / apply endpoints; the Circuit stage stores the edited circuit and layout — done.
-5. Edited circuits are designed and simulated (today the design stage refuses them).
+5. Edited circuits are designed and simulated; the design is carried over an edit — done.
 6. qdonis-web: engine synced mode and wire router.
 7. qdonis-web: synced schematic in the Circuit tab (sheets, check, apply).
 8. Developer layout tool (temporary, tagged `DEV-LAYOUT`).
 
 ## Change log
+
+### 2026-10-15 — Edited circuits are designed and simulated (part 5)
+- `simulation.service.ts`: the design (both paths), `setDesignValues`, `runSimulation` and `selectDevices` use the
+  branch's circuit; the "Designing an edited circuit is not available yet" refusals are gone.
+  `simulation-runs.service.ts`, `sizing/design-sizing.service.ts`: run inputs carry `circuit`.
+  `library-circuit-data.provider.ts` / `thermal.stage.ts`: loss recalculation takes it too.
+- `design-values.ts`: `rowUpdates` (shared with `setDesignValues`), `carriedDesignValues`; `schematic.service.ts`
+  carries the design over an edit (`designCarried` in the apply answer).
+- Checks: `schematic.service.spec.ts` drives the real `SimulationService` on an in-memory graph (design of an
+  edited circuit, carry-over onto the fork with the original branch untouched, value edits and the queued
+  simulation input on the edited circuit); all unit tests pass (1551).
 
 ### 2026-10-15 — Drawing -> YAML, schematic endpoints (part 4)
 - `library/apply.ts` (port of `apply_schematic` and its helpers), `values.ts` `coerce`, `library/drawing-input.ts`

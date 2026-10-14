@@ -17,6 +17,10 @@ import { VisualizationService } from '../visualization/visualization.service';
 import type { VisualizationData } from '../visualization/visualization.types';
 import type { SchematicSymbol } from './schematic.types';
 import { SchematicService } from './schematic.service';
+import type { DesignSizingService } from '../simulation/sizing/design-sizing.service';
+import type { SimulationRunsService } from '../simulation/simulation-runs.service';
+import { SimulationService } from '../simulation/simulation.service';
+import type { DesignData } from '../simulation/simulation.types';
 
 const USER = { id: 'u1', role: 'USER' } as const;
 const PROJECT = '00000000-0000-4000-8000-000000000001';
@@ -310,6 +314,123 @@ describe('SchematicService', () => {
     expect(sheet.sheet.id).toBe(top.sheets[0].id);
     expect(sheet.schematic.components.some((c) => c.type === 'PORT')).toBe(
       true,
+    );
+  });
+});
+
+describe('an edited circuit is designed and simulated', () => {
+  let topologies: TopologiesService;
+  let circuits: CircuitInfoService;
+
+  beforeAll(async () => {
+    const repository = new TopologiesRepository();
+    await repository.onModuleInit();
+    topologies = new TopologiesService(repository);
+    circuits = new CircuitInfoService(topologies);
+  });
+
+  const make = () => {
+    const env = setup('dcdc_buck');
+    const enqueue = jest.fn(() => Promise.resolve());
+    const schematic = new SchematicService(
+      env.access,
+      env.projects,
+      env.graph,
+      topologies,
+      circuits,
+    );
+    const simulation = new SimulationService(
+      env.access,
+      env.projects,
+      env.graph,
+      topologies,
+      null as never,
+      { enqueue } as unknown as SimulationRunsService,
+      null as never,
+      null as never,
+      null as unknown as DesignSizingService,
+    );
+    const { branchId } = env.init(schematic, topologies, circuits);
+    return { env, schematic, simulation, enqueue, branchId };
+  };
+
+  /** Edits Cout's capacitance in the drawing and applies it. */
+  const editCout = async (
+    schematic: SchematicService,
+    branchId: string,
+    value: string,
+  ) => {
+    const r = await schematic.render(USER, PROJECT, branchId, {});
+    const drawn = structuredClone({
+      components: r.schematic.components,
+      wires: r.schematic.wires,
+    });
+    const cout = drawn.components.find(
+      (c) => c.id === 'Cout',
+    ) as SchematicSymbol;
+    cout.parameters.capacitance = value;
+    return schematic.apply(USER, PROJECT, branchId, { schematic: drawn });
+  };
+
+  const designOf = (env: ReturnType<typeof make>['env'], branchId: string) =>
+    stageNodeOnBranch(env.studio, 'design', branchId)?.data as unknown as
+      DesignData | undefined;
+
+  it('designs the edited circuit, not the library one', async () => {
+    const { schematic, simulation, branchId } = make();
+    await editCout(schematic, branchId, '470u');
+    const design = await simulation.runDesign(USER, PROJECT, branchId);
+    const data = design.node?.data as unknown as DesignData;
+    expect(data.decks.transient).toContain('0.00047');
+  });
+
+  it('carries the design over when the designed circuit is edited', async () => {
+    const { env, schematic, simulation, branchId } = make();
+    await simulation.runDesign(USER, PROJECT, branchId);
+    await simulation.setDesignValues(USER, PROJECT, branchId, [
+      { ref: 'L1', param: 'inductance', value: '3.3e-05' },
+    ]);
+    const applied = await editCout(schematic, branchId, '470u');
+    expect(applied.forked).toBe(true);
+    expect(applied.designCarried).toBe(true);
+    const carried = designOf(env, applied.branchId);
+    expect(carried?.recalculatedParameters).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          ref: 'L1',
+          param: 'inductance',
+          after: '3.3e-05',
+        }),
+      ]),
+    );
+    expect(carried?.decks.transient).toContain('3.3e-05');
+    // the design table row takes the value as typed in the schematic
+    expect(carried?.decks.transient).toContain('Cout n_Cout_esr 0 470u');
+    // The original branch keeps its circuit and design.
+    expect(designOf(env, branchId)?.decks.transient).not.toContain('0.00047');
+  });
+
+  it('edits design values and queues the simulation on the edited circuit', async () => {
+    const { simulation, schematic, enqueue, branchId } = make();
+    const applied = await editCout(schematic, branchId, '470u');
+    await simulation.runDesign(USER, PROJECT, applied.branchId);
+    const edited = await simulation.setDesignValues(
+      USER,
+      PROJECT,
+      applied.branchId,
+      [{ ref: 'L1', param: 'inductance', value: '3.3e-05' }],
+    );
+    const decks = (edited.node?.data as unknown as DesignData).decks;
+    expect(decks.transient).toContain('3.3e-05');
+    expect(decks.transient).toContain('0.00047');
+    await simulation.runSimulation(USER, PROJECT, applied.branchId, [
+      'transient',
+    ]);
+    const queued = (
+      enqueue.mock.calls[0] as unknown as [{ run: { circuit?: unknown } }]
+    )[0];
+    expect(queued.run.circuit).toEqual(
+      expect.objectContaining({ components: expect.any(Array) as unknown }),
     );
   });
 });

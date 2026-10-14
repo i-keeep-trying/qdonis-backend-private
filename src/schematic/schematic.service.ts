@@ -30,7 +30,12 @@ import { applySchematic, type ApplyResult } from './library/apply';
 import { readDrawing, readLayout } from './library/drawing-input';
 import { libraryLayout, mergeLayouts } from './library/layout';
 import { SheetNotFoundError, renderForTopology } from './library/render';
-import { fromStoredCircuit, toStoredCircuit } from './library/stored-circuit';
+import {
+  branchCircuit,
+  fromStoredCircuit,
+  toStoredCircuit,
+} from './library/stored-circuit';
+import { carriedDesignValues } from '../simulation/design-values';
 
 type Actor = Pick<AuthenticatedUser, 'id' | 'role'>;
 
@@ -43,6 +48,8 @@ interface CircuitContext {
   node: StageNode;
   data: VisualizationData;
   topologyId: string;
+  /** The branch's design, if any. */
+  design: StageNode | null;
   /** Design values `[{ref, param, after}]` of the branch's design, if any. */
   rows: unknown;
   circuit: Dict;
@@ -165,6 +172,7 @@ export class SchematicService {
       summary = edit.summary;
     }
 
+    const carried = result.layout_only ? null : this.carryDesign(ctx, result);
     let forked = false;
     let branchName = '';
     let landed = branchId;
@@ -203,7 +211,16 @@ export class SchematicService {
         forked = commit.forked;
         branchName = commit.branchName;
         landed = commit.project.activeBranchId;
-        return commit.project;
+        if (!carried) return commit.project;
+        return commitStage(
+          commit.project,
+          'design',
+          carried as unknown as JsonObject,
+          {
+            source: 'user',
+            summary: 'Design carried over to the edited circuit',
+          },
+        ).project;
       },
       branchId,
     );
@@ -221,7 +238,39 @@ export class SchematicService {
       branchName,
       workspaceVersion: meta.revision,
       changes: result.changes,
+      designCarried: carried !== null,
     };
+  }
+
+  /**
+   * The branch's design brought along to the edited circuit (values kept,
+   * decks regenerated); null without a design, for an uploaded deck, or when
+   * the edited circuit can not be netlisted with the design's values.
+   */
+  private carryDesign(
+    ctx: CircuitContext,
+    result: ApplyResult,
+  ): DesignData | null {
+    const design = ctx.design;
+    if (design?.status !== 'ready') return null;
+    const previous = design.data as unknown as DesignData;
+    if (previous.origin === 'upload') return null;
+    try {
+      const carried = carriedDesignValues(
+        Array.isArray(previous.recalculatedParameters)
+          ? previous.recalculatedParameters
+          : [],
+        branchCircuit(
+          toStoredCircuit(result.circuit),
+          this.topologies.design(ctx.topologyId),
+        ),
+        result.param_changes,
+      );
+      if (!Object.keys(carried.decks).length) return null;
+      return { ...previous, ...carried, aiEdit: null };
+    } catch {
+      return null;
+    }
   }
 
   private async context(
@@ -251,7 +300,7 @@ export class SchematicService {
     const drawing = structuredClone(
       this.topologies.schematic(topologyId),
     ) as Dict;
-    return { node, data, topologyId, rows, circuit, drawing };
+    return { node, data, topologyId, design, rows, circuit, drawing };
   }
 
   private edit(ctx: CircuitContext, dto: SchematicEditDto): ApplyResult {

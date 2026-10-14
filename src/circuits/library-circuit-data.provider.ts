@@ -9,6 +9,7 @@ import type {
   WaveformStats,
 } from '../studio-stages/circuit-data.provider';
 import { TopologiesService } from '../topologies/topologies.service';
+import { branchCircuit } from '../schematic/library/stored-circuit';
 import { CircuitInfoService } from './circuit-info.service';
 import { applyUpdates } from './library/circuit-inventory';
 
@@ -81,6 +82,7 @@ export class LibraryCircuitDataProvider implements CircuitDataProvider {
 
   async recalculateLosses(input: {
     topologyId: string;
+    circuit?: unknown;
     componentModels: Record<string, string>;
     rawTimeSeriesZip: unknown;
     junctionC: number;
@@ -94,7 +96,9 @@ export class LibraryCircuitDataProvider implements CircuitDataProvider {
       tj: input.junctionC,
       componentModels: input.componentModels,
       deviceTypes: id
-        ? semiconductorTypesFromYaml(this.topologies.design(id))
+        ? semiconductorTypesFromYaml(
+            branchCircuit(input.circuit, this.topologies.design(id)),
+          )
         : null,
     });
     return { components: loss.components as unknown as LossComponent[] };
