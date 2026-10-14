@@ -54,7 +54,13 @@ describe('control blocks parity with qdonis-core control_blocks.py', () => {
   it('has the same block types, defaults and glyphs', () => {
     expect(tables).toBeDefined();
     expect(CONTROL_BLOCK_TYPES).toEqual(tables?.labels);
-    expect(CONTROL_BLOCK_DEFAULTS).toEqual(tables?.defaults);
+    // Python ints are bigint here; JSON has plain numbers.
+    const defaults = JSON.parse(
+      JSON.stringify(CONTROL_BLOCK_DEFAULTS, (_k, v: unknown) =>
+        typeof v === 'bigint' ? Number(v) : v,
+      ),
+    ) as unknown;
+    expect(defaults).toEqual(tables?.defaults);
     expect(CONTROL_BLOCK_GLYPHS).toEqual(tables?.glyphs);
   });
 
