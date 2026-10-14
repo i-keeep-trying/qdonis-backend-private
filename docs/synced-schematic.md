@@ -15,6 +15,8 @@ the engine's synced mode). The full original design notes are `qdonis/docs/SYNCE
 | Topology library (YAML incl. `schematic:` layouts), copied from core `0054f72` | `assets/`, `scripts/import-core-assets.mjs` |
 | Solver settings per analysis (`solverOptions`) | `src/simulation/netlist/netlist-generator.ts` |
 | YAML -> drawing (symbol registry, placement, wires, sheets, hidden parts) | `src/schematic/library/` |
+| Drawing -> YAML (`applySchematic`) and the input check of client drawings | `src/schematic/library/apply.ts`, `drawing-input.ts` |
+| Endpoints (render / check / apply on the branch's Circuit stage) | `src/schematic/schematic.{controller,service}.ts` |
 
 ## Control blocks
 
@@ -76,19 +78,59 @@ whole result. The fixtures also hold every sheet laid out from scratch and the a
 runs the core's `build_comp_nets` with an insertion-ordered set (its member order otherwise depends on the hash
 seed); the output was checked to be identical across seeds.
 
+## Drawing -> YAML and the endpoints
+
+`applySchematic(base, drawing, rows, sheet, layout, oldDrawing)` turns an edited drawing of one sheet into
+`{layout_only, circuit, layout, param_changes, added, removed, rewired, changes, errors}`: value edits, removed parts
+(nested children promoted; parts an analysis measures can not go), parts added from the palette or copied
+(`meta.copyOf`), rewiring (nets rewritten only if the connectivity really changed), unconnected pins, a default
+`.model` for a new switch; the netlist generator validates the result. Only the sheet's parts are in scope; a
+group block can not be deleted as a whole.
+
+Routes (`projects/:projectId/branches/:branchId/stages/visualization/schematic`, JWT, project access):
+
+| Route | Access | Does |
+|---|---|---|
+| `POST /` `{sheet?, fresh?, regroup?}` | view | Draws a sheet: `{schematic, layout, sheet, sheets, palette, basis, groupsExplicit, seededFromDrawing, libraryLayout}` |
+| `POST /check` `{schematic, sheet?, layout?}` | edit | What the edit would change (nothing stored), plus the new `inventory` |
+| `POST /apply` `{schematic, sheet?, layout?}` | edit | Re-checks and stores. Moves only: the Circuit node's `layout` in place. Circuit changes: a new Circuit result (`customCircuit`, `layout`, `inventory`, `netlist`, an `edits` entry, `customStructure: true`), forking a `<topology> + edit` branch when later stages build on it. Edits with errors: 400 `SCHEMATIC_INVALID`; the node changed meanwhile: 409 |
+
+- The circuit of a branch is its `customCircuit` (when edited) or the library YAML; design values come from the
+  branch's design. `customCircuit` is plain JSON without the `schematic:` section (re-attached from the library, so
+  library layout updates show through); whole numbers read back as YAML ints, as the old Studio's browser round
+  trip did (`stored-circuit.ts`).
+- The engine runs sandboxed, so `readDrawing` / `readLayout` keep only the fields editing uses, with types and
+  sizes checked (5000 parts, 20000 wires); only that is stored. Wires' `hidden` flag is dropped (the render derives
+  it).
+- Still refused until part 5: designing a branch whose circuit was edited.
+
 ## Plan
 
 1. Control blocks in the netlist generator — done.
 2. Topology library refreshed from core `feature/synced-schematic` (layouts, block-based control loops) — done.
 3. YAML -> drawing (`src/schematic/`): symbol registry, placement, wires, sheets (3a), layouts from scratch (3b) —
    done.
-4. Drawing -> YAML: check / apply endpoints; the Circuit stage stores the edited circuit and layout.
+4. Drawing -> YAML: check / apply endpoints; the Circuit stage stores the edited circuit and layout — done.
 5. Edited circuits are designed and simulated (today the design stage refuses them).
 6. qdonis-web: engine synced mode and wire router.
 7. qdonis-web: synced schematic in the Circuit tab (sheets, check, apply).
 8. Developer layout tool (temporary, tagged `DEV-LAYOUT`).
 
 ## Change log
+
+### 2026-10-15 — Drawing -> YAML, schematic endpoints (part 4)
+- `library/apply.ts` (port of `apply_schematic` and its helpers), `values.ts` `coerce`, `library/drawing-input.ts`
+  (input check), `library/stored-circuit.ts`; `SchematicModule` (controller, service, DTOs) registered in
+  `app.module.ts`; `VisualizationData` gains `customCircuit`, `layout` and a typed `edits`; error codes
+  `SHEET_NOT_FOUND`, `SCHEMATIC_INVALID`.
+- Parity: `test/parity/capture/schematic_apply_capture.py` -> `fixtures/schematic-apply/` (19 MB): every sheet
+  unedited, plus edits on the top level and one group sheet (move, value, removal, palette part, control block,
+  copy, labels, ground, rewire, floating part, bad name, unknown type, switch model, deleted block), each run
+  through the input check in `apply.parity.spec.ts`. `schematic.service.spec.ts` covers the endpoints' flow on an
+  in-memory graph (render, sheet 404, check, move in place, value edit stored and redrawn, errors, malformed
+  input, revision conflict, view-only).
+- Checks: 662 apply cases identical to the core; all unit tests pass (1548). Not run: the e2e suite (needs a
+  database).
 
 ### 2026-10-15 — Layouts from scratch (part 3b)
 - `library/power.ts` (port of `schematic_power.py`), `library/drawing-seed.ts` (`_seed_from_drawing`),

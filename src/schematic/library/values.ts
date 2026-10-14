@@ -13,6 +13,7 @@ import {
   truthy,
   type Dict,
 } from '../../simulation/netlist/py';
+import { pythonStrip } from '../../common/python/python-json';
 import { isAcSource, paramsOf } from './symbols';
 import { isControlBlock } from '../../simulation/netlist/signal-blocks';
 
@@ -179,4 +180,26 @@ export function displayText(comp: Dict): string {
     default:
       return '';
   }
+}
+
+const NOT_INTEGER_TEXT = /[eE.]|[fpnuµm]/;
+
+/**
+ * A value typed in the drawing, as the YAML stores it: true / false, an int
+ * (bigint) for whole numbers written without exponent / decimals / small
+ * prefixes, else a float; text otherwise.
+ */
+export function coerce(text: unknown): unknown {
+  const value = pythonStrip(pyStr(text));
+  const lower = value.toLowerCase();
+  if (lower === 'true' || lower === 'false') return lower === 'true';
+  const number = parseNumber(value);
+  if (number !== null) {
+    return Number.isInteger(number) &&
+      Math.abs(number) < 1e15 &&
+      !NOT_INTEGER_TEXT.test(value)
+      ? BigInt(number)
+      : number;
+  }
+  return value;
 }
