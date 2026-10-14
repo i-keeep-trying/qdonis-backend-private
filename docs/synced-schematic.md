@@ -126,7 +126,7 @@ edited circuit, so the next simulation runs exactly what is drawn. Simulation an
 5. Edited circuits are designed and simulated; the design is carried over an edit — done.
 6. qdonis-web: engine synced mode and wire router — done (engine protocol and web change log:
    `qdonis-web/docs/synced-schematic.md`).
-7. qdonis-web: synced schematic in the Circuit tab (sheets, check, apply).
+7. qdonis-web: synced schematic in the Circuit tab (sheets, check, apply) — done (see the web doc).
 8. Developer layout tool (temporary, tagged `DEV-LAYOUT`).
 
 ## Change log
