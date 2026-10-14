@@ -581,3 +581,44 @@ metadata:
   tags:
     - flyback
     - isolated
+schematic:
+  tuned: true
+  components:
+    CSN_P: {x: 180, y: 100, rotation: 180}
+    CSN_S: {x: 440, y: 260, rotation: 0}
+    CWW: {x: 380, y: -20, rotation: 270}
+    Cout: {x: 680, y: 200, rotation: 0}
+    D: {x: 560, y: 60, rotation: 270}
+    PWM: {x: 180, y: 360, rotation: 0}
+    RSN_P: {x: 180, y: 200, rotation: 180}
+    RSN_S: {x: 440, y: 140, rotation: 0}
+    R_ISO: {x: 380, y: 400, rotation: 90}
+    R_LOAD: {x: 800, y: 200, rotation: 0}
+    SW: {x: 300, y: 300, rotation: 0}
+    T1: {x: 320, y: 120, rotation: 0}
+    VIN: {x: 0, y: 200, rotation: 0}
+    "~GND@PWM.B": {x: 180, y: 480, rotation: 0}
+    "~GND@VIN.B": {x: 0, y: 320, rotation: 0}
+  wires:
+  - {id: W3, from: PWM.B, to: "~GND@PWM.B.P"}
+  - {id: W1, from: PWM.B, to: SW.S}
+  - {id: W2, from: R_ISO.B, to: SW.S}
+  - {id: W5, from: CSN_P.B, to: T1.P1}
+  - {id: W6, from: CWW.A, to: T1.P1}
+  - {id: W7, from: CSN_P.B, to: VIN.A}
+  - {id: W8, from: PWM.A, to: SW.G}
+  - {id: W9, from: SW.D, to: T1.P2}
+  - {id: W10, from: RSN_P.A, to: SW.D, path: [[180, 240], [180, 240], [240, 240], [240, 240], [300, 240], [300, 260]]}
+  - {id: W11, from: D.A, to: RSN_S.A}
+  - {id: W12, from: RSN_S.A, to: T1.S1}
+  - {id: W13, from: CWW.B, to: T1.S1}
+  - {id: W14, from: Cout.A, to: R_LOAD.A, path: [[680, 160], [680, 60], [800, 60], [800, 160]]}
+  - {id: W15, from: Cout.A, to: D.B}
+  - {id: W17, from: Cout.B, to: R_LOAD.B, path: [[680, 240], [680, 320], [800, 320], [800, 240]]}
+  - {id: W18, from: CSN_S.B, to: T1.S2}
+  - {id: W19, from: CSN_S.B, to: Cout.B}
+  - {id: W16, from: CSN_S.B, to: R_ISO.A}
+  - {id: W20, from: CSN_P.A, to: RSN_P.B}
+  - {id: W21, from: CSN_S.A, to: RSN_S.B}
+  - {id: W22, from: VIN.B, to: PWM.B}
+  groups: {}

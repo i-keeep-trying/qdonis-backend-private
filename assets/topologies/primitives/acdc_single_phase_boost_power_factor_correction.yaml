@@ -63,6 +63,11 @@ components:
     params:
       node_type: label
 
+  - ref: V_ERR
+    type: node
+    params:
+      node_type: label
+
   - ref: V_RAW
     type: node
     params:
@@ -88,7 +93,7 @@ components:
     params:
       node_type: label
 
-  - ref: C_RAW
+  - ref: C_ERR
     type: node
     params:
       node_type: label
@@ -248,71 +253,79 @@ components:
       resistance: 10000.0
       sense: false
 
-  # Control Loop 2: Voltage Error Amp & Comp Filter
-  - ref: VREF
-    type: node
-    role: voltage_source
+  # Control Loop 2: Voltage loop (control blocks): 5V reference - VFB -> gain 100 -> clamp 0..5V -> 10ms lag
+  - ref: REF_V
+    type: const
+    role: voltage_reference
     params:
-      node_type: voltage_source
-      source: dc
-      voltage: 5.0
-      series_resistance: 0
+      value: 5.0
 
-  - ref: E_V
-    type: e_source
+  - ref: SUM_V
+    type: sum
+    role: voltage_error
+    params:
+      signs: "+-"
+
+  - ref: K_V
+    type: gain
+    role: voltage_error_amp
     params:
       gain: 100.0
 
-  - ref: B_V_CLAMP
-    type: b_source
+  - ref: LIM_V
+    type: limiter
+    role: voltage_error_clamp
     params:
-      expression: "max(min(V(V_RAW), 5), 0)"
+      lower: 0
+      upper: 5
 
-  - ref: R_V
-    type: resistor
+  - ref: LPF_V
+    type: lowpass
+    role: voltage_compensator
     params:
-      resistance: 10000.0
-      sense: false
+      tau: 0.01
+      ic: 2.5
 
-  - ref: C_V
-    type: capacitor
+  # Control Loop 3: Analog Multiplier (current reference = 0.003 * rectified voltage * voltage-loop output)
+  - ref: MULT
+    type: product
+    role: current_reference_multiplier
     params:
-      capacitance: 1.0e-06
-      sense: false
+      gain: 0.003
 
-  # Control Loop 3: Analog Multiplier
-  - ref: B_MULT
-    type: b_source
-    params:
-      expression: "V(d) * V(V_COMP) * 0.003"
-
-  # Control Loop 4: Current Error Amp & Comp Filter
-  - ref: B_I_ACT
-    type: b_source
+  # Control Loop 4: Current loop: reference - sensed inductor current -> PI (clamped 0.1..4.8V) -> 4.7us lag.
+  # kp = 1 keeps the amplified inductor-current ripple slower than the 0.26 V/us carrier ramp (a gain of 100
+  # made the loop alternate between two duty cycles every switching period near the line peak); the PI zero
+  # sits at 5 kHz (ki = kp * 2*pi*5kHz) and LPF_C is the high-frequency pole.
+  - ref: I_SENSE
+    type: function
+    role: inductor_current_sense
     params:
       expression: "I(VSENSE)"
+      inputs: 0
 
-  - ref: E_C
-    type: e_source
+  - ref: SUM_C
+    type: sum
+    role: current_error
     params:
-      gain: 100.0
+      signs: "+-"
 
-  - ref: B_C_CLAMP
-    type: b_source
+  - ref: PI_C
+    type: pi
+    role: current_controller
     params:
-      expression: "max(min(V(C_RAW), 4.8), 0.1)"
+      kp: 1.0
+      ki: 31415.9
+      lower: 0.1
+      upper: 4.8
+      ic: 2.5
 
-  - ref: R_C
-    type: resistor
+  - ref: LPF_C
+    type: lowpass
+    role: current_compensator
     params:
-      resistance: 1000.0
-      sense: false
-
-  - ref: C_C
-    type: capacitor
-    params:
-      capacitance: 4.7e-09
-      sense: false
+      tau: 4.7e-06
+      ic: 2.5
 
   # Control Loop 5: PWM Generator (50kHz Sawtooth)
   - ref: V_TRI
@@ -330,10 +343,13 @@ components:
       per: 2.0e-05
       series_resistance: 0
 
-  - ref: B_PWM
-    type: b_source
+  - ref: CMP
+    type: comparator
+    role: pwm_comparator
     params:
-      expression: "V(C_COMP) > V(VTRI) ? 5 : 0"
+      high: 5
+      low: 0
+      width: 1.0e-06  # hard switching, like the original V(a) > V(b) ? high : low
 
 nets:
   # Ground reference net (0)
@@ -361,27 +377,7 @@ nets:
       - neg
     - - R3
       - neg
-    - - VREF
-      - '-'
-    - - E_V
-      - '-'
-    - - B_V_CLAMP
-      - '-'
-    - - C_V
-      - neg
-    - - B_MULT
-      - '-'
-    - - B_I_ACT
-      - '-'
-    - - E_C
-      - '-'
-    - - B_C_CLAMP
-      - '-'
-    - - C_C
-      - neg
     - - V_TRI
-      - '-'
-    - - B_PWM
       - '-'
 
   # Net a (AC input L)
@@ -419,6 +415,8 @@ nets:
       - pos
     - - L1
       - pos
+    - - MULT
+      - in1
 
   # Net L_node (Inductor to current sense)
   - - - L_node
@@ -455,8 +453,8 @@ nets:
       - pin
     - - R_gate
       - pos
-    - - B_PWM
-      - +
+    - - CMP
+      - out
 
   # Net VOUT (Regulated 385V DC output)
   - - - VOUT
@@ -477,86 +475,96 @@ nets:
       - neg
     - - R3
       - pos
-    - - E_V
-      - ctrl-
+    - - SUM_V
+      - in2
 
   # Net VREF_NODE (Reference 5V)
   - - - VREF_NODE
       - pin
-    - - VREF
-      - +
-    - - E_V
-      - ctrl+
+    - - REF_V
+      - out
+    - - SUM_V
+      - in1
+
+  # Net V_ERR (Voltage error VREF - VFB)
+  - - - V_ERR
+      - pin
+    - - SUM_V
+      - out
+    - - K_V
+      - in
 
   # Net V_RAW (Voltage error amp unconstrained output)
   - - - V_RAW
       - pin
-    - - E_V
-      - +
-    - - B_V_CLAMP
-      - ctrl+
+    - - K_V
+      - out
+    - - LIM_V
+      - in
 
   # Net V_CLAMP (Voltage error amp clamped output)
   - - - V_CLAMP
       - pin
-    - - B_V_CLAMP
-      - +
-    - - R_V
-      - pos
+    - - LIM_V
+      - out
+    - - LPF_V
+      - in
 
   # Net V_COMP (Voltage error compensation filtered output)
   - - - V_COMP
       - pin
-    - - R_V
-      - neg
-    - - C_V
-      - pos
+    - - LPF_V
+      - out
+    - - MULT
+      - in2
 
   # Net I_TARGET (Multiplier current demand reference)
   - - - I_TARGET
       - pin
-    - - B_MULT
-      - +
-    - - E_C
-      - ctrl+
+    - - MULT
+      - out
+    - - SUM_C
+      - in1
 
   # Net I_ACT (Actual sensed inductor current signal)
   - - - I_ACT
       - pin
-    - - B_I_ACT
-      - +
-    - - E_C
-      - ctrl-
+    - - I_SENSE
+      - out
+    - - SUM_C
+      - in2
 
-  # Net C_RAW (Current error amp unconstrained output)
-  - - - C_RAW
+  # Net C_ERR (Current error I_TARGET - I_ACT)
+  - - - C_ERR
       - pin
-    - - E_C
-      - +
-    - - B_C_CLAMP
-      - ctrl+
+    - - SUM_C
+      - out
+    - - PI_C
+      - in
 
-  # Net C_CLAMP (Current error amp clamped output)
+  # Net C_CLAMP (Current controller output, clamped 0.1..4.8V)
   - - - C_CLAMP
       - pin
-    - - B_C_CLAMP
-      - +
-    - - R_C
-      - pos
+    - - PI_C
+      - out
+    - - LPF_C
+      - in
 
   # Net C_COMP (Current error compensation filtered output)
   - - - C_COMP
       - pin
-    - - R_C
-      - neg
-    - - C_C
-      - pos
+    - - LPF_C
+      - out
+    - - CMP
+      - inp
 
   # Net VTRI (PWM triangle/sawtooth carrier)
   - - - VTRI
       - pin
     - - V_TRI
       - +
+    - - CMP
+      - inn
 
 analysis:
   spice_settings:
@@ -567,6 +575,8 @@ analysis:
     requirements:
       - rid: tr_boost_pfc
         requirement: Verify 385V DC output and active PFC boosting operation
+        criteria:
+          target_vout: 385.0
         environment:
           - ref: time_domain
             t_step: 1.0e-06
@@ -611,3 +621,145 @@ analysis:
           - var: vout_ripple_vpp
             formula: '[Vout_ripple_vpp]'
             description: Output Voltage Ripple peak-to-peak
+schematic:
+  tuned: false
+  components:
+    "#gate_drive": {x: 20, y: 720, rotation: 0}
+    C1: {x: 1440, y: 220, rotation: 0}
+    CMP: {x: 760, y: 480, rotation: 0}
+    C_BYPASS: {x: 640, y: 200, rotation: 0}
+    C_CLAMP: {x: 480, y: 400, rotation: 180}
+    C_COMP: {x: 640, y: 400, rotation: 180}
+    C_ERR: {x: 320, y: 380, rotation: 180}
+    C_RAW: {x: 880, y: 520, rotation: 180}
+    C_S: {x: 1120, y: 220, rotation: 0}
+    D1: {x: 260, y: 280, rotation: 180}
+    D2: {x: 260, y: 120, rotation: 180}
+    D3: {x: 420, y: 280, rotation: 180}
+    D4: {x: 420, y: 120, rotation: 180}
+    D6: {x: 1320, y: 40, rotation: 270}
+    GND: {x: 140, y: 440, rotation: 0}
+    I_ACT: {x: 340, y: 540, rotation: 0}
+    I_SENSE: {x: 120, y: 480, rotation: 0}
+    I_TARGET: {x: 200, y: 440, rotation: 180}
+    K_C: {x: 440, y: 460, rotation: 0}
+    K_V: {x: 440, y: 200, rotation: 0}
+    L1: {x: 760, y: 40, rotation: 270}
+    LIM_C: {x: 600, y: 460, rotation: 0}
+    LIM_V: {x: 600, y: 200, rotation: 0}
+    LPF_C: {x: 600, y: 460, rotation: 0}
+    LPF_V: {x: 760, y: 200, rotation: 0}
+    L_node: {x: 880, y: -40, rotation: 0}
+    M1: {x: 1020, y: 220, rotation: 0}
+    MULT: {x: 960, y: 180, rotation: 0}
+    PI_C: {x: 440, y: 460, rotation: 0}
+    R1: {x: 1560, y: 220, rotation: 0}
+    R2: {x: 1680, y: 140, rotation: 0}
+    R3: {x: 1680, y: 300, rotation: 0}
+    REF_V: {x: 120, y: 180, rotation: 0}
+    R_S: {x: 1220, y: 220, rotation: 0}
+    R_gate: {x: 900, y: 480, rotation: 270}
+    Ra: {x: 140, y: 320, rotation: 0}
+    Rb: {x: 540, y: 320, rotation: 0}
+    SUM_C: {x: 280, y: 460, rotation: 0}
+    SUM_V: {x: 280, y: 200, rotation: 0}
+    VAC: {x: 0, y: 200, rotation: 0}
+    VFB: {x: 1620, y: 240, rotation: 90}
+    VOUT: {x: 1440, y: 40, rotation: 0}
+    VREF_NODE: {x: 120, y: 100, rotation: 180}
+    VSENSE: {x: 900, y: 40, rotation: 270}
+    VTRI: {x: 560, y: 520, rotation: 180}
+    V_CLAMP: {x: 720, y: 140, rotation: 0}
+    V_COMP: {x: 880, y: 260, rotation: 0}
+    V_ERR: {x: 60, y: 240, rotation: 180}
+    V_RAW: {x: 560, y: 140, rotation: 0}
+    V_TRI: {x: 680, y: 580, rotation: 0}
+    "^gate_drive:VFB": {x: 180, y: 220, rotation: 180}
+    "^gate_drive:ctrl_gate": {x: 1000, y: 480, rotation: 0}
+    "^gate_drive:d": {x: 880, y: 160, rotation: 180}
+    a: {x: 0, y: 100, rotation: 270}
+    b: {x: 0, y: 300, rotation: 90}
+    ctrl: {x: 1040, y: 400, rotation: 0}
+    ctrl_gate: {x: 860, y: 220, rotation: 180}
+    d: {x: 260, y: 20, rotation: 270}
+    e: {x: 1020, y: 40, rotation: 0}
+    "~GND@C1.B": {x: 1440, y: 340, rotation: 0}
+    "~GND@V_TRI.B": {x: 680, y: 700, rotation: 0}
+    "~I_TARGET@MULT.out": {x: 1120, y: 180, rotation: 0}
+    "~VFB@#gate_drive.VFB": {x: -140, y: 700, rotation: 180}
+    "~ctrl_gate@#gate_drive.ctrl_gate": {x: 220, y: 720, rotation: 0}
+    "~d@#gate_drive.d": {x: -140, y: 740, rotation: 180}
+  wires:
+  - {id: W1, from: C_S.B, to: M1.S}
+  - {id: W2, from: C1.B, to: R1.B}
+  - {id: W3, from: D1.A, to: D3.A}
+  - {id: W4, from: R1.B, to: R3.B}
+  - {id: W5, from: D1.A, to: GND.P}
+  - {id: W6, from: GND.P, to: Ra.B}
+  - {id: W7, from: C_S.B, to: R_S.B}
+  - {id: W8, from: D3.A, to: Rb.B}
+  - {id: W9, from: C1.B, to: R_S.B}
+  - {id: W10, from: C_BYPASS.B, to: Rb.B}
+  - {id: W11, from: C1.B, to: "~GND@C1.B.P"}
+  - {id: W12, from: L1.B, to: VSENSE.A}
+  - {id: W13, from: L_node.P, to: VSENSE.A}
+  - {id: W14, from: R2.B, to: R3.A}
+  - {id: W15, from: R2.B, to: VFB.P}
+  - {id: W16, from: "#gate_drive.VFB", to: "~VFB@#gate_drive.VFB.P"}
+  - {id: W17, from: C1.A, to: R1.A}
+  - {id: W18, from: R1.A, to: R2.A}
+  - {id: W19, from: C1.A, to: D6.B}
+  - {id: W20, from: D6.B, to: VOUT.P}
+  - {id: W21, from: D1.B, to: D2.A}
+  - {id: W22, from: D2.A, to: VAC.A}
+  - {id: W23, from: VAC.A, to: a.P}
+  - {id: W24, from: D1.B, to: Ra.A}
+  - {id: W25, from: D3.B, to: D4.A}
+  - {id: W26, from: D3.B, to: VAC.B}
+  - {id: W27, from: VAC.B, to: b.P}
+  - {id: W28, from: D3.B, to: Rb.A}
+  - {id: W29, from: M1.G, to: ctrl_gate.P}
+  - {id: W30, from: "#gate_drive.ctrl_gate", to: "~ctrl_gate@#gate_drive.ctrl_gate.P"}
+  - {id: W31, from: D2.B, to: D4.B}
+  - {id: W32, from: C_BYPASS.A, to: L1.A}
+  - {id: W33, from: C_BYPASS.A, to: D4.B}
+  - {id: W34, from: D2.B, to: d.P}
+  - {id: W35, from: "#gate_drive.d", to: "~d@#gate_drive.d.P"}
+  - {id: W36, from: C_S.A, to: M1.D}
+  - {id: W37, from: M1.D, to: VSENSE.B}
+  - {id: W38, from: C_S.A, to: D6.A}
+  - {id: W39, from: VSENSE.B, to: e.P}
+  - {id: W40, from: C_S.A, to: R_S.A}
+  groups:
+    gate_drive: {label: "Control loop", members: [REF_V, SUM_V, K_V, LIM_V, LPF_V, MULT, I_SENSE, SUM_C, PI_C, LPF_C, V_TRI, CMP, R_gate]}
+  sheets:
+    gate_drive:
+      wires:
+      - {id: W1, from: V_TRI.B, to: "~GND@V_TRI.B.P"}
+      - {id: W2, from: LPF_C.in, to: PI_C.out}
+      - {id: W3, from: LPF_C.in, to: C_CLAMP.P}
+      - {id: W4, from: CMP.inp, to: LPF_C.out}
+      - {id: W5, from: CMP.inp, to: C_COMP.P}
+      - {id: W6, from: PI_C.in, to: SUM_C.out}
+      - {id: W7, from: C_ERR.P, to: SUM_C.out}
+      - {id: W8, from: I_SENSE.out, to: SUM_C.in2}
+      - {id: W9, from: I_ACT.P, to: SUM_C.in2}
+      - {id: W10, from: I_TARGET.P, to: SUM_C.in1}
+      - {id: W11, from: MULT.out, to: "~I_TARGET@MULT.out.P"}
+      - {id: W12, from: SUM_V.in2, to: "^gate_drive:VFB.P"}
+      - {id: W13, from: REF_V.out, to: SUM_V.in1}
+      - {id: W14, from: REF_V.out, to: VREF_NODE.P}
+      - {id: W15, from: CMP.inn, to: V_TRI.A}
+      - {id: W16, from: CMP.inn, to: VTRI.P}
+      - {id: W17, from: LIM_V.out, to: LPF_V.in}
+      - {id: W18, from: LPF_V.in, to: V_CLAMP.P}
+      - {id: W19, from: LPF_V.out, to: MULT.in2}
+      - {id: W20, from: LPF_V.out, to: V_COMP.P}
+      - {id: W21, from: K_V.in, to: SUM_V.out}
+      - {id: W22, from: SUM_V.out, to: V_ERR.P}
+      - {id: W23, from: K_V.out, to: LIM_V.in}
+      - {id: W24, from: LIM_V.in, to: V_RAW.P}
+      - {id: W25, from: CMP.out, to: R_gate.A}
+      - {id: W26, from: R_gate.A, to: ctrl.P}
+      - {id: W27, from: R_gate.B, to: "^gate_drive:ctrl_gate.P"}
+      - {id: W28, from: MULT.in1, to: "^gate_drive:d.P"}

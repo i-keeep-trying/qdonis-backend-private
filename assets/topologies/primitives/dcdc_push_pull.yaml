@@ -923,3 +923,61 @@ metadata:
   topology: ''
   control: ''
   tags: []
+schematic:
+  tuned: true
+  components:
+    C0: {x: 1100, y: 300, rotation: 0}
+    C1: {x: 300, y: 440, rotation: 0}
+    CSN_Q1: {x: 440, y: 80, rotation: 180}
+    CSN_Q2: {x: 440, y: 480, rotation: 0}
+    CSN_SEC: {x: 880, y: 360, rotation: 0}
+    D1: {x: 740, y: 200, rotation: 270}
+    D2: {x: 740, y: 360, rotation: 270}
+    L1: {x: 980, y: 200, rotation: 270}
+    PWM1: {x: 600, y: 60, rotation: 180}
+    PWM2: {x: 620, y: 480, rotation: 0}
+    Q1: {x: 540, y: 120, rotation: 180}
+    Q2: {x: 540, y: 440, rotation: 0, mirrorX: true}
+    RLOAD: {x: 1220, y: 300, rotation: 0}
+    RSN_Q1: {x: 440, y: 160, rotation: 180}
+    RSN_Q2: {x: 440, y: 380, rotation: 0}
+    RSN_SEC: {x: 880, y: 260, rotation: 0}
+    R_ISO: {x: 760, y: 580, rotation: 90}
+    T1: {x: 560, y: 280, rotation: 0}
+    VIN: {x: 200, y: 400, rotation: 0}
+    "~GND@C1.B": {x: 120, y: 400, rotation: 0}
+    "~GND@CSN_Q1.B": {x: 440, y: -40, rotation: 0}
+    "~GND@CSN_Q2.B": {x: 440, y: 600, rotation: 0}
+  wires:
+  - {id: W1, from: C1.B, to: VIN.B, path: [[300, 480], [300, 540], [200, 540], [200, 440]]}
+  - {id: W2, from: PWM2.B, to: R_ISO.B}
+  - {id: W4, from: CSN_Q2.B, to: Q2.S}
+  - {id: W5, from: PWM2.B, to: Q2.S, path: [[620, 520], [620, 540], [560, 540], [560, 540], [540, 540], [540, 480]]}
+  - {id: W8, from: CSN_Q2.B, to: "~GND@CSN_Q2.B.P"}
+  - {id: W3, from: CSN_Q1.B, to: Q1.S, path: [[440, 40], [440, 20], [540, 20], [540, 80]]}
+  - {id: W6, from: PWM1.B, to: Q1.S, path: [[600, 20], [600, 20], [540, 20], [540, 80]]}
+  - {id: W10, from: C1.A, to: VIN.A, path: [[300, 400], [300, 300], [200, 300], [200, 360]]}
+  - {id: W11, from: C1.A, to: T1.PCT}
+  - {id: W12, from: C0.B, to: RLOAD.B, path: [[1100, 340], [1100, 420], [1220, 420], [1220, 340]]}
+  - {id: W13, from: CSN_SEC.B, to: R_ISO.A}
+  - {id: W14, from: C0.B, to: CSN_SEC.B}
+  - {id: W15, from: CSN_SEC.B, to: T1.SCT}
+  - {id: W16, from: CSN_Q1.A, to: RSN_Q1.B}
+  - {id: W17, from: CSN_Q2.A, to: RSN_Q2.B}
+  - {id: W18, from: CSN_SEC.A, to: RSN_SEC.B}
+  - {id: W19, from: Q1.D, to: T1.P1}
+  - {id: W20, from: RSN_Q1.A, to: T1.P1}
+  - {id: W21, from: Q2.D, to: T1.P2}
+  - {id: W22, from: RSN_Q2.A, to: T1.P2, path: [[440, 340], [440, 340], [500, 340], [500, 340], [540, 340], [540, 320]]}
+  - {id: W23, from: PWM1.A, to: Q1.G}
+  - {id: W24, from: PWM2.A, to: Q2.G, path: [[620, 440], [620, 440], [580, 440], [580, 440], [560, 440]]}
+  - {id: W25, from: D1.A, to: T1.S1}
+  - {id: W26, from: D2.A, to: T1.S2}
+  - {id: W27, from: L1.A, to: RSN_SEC.A}
+  - {id: W28, from: D1.B, to: RSN_SEC.A}
+  - {id: W29, from: D1.B, to: D2.B}
+  - {id: W30, from: C0.A, to: RLOAD.A, path: [[1100, 260], [1100, 200], [1220, 200], [1220, 260]]}
+  - {id: W31, from: C0.A, to: L1.B}
+  - {id: W32, from: C1.B, to: CSN_Q2.B, path: [[300, 480], [300, 540], [440, 540], [440, 520]]}
+  - {id: W33, from: CSN_Q1.B, to: CSN_Q2.B, path: [[440, 40], [440, 20], [400, 20], [400, 260], [400, 260], [400, 540], [440, 540], [440, 520]]}
+  groups: {}

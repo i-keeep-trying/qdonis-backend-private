@@ -122,6 +122,8 @@ analysis:
     requirements:
     - rid: tr_single_phase_fw
       requirement: Verify full wave rectification via isolated transformer.
+      criteria:
+        target_vout: 18.0
       environment:
       - ref: time_domain
         t_step: 1.0e-06
@@ -145,3 +147,34 @@ analysis:
       - var: vout_avg_v
         formula: abs([Vout_avg])
         description: Average Output Voltage
+schematic:
+  tuned: true
+  components:
+    C_OUT: {x: 880, y: 200, rotation: 0}
+    D1: {x: 560, y: 280, rotation: 180}
+    D2: {x: 720, y: 280, rotation: 180}
+    D3: {x: 560, y: 120, rotation: 180}
+    D4: {x: 720, y: 120, rotation: 180}
+    GND: {x: 320, y: 340, rotation: 0}
+    R_LOAD: {x: 1000, y: 200, rotation: 0}
+    R_PRI: {x: 200, y: 300, rotation: 90}
+    R_SEC: {x: 420, y: 140, rotation: 90}
+    TX: {x: 300, y: 200, rotation: 0}
+    VAC: {x: 100, y: 200, rotation: 180}
+  wires:
+  - {id: W1, from: GND.P, to: TX.S2}
+  - {id: W2, from: D2.B, to: D4.A}
+  - {id: W3, from: D2.B, to: GND.P}
+  - {id: W4, from: C_OUT.B, to: R_LOAD.B}
+  - {id: W5, from: D1.A, to: D2.A}
+  - {id: W6, from: C_OUT.B, to: D2.A}
+  - {id: W7, from: D1.B, to: D3.A}
+  - {id: W8, from: D3.A, to: R_SEC.A}
+  - {id: W9, from: C_OUT.A, to: R_LOAD.A}
+  - {id: W10, from: D3.B, to: D4.B}
+  - {id: W11, from: C_OUT.A, to: D4.B}
+  - {id: W12, from: R_PRI.B, to: VAC.A}
+  - {id: W13, from: TX.P1, to: VAC.B}
+  - {id: W14, from: R_PRI.A, to: TX.P2}
+  - {id: W15, from: R_SEC.B, to: TX.S1}
+  groups: {}

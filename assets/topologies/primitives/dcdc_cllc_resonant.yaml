@@ -510,9 +510,9 @@ analysis:
     spice_settings:
       tstop: 0.01
       use_ic: true
+      # abstol / vntol at the defaults (1e-9 / 1e-5): the looser 1e-6 / 1e-4 written here earlier were applied from
+      # 2026-10-11 and moved the results away from a tight-tolerance reference (median error 5.4 % -> 9.4 %).
       reltol: 0.01
-      abstol: 1.0e-06
-      vntol: 0.0001
       gmin: 1.0e-12
       method: gear
       maxord: 2
@@ -746,3 +746,80 @@ metadata:
     - bidirectional
     - V2G
     - EV-charger
+schematic:
+  tuned: true
+  components:
+    Cout: {x: 1760, y: 300, rotation: 0}
+    Cr_P: {x: 620, y: 200, rotation: 270}
+    Cr_S: {x: 980, y: 200, rotation: 270}
+    Lr: {x: 740, y: 200, rotation: 270}
+    Ls: {x: 1100, y: 200, rotation: 270}
+    PWM1: {x: 140, y: 120, rotation: 0}
+    PWM2: {x: 140, y: 380, rotation: 0}
+    PWM3: {x: 420, y: 120, rotation: 0}
+    PWM4: {x: 420, y: 380, rotation: 0}
+    PWM5: {x: 1220, y: 120, rotation: 0}
+    PWM6: {x: 1220, y: 380, rotation: 0}
+    PWM7: {x: 1500, y: 120, rotation: 0}
+    PWM8: {x: 1500, y: 380, rotation: 0}
+    R_ISO: {x: 1000, y: 440, rotation: 90}
+    R_LOAD: {x: 1880, y: 300, rotation: 0}
+    SW1: {x: 240, y: 80, rotation: 0}
+    SW2: {x: 240, y: 320, rotation: 0}
+    SW3: {x: 520, y: 80, rotation: 0}
+    SW4: {x: 520, y: 320, rotation: 0}
+    SW5: {x: 1320, y: 80, rotation: 0}
+    SW6: {x: 1320, y: 320, rotation: 0}
+    SW7: {x: 1600, y: 80, rotation: 0}
+    SW8: {x: 1600, y: 320, rotation: 0}
+    T1: {x: 880, y: 240, rotation: 0}
+    VIN: {x: 0, y: 200, rotation: 0}
+    "~Cout.neg@Cout.B": {x: 1760, y: 500, rotation: 90}
+    "~Cout.neg@PWM6.B": {x: 1220, y: 520, rotation: 90}
+    "~GND@PWM2.B": {x: 140, y: 500, rotation: 0}
+    "~GND@R_ISO.B": {x: 880, y: 480, rotation: 0}
+    "~GND@VIN.B": {x: 0, y: 540, rotation: 0}
+  wires:
+  - {id: W1, from: PWM2.B, to: SW2.S}
+  - {id: W2, from: PWM4.B, to: SW4.S}
+  - {id: W3, from: PWM4.B, to: SW2.S, path: [[420, 420], [420, 440], [260, 440], [260, 440], [240, 440], [240, 360]]}
+  - {id: W5, from: PWM2.B, to: "~GND@PWM2.B.P"}
+  - {id: W4, from: R_ISO.B, to: "~GND@R_ISO.B.P"}
+  - {id: W7, from: SW1.D, to: SW3.D}
+  - {id: W8, from: SW1.D, to: VIN.A}
+  - {id: W9, from: PWM1.B, to: SW1.S}
+  - {id: W10, from: SW1.S, to: SW2.D}
+  - {id: W11, from: Cr_P.A, to: SW1.S, path: [[580, 200], [260, 200], [260, 180], [240, 180], [240, 120]]}
+  - {id: W12, from: Cr_S.A, to: T1.S1}
+  - {id: W13, from: Cr_S.B, to: Ls.A}
+  - {id: W14, from: Cout.A, to: R_LOAD.A, path: [[1760, 260], [1760, 20], [1880, 20], [1880, 260]]}
+  - {id: W15, from: SW5.D, to: SW7.D}
+  - {id: W16, from: Cout.A, to: SW7.D}
+  - {id: W17, from: PWM5.B, to: SW5.S}
+  - {id: W18, from: SW5.S, to: SW6.D}
+  - {id: W19, from: R_ISO.A, to: T1.S2}
+  - {id: W20, from: SW6.D, to: T1.S2}
+  - {id: W21, from: PWM5.A, to: SW5.G, path: [[1220, 80], [1220, 80], [1280, 80], [1280, 80], [1300, 80]]}
+  - {id: W22, from: PWM7.B, to: SW7.S, path: [[1500, 160], [1500, 200], [1600, 200], [1600, 120]]}
+  - {id: W23, from: SW7.S, to: SW8.D}
+  - {id: W24, from: Ls.B, to: PWM7.B}
+  - {id: W25, from: PWM7.A, to: SW7.G, path: [[1500, 80], [1500, 80], [1560, 80], [1560, 80], [1580, 80]]}
+  - {id: W26, from: Cout.B, to: R_LOAD.B, path: [[1760, 340], [1760, 440], [1880, 440], [1880, 340]]}
+  - {id: W27, from: Cout.B, to: SW8.S, path: [[1760, 340], [1760, 440], [1600, 440], [1600, 360]]}
+  - {id: W29, from: SW6.S, to: SW8.S}
+  - {id: W31, from: Cout.B, to: "~Cout.neg@Cout.B.P"}
+  - {id: W28, from: PWM6.B, to: PWM8.B, path: [[1220, 420], [1220, 420], [1500, 420], [1500, 420]]}
+  - {id: W30, from: PWM6.B, to: "~Cout.neg@PWM6.B.P"}
+  - {id: W32, from: PWM6.A, to: SW6.G}
+  - {id: W33, from: PWM8.A, to: SW8.G}
+  - {id: W34, from: PWM1.A, to: SW1.G, path: [[140, 80], [140, 80], [200, 80], [200, 80], [220, 80]]}
+  - {id: W35, from: Cr_P.B, to: Lr.A}
+  - {id: W36, from: Lr.B, to: T1.P1}
+  - {id: W37, from: PWM3.B, to: SW3.S}
+  - {id: W38, from: SW3.S, to: SW4.D}
+  - {id: W39, from: SW4.D, to: T1.P2}
+  - {id: W40, from: PWM3.A, to: SW3.G, path: [[420, 80], [420, 80], [480, 80], [480, 80], [500, 80]]}
+  - {id: W41, from: PWM2.A, to: SW2.G}
+  - {id: W42, from: PWM4.A, to: SW4.G}
+  - {id: W43, from: PWM2.B, to: VIN.B}
+  groups: {}

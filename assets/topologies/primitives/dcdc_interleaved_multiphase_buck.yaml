@@ -496,3 +496,45 @@ metadata:
     - multiphase
     - VRM
     - step-down
+schematic:
+  tuned: false
+  components:
+    Cout: {x: 800, y: 240, rotation: 0}
+    L1: {x: 640, y: 200, rotation: 270}
+    L2: {x: 640, y: 300, rotation: 270}
+    PWM1: {x: 140, y: 140, rotation: 0}
+    PWM2: {x: 140, y: 320, rotation: 0}
+    PWM3: {x: 380, y: 140, rotation: 0}
+    PWM4: {x: 380, y: 320, rotation: 0}
+    R_LOAD: {x: 920, y: 240, rotation: 0}
+    SW1: {x: 240, y: 120, rotation: 180, mirrorX: true}
+    SW2: {x: 240, y: 280, rotation: 0}
+    SW3: {x: 480, y: 120, rotation: 180, mirrorX: true}
+    SW4: {x: 480, y: 280, rotation: 0}
+    VIN: {x: 0, y: 200, rotation: 0}
+    "~GND@Cout.B": {x: 800, y: 360, rotation: 0}
+    "~GND@PWM1.B": {x: 0, y: 300, rotation: 0}
+  wires:
+  - {id: W1, from: Cout.B, to: R_LOAD.B}
+  - {id: W8, from: Cout.B, to: "~GND@Cout.B.P"}
+  - {id: W2, from: PWM2.B, to: SW2.S}
+  - {id: W3, from: PWM4.B, to: SW4.S}
+  - {id: W4, from: PWM1.B, to: PWM2.B}
+  - {id: W5, from: PWM3.B, to: PWM4.B}
+  - {id: W6, from: PWM4.B, to: SW2.S}
+  - {id: W7, from: PWM1.B, to: VIN.B}
+  - {id: W9, from: PWM1.B, to: "~GND@PWM1.B.P"}
+  - {id: W10, from: SW1.S, to: SW3.S}
+  - {id: W11, from: SW1.S, to: VIN.A}
+  - {id: W12, from: PWM1.A, to: SW1.G}
+  - {id: W13, from: SW1.D, to: SW2.D}
+  - {id: W14, from: L1.A, to: SW1.D}
+  - {id: W15, from: PWM2.A, to: SW2.G}
+  - {id: W16, from: PWM3.A, to: SW3.G}
+  - {id: W17, from: SW3.D, to: SW4.D}
+  - {id: W18, from: L2.A, to: SW4.D}
+  - {id: W19, from: PWM4.A, to: SW4.G}
+  - {id: W20, from: L1.B, to: L2.B}
+  - {id: W21, from: Cout.A, to: L1.B}
+  - {id: W22, from: Cout.A, to: R_LOAD.A}
+  groups: {}

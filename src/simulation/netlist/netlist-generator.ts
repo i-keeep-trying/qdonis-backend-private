@@ -182,30 +182,80 @@ function transistorTypeForPwm(design: Dict, pwmRef: unknown): string | null {
 const invertPwmPulse = (design: Dict, pwmRef: unknown) =>
   ['pnp', 'p'].includes(transistorTypeForPwm(design, pwmRef) ?? '');
 
-const optionLines = (design: Dict): string[] => {
-  const analysisData = get(design, 'analysis', {});
-  const spice = get(analysisData, 'spice_settings', {});
-  const sim = get(get(design, 'simulation', {}), 'spice_options', {});
-  const setting = (key: string, dflt: unknown) =>
-    get(spice, key, get(sim, key, dflt));
-  const rshunt = setting('rshunt', 1e12);
-  const cshunt = setting('cshunt', 1e-12);
-  const reltol = setting('reltol', RELTOL_DEFAULT);
-  const abstol = setting('abstol', ABSTOL_DEFAULT);
-  const vntol = setting('vntol', VNTOL_DEFAULT);
-  const chgtol = setting('chgtol', CHGTOL_DEFAULT);
-  const gmin = setting('gmin', GMIN_DEFAULT);
-  const method = setting('method', METHOD_DEFAULT);
-  const maxord = setting('maxord', MAXORD_DEFAULT);
-  const trtol = setting('trtol', TRTOL_DEFAULT);
-  let itl4 = get(spice, 'itl4', get(sim, 'itl4'));
-  const transientSpice = get(
-    get(get(design, 'analysis', {}), 'transient', {}),
-    'spice_settings',
-    {},
-  );
-  if (!truthy(itl4) && isDict(transientSpice))
-    itl4 = get(transientSpice, 'itl4');
+/** Solver option keys taken from the settings layers (`solver_options` in the core). */
+const SOLVER_KEYS = [
+  'rshunt',
+  'cshunt',
+  'reltol',
+  'abstol',
+  'vntol',
+  'chgtol',
+  'gmin',
+  'method',
+  'maxord',
+  'trtol',
+  'itl4',
+] as const;
+
+/**
+ * Solver options, lowest precedence first: the defaults,
+ * `simulation.spice_options`, `analysis.spice_settings`, then the analysis's
+ * own `analysis.<type>.spice_settings` (where most library topologies put
+ * them).
+ */
+export function solverOptions(
+  design: Dict,
+  analysisType: AnalysisKind | null,
+): Record<(typeof SOLVER_KEYS)[number], unknown> {
+  const out: Record<(typeof SOLVER_KEYS)[number], unknown> = {
+    rshunt: 1e12,
+    cshunt: 1e-12,
+    reltol: RELTOL_DEFAULT,
+    abstol: ABSTOL_DEFAULT,
+    vntol: VNTOL_DEFAULT,
+    chgtol: CHGTOL_DEFAULT,
+    gmin: GMIN_DEFAULT,
+    method: METHOD_DEFAULT,
+    maxord: MAXORD_DEFAULT,
+    trtol: TRTOL_DEFAULT,
+    itl4: null,
+  };
+  const analysis = or(get(design, 'analysis'), {});
+  const own = analysisType ? or(get(analysis, analysisType), {}) : {};
+  const layers = [
+    get(or(get(design, 'simulation'), {}), 'spice_options'),
+    get(analysis, 'spice_settings'),
+    isDict(own) ? get(own, 'spice_settings') : null,
+  ];
+  for (const layer of layers) {
+    if (!isDict(layer)) continue;
+    for (const key of SOLVER_KEYS) {
+      const value = get(layer, key);
+      if (value !== null && value !== undefined) out[key] = value;
+    }
+  }
+  return out;
+}
+
+const optionLines = (
+  design: Dict,
+  analysisType: AnalysisKind | null,
+): string[] => {
+  const spice = get(get(design, 'analysis', {}), 'spice_settings', {});
+  const transientSpice = transientSpiceSettings(design);
+  const {
+    rshunt,
+    cshunt,
+    reltol,
+    abstol,
+    vntol,
+    chgtol,
+    gmin,
+    method,
+    maxord,
+    trtol,
+    itl4,
+  } = solverOptions(design, analysisType);
 
   const lines = [
     `.options rshunt=${fmt(rshunt)} cshunt=${fmt(cshunt)} reltol=${pyStr(reltol)} abstol=${pyStr(abstol)} vntol=${pyStr(vntol)} chgtol=${pyStr(chgtol)} gmin=${pyStr(gmin)}`,
@@ -960,7 +1010,16 @@ export function generateNetlist(
   clampCapacitorEsl(design);
   const [compNets, notes] = buildCompNets(design);
   buildComponentsIndex(design);
-  const lines = [...header(design, notes), ...optionLines(design)];
+  // The combined netlist takes the transient settings when there is a
+  // transient analysis (the usual run).
+  const analyses = get(design, 'analysis', {});
+  const primary =
+    (['transient', 'dc', 'ac'] as const).find(
+      (kind) =>
+        has(analyses, kind) &&
+        (!analysisFilter?.length || analysisFilter.includes(kind)),
+    ) ?? null;
+  const lines = [...header(design, notes), ...optionLines(design, primary)];
 
   const transientSpice = transientSpiceSettings(design);
   const spice = get(get(design, 'analysis', {}), 'spice_settings', {});
@@ -1160,7 +1219,7 @@ export function generateNetlistForAnalysis(
     }
   }
 
-  const lines = [...header(design, notes), ...optionLines(design)];
+  const lines = [...header(design, notes), ...optionLines(design, kind)];
   const models = generateComponentModels(design);
   if (models.trim()) lines.push(models);
   const subckts = subcktTemplatesNeeded(design);

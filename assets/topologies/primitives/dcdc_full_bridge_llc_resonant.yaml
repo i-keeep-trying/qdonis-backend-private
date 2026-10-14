@@ -1,7 +1,8 @@
 id: dcdc_full_bridge_llc_resonant
 name: Full Bridge LLC Resonant DC-DC Converter
 description: Isolated resonant DC-DC converter with an L-L-C tank for soft switching.
-  Converts 24V input to 12V isolated output (0.3:1 step-down transformer) using frequency
+  Converts 24V input to 12V isolated output (centre-tapped transformer, 0.56 secondary turns
+  per primary turn per half) using frequency
   modulation for voltage regulation. Full-bridge topology for higher power handling.
 components:
   - ref: VIN
@@ -130,7 +131,10 @@ components:
     params:
       name: T1
       Lm_primary: 100e-6
-      turns_ratio: 2.4
+      # Secondary turns per primary turn (each half; the model scales each half by Ns^2). (12 V + diode) / 24 V at
+      # unity tank gain. Until 2026-10-11 it was 2.4 (a 1:2.4 step-up): Vout 20 V against 12 V, tank Q ~5,
+      # 12-16 A RMS circulating in the resonant tank.
+      turns_ratio: 0.56
       k_coupling: 0.98
       phase_s1: same
       phase_s2: opposite
@@ -473,6 +477,7 @@ analysis:
             t_start: 0.012
             t_stop: 0.015
             t_step: 1.0e-07
+            t_max_step: 5.0e-08  # 100 kHz tank: at the default step Vout reads 1.8 % low, settling 40 % off
             description: 15ms startup transient with 100ns timestep for resonant
               tank resolution
         measurement:
@@ -556,6 +561,7 @@ analysis:
             t_start: 0.012
             t_stop: 0.015
             t_step: 1.0e-07
+            t_max_step: 5.0e-08  # 100 kHz tank: at the default step Vout reads 1.8 % low, settling 40 % off
             description: 15ms steady-state with 100ns resolution for resonant frequency
               capture
         measurement:
@@ -677,6 +683,7 @@ analysis:
             t_start: 0.01125
             t_stop: 0.015
             t_step: 1.0e-07
+            t_max_step: 5.0e-08  # 100 kHz tank: at the default step Vout reads 1.8 % low, settling 40 % off
             description: 15ms transient for line step response with resonant settling
         measurement:
           - ref: VIN
@@ -746,6 +753,7 @@ analysis:
             t_start: 0.01125
             t_stop: 0.015
             t_step: 1.0e-07
+            t_max_step: 5.0e-08  # 100 kHz tank: at the default step Vout reads 1.8 % low, settling 40 % off
             description: 15ms transient for load step with resonant tank settling
         measurement:
           - ref: VIN
@@ -829,6 +837,7 @@ analysis:
             t_start: 0.012
             t_stop: 0.015
             t_step: 1.0e-07
+            t_max_step: 5.0e-08  # 100 kHz tank: at the default step Vout reads 1.8 % low, settling 40 % off
             description: 15ms steady-state for power averaging over multiple resonant
               cycles
         measurement:
@@ -1038,6 +1047,7 @@ analysis:
             t_start: 0.012
             t_stop: 0.015
             t_step: 1.0e-07
+            t_max_step: 5.0e-08  # 100 kHz tank: at the default step Vout reads 1.8 % low, settling 40 % off
             description: 15ms for peak stress measurement over resonant cycles
         measurement:
           - ref: VIN
@@ -1216,3 +1226,75 @@ metadata:
   topology: ''
   control: ''
   tags: []
+schematic:
+  tuned: false
+  components:
+    CSN_P: {x: 120, y: 260, rotation: 0}
+    CSN_PB: {x: 220, y: 260, rotation: 0}
+    CSN_S1: {x: 1160, y: 20, rotation: 270}
+    CSN_S2: {x: 1160, y: 380, rotation: 270}
+    Cout: {x: 1320, y: 220, rotation: 0}
+    Cr: {x: 820, y: 240, rotation: 90}
+    D1: {x: 1100, y: 100, rotation: 270}
+    D2: {x: 1100, y: 300, rotation: 270}
+    Lr: {x: 820, y: 160, rotation: 270}
+    PWM1: {x: 340, y: 140, rotation: 0}
+    PWM2: {x: 340, y: 380, rotation: 0}
+    PWM3: {x: 620, y: 140, rotation: 0}
+    PWM4: {x: 620, y: 380, rotation: 0}
+    RSN_P: {x: 120, y: 140, rotation: 0}
+    RSN_PB: {x: 220, y: 140, rotation: 0}
+    RSN_S1: {x: 1060, y: 20, rotation: 270}
+    RSN_S2: {x: 1060, y: 380, rotation: 270}
+    R_ISO: {x: 1100, y: 500, rotation: 90}
+    Rout: {x: 1440, y: 220, rotation: 0}
+    SW1: {x: 440, y: 80, rotation: 0}
+    SW2: {x: 440, y: 320, rotation: 0}
+    SW3: {x: 720, y: 80, rotation: 0}
+    SW4: {x: 720, y: 320, rotation: 0}
+    T1: {x: 940, y: 200, rotation: 0}
+    VIN: {x: 0, y: 200, rotation: 0}
+    "~GND@CSN_P.B": {x: 120, y: 380, rotation: 0}
+    "~GND@R_ISO.B": {x: 980, y: 540, rotation: 0}
+  wires:
+  - {id: W1, from: CSN_P.B, to: CSN_PB.B}
+  - {id: W2, from: PWM2.B, to: SW2.S}
+  - {id: W3, from: PWM4.B, to: SW4.S}
+  - {id: W4, from: CSN_P.B, to: VIN.B}
+  - {id: W5, from: CSN_PB.B, to: PWM2.B}
+  - {id: W6, from: PWM4.B, to: SW2.S}
+  - {id: W8, from: CSN_P.B, to: "~GND@CSN_P.B.P"}
+  - {id: W7, from: R_ISO.B, to: "~GND@R_ISO.B.P"}
+  - {id: W9, from: RSN_P.A, to: RSN_PB.A}
+  - {id: W10, from: RSN_P.A, to: VIN.A}
+  - {id: W11, from: RSN_PB.A, to: SW1.D}
+  - {id: W12, from: SW1.D, to: SW3.D}
+  - {id: W13, from: D1.A, to: RSN_S1.A}
+  - {id: W14, from: D1.A, to: T1.S1}
+  - {id: W15, from: D2.A, to: RSN_S2.A}
+  - {id: W16, from: D2.A, to: T1.S2}
+  - {id: W17, from: Cout.B, to: Rout.B}
+  - {id: W18, from: Cout.B, to: R_ISO.A}
+  - {id: W19, from: Cout.B, to: T1.SCT}
+  - {id: W20, from: Cout.A, to: Rout.A}
+  - {id: W21, from: CSN_S1.B, to: D1.B}
+  - {id: W22, from: CSN_S2.B, to: D2.B}
+  - {id: W23, from: D1.B, to: D2.B}
+  - {id: W24, from: Cout.A, to: D1.B}
+  - {id: W25, from: CSN_P.A, to: RSN_P.B}
+  - {id: W26, from: CSN_PB.A, to: RSN_PB.B}
+  - {id: W27, from: CSN_S1.A, to: RSN_S1.B}
+  - {id: W28, from: CSN_S2.A, to: RSN_S2.B}
+  - {id: W29, from: PWM1.B, to: SW1.S}
+  - {id: W30, from: SW1.S, to: SW2.D}
+  - {id: W31, from: Lr.A, to: SW1.S}
+  - {id: W32, from: Cr.B, to: SW4.D}
+  - {id: W33, from: PWM3.B, to: SW3.S}
+  - {id: W34, from: SW3.S, to: SW4.D}
+  - {id: W35, from: PWM1.A, to: SW1.G}
+  - {id: W36, from: PWM2.A, to: SW2.G}
+  - {id: W37, from: PWM3.A, to: SW3.G}
+  - {id: W38, from: PWM4.A, to: SW4.G}
+  - {id: W39, from: Lr.B, to: T1.P1}
+  - {id: W40, from: Cr.A, to: T1.P2}
+  groups: {}

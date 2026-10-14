@@ -16,7 +16,7 @@ describe('assets/MANIFEST.json (real assets)', () => {
   it('lists exactly the 963 copied files, all hashes matching', async () => {
     const manifest = await readManifest(ASSETS_ROOT);
     expect(manifest.source.commit).toBe(
-      '239d79a29c6fc6e97b2038aded19e5a71dbf1081',
+      '0054f7202abd61e503dbac26ac676431698e66ea',
     );
     expect(manifest.files).toHaveLength(963);
     const onDisk = walk(ASSETS_ROOT).filter((p) => p !== 'MANIFEST.json');
@@ -26,7 +26,7 @@ describe('assets/MANIFEST.json (real assets)', () => {
     expect(all.size).toBe(963);
   }, 60_000);
 
-  it('has the per-folder counts of core 239d79a', async () => {
+  it('has the per-folder counts of core 0054f72', async () => {
     const paths = (await readManifest(ASSETS_ROOT)).files.map((f) => f.path);
     const count = (prefix: string, suffix: string) =>
       paths.filter(

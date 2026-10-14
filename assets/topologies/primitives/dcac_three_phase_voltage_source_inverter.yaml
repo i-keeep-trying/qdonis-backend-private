@@ -3,56 +3,166 @@ name: Three Phase Voltage Source Inverter
 description: A 3-phase sine-PWM voltage source inverter with an RL load, using explicit
   carrier generation and behavioral comparators for switching logic.
 components:
+  - ref: ControlA
+    type: node
+    params:
+      node_type: "label"
+
+  - ref: ControlB
+    type: node
+    params:
+      node_type: "label"
+
+  - ref: ControlC
+    type: node
+    params:
+      node_type: "label"
+
+  - ref: Tri
+    type: node
+    params:
+      node_type: "label"
+
+  - ref: GND
+    type: node
+    params:
+      node_type: "ground"
+
+  - ref: PWM_AH
+    type: node
+    params:
+      node_type: "label"
+
+  - ref: PWM_AL
+    type: node
+    params:
+      node_type: "label"
+
+  - ref: PWM_BH
+    type: node
+    params:
+      node_type: "label"
+
+  - ref: PWM_BL
+    type: node
+    params:
+      node_type: "label"
+
+  - ref: PWM_CH
+    type: node
+    params:
+      node_type: "label"
+
+  - ref: PWM_CL
+    type: node
+    params:
+      node_type: "label"
+
+  # Modulation sources (were raw SPICE lines): 160 Hz three-phase sine references and the 16 kHz carrier
   - ref: V1
-    type: custom_spice
-    role: pwm_carrier
+    type: node
+    role: voltage_source
     params:
-      spice_line: V1 Tri 0 PULSE(-10 10 0 0.03124m 0.03124m 0.00002m 0.0625m)
+      node_type: "voltage_source"
+      source: "pulse"
+      v1: -10
+      v2: 10
+      td: 0
+      tr: 3.124e-05
+      tf: 3.124e-05
+      pw: 2e-08
+      per: 6.25e-05
+      series_resistance: 0
+
   - ref: V2
-    type: custom_spice
-    role: mod_a
+    type: node
+    role: voltage_source
     params:
-      spice_line: V2 ControlA 0 SINE(0 8 160)
+      node_type: "voltage_source"
+      source: "sine"
+      offset: 0
+      amplitude: 8
+      frequency: 160
+      series_resistance: 0
+
   - ref: V3
-    type: custom_spice
-    role: reference_sine_b
+    type: node
+    role: voltage_source
     params:
-      spice_line: V3 ControlB 0 SINE(0 8 160 0 0 120)
+      node_type: "voltage_source"
+      source: "sine"
+      offset: 0
+      amplitude: 8
+      frequency: 160
+      delay: 0
+      damping: 0
+      phase: 120
+      series_resistance: 0
+
   - ref: V4
-    type: custom_spice
-    role: reference_sine_c
+    type: node
+    role: voltage_source
     params:
-      spice_line: V4 ControlC 0 SINE(0 8 160 0 0 240)
-  - ref: B1
-    type: b_source
-    role: comparator_a_high
+      node_type: "voltage_source"
+      source: "sine"
+      offset: 0
+      amplitude: 8
+      frequency: 160
+      delay: 0
+      damping: 0
+      phase: 240
+      series_resistance: 0
+
+  # Sine-triangle PWM (blocks): each phase's top / bottom comparator; hard switching like the original
+  # V(a) >= V(b) ? 1 : 0. The gate drivers E1..E6 (gain 100, floating on the switch nodes) stay E sources.
+  - ref: CMP_AH
+    type: comparator
+    role: a_top_pwm
     params:
-      expression: 'V(ControlA) >= V(Tri) ? 1 : 0'
-  - ref: B2
-    type: b_source
-    role: comparator_a_low
+      high: 1
+      low: 0
+      width: 1e-06
+
+  - ref: CMP_AL
+    type: comparator
+    role: a_bottom_pwm
     params:
-      expression: 'V(ControlA) < V(Tri) ? 1 : 0'
-  - ref: B3
-    type: b_source
-    role: comparator_b_high
+      high: 1
+      low: 0
+      width: 1e-06
+
+  - ref: CMP_BH
+    type: comparator
+    role: b_top_pwm
     params:
-      expression: 'V(ControlB) >= V(Tri) ? 1 : 0'
-  - ref: B4
-    type: b_source
-    role: comparator_b_low
+      high: 1
+      low: 0
+      width: 1e-06
+
+  - ref: CMP_BL
+    type: comparator
+    role: b_bottom_pwm
     params:
-      expression: 'V(ControlB) < V(Tri) ? 1 : 0'
-  - ref: B5
-    type: b_source
-    role: comparator_c_high
+      high: 1
+      low: 0
+      width: 1e-06
+
+  - ref: CMP_CH
+    type: comparator
+    role: c_top_pwm
     params:
-      expression: 'V(ControlC) >= V(Tri) ? 1 : 0'
-  - ref: B6
-    type: b_source
-    role: comparator_c_low
+      high: 1
+      low: 0
+      width: 1e-06
+
+  - ref: CMP_CL
+    type: comparator
+    role: c_bottom_pwm
     params:
-      expression: 'V(ControlC) < V(Tri) ? 1 : 0'
+      high: 1
+      low: 0
+      width: 1e-06
+
   - ref: E1
     type: e_source
     role: gate_driver_a_high
@@ -267,48 +377,26 @@ nets:
       - drain
   - - - E1
       - ctrl+
-    - - B1
-      - +
-  - - - E1
-      - ctrl-
-    - - E2
+    - - CMP_AH
+      - out
+    - - PWM_AH
+      - pin
+  - - - E2
       - '-'
-    - - E2
-      - ctrl-
     - - R4
       - neg
-    - - E3
-      - ctrl-
     - - E4
       - '-'
-    - - E4
-      - ctrl-
     - - R8
       - neg
-    - - E5
-      - ctrl-
     - - E6
       - '-'
-    - - E6
-      - ctrl-
     - - R12
       - neg
     - - R14
       - neg
     - - C2
       - neg
-    - - B1
-      - '-'
-    - - B2
-      - '-'
-    - - B3
-      - '-'
-    - - B4
-      - '-'
-    - - B5
-      - '-'
-    - - B6
-      - '-'
     - - M2
       - source
     - - M2
@@ -335,8 +423,10 @@ nets:
       - neg
   - - - E2
       - ctrl+
-    - - B2
-      - +
+    - - CMP_AL
+      - out
+    - - PWM_AL
+      - pin
   - - - R3
       - pos
     - - R4
@@ -361,8 +451,10 @@ nets:
       - drain
   - - - E3
       - ctrl+
-    - - B3
-      - +
+    - - CMP_BH
+      - out
+    - - PWM_BH
+      - pin
   - - - R5
       - pos
     - - R6
@@ -375,8 +467,10 @@ nets:
       - neg
   - - - E4
       - ctrl+
-    - - B4
-      - +
+    - - CMP_BL
+      - out
+    - - PWM_BL
+      - pin
   - - - R7
       - pos
     - - R8
@@ -401,8 +495,10 @@ nets:
       - drain
   - - - E5
       - ctrl+
-    - - B5
-      - +
+    - - CMP_CH
+      - out
+    - - PWM_CH
+      - pin
   - - - R9
       - pos
     - - R10
@@ -415,8 +511,10 @@ nets:
       - neg
   - - - E6
       - ctrl+
-    - - B6
-      - +
+    - - CMP_CL
+      - out
+    - - PWM_CL
+      - pin
   - - - R11
       - pos
     - - R12
@@ -461,20 +559,91 @@ nets:
       - pos
     - - R17
       - pos
+
+  # Phase A sine reference (raw SPICE source V2)
+  - - - ControlA
+      - pin
+    - - CMP_AH
+      - inp
+    - - CMP_AL
+      - inn
+    - - V2
+      - '+'
+
+  # Phase B sine reference (V3)
+  - - - ControlB
+      - pin
+    - - CMP_BH
+      - inp
+    - - CMP_BL
+      - inn
+    - - V3
+      - '+'
+
+  # Phase C sine reference (V4)
+  - - - ControlC
+      - pin
+    - - CMP_CH
+      - inp
+    - - CMP_CL
+      - inn
+    - - V4
+      - '+'
+
+  # PWM carrier (raw SPICE source V1)
+  - - - Tri
+      - pin
+    - - CMP_AH
+      - inn
+    - - CMP_AL
+      - inp
+    - - CMP_BH
+      - inn
+    - - CMP_BL
+      - inp
+    - - CMP_CH
+      - inn
+    - - CMP_CL
+      - inp
+    - - V1
+      - '+'
+
+  # Control ground: the comparators' outputs are referred to it, so the gate drivers read them against it
+  - - - GND
+      - pin
+    - - E1
+      - ctrl-
+    - - E2
+      - ctrl-
+    - - E3
+      - ctrl-
+    - - E4
+      - ctrl-
+    - - E5
+      - ctrl-
+    - - E6
+      - ctrl-
+    - - V1
+      - '-'
+    - - V2
+      - '-'
+    - - V3
+      - '-'
+    - - V4
+      - '-'
 analysis:
   transient:
-    time_domain:
-      - ref: transient
-        duration: 60m
-        step_size: 5u
-        time_start: 0
-        tmax: 1m
-        uic: true
     requirements:
       - rid: tr_comprehensive
         requirement: Plot all key waveforms
         criteria:
           target_vout: 380.0
+        # 62.5 ms = ten cycles of the 160 Hz modulation (the default run, ~2.4 cycles, gave unbalanced RMS phase
+        # voltages 322 / 270 / 194 V).
+        environment:
+          - ref: time_domain
+            t_stop: 0.0625
+            t_step: 5.0e-06
         measurement:
           - ref: VIN
             plot:
@@ -626,10 +795,269 @@ analysis:
           - var: vout_a_rms_v
             formula: '[Vout_A_rms]'
             description: Phase A RMS Voltage
-  ac:
-    frequency:
-      start: 1
-      stop: 1Meg
-      points_per_decade: 10
+  # NOT APPLIED: an `ac` section without requirements runs no AC analysis (kept for reference).
+  # ac:
+  #   frequency:
+  #     start: 1
+  #     stop: 1Meg
+  #     points_per_decade: 10
 models:
   - .model FDH210N08 NMOS (LEVEL=1 VTO=2.5 KP=20 LAMBDA=0.001 RD=0.003 RS=0.003)
+schematic:
+  tuned: false
+  components:
+    "#gate_drive": {x: 600, y: 860, rotation: 0}
+    "#modulator": {x: 40, y: 800, rotation: 0}
+    C1: {x: 160, y: 100, rotation: 0}
+    C2: {x: 160, y: 300, rotation: 0}
+    CMP_AH: {x: 620, y: 280, rotation: 0}
+    CMP_AL: {x: 440, y: 320, rotation: 0}
+    CMP_BH: {x: 440, y: 460, rotation: 0}
+    CMP_BL: {x: 260, y: 400, rotation: 0}
+    CMP_CH: {x: 280, y: 260, rotation: 0}
+    CMP_CL: {x: 280, y: 140, rotation: 0}
+    ControlA: {x: 580, y: 180, rotation: 180}
+    ControlB: {x: 260, y: 660, rotation: 0}
+    ControlC: {x: 80, y: 80, rotation: 0}
+    E1: {x: 920, y: 260, rotation: 0}
+    E2: {x: 400, y: 260, rotation: 0}
+    E3: {x: 160, y: 940, rotation: 0}
+    E4: {x: 440, y: 380, rotation: 0}
+    E5: {x: 600, y: 940, rotation: 0}
+    E6: {x: 280, y: 500, rotation: 0}
+    GND: {x: 960, y: 20, rotation: 0}
+    L1: {x: 1660, y: 200, rotation: 270}
+    L2: {x: 1660, y: 320, rotation: 270}
+    L3: {x: 1660, y: 440, rotation: 270}
+    M1: {x: 540, y: 100, rotation: 0}
+    M2: {x: 540, y: 300, rotation: 0}
+    M3: {x: 880, y: 100, rotation: 0}
+    M4: {x: 880, y: 300, rotation: 0}
+    M5: {x: 1220, y: 100, rotation: 0}
+    M6: {x: 1220, y: 300, rotation: 0}
+    PWM_AH: {x: 820, y: 160, rotation: 180}
+    PWM_AL: {x: 300, y: 160, rotation: 180}
+    PWM_BH: {x: 60, y: 840, rotation: 180}
+    PWM_BL: {x: 220, y: 280, rotation: 180}
+    PWM_CH: {x: 500, y: 840, rotation: 180}
+    PWM_CL: {x: 100, y: 520, rotation: 180}
+    R1: {x: 1060, y: 260, rotation: 0}
+    R10: {x: 680, y: 820, rotation: 0}
+    R11: {x: 160, y: 360, rotation: 270}
+    R12: {x: 280, y: 380, rotation: 270}
+    R13: {x: 320, y: 100, rotation: 0}
+    R14: {x: 320, y: 300, rotation: 0}
+    R15: {x: 1860, y: 200, rotation: 90}
+    R16: {x: 2020, y: 260, rotation: 0}
+    R17: {x: 2020, y: 380, rotation: 0}
+    R2: {x: 1000, y: 140, rotation: 0}
+    R3: {x: 540, y: 260, rotation: 0}
+    R4: {x: 480, y: 140, rotation: 0}
+    R5: {x: 300, y: 940, rotation: 0}
+    R6: {x: 240, y: 820, rotation: 0}
+    R7: {x: 600, y: 400, rotation: 270}
+    R8: {x: 440, y: 520, rotation: 0}
+    R9: {x: 740, y: 940, rotation: 0}
+    Tri: {x: 580, y: 400, rotation: 180}
+    V1: {x: 580, y: 500, rotation: 0}
+    V2: {x: 420, y: 180, rotation: 90}
+    V3: {x: 260, y: 540, rotation: 180}
+    V4: {x: 100, y: 200, rotation: 0}
+    V5: {x: 0, y: 200, rotation: 0}
+    "^gate_drive:PWM_AH": {x: 860, y: 80, rotation: 0}
+    "^gate_drive:PWM_AL": {x: 340, y: 80, rotation: 0}
+    "^gate_drive:PWM_BH": {x: 100, y: 760, rotation: 0}
+    "^gate_drive:PWM_BL": {x: 120, y: 200, rotation: 0}
+    "^gate_drive:PWM_CH": {x: 540, y: 760, rotation: 0}
+    "^gate_drive:PWM_CL": {x: 100, y: 580, rotation: 0}
+    "^gate_drive:n1": {x: 960, y: 380, rotation: 0}
+    "^gate_drive:n10": {x: 100, y: 840, rotation: 0}
+    "^gate_drive:n11": {x: 280, y: 700, rotation: 0}
+    "^gate_drive:n13": {x: 220, y: 280, rotation: 0}
+    "^gate_drive:n14": {x: 600, y: 500, rotation: 0}
+    "^gate_drive:n16": {x: 640, y: 1060, rotation: 0}
+    "^gate_drive:n17": {x: 560, y: 840, rotation: 0}
+    "^gate_drive:n18": {x: 720, y: 700, rotation: 0}
+    "^gate_drive:n2": {x: 880, y: 160, rotation: 0}
+    "^gate_drive:n20": {x: 100, y: 520, rotation: 0}
+    "^gate_drive:n21": {x: 80, y: 460, rotation: 0}
+    "^gate_drive:n3": {x: 280, y: 600, rotation: 0}
+    "^gate_drive:n4": {x: 1040, y: 20, rotation: 0}
+    "^gate_drive:n6": {x: 340, y: 160, rotation: 0}
+    "^gate_drive:n7": {x: 520, y: 20, rotation: 0}
+    "^gate_drive:n9": {x: 200, y: 1060, rotation: 0}
+    "^modulator:PWM_AH": {x: 800, y: 280, rotation: 0}
+    "^modulator:PWM_AL": {x: 580, y: 120, rotation: 0}
+    "^modulator:PWM_BH": {x: 540, y: 620, rotation: 0}
+    "^modulator:PWM_BL": {x: 440, y: 560, rotation: 0}
+    "^modulator:PWM_CH": {x: 460, y: 60, rotation: 0}
+    "^modulator:PWM_CL": {x: 260, y: 20, rotation: 0}
+    "^modulator:n10": {x: 580, y: 440, rotation: 0}
+    "^modulator:n13": {x: 400, y: 540, rotation: 0}
+    "^modulator:n17": {x: 380, y: 120, rotation: 0}
+    "^modulator:n2": {x: 800, y: 280, rotation: 0}
+    "^modulator:n20": {x: 260, y: 20, rotation: 0}
+    "^modulator:n6": {x: 640, y: 380, rotation: 0}
+    "~C2.neg@#gate_drive.C2_neg": {x: 420, y: 740, rotation: 180}
+    "~C2.neg@C2.B": {x: 160, y: 420, rotation: 90}
+    "~E1.-@#gate_drive.E1_-": {x: 780, y: 700, rotation: 0}
+    "~E1.-@L1.A": {x: 1540, y: 200, rotation: 180}
+    "~E1.-@M1.S": {x: 460, y: 200, rotation: 90}
+    "~E3.-@#gate_drive.E3_-": {x: 780, y: 740, rotation: 0}
+    "~E3.-@L2.A": {x: 1540, y: 320, rotation: 180}
+    "~E5.-@#gate_drive.E5_-": {x: 780, y: 780, rotation: 0}
+    "~E5.-@L3.A": {x: 1540, y: 440, rotation: 180}
+    "~GND@E1.CN": {x: 840, y: 360, rotation: 0}
+    "~GND@E2.CN": {x: 260, y: 220, rotation: 0}
+    "~GND@E3.CN": {x: 80, y: 1040, rotation: 0}
+    "~GND@E5.CN": {x: 520, y: 1040, rotation: 0}
+    "~GND@E6.CN": {x: 140, y: 640, rotation: 0}
+    "~GND@V1.B": {x: 580, y: 680, rotation: 0}
+    "~GND@V2.B": {x: 160, y: 300, rotation: 0}
+    "~GND@V3.B": {x: 140, y: 420, rotation: 0}
+    "~GND@V4.B": {x: 40, y: 320, rotation: 0}
+    "~M1.gate@#gate_drive.M1_gate": {x: 800, y: 820, rotation: 0}
+    "~M1.gate@M1.G": {x: 440, y: 20, rotation: 180}
+    "~M2.gate@#gate_drive.M2_gate": {x: 800, y: 860, rotation: 0}
+    "~M2.gate@M2.G": {x: 440, y: 380, rotation: 180}
+    "~M3.gate@#gate_drive.M3_gate": {x: 800, y: 900, rotation: 0}
+    "~M3.gate@M3.G": {x: 740, y: 100, rotation: 180}
+    "~M4.gate@#gate_drive.M4_gate": {x: 800, y: 940, rotation: 0}
+    "~M4.gate@M4.G": {x: 740, y: 300, rotation: 180}
+    "~M5.gate@#gate_drive.M5_gate": {x: 800, y: 980, rotation: 0}
+    "~M5.gate@M5.G": {x: 1080, y: 100, rotation: 180}
+    "~M6.gate@#gate_drive.M6_gate": {x: 800, y: 1020, rotation: 0}
+    "~M6.gate@M6.G": {x: 1080, y: 300, rotation: 180}
+  wires:
+  - {id: W1, from: "#gate_drive.PWM_AH", to: "#modulator.PWM_AH"}
+  - {id: W2, from: "#gate_drive.PWM_AL", to: "#modulator.PWM_AL"}
+  - {id: W3, from: "#gate_drive.PWM_BH", to: "#modulator.PWM_BH"}
+  - {id: W4, from: "#gate_drive.PWM_BL", to: "#modulator.PWM_BL"}
+  - {id: W5, from: "#gate_drive.PWM_CH", to: "#modulator.PWM_CH"}
+  - {id: W6, from: "#gate_drive.PWM_CL", to: "#modulator.PWM_CL"}
+  - {id: W7, from: M1.S, to: M2.D}
+  - {id: W8, from: "#gate_drive.E1_-", to: "~E1.-@#gate_drive.E1_-.P"}
+  - {id: W9, from: L1.A, to: "~E1.-@L1.A.P"}
+  - {id: W10, from: M1.S, to: "~E1.-@M1.S.P"}
+  - {id: W11, from: "#gate_drive.M3_gate", to: "~M3.gate@#gate_drive.M3_gate.P"}
+  - {id: W12, from: M3.G, to: "~M3.gate@M3.G.P"}
+  - {id: W13, from: "#gate_drive.M4_gate", to: "~M4.gate@#gate_drive.M4_gate.P"}
+  - {id: W14, from: M4.G, to: "~M4.gate@M4.G.P"}
+  - {id: W15, from: M5.S, to: M6.D}
+  - {id: W16, from: L3.A, to: M6.D}
+  - {id: W17, from: "#gate_drive.E5_-", to: "~E5.-@#gate_drive.E5_-.P"}
+  - {id: W18, from: L3.A, to: "~E5.-@L3.A.P"}
+  - {id: W19, from: "#gate_drive.M5_gate", to: "~M5.gate@#gate_drive.M5_gate.P"}
+  - {id: W20, from: M5.G, to: "~M5.gate@M5.G.P"}
+  - {id: W21, from: "#gate_drive.M6_gate", to: "~M6.gate@#gate_drive.M6_gate.P"}
+  - {id: W22, from: M6.G, to: "~M6.gate@M6.G.P"}
+  - {id: W23, from: C1.A, to: R13.A}
+  - {id: W24, from: M1.D, to: R13.A}
+  - {id: W25, from: C1.A, to: V5.A}
+  - {id: W26, from: M1.D, to: M3.D}
+  - {id: W27, from: M3.D, to: M5.D}
+  - {id: W28, from: C1.B, to: C2.A}
+  - {id: W29, from: R13.B, to: R14.A}
+  - {id: W30, from: C1.B, to: R13.B}
+  - {id: W31, from: L1.B, to: R15.B}
+  - {id: W32, from: L2.B, to: R16.B}
+  - {id: W33, from: L3.B, to: R17.B}
+  - {id: W34, from: R16.A, to: R17.A}
+  - {id: W35, from: R15.A, to: R16.A}
+  - {id: W36, from: C2.B, to: R14.B}
+  - {id: W37, from: M2.S, to: R14.B}
+  - {id: W38, from: C2.B, to: V5.B}
+  - {id: W39, from: M2.S, to: M4.S}
+  - {id: W40, from: M4.S, to: M6.S}
+  - {id: W41, from: "#gate_drive.C2_neg", to: "~C2.neg@#gate_drive.C2_neg.P"}
+  - {id: W42, from: C2.B, to: "~C2.neg@C2.B.P"}
+  - {id: W43, from: "#gate_drive.M1_gate", to: "~M1.gate@#gate_drive.M1_gate.P"}
+  - {id: W44, from: M1.G, to: "~M1.gate@M1.G.P"}
+  - {id: W45, from: "#gate_drive.M2_gate", to: "~M2.gate@#gate_drive.M2_gate.P"}
+  - {id: W46, from: M2.G, to: "~M2.gate@M2.G.P"}
+  - {id: W47, from: M3.S, to: M4.D}
+  - {id: W48, from: L2.A, to: M4.D}
+  - {id: W49, from: "#gate_drive.E3_-", to: "~E3.-@#gate_drive.E3_-.P"}
+  - {id: W50, from: L2.A, to: "~E3.-@L2.A.P"}
+  groups:
+    modulator: {label: "Sine-triangle PWM", members: [V1, V2, V3, V4, GND, CMP_AH, CMP_AL, CMP_BH, CMP_BL, CMP_CH, CMP_CL]}
+    gate_drive: {label: "Gate drive", members: [E1, E2, E3, E4, E5, E6, R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12]}
+  sheets:
+    gate_drive:
+      wires:
+      - {id: W1, from: E2.CN, to: E4.CN}
+      - {id: W2, from: E1.CN, to: "~GND@E1.CN.P"}
+      - {id: W3, from: E3.CN, to: "~GND@E3.CN.P"}
+      - {id: W4, from: E2.CN, to: "~GND@E2.CN.P"}
+      - {id: W5, from: E5.CN, to: "~GND@E5.CN.P"}
+      - {id: W6, from: E6.CN, to: "~GND@E6.CN.P"}
+      - {id: W7, from: E1.CP, to: "^gate_drive:PWM_AH.P"}
+      - {id: W8, from: PWM_AH.P, to: "^gate_drive:PWM_AH.P"}
+      - {id: W9, from: E2.CP, to: "^gate_drive:PWM_AL.P"}
+      - {id: W10, from: PWM_AL.P, to: "^gate_drive:PWM_AL.P"}
+      - {id: W11, from: E3.CP, to: "^gate_drive:PWM_BH.P"}
+      - {id: W12, from: PWM_BH.P, to: "^gate_drive:PWM_BH.P"}
+      - {id: W13, from: E4.CP, to: "^gate_drive:PWM_BL.P"}
+      - {id: W14, from: PWM_BL.P, to: "^gate_drive:PWM_BL.P"}
+      - {id: W15, from: E5.CP, to: "^gate_drive:PWM_CH.P"}
+      - {id: W16, from: PWM_CH.P, to: "^gate_drive:PWM_CH.P"}
+      - {id: W17, from: E6.CP, to: "^gate_drive:PWM_CL.P"}
+      - {id: W18, from: PWM_CL.P, to: "^gate_drive:PWM_CL.P"}
+      - {id: W19, from: E1.A, to: R1.B}
+      - {id: W20, from: E1.B, to: "^gate_drive:n1.P"}
+      - {id: W21, from: E1.B, to: R2.B}
+      - {id: W22, from: R6.A, to: "^gate_drive:n11.P"}
+      - {id: W23, from: R5.A, to: R6.A}
+      - {id: W24, from: E4.A, to: R7.B}
+      - {id: W25, from: R7.A, to: "^gate_drive:n14.P"}
+      - {id: W26, from: R8.A, to: "^gate_drive:n14.P"}
+      - {id: W27, from: E5.A, to: R9.B}
+      - {id: W28, from: E5.B, to: "^gate_drive:n16.P"}
+      - {id: W29, from: E5.B, to: R10.B}
+      - {id: W30, from: R10.A, to: "^gate_drive:n18.P"}
+      - {id: W31, from: R10.A, to: R9.A}
+      - {id: W32, from: E6.A, to: R11.B}
+      - {id: W33, from: R11.A, to: R12.A}
+      - {id: W34, from: R11.A, to: "^gate_drive:n21.P"}
+      - {id: W35, from: E6.B, to: "^gate_drive:n3.P"}
+      - {id: W36, from: E4.B, to: R8.B}
+      - {id: W37, from: E2.B, to: E4.B}
+      - {id: W38, from: E2.B, to: R12.B}
+      - {id: W39, from: E6.B, to: R8.B}
+      - {id: W40, from: E2.B, to: R4.B}
+      - {id: W41, from: R2.A, to: "^gate_drive:n4.P"}
+      - {id: W42, from: R1.A, to: R2.A}
+      - {id: W43, from: E2.A, to: R3.B}
+      - {id: W44, from: R4.A, to: "^gate_drive:n7.P"}
+      - {id: W45, from: R3.A, to: R4.A}
+      - {id: W46, from: E3.A, to: R5.B}
+      - {id: W47, from: E3.B, to: "^gate_drive:n9.P"}
+      - {id: W48, from: E3.B, to: R6.B}
+    modulator:
+      wires:
+      - {id: W1, from: V1.B, to: "~GND@V1.B.P"}
+      - {id: W2, from: V2.B, to: "~GND@V2.B.P"}
+      - {id: W3, from: V3.B, to: "~GND@V3.B.P"}
+      - {id: W4, from: V4.B, to: "~GND@V4.B.P"}
+      - {id: W5, from: CMP_AH.inp, to: V2.A}
+      - {id: W6, from: CMP_AL.inn, to: V2.A}
+      - {id: W7, from: CMP_AH.inp, to: ControlA.P}
+      - {id: W8, from: CMP_BH.inp, to: CMP_BL.inn}
+      - {id: W9, from: CMP_BL.inn, to: V3.A}
+      - {id: W10, from: ControlB.P, to: V3.A}
+      - {id: W11, from: CMP_CH.inp, to: CMP_CL.inn}
+      - {id: W12, from: CMP_CL.inn, to: V4.A}
+      - {id: W13, from: ControlC.P, to: V4.A}
+      - {id: W14, from: CMP_AH.out, to: "^modulator:PWM_AH.P"}
+      - {id: W15, from: CMP_AL.out, to: "^modulator:PWM_AL.P"}
+      - {id: W16, from: CMP_BH.out, to: "^modulator:PWM_BH.P"}
+      - {id: W17, from: CMP_BL.out, to: "^modulator:PWM_BL.P"}
+      - {id: W18, from: CMP_CH.out, to: "^modulator:PWM_CH.P"}
+      - {id: W19, from: CMP_CL.out, to: "^modulator:PWM_CL.P"}
+      - {id: W20, from: CMP_BL.inp, to: CMP_CH.inn}
+      - {id: W21, from: CMP_AH.inn, to: V1.A}
+      - {id: W22, from: CMP_CH.inn, to: CMP_CL.inp}
+      - {id: W23, from: CMP_AH.inn, to: CMP_AL.inp}
+      - {id: W24, from: CMP_AL.inp, to: CMP_BH.inn}
+      - {id: W25, from: CMP_AL.inp, to: CMP_CH.inn}
+      - {id: W26, from: Tri.P, to: V1.A}

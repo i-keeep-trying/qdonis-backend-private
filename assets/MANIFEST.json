@@ -1,8 +1,8 @@
 {
   "source": {
     "repository": "qdonis-core",
-    "commit": "239d79a29c6fc6e97b2038aded19e5a71dbf1081",
-    "branch": "feature/chat-first",
+    "commit": "0054f7202abd61e503dbac26ac676431698e66ea",
+    "branch": "feature/synced-schematic",
     "root": "qdonis_backend/data"
   },
   "generatedBy": "scripts/import-core-assets.mjs",
@@ -4314,8 +4314,8 @@
     },
     {
       "path": "spice/spice_components.json",
-      "bytes": 27859,
-      "sha256": "8d2900d5a42e93e307fb88ff9e94bd100868f38c7e6dc93f45f14d976baff044"
+      "bytes": 26746,
+      "sha256": "f11ebb90ade56aba63ab222ca538a085ce0c97c3513809d90f38adade21ac8dd"
     },
     {
       "path": "topologies/json_library/acdc_centre_tapped_full_wave.json",
@@ -4394,8 +4394,8 @@
     },
     {
       "path": "topologies/json_library/dcdc_boost.json",
-      "bytes": 11442,
-      "sha256": "d7f8b99d05727c923230f285d3bb132270aac8928350f6626182290b2add24e9"
+      "bytes": 3092,
+      "sha256": "04ae47110982af571868a75ea015368235a95d8d8749c50f270f8b1d63159c71"
     },
     {
       "path": "topologies/json_library/dcdc_buck.json",
@@ -4494,178 +4494,178 @@
     },
     {
       "path": "topologies/primitives/acdc_centre_tapped_full_wave.yaml",
-      "bytes": 2178,
-      "sha256": "c9d31b8b18c851b7adc53dd1f5ec96d5c06dc87d180b7c2a1219bece7631995e"
+      "bytes": 3087,
+      "sha256": "59c036e2da8505d7ee4fec12e2d82578d5ac9e79c98ebd97e25d8eba4d7b6b04"
     },
     {
       "path": "topologies/primitives/acdc_flyback_pfc_dcm.yaml",
-      "bytes": 2711,
-      "sha256": "83dbc0e8991a0b385e36645821f0c074cb1fef501d9ee13cf759aadd032e13d4"
+      "bytes": 3935,
+      "sha256": "aaf135e3aa5e0e7213af0a586fc3a4cd5335ac2f80fcd28d0236eb34dc70e9b4"
     },
     {
       "path": "topologies/primitives/acdc_interleaved_boost_power_factor_correction.yaml",
-      "bytes": 15606,
-      "sha256": "7e1140b82160f46d0916d4ea0100ae63287b6136f7559a3620e005d4e745f4d5"
+      "bytes": 29422,
+      "sha256": "5fbc8418da35bc157fa12f027c573894d54b16cfcd66bbbd37c5f3eb7dc1ea89"
     },
     {
       "path": "topologies/primitives/acdc_single_phase_active_front_end.yaml",
-      "bytes": 8470,
-      "sha256": "6400a65cd27c2dda08a82a892002f23806419220d60a2a998eb46f690ce07e1c"
+      "bytes": 24936,
+      "sha256": "39db66dd9ec936494ad2d41d486ceb1e278022ec86bf7fc60ba2521c133dd180"
     },
     {
       "path": "topologies/primitives/acdc_single_phase_boost_power_factor_correction.yaml",
-      "bytes": 10595,
-      "sha256": "77cf8d87b1128e26d36139f79ced3fec8a15dad4f61a724cff1cf15bcc39bb4d"
+      "bytes": 17254,
+      "sha256": "79157a81ce200a25acb4b509601a284ac6359328c8022879d654c9c767708d07"
     },
     {
       "path": "topologies/primitives/acdc_single_phase_diode_bridge.yaml",
-      "bytes": 2713,
-      "sha256": "c9ef7abed9a9955bff4383317100962dbe8190eb407bbcd8e2cada39c574ab40"
+      "bytes": 3523,
+      "sha256": "5a7f5b2ec64886c54b90007f17897a573022f173d1a8dff499303d7ba4a1748e"
     },
     {
       "path": "topologies/primitives/acdc_single_phase_full_wave(transformer).yaml",
-      "bytes": 2374,
-      "sha256": "60028498c49d7bcca496fd91e0af08bb2452dee9701cfdc5ec54bbbe4260c177"
+      "bytes": 3494,
+      "sha256": "8de8015fb4b9781a59bbfb964be41c13f19ddf81a50bd0343ebba3d25b2ae599"
     },
     {
       "path": "topologies/primitives/acdc_three_phase_active_front_end.yaml",
-      "bytes": 15024,
-      "sha256": "9b5e46bebda5bd767927a7af4df771453e2a3d176bf23d04daecd7bf49a3a3f2"
+      "bytes": 40096,
+      "sha256": "8afd7dead46f486fbe4b252f7429275ece6159c8ac944a9ded8d4eede8ead9c0"
     },
     {
       "path": "topologies/primitives/acdc_three_phase_vienna.yaml",
-      "bytes": 9262,
-      "sha256": "a32ff7bd77458a731b81c60fe7093260501baf876c1ca1cf2b92cdb3ce5fd837"
+      "bytes": 34030,
+      "sha256": "e9c68556d41a27e604afd6d1a4bd51c36d395a9c4f5a941927d3d29eb5fef0e7"
     },
     {
       "path": "topologies/primitives/acdc_totem_pole_power_factor_correction.yaml",
-      "bytes": 13754,
-      "sha256": "1b63f9b082cb707edd916d66ceafb10571da443d4460bb1fdf5fcbc958192919"
+      "bytes": 29767,
+      "sha256": "b7eab6506dfb32c51a0d9f93de337c94411f5d0131321473e1d0258b3b9be8d0"
     },
     {
       "path": "topologies/primitives/dcac_neutral_point_clamped.yaml",
-      "bytes": 20003,
-      "sha256": "e9eb5088cc7322ea7f7e6cb0c417048b7f4a478dbfa3723f0be45d85b3b335e3"
+      "bytes": 37071,
+      "sha256": "73e8e5fd1756b8dd04f9e9bd88353acd3841f0b07da50862e6b08d4e7c6db489"
     },
     {
       "path": "topologies/primitives/dcac_single_phase_h_bridge.yaml",
-      "bytes": 10565,
-      "sha256": "647c2d1c5a8b3bf6cc1c1d64ffab2f264e5b0b9cd7230592434bb6c20d20896e"
+      "bytes": 22838,
+      "sha256": "9fe9f7c0faed0300a1d2e0987b846ba5e7878a91979501caa8f94c08eb927407"
     },
     {
       "path": "topologies/primitives/dcac_t_type.yaml",
-      "bytes": 28917,
-      "sha256": "71aed6074f30f07c84e3697956571c6e468a07a3934139df2cd01523b0c06219"
+      "bytes": 63674,
+      "sha256": "a48f8f8710a28c273ca22d7986f17b0ebdd210a1d0a3ce032a4c1c53c4ff45f5"
     },
     {
       "path": "topologies/primitives/dcac_three_phase_voltage_source_inverter.yaml",
-      "bytes": 12306,
-      "sha256": "f518c1ff2c149bfd8b36e03084dc4683c67182b90ff1626d1188089c9cf20f7f"
+      "bytes": 27443,
+      "sha256": "134394d84666ba7cbfb7c81bf31320435ec014ee1cee13cdfc52389d95969e81"
     },
     {
       "path": "topologies/primitives/dcdc_active_clamp_flyback.yaml",
-      "bytes": 11520,
-      "sha256": "70cef3feb4b8d530986686e1c5da118ffb3d8e94fc29ed5325454cefb694131e"
+      "bytes": 13489,
+      "sha256": "32dce2b06c84079d70774c8b27661302441aec5f5a215dfb51c5237ea44862fc"
     },
     {
       "path": "topologies/primitives/dcdc_boost.yaml",
-      "bytes": 15944,
-      "sha256": "11d54ff0096676ba5f5b3475caf12b71d0f6313ac30c34dd74c65bc0c8790cae"
+      "bytes": 17323,
+      "sha256": "e8e839171e7558e80a2d4848e59a428f9a22c5c51d5c2bb73d078109654954f2"
     },
     {
       "path": "topologies/primitives/dcdc_buck.yaml",
-      "bytes": 16061,
-      "sha256": "0412351c5e18a8f964b2ca4e818bc3b4fbf2c686b1032643f3e174374cf5f55b"
+      "bytes": 17039,
+      "sha256": "25f321a2694bf6f737c715d5913268ded7c83a3c624d6b5b07f0e5f9d882a98a"
     },
     {
       "path": "topologies/primitives/dcdc_buck_boost.yaml",
-      "bytes": 15928,
-      "sha256": "391bc1f11605bf5c736bc430c025e7dfb126663035ed49e95b1c69aa8560a4d5"
+      "bytes": 16866,
+      "sha256": "2b89c4c42e9a839b795659aa104edf8959cff1f792ce367db56ad961c9ad00c4"
     },
     {
       "path": "topologies/primitives/dcdc_cllc_resonant.yaml",
-      "bytes": 17211,
-      "sha256": "3780d09f8ffa9ad7b6793ff1286172ff445fd021a7e9118a7cc97ac583dfb5b5"
+      "bytes": 21099,
+      "sha256": "448d400b388d5ec78cc903674984646beb5114c1e4b1f8a370a9b831b3f6901f"
     },
     {
       "path": "topologies/primitives/dcdc_cuk.yaml",
-      "bytes": 16669,
-      "sha256": "466feb7e6065c8a064773a2bff0e364c8cbe3a4d1564924ac2017d51e7384946"
+      "bytes": 17946,
+      "sha256": "e49db65a4c7ef9a537becc7349540521070d6775557dd1e851d8a9d862bc609a"
     },
     {
       "path": "topologies/primitives/dcdc_dual_active_bridge.yaml",
-      "bytes": 19509,
-      "sha256": "a42983226f71091437ca0ff29f16706afb36ffa5e4218b531a87b01bab76cb79"
+      "bytes": 37231,
+      "sha256": "fd63c41a5829e68743d0148afc80ce97af0c27094ccbbb2f3e11807d7f8ebd18"
     },
     {
       "path": "topologies/primitives/dcdc_flyback.yaml",
-      "bytes": 15992,
-      "sha256": "bc9eb3a086520a1d66aa327612b499fa71d828bddb8fffc193624a14208aeced"
+      "bytes": 17688,
+      "sha256": "aa57a74655804f9cfbb2f4ac403f2ef77da27e2308674972b709b98ead22dc31"
     },
     {
       "path": "topologies/primitives/dcdc_four_switch_buck_boost.yaml",
-      "bytes": 13390,
-      "sha256": "d6a4c885e08f47cf7d61a5038e14d6da43a3bab460a0f784bf7aa96d12b7e070"
+      "bytes": 15220,
+      "sha256": "b3bf618c94072d7ea4d55b548af48c809637171f1e64ee3b64ca7f404f59619b"
     },
     {
       "path": "topologies/primitives/dcdc_full_bridge_centertapped.yaml",
-      "bytes": 33689,
-      "sha256": "4c1c1269ead75933973c6d7858eab7e36ab568b8c30e8cbd476601dafbac2a04"
+      "bytes": 37485,
+      "sha256": "940c0ee59d7adc45bd93b00b9ee6993534f81b79ed8f591822dbb9772b3b9f8a"
     },
     {
       "path": "topologies/primitives/dcdc_full_bridge_llc_resonant.yaml",
-      "bytes": 35147,
-      "sha256": "6b0d11b93edce1d662b9097d27387e1af0d87f571161084ea2357ce1e6c868e9"
+      "bytes": 38905,
+      "sha256": "335a3ca728be562e9dfd355a751355257000e272f39b6cbd440e163829e73b4b"
     },
     {
       "path": "topologies/primitives/dcdc_half_bridge.yaml",
-      "bytes": 30883,
-      "sha256": "f57fc948566a7f340236dd2a77af8d97f87de9a63467633d4da231d5464fbc7c"
+      "bytes": 33574,
+      "sha256": "960acc18fbf74f5ee7a2014c5bb36fe226d931e6183f02d43cbc70127bbdf91c"
     },
     {
       "path": "topologies/primitives/dcdc_half_bridge_llc_resonant.yaml",
-      "bytes": 33105,
-      "sha256": "8d59c3c5b5096cea6bffc8d3fa62b2bd6b2d32056fd7586984585cd14057cf92"
+      "bytes": 35236,
+      "sha256": "e07764ac31b6fb940c4782077a825409e7b33949a0ef7fed4acf150c4c490314"
     },
     {
       "path": "topologies/primitives/dcdc_interleaved_multiphase_buck.yaml",
-      "bytes": 12178,
-      "sha256": "93c5d9256ec7e76b38b3b4f88f43e265af65a1b3d2c0ed7caa037eece6b5400f"
+      "bytes": 13750,
+      "sha256": "9b988056287d77f42efe98b1a61aec998a0b0e9f9a60e71e65e3d2eb8cc65423"
     },
     {
       "path": "topologies/primitives/dcdc_phase_shifted_full_bridge_not_centertapped.yaml",
-      "bytes": 13404,
-      "sha256": "012f4fd2eb79d9df7bd6bda0287f3046da11616862593e91306687482768d265"
+      "bytes": 16419,
+      "sha256": "a1736f09ca716163f138382622be3d7eb38876d64a9aa9a214366991ab4ed8eb"
     },
     {
       "path": "topologies/primitives/dcdc_push_pull.yaml",
-      "bytes": 26221,
-      "sha256": "4aef463736a10af7bd8962be512cfda1783bf131577c85d5ee1539ae1ae5fef0"
+      "bytes": 29180,
+      "sha256": "ba6454cdaa80a8a9a7932c75d10b96c762bce93c64d47c144a8f9b3b7c06ec2a"
     },
     {
       "path": "topologies/primitives/dcdc_sepic.yaml",
-      "bytes": 16408,
-      "sha256": "ef3c3e866f8065b81dc8aae0a1e567e3393fc02628a43e21160ae986504c884b"
+      "bytes": 17920,
+      "sha256": "fd342277705886f66079fd15a3ffcc2c0c6e94a56bceeb217c361658db851dc2"
     },
     {
       "path": "topologies/primitives/dcdc_single_switch_forward.yaml",
-      "bytes": 6579,
-      "sha256": "3db87b1edf8b4aba0d2e78fa279b25352c38f196397b89f9e01efd2a0f4e208a"
+      "bytes": 7909,
+      "sha256": "81df012d4cf591846247ed0b331abcaccdc779f447a2b13e7dfb2921891bbd27"
     },
     {
       "path": "topologies/primitives/dcdc_synchronous_buck.yaml",
-      "bytes": 11357,
-      "sha256": "37e8d06bf56206d9cf6b8a94026c2e32886d167199c9b7c9c8661509a0520bb4"
+      "bytes": 12772,
+      "sha256": "0e3ccd5464d23398173a73765ab7b0520e64b30f088e669a99a153c62e9f810e"
     },
     {
       "path": "topologies/primitives/dcdc_two_switch_forward.yaml",
-      "bytes": 11795,
-      "sha256": "f2d8a17b162fba3088a205299508f96e91467c6c149d527cac19cc362957885b"
+      "bytes": 14170,
+      "sha256": "86ac20e439c4bbe6a544a4f9480afee679b25f2f43c5a1c4b98fa028b061042a"
     },
     {
       "path": "topologies/primitives/dcdc_zeta.yaml",
-      "bytes": 6198,
-      "sha256": "35cfbb4a900b005d6f941e2149f5fd516d2037fa91f3cf25583b136640a80ea4"
+      "bytes": 7592,
+      "sha256": "03a6702e31efc235216af2b4de57f0dae0a9caa1eeeb72688fb34a14e1963de0"
     },
     {
       "path": "topologies/prompts/acdc_flyback_pfc_dcm.prompt.md",

@@ -182,6 +182,312 @@ components:
   type: e_source
   params:
     gain: 1
+
+- ref: V_REF_DC
+  type: node
+  params:
+    node_type: "label"
+
+- ref: V_PI_SUM
+  type: node
+  params:
+    node_type: "label"
+
+- ref: V_A_PH
+  type: node
+  params:
+    node_type: "label"
+
+- ref: V_IERR_A
+  type: node
+  params:
+    node_type: "label"
+
+- ref: V_IERR_K_A
+  type: node
+  params:
+    node_type: "label"
+
+- ref: V_B_PH
+  type: node
+  params:
+    node_type: "label"
+
+- ref: V_IERR_B
+  type: node
+  params:
+    node_type: "label"
+
+- ref: V_IERR_K_B
+  type: node
+  params:
+    node_type: "label"
+
+- ref: V_C_PH
+  type: node
+  params:
+    node_type: "label"
+
+- ref: V_IERR_C
+  type: node
+  params:
+    node_type: "label"
+
+- ref: V_IERR_K_C
+  type: node
+  params:
+    node_type: "label"
+
+# Control (blocks): voltage PI 0.08 * err + 500 * integral (conditional anti-windup 0..30.1) -> clamp ->
+# 1 ms filter = current amplitude; per phase: reference = amplitude * v_phase / 310.27, error * 20 clamped +-12,
+# 10 us filter, bipolar PWM against a +-10 V 100 kHz triangle (0.2 V dead band, 15 V gate levels).
+# E1..E3 stay E sources: the high-side gate buffers float on the phase nodes.
+- ref: REF_V
+  type: const
+  role: voltage_reference
+  params:
+    value: 700
+
+- ref: SUM_V
+  type: sum
+  role: voltage_error
+  params:
+    signs: "+-"
+
+- ref: KP_V
+  type: gain
+  role: voltage_p
+  params:
+    gain: 0.08
+
+- ref: INT_V
+  type: integrator
+  role: voltage_i
+  params:
+    ki: 500
+    lower: 0
+    upper: 30.1
+    antiwindup: "conditional"
+    ic: 21.5
+
+- ref: SUM_PI
+  type: sum
+  role: voltage_pi_sum
+  params:
+    signs: "++"
+
+- ref: LIM_PI
+  type: limiter
+  role: current_amplitude_clamp
+  params:
+    lower: 0
+    upper: 30.1
+
+- ref: LPF_MAG
+  type: lowpass
+  role: current_amplitude_filter
+  params:
+    tau: 0.000999001
+    gain: 0.999001
+
+- ref: CAR
+  type: carrier
+  role: pwm_carrier
+  params:
+    frequency: 100000.0
+    low: -10
+    high: 10
+    shape: "triangle"
+
+- ref: SUM_VA
+  type: sum
+  role: phase_a_voltage_sense
+  params:
+    signs: "+-"
+
+- ref: REF_A
+  type: product
+  role: phase_a_current_reference
+  params:
+    gain: "1/310.27"
+
+- ref: I_SENSE_A
+  type: function
+  role: phase_a_current_sense
+  params:
+    expression: "i(VLA_SENSE)"
+    inputs: 0
+
+- ref: SUM_IA
+  type: sum
+  role: phase_a_current_error
+  params:
+    signs: "+-"
+
+- ref: K_IA
+  type: gain
+  role: phase_a_current_error_amp
+  params:
+    gain: 20
+
+- ref: LIM_IA
+  type: limiter
+  role: phase_a_current_error_clamp
+  params:
+    lower: -12
+    upper: 12
+
+- ref: LPF_CA
+  type: lowpass
+  role: phase_a_current_compensator
+  params:
+    tau: 9.99001e-06
+    gain: 0.999001
+
+- ref: CMP_A_TOP
+  type: comparator
+  role: phase_a_top_pwm
+  params:
+    high: 15
+    low: 0
+    threshold: 0.2
+    width: 0.2
+
+- ref: CMP_A_BOT
+  type: comparator
+  role: phase_a_bottom_pwm
+  params:
+    high: 15
+    low: 0
+    threshold: 0.2
+    width: 0.2
+
+- ref: SUM_VB
+  type: sum
+  role: phase_b_voltage_sense
+  params:
+    signs: "+-"
+
+- ref: REF_B
+  type: product
+  role: phase_b_current_reference
+  params:
+    gain: "1/310.27"
+
+- ref: I_SENSE_B
+  type: function
+  role: phase_b_current_sense
+  params:
+    expression: "i(VLB_SENSE)"
+    inputs: 0
+
+- ref: SUM_IB
+  type: sum
+  role: phase_b_current_error
+  params:
+    signs: "+-"
+
+- ref: K_IB
+  type: gain
+  role: phase_b_current_error_amp
+  params:
+    gain: 20
+
+- ref: LIM_IB
+  type: limiter
+  role: phase_b_current_error_clamp
+  params:
+    lower: -12
+    upper: 12
+
+- ref: LPF_CB
+  type: lowpass
+  role: phase_b_current_compensator
+  params:
+    tau: 9.99001e-06
+    gain: 0.999001
+
+- ref: CMP_B_TOP
+  type: comparator
+  role: phase_b_top_pwm
+  params:
+    high: 15
+    low: 0
+    threshold: 0.2
+    width: 0.2
+
+- ref: CMP_B_BOT
+  type: comparator
+  role: phase_b_bottom_pwm
+  params:
+    high: 15
+    low: 0
+    threshold: 0.2
+    width: 0.2
+
+- ref: SUM_VC
+  type: sum
+  role: phase_c_voltage_sense
+  params:
+    signs: "+-"
+
+- ref: REF_C
+  type: product
+  role: phase_c_current_reference
+  params:
+    gain: "1/310.27"
+
+- ref: I_SENSE_C
+  type: function
+  role: phase_c_current_sense
+  params:
+    expression: "i(VLC_SENSE)"
+    inputs: 0
+
+- ref: SUM_IC
+  type: sum
+  role: phase_c_current_error
+  params:
+    signs: "+-"
+
+- ref: K_IC
+  type: gain
+  role: phase_c_current_error_amp
+  params:
+    gain: 20
+
+- ref: LIM_IC
+  type: limiter
+  role: phase_c_current_error_clamp
+  params:
+    lower: -12
+    upper: 12
+
+- ref: LPF_CC
+  type: lowpass
+  role: phase_c_current_compensator
+  params:
+    tau: 9.99001e-06
+    gain: 0.999001
+
+- ref: CMP_C_TOP
+  type: comparator
+  role: phase_c_top_pwm
+  params:
+    high: 15
+    low: 0
+    threshold: 0.2
+    width: 0.2
+
+- ref: CMP_C_BOT
+  type: comparator
+  role: phase_c_bottom_pwm
+  params:
+    high: 15
+    low: 0
+    threshold: 0.2
+    width: 0.2
+
 - ref: R8
   type: resistor
   params:
@@ -234,218 +540,6 @@ components:
   type: resistor
   params:
     resistance: 49.0
-- ref: B_ERR
-  type: b_source
-  params:
-    expression: 700 - v(V_DC)
-- ref: B_P
-  type: b_source
-  params:
-    expression: v(V_ERR) * 0.08
-- ref: B_INT
-  type: b_source
-  params:
-    source_type: i
-    expression: 'v(V_I) >= 30.1 ? (v(V_ERR) > 0 ? 0 : 0.005 * v(V_ERR)) : (v(V_I) <= 0 ? (v(V_ERR) < 0 ? 0 : 0.005 * v(V_ERR)) : 0.005 * v(V_ERR))'
-- ref: C_INT
-  type: capacitor
-  params:
-    capacitance: 1.0e-05
-- ref: R_INT
-  type: resistor
-  params:
-    resistance: 10Meg
-- ref: B_VERR_RAW
-  type: b_source
-  params:
-    expression: '((v(V_ERR) * 0.08) + v(V_I)) > 30.1 ? 30.1 : (((v(V_ERR) * 0.08) + v(V_I)) < 0 ? 0 : ((v(V_ERR) * 0.08) + v(V_I)))'
-- ref: R_MAG_FLT
-  type: resistor
-  params:
-    resistance: 1k
-- ref: C_MAG_FLT
-  type: capacitor
-  params:
-    capacitance: 1u
-- ref: R_MAG_DC
-  type: resistor
-  params:
-    resistance: 1Meg
-- ref: B_REFA
-  type: b_source
-  params:
-    expression: v(I_MAG) * (v(V_A_node) - v(N_star)) / 310.27
-- ref: B_REFB
-  type: b_source
-  params:
-    expression: v(I_MAG) * (v(V_B_node) - v(N_star)) / 310.27
-- ref: B_REFC
-  type: b_source
-  params:
-    expression: v(I_MAG) * (v(V_C_node) - v(N_star)) / 310.27
-- ref: R_REFA
-  type: resistor
-  params:
-    resistance: 1Meg
-- ref: R_REFB
-  type: resistor
-  params:
-    resistance: 1Meg
-- ref: R_REFC
-  type: resistor
-  params:
-    resistance: 1Meg
-- ref: B_SENSE_A
-  type: b_source
-  params:
-    expression: i(VLA_SENSE)
-- ref: B_SENSE_B
-  type: b_source
-  params:
-    expression: i(VLB_SENSE)
-- ref: B_SENSE_C
-  type: b_source
-  params:
-    expression: i(VLC_SENSE)
-- ref: R_IACT_A
-  type: resistor
-  params:
-    resistance: 1Meg
-- ref: R_IACT_B
-  type: resistor
-  params:
-    resistance: 1Meg
-- ref: R_IACT_C
-  type: resistor
-  params:
-    resistance: 1Meg
-- ref: B_ERR_A
-  type: b_source
-  params:
-    expression: '((v(I_REF_A) - v(V_IACT_A)) * 20) > 12 ? 12 : (((v(I_REF_A) - v(V_IACT_A))
-      * 20) < -12 ? -12 : ((v(I_REF_A) - v(V_IACT_A)) * 20))'
-- ref: B_ERR_B
-  type: b_source
-  params:
-    expression: '((v(I_REF_B) - v(V_IACT_B)) * 20) > 12 ? 12 : (((v(I_REF_B) - v(V_IACT_B))
-      * 20) < -12 ? -12 : ((v(I_REF_B) - v(V_IACT_B)) * 20))'
-- ref: B_ERR_C
-  type: b_source
-  params:
-    expression: '((v(I_REF_C) - v(V_IACT_C)) * 20) > 12 ? 12 : (((v(I_REF_C) - v(V_IACT_C))
-      * 20) < -12 ? -12 : ((v(I_REF_C) - v(V_IACT_C)) * 20))'
-- ref: R_RAW_DUMMY_A
-  type: resistor
-  params:
-    resistance: 1Meg
-- ref: R_RAW_DUMMY_B
-  type: resistor
-  params:
-    resistance: 1Meg
-- ref: R_RAW_DUMMY_C
-  type: resistor
-  params:
-    resistance: 1Meg
-- ref: R_CPA
-  type: resistor
-  params:
-    resistance: 1k
-- ref: C_CPA
-  type: capacitor
-  params:
-    capacitance: 10n
-- ref: R_CPB
-  type: resistor
-  params:
-    resistance: 1k
-- ref: C_CPB
-  type: capacitor
-  params:
-    capacitance: 10n
-- ref: R_CPC
-  type: resistor
-  params:
-    resistance: 1k
-- ref: C_CPC
-  type: capacitor
-  params:
-    capacitance: 10n
-- ref: R_DC_A
-  type: resistor
-  params:
-    resistance: 1Meg
-- ref: R_DC_B
-  type: resistor
-  params:
-    resistance: 1Meg
-- ref: R_DC_C
-  type: resistor
-  params:
-    resistance: 1Meg
-- ref: VTRI
-  type: node
-  params:
-    node_type: voltage_source
-    source: pulse
-    v1: -10
-    v2: 10
-    td: 0
-    tr: 5u
-    tf: 5u
-    pw: 0
-    per: 10u
-- ref: R_TRI
-  type: resistor
-  params:
-    resistance: 1Meg
-- ref: B1
-  type: b_source
-  params:
-    expression: '7.5 * (1 + tanh(5 * (v(V_TRI) - 0.2 - v(V_CTRL_A))))'
-- ref: B4
-  type: b_source
-  params:
-    expression: '7.5 * (1 + tanh(5 * (v(V_CTRL_A) - v(V_TRI) - 0.2)))'
-- ref: R_PWA_T
-  type: resistor
-  params:
-    resistance: 1Meg
-- ref: R_PWA_B
-  type: resistor
-  params:
-    resistance: 1Meg
-- ref: B2
-  type: b_source
-  params:
-    expression: '7.5 * (1 + tanh(5 * (v(V_TRI) - 0.2 - v(V_CTRL_B))))'
-- ref: B5
-  type: b_source
-  params:
-    expression: '7.5 * (1 + tanh(5 * (v(V_CTRL_B) - v(V_TRI) - 0.2)))'
-- ref: R_PWB_T
-  type: resistor
-  params:
-    resistance: 1Meg
-- ref: R_PWB_B
-  type: resistor
-  params:
-    resistance: 1Meg
-- ref: B3
-  type: b_source
-  params:
-    expression: '7.5 * (1 + tanh(5 * (v(V_TRI) - 0.2 - v(V_CTRL_C))))'
-- ref: B6
-  type: b_source
-  params:
-    expression: '7.5 * (1 + tanh(5 * (v(V_CTRL_C) - v(V_TRI) - 0.2)))'
-- ref: R_PWC_T
-  type: resistor
-  params:
-    resistance: 1Meg
-- ref: R_PWC_B
-  type: resistor
-  params:
-    resistance: 1Meg
 - ref: GND
   type: node
   params:
@@ -457,18 +551,24 @@ nets:
     - +
   - - L_EMI_A
     - pos
+  - - SUM_VA
+    - in1
 - - - V_B_node
     - pin
   - - V_B
     - +
   - - L_EMI_B
     - pos
+  - - SUM_VB
+    - in1
 - - - V_C_node
     - pin
   - - V_C
     - +
   - - L_EMI_C
     - pos
+  - - SUM_VC
+    - in1
 - - - N_star
     - pin
   - - V_A
@@ -485,6 +585,12 @@ nets:
     - neg
   - - R_DAMP_C
     - neg
+  - - SUM_VA
+    - in2
+  - - SUM_VB
+    - in2
+  - - SUM_VC
+    - in2
 - - - V_A1
     - pin
   - - L_EMI_A
@@ -561,48 +667,36 @@ nets:
     - pin
   - - E1
     - ctrl+
-  - - B1
-    - +
-  - - R_PWA_T
-    - pos
+  - - CMP_A_TOP
+    - out
 - - - ctrl_A_bot
     - pin
-  - - B4
-    - +
-  - - R_PWA_B
-    - pos
+  - - CMP_A_BOT
+    - out
   - - R9
     - pos
 - - - ctrl_B_top
     - pin
   - - E2
     - ctrl+
-  - - B2
-    - +
-  - - R_PWB_T
-    - pos
+  - - CMP_B_TOP
+    - out
 - - - ctrl_B_bot
     - pin
-  - - B5
-    - +
-  - - R_PWB_B
-    - pos
+  - - CMP_B_BOT
+    - out
   - - R10
     - pos
 - - - ctrl_C_top
     - pin
   - - E3
     - ctrl+
-  - - B3
-    - +
-  - - R_PWC_T
-    - pos
+  - - CMP_C_TOP
+    - out
 - - - ctrl_C_bot
     - pin
-  - - B6
-    - +
-  - - R_PWC_B
-    - pos
+  - - CMP_C_BOT
+    - out
   - - R11
     - pos
 - - - G_A_TOP
@@ -677,148 +771,138 @@ nets:
     - pos
   - - R_DC
     - pos
+  - - SUM_V
+    - in2
 - - - V_ERR
     - pin
-  - - B_ERR
-    - +
-  - - B_P
-    - ctrl+
+  - - SUM_V
+    - out
+  - - KP_V
+    - in
+  - - INT_V
+    - in
 - - - V_P
     - pin
-  - - B_P
-    - +
-  - - B_VERR_RAW
-    - ctrl+
+  - - KP_V
+    - out
+  - - SUM_PI
+    - in1
 - - - V_I
     - pin
-  - - B_INT
-    - '-'
-  - - C_INT
-    - pos
-  - - R_INT
-    - pos
+  - - INT_V
+    - out
+  - - SUM_PI
+    - in2
 - - - I_MAG_RAW
     - pin
-  - - B_VERR_RAW
-    - +
-  - - R_MAG_FLT
-    - pos
+  - - LIM_PI
+    - out
+  - - LPF_MAG
+    - in
 - - - I_MAG
     - pin
-  - - R_MAG_FLT
-    - neg
-  - - C_MAG_FLT
-    - pos
-  - - R_MAG_DC
-    - pos
-  - - B_REFA
-    - ctrl+
-  - - B_REFB
-    - ctrl+
-  - - B_REFC
-    - ctrl+
+  - - LPF_MAG
+    - out
+  - - REF_A
+    - in1
+  - - REF_B
+    - in1
+  - - REF_C
+    - in1
 - - - I_REF_A
     - pin
-  - - B_REFA
-    - +
-  - - R_REFA
-    - pos
+  - - REF_A
+    - out
+  - - SUM_IA
+    - in1
 - - - I_REF_B
     - pin
-  - - B_REFB
-    - +
-  - - R_REFB
-    - pos
+  - - REF_B
+    - out
+  - - SUM_IB
+    - in1
 - - - I_REF_C
     - pin
-  - - B_REFC
-    - +
-  - - R_REFC
-    - pos
+  - - REF_C
+    - out
+  - - SUM_IC
+    - in1
 - - - V_IACT_A
     - pin
-  - - B_SENSE_A
-    - +
-  - - R_IACT_A
-    - pos
+  - - I_SENSE_A
+    - out
+  - - SUM_IA
+    - in2
 - - - V_IACT_B
     - pin
-  - - B_SENSE_B
-    - +
-  - - R_IACT_B
-    - pos
+  - - I_SENSE_B
+    - out
+  - - SUM_IB
+    - in2
 - - - V_IACT_C
     - pin
-  - - B_SENSE_C
-    - +
-  - - R_IACT_C
-    - pos
+  - - I_SENSE_C
+    - out
+  - - SUM_IC
+    - in2
 - - - V_CTRL_A_RAW
     - pin
-  - - B_ERR_A
-    - +
-  - - R_RAW_DUMMY_A
-    - pos
-  - - R_CPA
-    - pos
+  - - LIM_IA
+    - out
+  - - LPF_CA
+    - in
 - - - V_CTRL_B_RAW
     - pin
-  - - B_ERR_B
-    - +
-  - - R_RAW_DUMMY_B
-    - pos
-  - - R_CPB
-    - pos
+  - - LIM_IB
+    - out
+  - - LPF_CB
+    - in
 - - - V_CTRL_C_RAW
     - pin
-  - - B_ERR_C
-    - +
-  - - R_RAW_DUMMY_C
-    - pos
-  - - R_CPC
-    - pos
+  - - LIM_IC
+    - out
+  - - LPF_CC
+    - in
 - - - V_CTRL_A
     - pin
-  - - R_CPA
-    - neg
-  - - C_CPA
-    - pos
-  - - R_DC_A
-    - pos
-  - - B1
-    - ctrl+
-  - - B4
-    - ctrl+
+  - - LPF_CA
+    - out
+  - - CMP_A_TOP
+    - inn
+  - - CMP_A_BOT
+    - inp
 - - - V_CTRL_B
     - pin
-  - - R_CPB
-    - neg
-  - - C_CPB
-    - pos
-  - - R_DC_B
-    - pos
-  - - B2
-    - ctrl+
-  - - B5
-    - ctrl+
+  - - LPF_CB
+    - out
+  - - CMP_B_TOP
+    - inn
+  - - CMP_B_BOT
+    - inp
 - - - V_CTRL_C
     - pin
-  - - R_CPC
-    - neg
-  - - C_CPC
-    - pos
-  - - R_DC_C
-    - pos
-  - - B3
-    - ctrl+
-  - - B6
-    - ctrl+
+  - - LPF_CC
+    - out
+  - - CMP_C_TOP
+    - inn
+  - - CMP_C_BOT
+    - inp
 - - - V_TRI
     - pin
-  - - VTRI
-    - +
-  - - R_TRI
-    - pos
+  - - CAR
+    - out
+  - - CMP_A_TOP
+    - inp
+  - - CMP_B_TOP
+    - inp
+  - - CMP_C_TOP
+    - inp
+  - - CMP_A_BOT
+    - inn
+  - - CMP_B_BOT
+    - inn
+  - - CMP_C_BOT
+    - inn
 - - - GND
     - pin
   - - R_N_star
@@ -839,114 +923,12 @@ nets:
     - neg
   - - R_DC
     - neg
-  - - B_P
-    - '-'
-  - - B_P
-    - ctrl-
-  - - B_INT
-    - +
-  - - C_INT
-    - neg
-  - - R_INT
-    - neg
-  - - B_VERR_RAW
-    - '-'
-  - - B_VERR_RAW
-    - ctrl-
-  - - C_MAG_FLT
-    - neg
-  - - R_MAG_DC
-    - neg
-  - - B_REFA
-    - '-'
-  - - B_REFB
-    - '-'
-  - - B_REFC
-    - '-'
-  - - B_REFA
-    - ctrl-
-  - - B_REFB
-    - ctrl-
-  - - B_REFC
-    - ctrl-
-  - - R_REFA
-    - neg
-  - - R_REFB
-    - neg
-  - - R_REFC
-    - neg
-  - - B_SENSE_A
-    - '-'
-  - - B_SENSE_B
-    - '-'
-  - - B_SENSE_C
-    - '-'
-  - - R_IACT_A
-    - neg
-  - - R_IACT_B
-    - neg
-  - - R_IACT_C
-    - neg
-  - - B_ERR_A
-    - '-'
-  - - B_ERR_B
-    - '-'
-  - - B_ERR_C
-    - '-'
-  - - R_RAW_DUMMY_A
-    - neg
-  - - R_RAW_DUMMY_B
-    - neg
-  - - R_RAW_DUMMY_C
-    - neg
-  - - C_CPA
-    - neg
-  - - R_DC_A
-    - neg
-  - - C_CPB
-    - neg
-  - - R_DC_B
-    - neg
-  - - C_CPC
-    - neg
-  - - R_DC_C
-    - neg
-  - - VTRI
-    - '-'
-  - - R_TRI
-    - neg
-  - - B1
-    - '-'
-  - - B4
-    - '-'
-  - - B2
-    - '-'
-  - - B5
-    - '-'
-  - - B3
-    - '-'
-  - - B6
-    - '-'
-  - - R_PWA_T
-    - neg
-  - - R_PWA_B
-    - neg
-  - - R_PWB_T
-    - neg
-  - - R_PWB_B
-    - neg
-  - - R_PWC_T
-    - neg
-  - - R_PWC_B
-    - neg
   - - E1
     - ctrl-
   - - E2
     - ctrl-
   - - E3
     - ctrl-
-  - - B_ERR
-    - '-'
 - - - C_A_damp
     - pin
   - - C_EMI_A
@@ -965,6 +947,83 @@ nets:
     - neg
   - - R_DAMP_C
     - pos
+
+- - - V_REF_DC
+    - pin
+  - - REF_V
+    - out
+  - - SUM_V
+    - in1
+
+- - - V_PI_SUM
+    - pin
+  - - SUM_PI
+    - out
+  - - LIM_PI
+    - in
+
+- - - V_A_PH
+    - pin
+  - - SUM_VA
+    - out
+  - - REF_A
+    - in2
+
+- - - V_IERR_A
+    - pin
+  - - SUM_IA
+    - out
+  - - K_IA
+    - in
+
+- - - V_IERR_K_A
+    - pin
+  - - K_IA
+    - out
+  - - LIM_IA
+    - in
+
+- - - V_B_PH
+    - pin
+  - - SUM_VB
+    - out
+  - - REF_B
+    - in2
+
+- - - V_IERR_B
+    - pin
+  - - SUM_IB
+    - out
+  - - K_IB
+    - in
+
+- - - V_IERR_K_B
+    - pin
+  - - K_IB
+    - out
+  - - LIM_IB
+    - in
+
+- - - V_C_PH
+    - pin
+  - - SUM_VC
+    - out
+  - - REF_C
+    - in2
+
+- - - V_IERR_C
+    - pin
+  - - SUM_IC
+    - out
+  - - K_IC
+    - in
+
+- - - V_IERR_K_C
+    - pin
+  - - K_IC
+    - out
+  - - LIM_IC
+    - in
 analysis:
   transient:
     requirements:
@@ -1001,3 +1060,495 @@ analysis:
       method: trap
       trtol: 7
       ic: v(V_DC)=700 v(V_I)=21.5
+schematic:
+  tuned: false
+  components:
+    "#gate_drive": {x: 1580, y: 1200, rotation: 0}
+    "#modulator": {x: 1020, y: 1200, rotation: 0}
+    "#phase_a_control": {x: 460, y: 1140, rotation: 0}
+    "#phase_b_control": {x: 460, y: 1400, rotation: 0}
+    "#phase_c_control": {x: 460, y: 1660, rotation: 0}
+    "#voltage_loop": {x: -100, y: 1100, rotation: 0}
+    B1: {x: 440, y: 420, rotation: 0}
+    B2: {x: 1040, y: 420, rotation: 0}
+    B3: {x: 440, y: 1040, rotation: 0}
+    B4: {x: 240, y: 420, rotation: 0}
+    B5: {x: 840, y: 420, rotation: 0}
+    B6: {x: 240, y: 1040, rotation: 0}
+    B_ERR: {x: 220, y: 140, rotation: 0}
+    B_ERR_A: {x: 520, y: 460, rotation: 0}
+    B_ERR_B: {x: 520, y: 460, rotation: 0}
+    B_ERR_C: {x: 280, y: 280, rotation: 0}
+    B_INT: {x: 420, y: 260, rotation: 0}
+    B_P: {x: 220, y: 260, rotation: 0}
+    B_REFA: {x: 140, y: 460, rotation: 0}
+    B_REFB: {x: 140, y: 460, rotation: 0}
+    B_REFC: {x: 600, y: 360, rotation: 0}
+    B_SENSE_A: {x: 320, y: 460, rotation: 0}
+    B_SENSE_B: {x: 320, y: 460, rotation: 0}
+    B_SENSE_C: {x: 1020, y: 260, rotation: 0}
+    B_VERR_RAW: {x: 640, y: 260, rotation: 0}
+    CAR: {x: 520, y: 320, rotation: 0}
+    CMP_A_BOT: {x: 700, y: 300, rotation: 0}
+    CMP_A_TOP: {x: 600, y: 180, rotation: 0}
+    CMP_B_BOT: {x: 340, y: 300, rotation: 0}
+    CMP_B_TOP: {x: 420, y: 180, rotation: 0}
+    CMP_C_BOT: {x: 140, y: 360, rotation: 0}
+    CMP_C_TOP: {x: 340, y: 420, rotation: 0}
+    C_A_damp.pin: {x: -80, y: 100, rotation: 180}
+    C_B_damp.pin: {x: -80, y: 340, rotation: 180}
+    C_CPA: {x: 700, y: 460, rotation: 0}
+    C_CPB: {x: 700, y: 460, rotation: 0}
+    C_CPC: {x: 280, y: 560, rotation: 0}
+    C_C_damp.pin: {x: 60, y: 640, rotation: 180}
+    C_DC: {x: 1360, y: 240, rotation: 0}
+    C_EMI_A: {x: 180, y: 80, rotation: 90}
+    C_EMI_B: {x: 180, y: 320, rotation: 90}
+    C_EMI_C: {x: 180, y: 560, rotation: 90}
+    C_INT: {x: 420, y: 400, rotation: 0}
+    C_MAG_FLT: {x: 820, y: 260, rotation: 0}
+    D1: {x: 720, y: -140, rotation: 180}
+    D2: {x: 1000, y: -140, rotation: 180}
+    D3: {x: 1280, y: -140, rotation: 180}
+    D4: {x: 720, y: 640, rotation: 180}
+    D5: {x: 1000, y: 640, rotation: 180}
+    D6: {x: 1280, y: 640, rotation: 180}
+    E1: {x: 200, y: 240, rotation: 0}
+    E2: {x: 700, y: 240, rotation: 0}
+    E3: {x: 200, y: 660, rotation: 0}
+    GND: {x: -80, y: 840, rotation: 0}
+    G_A_BOT.pin: {x: 1220, y: 1060, rotation: 0}
+    G_A_TOP.pin: {x: 320, y: 80, rotation: 90}
+    G_A_TOP_G.pin: {x: 1780, y: 1120, rotation: 0}
+    G_B_BOT.pin: {x: 1220, y: 1220, rotation: 0}
+    G_B_TOP.pin: {x: 820, y: 80, rotation: 90}
+    G_B_TOP_G.pin: {x: 1780, y: 1280, rotation: 0}
+    G_C_BOT.pin: {x: 1220, y: 1260, rotation: 0}
+    G_C_TOP.pin: {x: 320, y: 500, rotation: 90}
+    G_C_TOP_G.pin: {x: 1780, y: 1320, rotation: 0}
+    INT_V: {x: 280, y: 320, rotation: 0}
+    I_MAG.pin: {x: 260, y: 100, rotation: 180}
+    I_MAG_RAW.pin: {x: 720, y: 500, rotation: 180}
+    I_REF_A.pin: {x: 440, y: 80, rotation: 180}
+    I_REF_B.pin: {x: 540, y: 80, rotation: 0}
+    I_REF_C.pin: {x: 540, y: 80, rotation: 0}
+    I_SENSE_A: {x: 440, y: 340, rotation: 0}
+    I_SENSE_B: {x: 440, y: 320, rotation: 0}
+    I_SENSE_C: {x: 440, y: 320, rotation: 0}
+    KP_V: {x: 380, y: 200, rotation: 0}
+    K_IA: {x: 720, y: 120, rotation: 0}
+    K_IB: {x: 720, y: 100, rotation: 0}
+    K_IC: {x: 720, y: 100, rotation: 0}
+    LA: {x: 400, y: 0, rotation: 270}
+    LB: {x: 400, y: 240, rotation: 270}
+    LC: {x: 400, y: 480, rotation: 270}
+    LIM_IA: {x: 900, y: 120, rotation: 0}
+    LIM_IB: {x: 900, y: 100, rotation: 0}
+    LIM_IC: {x: 900, y: 100, rotation: 0}
+    LIM_PI: {x: 620, y: 420, rotation: 0}
+    LPF_CA: {x: 1120, y: 120, rotation: 0}
+    LPF_CB: {x: 1120, y: 100, rotation: 0}
+    LPF_CC: {x: 1120, y: 100, rotation: 0}
+    LPF_MAG: {x: 840, y: 420, rotation: 0}
+    L_A_node.pin: {x: 540, y: 0, rotation: 0}
+    L_B_node.pin: {x: 540, y: 240, rotation: 0}
+    L_C_node.pin: {x: 540, y: 480, rotation: 0}
+    L_EMI_A: {x: 120, y: 0, rotation: 270}
+    L_EMI_B: {x: 120, y: 240, rotation: 270}
+    L_EMI_C: {x: 120, y: 480, rotation: 270}
+    M_A_BOT: {x: 640, y: 640, rotation: 0}
+    M_A_TOP: {x: 640, y: -140, rotation: 0}
+    M_B_BOT: {x: 920, y: 640, rotation: 0}
+    M_B_TOP: {x: 920, y: -140, rotation: 0}
+    M_C_BOT: {x: 1200, y: 640, rotation: 0}
+    M_C_TOP: {x: 1200, y: -140, rotation: 0}
+    N_star.pin: {x: -120, y: 0, rotation: 180}
+    R10: {x: 480, y: 460, rotation: 0}
+    R11: {x: 280, y: 560, rotation: 0}
+    R6: {x: 340, y: 240, rotation: 0}
+    R7: {x: 840, y: 240, rotation: 0}
+    R8: {x: 340, y: 660, rotation: 0}
+    R9: {x: 840, y: 300, rotation: 0}
+    REF_A: {x: 360, y: 200, rotation: 0}
+    REF_B: {x: 360, y: 160, rotation: 0}
+    REF_C: {x: 360, y: 160, rotation: 0}
+    REF_V: {x: 140, y: 20, rotation: 0}
+    R_CPA: {x: 620, y: 180, rotation: 270}
+    R_CPB: {x: 620, y: 180, rotation: 270}
+    R_CPC: {x: 280, y: 420, rotation: 0}
+    R_DAMP_A: {x: 60, y: 80, rotation: 90}
+    R_DAMP_B: {x: 60, y: 320, rotation: 90}
+    R_DAMP_C: {x: 60, y: 560, rotation: 90}
+    R_DC: {x: 1480, y: 240, rotation: 0}
+    R_DC_A: {x: 700, y: 320, rotation: 0}
+    R_DC_B: {x: 700, y: 320, rotation: 0}
+    R_DC_C: {x: 160, y: 500, rotation: 0}
+    R_IACT_A: {x: 320, y: 320, rotation: 0}
+    R_IACT_B: {x: 320, y: 320, rotation: 0}
+    R_IACT_C: {x: 1020, y: 120, rotation: 0}
+    R_INT: {x: 300, y: 380, rotation: 0}
+    R_MAG_DC: {x: 600, y: 240, rotation: 0}
+    R_MAG_FLT: {x: 740, y: 120, rotation: 270}
+    R_N_star: {x: -80, y: 720, rotation: 0}
+    R_PWA_B: {x: 240, y: 140, rotation: 0}
+    R_PWA_T: {x: 240, y: 280, rotation: 0}
+    R_PWB_B: {x: 840, y: 140, rotation: 0}
+    R_PWB_T: {x: 240, y: 760, rotation: 0}
+    R_PWC_B: {x: 240, y: 760, rotation: 0}
+    R_PWC_T: {x: 240, y: 1240, rotation: 0}
+    R_RAW_DUMMY_A: {x: 520, y: 320, rotation: 0}
+    R_RAW_DUMMY_B: {x: 520, y: 320, rotation: 0}
+    R_RAW_DUMMY_C: {x: 280, y: 140, rotation: 0}
+    R_REFA: {x: 140, y: 320, rotation: 0}
+    R_REFB: {x: 140, y: 320, rotation: 0}
+    R_REFC: {x: 760, y: 260, rotation: 0}
+    R_TRI: {x: 780, y: 820, rotation: 0}
+    SUM_IA: {x: 540, y: 200, rotation: 0}
+    SUM_IB: {x: 540, y: 180, rotation: 0}
+    SUM_IC: {x: 540, y: 180, rotation: 0}
+    SUM_PI: {x: 440, y: 340, rotation: 0}
+    SUM_V: {x: 200, y: 200, rotation: 0}
+    SUM_VA: {x: 260, y: 340, rotation: 0}
+    SUM_VB: {x: 260, y: 300, rotation: 0}
+    SUM_VC: {x: 260, y: 300, rotation: 0}
+    VTRI: {x: 780, y: 960, rotation: 0}
+    V_A: {x: 0, y: 0, rotation: 90}
+    V_A1.pin: {x: 240, y: 0, rotation: 0}
+    V_A_PH: {x: 180, y: 220, rotation: 180}
+    V_A_node.pin: {x: 140, y: -80, rotation: 0}
+    V_B: {x: 0, y: 240, rotation: 90}
+    V_B1.pin: {x: 240, y: 240, rotation: 0}
+    V_B_PH: {x: 180, y: 180, rotation: 180}
+    V_B_node.pin: {x: 140, y: 160, rotation: 0}
+    V_C: {x: 0, y: 480, rotation: 90}
+    V_C1.pin: {x: 240, y: 480, rotation: 0}
+    V_CTRL_A.pin: {x: 540, y: 80, rotation: 180}
+    V_CTRL_A_RAW.pin: {x: 1000, y: 200, rotation: 180}
+    V_CTRL_B.pin: {x: 160, y: 240, rotation: 180}
+    V_CTRL_B_RAW.pin: {x: 1020, y: 180, rotation: 0}
+    V_CTRL_C.pin: {x: 20, y: 380, rotation: 270}
+    V_CTRL_C_RAW.pin: {x: 1020, y: 180, rotation: 0}
+    V_C_PH: {x: 180, y: 180, rotation: 180}
+    V_C_node.pin: {x: 140, y: 400, rotation: 0}
+    V_DC.pin: {x: 640, y: -260, rotation: 270}
+    V_ERR.pin: {x: 380, y: 120, rotation: 0}
+    V_I.pin: {x: 280, y: 420, rotation: 180}
+    V_IACT_A.pin: {x: 480, y: 440, rotation: 180}
+    V_IACT_B.pin: {x: 500, y: 420, rotation: 0}
+    V_IACT_C.pin: {x: 500, y: 420, rotation: 0}
+    V_IERR_A: {x: 720, y: 200, rotation: 180}
+    V_IERR_B: {x: 720, y: 180, rotation: 180}
+    V_IERR_C: {x: 720, y: 180, rotation: 180}
+    V_IERR_K_A: {x: 820, y: 40, rotation: 180}
+    V_IERR_K_B: {x: 820, y: 20, rotation: 180}
+    V_IERR_K_C: {x: 820, y: 20, rotation: 180}
+    V_P.pin: {x: 520, y: 220, rotation: 180}
+    V_PI_SUM: {x: 620, y: 340, rotation: 180}
+    V_REF_DC: {x: 100, y: 100, rotation: 180}
+    V_TRI.pin: {x: 240, y: 180, rotation: 180}
+    "^gate_drive:G_A_TOP_G": {x: 340, y: 340, rotation: 0}
+    "^gate_drive:G_B_TOP_G": {x: 840, y: 340, rotation: 0}
+    "^gate_drive:G_C_TOP_G": {x: 340, y: 760, rotation: 0}
+    "^gate_drive:L_A_node": {x: 120, y: 340, rotation: 0}
+    "^gate_drive:L_B_node": {x: 620, y: 340, rotation: 0}
+    "^gate_drive:L_C_node": {x: 120, y: 760, rotation: 0}
+    "^gate_drive:ctrl_A_top": {x: 140, y: 60, rotation: 0}
+    "^gate_drive:ctrl_B_top": {x: 640, y: 60, rotation: 0}
+    "^gate_drive:ctrl_C_top": {x: 140, y: 480, rotation: 0}
+    "^modulator:G_A_BOT": {x: 840, y: 400, rotation: 0}
+    "^modulator:G_B_BOT": {x: 520, y: 640, rotation: 0}
+    "^modulator:G_C_BOT": {x: 240, y: 660, rotation: 0}
+    "^modulator:V_CTRL_A": {x: 580, y: 20, rotation: 0}
+    "^modulator:V_CTRL_B": {x: 220, y: 120, rotation: 0}
+    "^modulator:V_CTRL_C": {x: 100, y: 540, rotation: 0}
+    "^modulator:ctrl_A_top": {x: 820, y: 100, rotation: 0}
+    "^modulator:ctrl_B_top": {x: 360, y: 20, rotation: 0}
+    "^modulator:ctrl_C_top": {x: 720, y: 460, rotation: 0}
+    "^phase_a_control:I_MAG": {x: 300, y: 20, rotation: 0}
+    "^phase_a_control:N_star": {x: 80, y: 360, rotation: 0}
+    "^phase_a_control:V_A_node": {x: 80, y: 280, rotation: 0}
+    "^phase_a_control:V_CTRL_A": {x: 1220, y: 40, rotation: 0}
+    "^phase_b_control:I_MAG": {x: 260, y: 60, rotation: 0}
+    "^phase_b_control:N_star": {x: 80, y: 320, rotation: 0}
+    "^phase_b_control:V_B_node": {x: 80, y: 240, rotation: 0}
+    "^phase_b_control:V_CTRL_B": {x: 1220, y: 20, rotation: 0}
+    "^phase_c_control:I_MAG": {x: 260, y: 60, rotation: 0}
+    "^phase_c_control:N_star": {x: 80, y: 320, rotation: 0}
+    "^phase_c_control:V_CTRL_C": {x: 1220, y: 20, rotation: 0}
+    "^phase_c_control:V_C_node": {x: 80, y: 240, rotation: 0}
+    "^voltage_loop:I_MAG": {x: 940, y: 340, rotation: 0}
+    "^voltage_loop:V_DC": {x: 60, y: 220, rotation: 0}
+    ctrl_A_bot.pin: {x: 940, y: 260, rotation: 90}
+    ctrl_A_top.pin: {x: 100, y: 140, rotation: 180}
+    ctrl_B_bot.pin: {x: 580, y: 500, rotation: 90}
+    ctrl_B_top.pin: {x: 600, y: 140, rotation: 180}
+    ctrl_C_bot.pin: {x: 380, y: 620, rotation: 90}
+    ctrl_C_top.pin: {x: 100, y: 560, rotation: 180}
+    "~GND@B1.B": {x: 500, y: 540, rotation: 0}
+    "~GND@B2.B": {x: 1100, y: 540, rotation: 0}
+    "~GND@B3.B": {x: 500, y: 1160, rotation: 0}
+    "~GND@B_ERR.B": {x: 180, y: 360, rotation: 0}
+    "~GND@B_ERR_A.B": {x: 520, y: 580, rotation: 0}
+    "~GND@B_ERR_B.B": {x: 520, y: 580, rotation: 0}
+    "~GND@B_ERR_C.B": {x: 400, y: 400, rotation: 0}
+    "~GND@B_REFC.B": {x: 600, y: 480, rotation: 0}
+    "~GND@C_CPC.B": {x: 280, y: 740, rotation: 0}
+    "~GND@C_DC.B": {x: 1360, y: 360, rotation: 0}
+    "~GND@D4.A": {x: 720, y: 760, rotation: 0}
+    "~GND@E1.CN": {x: 60, y: 280, rotation: 0}
+    "~GND@E2.CN": {x: 560, y: 280, rotation: 0}
+    "~GND@E3.CN": {x: 60, y: 700, rotation: 0}
+    "~GND@R_PWA_B.B": {x: 360, y: 260, rotation: 0}
+    "~GND@R_PWB_B.B": {x: 960, y: 260, rotation: 0}
+    "~GND@R_PWC_B.B": {x: 360, y: 880, rotation: 0}
+    "~G_A_BOT@M_A_BOT.G": {x: 480, y: 640, rotation: 180}
+    "~G_A_TOP_G@M_A_TOP.G": {x: 480, y: -140, rotation: 180}
+    "~G_B_BOT@M_B_BOT.G": {x: 820, y: 560, rotation: 180}
+    "~G_B_TOP_G@M_B_TOP.G": {x: 820, y: -220, rotation: 180}
+    "~G_C_BOT@M_C_BOT.G": {x: 1100, y: 560, rotation: 180}
+    "~G_C_TOP_G@M_C_TOP.G": {x: 1100, y: -220, rotation: 180}
+    "~I_MAG@#phase_a_control.I_MAG": {x: 280, y: 1100, rotation: 180}
+    "~I_MAG@#phase_b_control.I_MAG": {x: 280, y: 1360, rotation: 180}
+    "~I_MAG@#phase_c_control.I_MAG": {x: 280, y: 1620, rotation: 180}
+    "~L_A_node@#gate_drive.L_A_node": {x: 1420, y: 1020, rotation: 180}
+    "~L_B_node@#gate_drive.L_B_node": {x: 1420, y: 980, rotation: 180}
+    "~L_C_node@#gate_drive.L_C_node": {x: 1380, y: 1300, rotation: 180}
+    "~N_star@#phase_a_control.N_star": {x: 280, y: 1140, rotation: 180}
+    "~N_star@#phase_b_control.N_star": {x: 280, y: 1400, rotation: 180}
+    "~N_star@#phase_c_control.N_star": {x: 280, y: 1660, rotation: 180}
+    "~V_A_node@#phase_a_control.V_A_node": {x: 260, y: 1180, rotation: 180}
+    "~V_B_node@#phase_b_control.V_B_node": {x: 260, y: 1440, rotation: 180}
+    "~V_CTRL_B@#modulator.V_CTRL_B": {x: 820, y: 1200, rotation: 180}
+    "~V_CTRL_B@#phase_b_control.V_CTRL_B": {x: 660, y: 1400, rotation: 0}
+    "~V_CTRL_C@#modulator.V_CTRL_C": {x: 820, y: 1240, rotation: 180}
+    "~V_CTRL_C@#phase_c_control.V_CTRL_C": {x: 660, y: 1660, rotation: 0}
+    "~V_C_node@#phase_c_control.V_C_node": {x: 260, y: 1700, rotation: 180}
+    "~V_DC@#voltage_loop.V_DC": {x: -280, y: 1100, rotation: 180}
+  wires:
+  - {id: W1, from: D4.A, to: M_A_BOT.S}
+  - {id: W2, from: D5.A, to: M_B_BOT.S}
+  - {id: W3, from: D6.A, to: M_C_BOT.S}
+  - {id: W4, from: C_DC.B, to: R_DC.B}
+  - {id: W5, from: D4.A, to: M_B_BOT.S}
+  - {id: W6, from: D5.A, to: M_C_BOT.S}
+  - {id: W7, from: GND.P, to: R_N_star.B}
+  - {id: W8, from: D4.A, to: "~GND@D4.A.P"}
+  - {id: W9, from: C_DC.B, to: "~GND@C_DC.B.P"}
+  - {id: W10, from: C_EMI_A.B, to: R_DAMP_A.A}
+  - {id: W11, from: C_A_damp.pin.P, to: R_DAMP_A.A}
+  - {id: W12, from: C_EMI_B.B, to: R_DAMP_B.A}
+  - {id: W13, from: C_B_damp.pin.P, to: R_DAMP_B.A}
+  - {id: W14, from: C_EMI_C.B, to: R_DAMP_C.A}
+  - {id: W15, from: C_C_damp.pin.P, to: R_DAMP_C.A}
+  - {id: W16, from: "#modulator.G_A_BOT", to: G_A_BOT.pin.P}
+  - {id: W17, from: M_A_BOT.G, to: "~G_A_BOT@M_A_BOT.G.P"}
+  - {id: W18, from: "#gate_drive.G_A_TOP_G", to: G_A_TOP_G.pin.P}
+  - {id: W19, from: M_A_TOP.G, to: "~G_A_TOP_G@M_A_TOP.G.P"}
+  - {id: W20, from: "#modulator.G_B_BOT", to: G_B_BOT.pin.P}
+  - {id: W21, from: M_B_BOT.G, to: "~G_B_BOT@M_B_BOT.G.P"}
+  - {id: W22, from: "#gate_drive.G_B_TOP_G", to: G_B_TOP_G.pin.P}
+  - {id: W23, from: M_B_TOP.G, to: "~G_B_TOP_G@M_B_TOP.G.P"}
+  - {id: W24, from: "#modulator.G_C_BOT", to: G_C_BOT.pin.P}
+  - {id: W25, from: M_C_BOT.G, to: "~G_C_BOT@M_C_BOT.G.P"}
+  - {id: W26, from: "#gate_drive.G_C_TOP_G", to: G_C_TOP_G.pin.P}
+  - {id: W27, from: M_C_TOP.G, to: "~G_C_TOP_G@M_C_TOP.G.P"}
+  - {id: W28, from: "#phase_a_control.I_MAG", to: "#voltage_loop.I_MAG"}
+  - {id: W29, from: "#phase_b_control.I_MAG", to: "~I_MAG@#phase_b_control.I_MAG.P"}
+  - {id: W30, from: "#phase_c_control.I_MAG", to: "~I_MAG@#phase_c_control.I_MAG.P"}
+  - {id: W31, from: "#phase_a_control.I_MAG", to: "~I_MAG@#phase_a_control.I_MAG.P"}
+  - {id: W32, from: D1.A, to: M_A_TOP.S}
+  - {id: W33, from: D4.B, to: M_A_BOT.D}
+  - {id: W34, from: LA.B, to: M_A_TOP.S}
+  - {id: W35, from: D1.A, to: D4.B}
+  - {id: W36, from: LA.B, to: L_A_node.pin.P}
+  - {id: W37, from: "#gate_drive.L_A_node", to: "~L_A_node@#gate_drive.L_A_node.P"}
+  - {id: W38, from: D2.A, to: M_B_TOP.S}
+  - {id: W39, from: D5.B, to: M_B_BOT.D}
+  - {id: W40, from: D2.A, to: D5.B}
+  - {id: W41, from: LB.B, to: M_B_TOP.S}
+  - {id: W42, from: LB.B, to: L_B_node.pin.P}
+  - {id: W43, from: "#gate_drive.L_B_node", to: "~L_B_node@#gate_drive.L_B_node.P"}
+  - {id: W44, from: D3.A, to: M_C_TOP.S}
+  - {id: W45, from: D6.B, to: M_C_BOT.D}
+  - {id: W46, from: D3.A, to: D6.B}
+  - {id: W47, from: LC.B, to: M_C_BOT.D}
+  - {id: W48, from: LC.B, to: L_C_node.pin.P}
+  - {id: W49, from: "#gate_drive.L_C_node", to: "~L_C_node@#gate_drive.L_C_node.P"}
+  - {id: W50, from: R_DAMP_A.B, to: V_A.B}
+  - {id: W51, from: R_DAMP_B.B, to: V_B.B}
+  - {id: W52, from: R_DAMP_C.B, to: V_C.B}
+  - {id: W53, from: R_DAMP_A.B, to: V_B.B}
+  - {id: W54, from: R_DAMP_B.B, to: V_C.B}
+  - {id: W55, from: N_star.pin.P, to: V_A.B}
+  - {id: W56, from: R_DAMP_C.B, to: R_N_star.A}
+  - {id: W57, from: "#phase_a_control.N_star", to: "~N_star@#phase_a_control.N_star.P"}
+  - {id: W58, from: "#phase_b_control.N_star", to: "~N_star@#phase_b_control.N_star.P"}
+  - {id: W59, from: "#phase_c_control.N_star", to: "~N_star@#phase_c_control.N_star.P"}
+  - {id: W60, from: C_EMI_A.A, to: L_EMI_A.B}
+  - {id: W61, from: LA.A, to: L_EMI_A.B}
+  - {id: W62, from: L_EMI_A.B, to: V_A1.pin.P}
+  - {id: W63, from: L_EMI_A.A, to: V_A.A}
+  - {id: W64, from: L_EMI_A.A, to: V_A_node.pin.P}
+  - {id: W65, from: "#phase_a_control.V_A_node", to: "~V_A_node@#phase_a_control.V_A_node.P"}
+  - {id: W66, from: C_EMI_B.A, to: L_EMI_B.B}
+  - {id: W67, from: LB.A, to: L_EMI_B.B}
+  - {id: W68, from: L_EMI_B.B, to: V_B1.pin.P}
+  - {id: W69, from: L_EMI_B.A, to: V_B.A}
+  - {id: W70, from: L_EMI_B.A, to: V_B_node.pin.P}
+  - {id: W71, from: "#phase_b_control.V_B_node", to: "~V_B_node@#phase_b_control.V_B_node.P"}
+  - {id: W72, from: C_EMI_C.A, to: L_EMI_C.B}
+  - {id: W73, from: LC.A, to: L_EMI_C.B}
+  - {id: W74, from: L_EMI_C.B, to: V_C1.pin.P}
+  - {id: W75, from: "#modulator.V_CTRL_A", to: "#phase_a_control.V_CTRL_A"}
+  - {id: W76, from: "#modulator.V_CTRL_B", to: "~V_CTRL_B@#modulator.V_CTRL_B.P"}
+  - {id: W77, from: "#phase_b_control.V_CTRL_B", to: "~V_CTRL_B@#phase_b_control.V_CTRL_B.P"}
+  - {id: W78, from: "#modulator.V_CTRL_C", to: "~V_CTRL_C@#modulator.V_CTRL_C.P"}
+  - {id: W79, from: "#phase_c_control.V_CTRL_C", to: "~V_CTRL_C@#phase_c_control.V_CTRL_C.P"}
+  - {id: W80, from: L_EMI_C.A, to: V_C.A}
+  - {id: W81, from: L_EMI_C.A, to: V_C_node.pin.P}
+  - {id: W82, from: "#phase_c_control.V_C_node", to: "~V_C_node@#phase_c_control.V_C_node.P"}
+  - {id: W83, from: D1.B, to: M_A_TOP.D}
+  - {id: W84, from: D2.B, to: M_B_TOP.D}
+  - {id: W85, from: D3.B, to: M_C_TOP.D}
+  - {id: W86, from: C_DC.A, to: R_DC.A}
+  - {id: W87, from: D1.B, to: M_B_TOP.D}
+  - {id: W88, from: D2.B, to: M_C_TOP.D}
+  - {id: W89, from: C_DC.A, to: D3.B}
+  - {id: W90, from: M_A_TOP.D, to: V_DC.pin.P}
+  - {id: W91, from: "#voltage_loop.V_DC", to: "~V_DC@#voltage_loop.V_DC.P"}
+  - {id: W92, from: "#gate_drive.ctrl_A_top", to: "#modulator.ctrl_A_top"}
+  - {id: W93, from: "#gate_drive.ctrl_B_top", to: "#modulator.ctrl_B_top"}
+  - {id: W94, from: "#gate_drive.ctrl_C_top", to: "#modulator.ctrl_C_top"}
+  groups:
+    voltage_loop: {label: "Voltage loop", members: [REF_V, SUM_V, KP_V, INT_V, SUM_PI, LIM_PI, LPF_MAG]}
+    modulator: {label: "Modulator", members: [CAR, CMP_A_TOP, CMP_A_BOT, CMP_B_TOP, CMP_B_BOT, CMP_C_TOP, CMP_C_BOT, R9, R10, R11]}
+    gate_drive: {label: "Gate drive", members: [E1, E2, E3, R6, R7, R8]}
+    phase_a_control: {label: "Phase A control", members: [SUM_VA, REF_A, I_SENSE_A, SUM_IA, K_IA, LIM_IA, LPF_CA]}
+    phase_b_control: {label: "Phase B control", members: [SUM_VB, REF_B, I_SENSE_B, SUM_IB, K_IB, LIM_IB, LPF_CB]}
+    phase_c_control: {label: "Phase C control", members: [SUM_VC, REF_C, I_SENSE_C, SUM_IC, K_IC, LIM_IC, LPF_CC]}
+  sheets:
+    gate_drive:
+      wires:
+      - {id: W1, from: E1.CN, to: "~GND@E1.CN.P"}
+      - {id: W2, from: E2.CN, to: "~GND@E2.CN.P"}
+      - {id: W3, from: E3.CN, to: "~GND@E3.CN.P"}
+      - {id: W4, from: E1.A, to: R6.A}
+      - {id: W5, from: G_A_TOP.pin.P, to: R6.A}
+      - {id: W6, from: R6.B, to: "^gate_drive:G_A_TOP_G.P"}
+      - {id: W7, from: E2.A, to: R7.A}
+      - {id: W8, from: G_B_TOP.pin.P, to: R7.A}
+      - {id: W9, from: R7.B, to: "^gate_drive:G_B_TOP_G.P"}
+      - {id: W10, from: E3.A, to: R8.A}
+      - {id: W11, from: G_C_TOP.pin.P, to: R8.A}
+      - {id: W12, from: R8.B, to: "^gate_drive:G_C_TOP_G.P"}
+      - {id: W13, from: E1.B, to: "^gate_drive:L_A_node.P"}
+      - {id: W14, from: E2.B, to: "^gate_drive:L_B_node.P"}
+      - {id: W15, from: E3.B, to: "^gate_drive:L_C_node.P"}
+      - {id: W16, from: E1.CP, to: "^gate_drive:ctrl_A_top.P"}
+      - {id: W17, from: "^gate_drive:ctrl_A_top.P", to: ctrl_A_top.pin.P}
+      - {id: W18, from: E2.CP, to: "^gate_drive:ctrl_B_top.P"}
+      - {id: W19, from: "^gate_drive:ctrl_B_top.P", to: ctrl_B_top.pin.P}
+      - {id: W20, from: E3.CP, to: "^gate_drive:ctrl_C_top.P"}
+      - {id: W21, from: "^gate_drive:ctrl_C_top.P", to: ctrl_C_top.pin.P}
+    modulator:
+      wires:
+      - {id: W1, from: R9.B, to: "^modulator:G_A_BOT.P"}
+      - {id: W2, from: R10.B, to: "^modulator:G_B_BOT.P"}
+      - {id: W3, from: R11.B, to: "^modulator:G_C_BOT.P"}
+      - {id: W4, from: CMP_A_BOT.inp, to: CMP_A_TOP.inn}
+      - {id: W5, from: CMP_A_TOP.inn, to: "^modulator:V_CTRL_A.P"}
+      - {id: W6, from: V_CTRL_A.pin.P, to: "^modulator:V_CTRL_A.P"}
+      - {id: W7, from: CMP_B_BOT.inp, to: CMP_B_TOP.inn}
+      - {id: W8, from: CMP_B_BOT.inp, to: "^modulator:V_CTRL_B.P"}
+      - {id: W9, from: V_CTRL_B.pin.P, to: "^modulator:V_CTRL_B.P"}
+      - {id: W10, from: CMP_C_BOT.inp, to: "^modulator:V_CTRL_C.P"}
+      - {id: W11, from: CMP_C_BOT.inp, to: CMP_C_TOP.inn}
+      - {id: W12, from: CMP_C_BOT.inp, to: V_CTRL_C.pin.P}
+      - {id: W13, from: CMP_B_BOT.inn, to: CMP_C_TOP.inp}
+      - {id: W14, from: CAR.out, to: CMP_A_BOT.inn}
+      - {id: W15, from: CAR.out, to: CMP_A_TOP.inp}
+      - {id: W16, from: CMP_A_TOP.inp, to: CMP_B_TOP.inp}
+      - {id: W17, from: CMP_C_BOT.inn, to: CMP_C_TOP.inp}
+      - {id: W18, from: CMP_B_BOT.inn, to: CMP_B_TOP.inp}
+      - {id: W19, from: CMP_B_TOP.inp, to: V_TRI.pin.P}
+      - {id: W20, from: CMP_A_BOT.out, to: R9.A}
+      - {id: W21, from: R9.A, to: ctrl_A_bot.pin.P}
+      - {id: W22, from: CMP_A_TOP.out, to: "^modulator:ctrl_A_top.P"}
+      - {id: W23, from: CMP_B_BOT.out, to: R10.A}
+      - {id: W24, from: R10.A, to: ctrl_B_bot.pin.P}
+      - {id: W25, from: CMP_B_TOP.out, to: "^modulator:ctrl_B_top.P"}
+      - {id: W26, from: CMP_C_BOT.out, to: R11.A}
+      - {id: W27, from: R11.A, to: ctrl_C_bot.pin.P}
+      - {id: W28, from: CMP_C_TOP.out, to: "^modulator:ctrl_C_top.P"}
+    phase_a_control:
+      wires:
+      - {id: W1, from: REF_A.in1, to: "^phase_a_control:I_MAG.P"}
+      - {id: W2, from: I_MAG.pin.P, to: "^phase_a_control:I_MAG.P"}
+      - {id: W3, from: REF_A.out, to: SUM_IA.in1}
+      - {id: W4, from: I_REF_A.pin.P, to: SUM_IA.in1}
+      - {id: W5, from: SUM_VA.in2, to: "^phase_a_control:N_star.P"}
+      - {id: W6, from: REF_A.in2, to: SUM_VA.out}
+      - {id: W7, from: REF_A.in2, to: V_A_PH.P}
+      - {id: W8, from: SUM_VA.in1, to: "^phase_a_control:V_A_node.P"}
+      - {id: W9, from: LPF_CA.out, to: "^phase_a_control:V_CTRL_A.P"}
+      - {id: W10, from: LIM_IA.out, to: LPF_CA.in}
+      - {id: W11, from: LPF_CA.in, to: V_CTRL_A_RAW.pin.P}
+      - {id: W12, from: I_SENSE_A.out, to: SUM_IA.in2}
+      - {id: W13, from: I_SENSE_A.out, to: V_IACT_A.pin.P}
+      - {id: W14, from: K_IA.in, to: SUM_IA.out}
+      - {id: W15, from: K_IA.in, to: V_IERR_A.P}
+      - {id: W16, from: K_IA.out, to: LIM_IA.in}
+      - {id: W17, from: LIM_IA.in, to: V_IERR_K_A.P}
+    phase_b_control:
+      wires:
+      - {id: W1, from: REF_B.in1, to: "^phase_b_control:I_MAG.P"}
+      - {id: W2, from: REF_B.out, to: SUM_IB.in1}
+      - {id: W3, from: I_REF_B.pin.P, to: SUM_IB.in1}
+      - {id: W4, from: SUM_VB.in2, to: "^phase_b_control:N_star.P"}
+      - {id: W5, from: REF_B.in2, to: SUM_VB.out}
+      - {id: W6, from: REF_B.in2, to: V_B_PH.P}
+      - {id: W7, from: SUM_VB.in1, to: "^phase_b_control:V_B_node.P"}
+      - {id: W8, from: LPF_CB.out, to: "^phase_b_control:V_CTRL_B.P"}
+      - {id: W9, from: LIM_IB.out, to: LPF_CB.in}
+      - {id: W10, from: LIM_IB.out, to: V_CTRL_B_RAW.pin.P}
+      - {id: W11, from: I_SENSE_B.out, to: SUM_IB.in2}
+      - {id: W12, from: I_SENSE_B.out, to: V_IACT_B.pin.P}
+      - {id: W13, from: K_IB.in, to: SUM_IB.out}
+      - {id: W14, from: K_IB.in, to: V_IERR_B.P}
+      - {id: W15, from: K_IB.out, to: LIM_IB.in}
+      - {id: W16, from: LIM_IB.in, to: V_IERR_K_B.P}
+    phase_c_control:
+      wires:
+      - {id: W1, from: REF_C.in1, to: "^phase_c_control:I_MAG.P"}
+      - {id: W2, from: REF_C.out, to: SUM_IC.in1}
+      - {id: W3, from: I_REF_C.pin.P, to: SUM_IC.in1}
+      - {id: W4, from: SUM_VC.in2, to: "^phase_c_control:N_star.P"}
+      - {id: W5, from: LPF_CC.out, to: "^phase_c_control:V_CTRL_C.P"}
+      - {id: W6, from: LIM_IC.out, to: LPF_CC.in}
+      - {id: W7, from: LIM_IC.out, to: V_CTRL_C_RAW.pin.P}
+      - {id: W8, from: REF_C.in2, to: SUM_VC.out}
+      - {id: W9, from: REF_C.in2, to: V_C_PH.P}
+      - {id: W10, from: SUM_VC.in1, to: "^phase_c_control:V_C_node.P"}
+      - {id: W11, from: I_SENSE_C.out, to: SUM_IC.in2}
+      - {id: W12, from: I_SENSE_C.out, to: V_IACT_C.pin.P}
+      - {id: W13, from: K_IC.in, to: SUM_IC.out}
+      - {id: W14, from: K_IC.in, to: V_IERR_C.P}
+      - {id: W15, from: K_IC.out, to: LIM_IC.in}
+      - {id: W16, from: LIM_IC.in, to: V_IERR_K_C.P}
+    voltage_loop:
+      wires:
+      - {id: W1, from: LPF_MAG.out, to: "^voltage_loop:I_MAG.P"}
+      - {id: W2, from: LIM_PI.out, to: LPF_MAG.in}
+      - {id: W3, from: I_MAG_RAW.pin.P, to: LPF_MAG.in}
+      - {id: W4, from: SUM_V.in2, to: "^voltage_loop:V_DC.P"}
+      - {id: W5, from: KP_V.in, to: SUM_V.out}
+      - {id: W6, from: INT_V.in, to: SUM_V.out}
+      - {id: W7, from: KP_V.in, to: V_ERR.pin.P}
+      - {id: W8, from: INT_V.out, to: SUM_PI.in2}
+      - {id: W9, from: INT_V.out, to: V_I.pin.P}
+      - {id: W10, from: KP_V.out, to: SUM_PI.in1}
+      - {id: W11, from: KP_V.out, to: V_P.pin.P}
+      - {id: W12, from: LIM_PI.in, to: SUM_PI.out}
+      - {id: W13, from: LIM_PI.in, to: V_PI_SUM.P}
+      - {id: W14, from: REF_V.out, to: SUM_V.in1}
+      - {id: W15, from: SUM_V.in1, to: V_REF_DC.P}

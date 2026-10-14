@@ -553,3 +553,28 @@ metadata:
     - buck-boost
     - step-up
     - step-down
+schematic:
+  tuned: true
+  components:
+    Cout: {x: 540, y: 200, rotation: 180}
+    D: {x: 400, y: 80, rotation: 90}
+    L1: {x: 240, y: 200, rotation: 0}
+    PWM: {x: 180, y: -20, rotation: 180}
+    R_LOAD: {x: 660, y: 200, rotation: 0}
+    SW: {x: 180, y: 80, rotation: 90, mirrorY: true}
+    VIN: {x: 0, y: 200, rotation: 0}
+    "~GND@Cout.A": {x: 540, y: 320, rotation: 0}
+    "~GND@L1.B": {x: 240, y: 300, rotation: 0}
+  wires:
+  - {id: W1, from: Cout.A, to: R_LOAD.B}
+  - {id: W2, from: L1.B, to: VIN.B}
+  - {id: W4, from: L1.B, to: "~GND@L1.B.P"}
+  - {id: W5, from: SW.D, to: VIN.A}
+  - {id: W6, from: L1.A, to: SW.S}
+  - {id: W7, from: D.B, to: SW.S}
+  - {id: W8, from: PWM.B, to: SW.S}
+  - {id: W9, from: Cout.B, to: R_LOAD.A, path: [[540, 160], [540, 80], [660, 80], [660, 160]]}
+  - {id: W10, from: Cout.B, to: D.A}
+  - {id: W11, from: PWM.A, to: SW.G}
+  - {id: W12, from: Cout.A, to: {wire: W4, x: 240, y: 259}}
+  groups: {}

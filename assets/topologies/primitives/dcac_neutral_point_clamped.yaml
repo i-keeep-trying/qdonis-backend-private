@@ -209,37 +209,119 @@ components:
       frequency: 50
       series_resistance: 0
 
+  - ref: n_p
+    type: node
+    params:
+      node_type: "label"
+
+  - ref: n_ctrl_sum
+    type: node
+    params:
+      node_type: "label"
+
+  # Control (blocks): error = reference - (v(n10) - v(n6)); modulation = (2 * err + 100 * integral(err) +
+  # reference) / 500, clamped +-0.98; phase-disposition PWM against 0..1 and -1..0 V 10 kHz triangles with a
+  # 0.01 V (500 ns) dead band. The floating gate drives E_PWM1..4 stay E sources.
+  - ref: SUM_E
+    type: sum
+    role: voltage_error
+    params:
+      signs: "+-+"
+
+  - ref: KP
+    type: gain
+    role: voltage_p
+    params:
+      gain: 2.0
+
+  - ref: INT
+    type: integrator
+    role: voltage_i
+    params:
+      ki: 100
+
+  - ref: SUM_C
+    type: sum
+    role: pi_plus_feedforward
+    params:
+      signs: "+++"
+
+  - ref: K_NORM
+    type: gain
+    role: modulation_normalise
+    params:
+      gain: "1/500"
+
+  - ref: LIM_REF
+    type: limiter
+    role: modulation_clamp
+    params:
+      lower: -0.98
+      upper: 0.98
+
+  - ref: CAR_UP
+    type: carrier
+    role: upper_carrier
+    params:
+      frequency: 10000.0
+      low: 0
+      high: 1
+      shape: "triangle"
+
+  - ref: CAR_LOW
+    type: carrier
+    role: lower_carrier
+    params:
+      frequency: 10000.0
+      low: -1
+      high: 0
+      shape: "triangle"
+
+  - ref: CMP_SW1
+    type: comparator
+    role: sw1_pwm
+    params:
+      high: 15
+      low: 0
+      threshold: 0.01
+      width: 0.0002
+
+  - ref: CMP_SW3
+    type: comparator
+    role: sw3_pwm
+    params:
+      high: 15
+      low: 0
+      threshold: 0.01
+      width: 0.0002
+
+  - ref: CMP_SW2
+    type: comparator
+    role: sw2_pwm
+    params:
+      high: 15
+      low: 0
+      threshold: 0.01
+      width: 0.0002
+
+  - ref: CMP_SW4
+    type: comparator
+    role: sw4_pwm
+    params:
+      high: 15
+      low: 0
+      threshold: 0.01
+      width: 0.0002
+
   - ref: COMMENT_ERR
     type: custom_spice
     params:
       spice_line: "* Error calculation (Reference - Actual Load Voltage relative to midpoint)"
 
-  - ref: B_err
-    type: b_source
-    params:
-      expression: "V(n_ref_target) - (V(n10) - V(n6))"
-
   - ref: COMMENT_PI
     type: custom_spice
     params:
       spice_line: "* Continuous-Time PI Controller (Aggressive Tuning)"
-
-  - ref: G_PI
-    type: g_source
-    params:
-      gain: 100
-
-  - ref: C_PI
-    type: capacitor
-    params:
-      capacitance: 1
-      sense: false
-
-  - ref: R_PI
-    type: resistor
-    params:
-      resistance: 10Meg
-      sense: false
 
   - ref: IC_PI
     type: custom_spice
@@ -251,55 +333,15 @@ components:
     params:
       spice_line: "* Control Effort: PI Output + Voltage Feed-forward (normalized to +/- 1)"
 
-  - ref: B_ctrl
-    type: b_source
-    params:
-      expression: "(V(n_err)*2.0 + V(n_pi_int) + V(n_ref_target))/500"
-
   - ref: COMMENT_ANTI_WINDUP
     type: custom_spice
     params:
       spice_line: "* Anti-Windup / Modulation Clamp"
 
-  - ref: B_ref
-    type: b_source
-    params:
-      expression: "max(-0.98, min(0.98, V(n_ctrl_raw)))"
-
   - ref: COMMENT_TRI
     type: custom_spice
     params:
       spice_line: "* 10kHz Triangle Carriers (Upper: 0 to 1, Lower: -1 to 0)"
-
-  - ref: V_tri_upper
-    type: node
-    role: carrier_source
-    params:
-      node_type: voltage_source
-      source: pulse
-      v1: 0
-      v2: 1
-      td: 0
-      tr: 50u
-      tf: 50u
-      pw: 0
-      per: 100u
-      series_resistance: 0
-
-  - ref: V_tri_lower
-    type: node
-    role: carrier_source
-    params:
-      node_type: voltage_source
-      source: pulse
-      v1: -1
-      v2: 0
-      td: 0
-      tr: 50u
-      tf: 50u
-      pw: 0
-      per: 100u
-      series_resistance: 0
 
   - ref: COMMENT_PWM_1
     type: custom_spice
@@ -310,26 +352,6 @@ components:
     type: custom_spice
     params:
       spice_line: "* 10kHz Carrier slope is 20,000 V/s. A 0.01V offset mathematically creates a robust 500ns interlocking delay."
-
-  - ref: B_SW1
-    type: b_source
-    params:
-      expression: "7.5 * (1 + tanh((V(n_ref) - V(n_tri_up) - 0.01)*5000))"
-
-  - ref: B_SW3
-    type: b_source
-    params:
-      expression: "7.5 * (1 + tanh((V(n_tri_up) - V(n_ref) - 0.01)*5000))"
-
-  - ref: B_SW2
-    type: b_source
-    params:
-      expression: "7.5 * (1 + tanh((V(n_ref) - V(n_tri_low) - 0.01)*5000))"
-
-  - ref: B_SW4
-    type: b_source
-    params:
-      expression: "7.5 * (1 + tanh((V(n_tri_low) - V(n_ref) - 0.01)*5000))"
 
   # Perfect Floating Gate Drives
   - ref: COMMENT_GATE_DRV
@@ -566,6 +588,8 @@ nets:
       - neg
     - - R_LOAD
       - neg
+    - - SUM_E
+      - in3
 
   # Net n7: SW3 Gate
   - - - n7
@@ -604,6 +628,8 @@ nets:
       - pos
     - - R_LOAD
       - pos
+    - - SUM_E
+      - in2
 
   # Reference Ground Net (0)
   - - - GND
@@ -611,32 +637,6 @@ nets:
     - - R_GND_ANCHOR
       - neg
     - - V_ref_target
-      - '-'
-    - - B_err
-      - '-'
-    - - G_PI
-      - +
-    - - G_PI
-      - ctrl-
-    - - C_PI
-      - neg
-    - - R_PI
-      - neg
-    - - B_ctrl
-      - '-'
-    - - B_ref
-      - '-'
-    - - V_tri_upper
-      - '-'
-    - - V_tri_lower
-      - '-'
-    - - B_SW1
-      - '-'
-    - - B_SW3
-      - '-'
-    - - B_SW2
-      - '-'
-    - - B_SW4
       - '-'
     - - E_PWM1
       - ctrl-
@@ -652,78 +652,100 @@ nets:
       - pin
     - - V_ref_target
       - +
+    - - SUM_E
+      - in1
+    - - SUM_C
+      - in3
 
   # Net n_err
   - - - n_err
       - pin
-    - - B_err
-      - +
-    - - G_PI
-      - ctrl+
+    - - SUM_E
+      - out
+    - - INT
+      - in
+    - - KP
+      - in
 
   # Net n_pi_int
   - - - n_pi_int
       - pin
-    - - G_PI
-      - '-'
-    - - C_PI
-      - pos
-    - - R_PI
-      - pos
+    - - INT
+      - out
+    - - SUM_C
+      - in2
 
   # Net n_ctrl_raw
   - - - n_ctrl_raw
       - pin
-    - - B_ctrl
-      - +
+    - - K_NORM
+      - out
+    - - LIM_REF
+      - in
 
   # Net n_ref
   - - - n_ref
       - pin
-    - - B_ref
-      - +
+    - - LIM_REF
+      - out
+    - - CMP_SW1
+      - inp
+    - - CMP_SW3
+      - inn
+    - - CMP_SW2
+      - inp
+    - - CMP_SW4
+      - inn
 
   # Net n_tri_up
   - - - n_tri_up
       - pin
-    - - V_tri_upper
-      - +
+    - - CAR_UP
+      - out
+    - - CMP_SW1
+      - inn
+    - - CMP_SW3
+      - inp
 
   # Net n_tri_low
   - - - n_tri_low
       - pin
-    - - V_tri_lower
-      - +
+    - - CAR_LOW
+      - out
+    - - CMP_SW2
+      - inn
+    - - CMP_SW4
+      - inp
 
   # Net n_PWM1_int
   - - - n_PWM1_int
       - pin
-    - - B_SW1
-      - +
+    - - CMP_SW1
+      - out
     - - E_PWM1
       - ctrl+
 
   # Net n_PWM2_int
   - - - n_PWM2_int
       - pin
-    - - B_SW2
-      - +
+    - - CMP_SW2
+      - out
     - - E_PWM2
       - ctrl+
 
   # Net n_PWM3_int
   - - - n_PWM3_int
       - pin
-    - - B_SW3
-      - +
+    - - CMP_SW3
+      - out
     - - E_PWM3
       - ctrl+
 
   # Net n_PWM4_int
   - - - n_PWM4_int
       - pin
-    - - B_SW4
-      - +
+    - - CMP_SW4
+      - out
     - - E_PWM4
       - ctrl+
 
@@ -758,6 +780,20 @@ nets:
       - +
     - - PWM4_drive
       - pos
+
+  - - - n_p
+      - pin
+    - - KP
+      - out
+    - - SUM_C
+      - in1
+
+  - - - n_ctrl_sum
+      - pin
+    - - SUM_C
+      - out
+    - - K_NORM
+      - in
 
 analysis:
   spice_settings:
@@ -985,3 +1021,313 @@ metadata:
     - closed-loop
     - pd-pwm
     - inverter
+schematic:
+  tuned: false
+  components:
+    "#channel_1_control": {x: 1160, y: 980, rotation: 0}
+    "#channel_2_control": {x: 1160, y: 1240, rotation: 0}
+    "#gate_drive": {x: 40, y: 1840, rotation: 0}
+    "#modulator": {x: 600, y: 1020, rotation: 0}
+    "#reference": {x: 40, y: 960, rotation: 0}
+    "#spice_directives": {x: 40, y: 1160, rotation: 0}
+    "#voltage_loop": {x: 40, y: 1500, rotation: 0}
+    B_SW1: {x: 140, y: 40, rotation: 0}
+    B_SW2: {x: 140, y: 40, rotation: 0}
+    B_SW3: {x: 140, y: 40, rotation: 0}
+    B_SW4: {x: 180, y: 580, rotation: 0}
+    B_ctrl: {x: 660, y: 200, rotation: 0}
+    B_err: {x: 80, y: 220, rotation: 0}
+    B_ref: {x: 800, y: 600, rotation: 0}
+    C1: {x: 0, y: 200, rotation: 0}
+    C2: {x: 0, y: 400, rotation: 0}
+    CAR_LOW: {x: 120, y: 600, rotation: 0}
+    CAR_UP: {x: 220, y: 40, rotation: 0}
+    CMP_SW1: {x: 400, y: 240, rotation: 0}
+    CMP_SW2: {x: 280, y: 380, rotation: 0}
+    CMP_SW3: {x: 240, y: 260, rotation: 0}
+    CMP_SW4: {x: 100, y: 400, rotation: 0}
+    COMMENT_ANTI_WINDUP: {x: 480, y: 240, rotation: 0}
+    COMMENT_CTRL_1: {x: 840, y: 20, rotation: 0}
+    COMMENT_CTRL_2: {x: 140, y: 120, rotation: 0}
+    COMMENT_CTRL_EFFORT: {x: 140, y: 240, rotation: 0}
+    COMMENT_DC_LINK: {x: 140, y: 20, rotation: 0}
+    COMMENT_ERR: {x: 480, y: 120, rotation: 0}
+    COMMENT_FILTER_LOAD: {x: 480, y: 460, rotation: 0}
+    COMMENT_GATE_DRV: {x: 840, y: 360, rotation: 0}
+    COMMENT_GND_ANCHOR: {x: 480, y: 20, rotation: 0}
+    COMMENT_PI: {x: 840, y: 120, rotation: 0}
+    COMMENT_POWER_STAGE: {x: 140, y: 460, rotation: 0}
+    COMMENT_PWM_1: {x: 140, y: 360, rotation: 0}
+    COMMENT_PWM_2: {x: 480, y: 360, rotation: 0}
+    COMMENT_TRI: {x: 840, y: 240, rotation: 0}
+    C_FILT: {x: 780, y: 360, rotation: 0}
+    C_PI: {x: 260, y: 340, rotation: 0}
+    D_CLAMP_N: {x: 320, y: 400, rotation: 180}
+    D_CLAMP_P: {x: 320, y: 200, rotation: 180}
+    E_PWM1: {x: 200, y: 200, rotation: 0}
+    E_PWM2: {x: 800, y: 200, rotation: 0}
+    E_PWM3: {x: 200, y: 620, rotation: 0}
+    E_PWM4: {x: 800, y: 620, rotation: 0}
+    GND: {x: 240, y: 680, rotation: 0}
+    G_PI: {x: 260, y: 200, rotation: 0}
+    IC_PI: {x: 140, y: 640, rotation: 0}
+    INT: {x: 400, y: 100, rotation: 0}
+    KP: {x: 460, y: 220, rotation: 0}
+    K_NORM: {x: 700, y: 460, rotation: 0}
+    LIM_REF: {x: 880, y: 460, rotation: 0}
+    L_FILT: {x: 640, y: 300, rotation: 270}
+    PWM1_drive: {x: 380, y: 80, rotation: 0}
+    PWM2_drive: {x: 980, y: 80, rotation: 0}
+    PWM3_drive: {x: 380, y: 500, rotation: 0}
+    PWM4_drive: {x: 980, y: 500, rotation: 0}
+    R_GND_ANCHOR: {x: 240, y: 560, rotation: 0}
+    R_LOAD: {x: 900, y: 360, rotation: 0}
+    R_PI: {x: 380, y: 320, rotation: 0}
+    SUM_C: {x: 500, y: 380, rotation: 0}
+    SUM_E: {x: 320, y: 240, rotation: 0}
+    SW1: {x: 480, y: 80, rotation: 0}
+    SW2: {x: 480, y: 240, rotation: 0}
+    SW3: {x: 480, y: 360, rotation: 0}
+    SW4: {x: 480, y: 520, rotation: 0}
+    VDC_BOT: {x: 120, y: 400, rotation: 0}
+    VDC_TOP: {x: 120, y: 200, rotation: 0}
+    V_ref_target: {x: 320, y: 380, rotation: 0}
+    V_tri_lower: {x: 80, y: 1020, rotation: 0}
+    V_tri_upper: {x: 1040, y: 600, rotation: 0}
+    "^channel_1_control:n1": {x: 420, y: 320, rotation: 0}
+    "^channel_1_control:n3": {x: 200, y: 400, rotation: 0}
+    "^channel_1_control:n_ref": {x: -60, y: 20, rotation: 0}
+    "^channel_1_control:n_tri_up": {x: -80, y: 60, rotation: 0}
+    "^channel_2_control:n4": {x: 420, y: 320, rotation: 0}
+    "^channel_2_control:n5": {x: 160, y: 360, rotation: 0}
+    "^channel_2_control:n_ref": {x: -60, y: 20, rotation: 0}
+    "^channel_2_control:n_tri_low": {x: -100, y: 60, rotation: 0}
+    "^gate_drive:n1": {x: 420, y: 260, rotation: 0}
+    "^gate_drive:n2": {x: 800, y: 720, rotation: 0}
+    "^gate_drive:n3": {x: 200, y: 340, rotation: 0}
+    "^gate_drive:n4": {x: 1020, y: 260, rotation: 0}
+    "^gate_drive:n5": {x: 760, y: 300, rotation: 0}
+    "^gate_drive:n7": {x: 420, y: 680, rotation: 0}
+    "^gate_drive:n8": {x: 200, y: 760, rotation: 0}
+    "^gate_drive:n9": {x: 1020, y: 680, rotation: 0}
+    "^gate_drive:n_PWM1_int": {x: 140, y: 20, rotation: 0}
+    "^gate_drive:n_PWM2_int": {x: 740, y: 20, rotation: 0}
+    "^gate_drive:n_PWM3_int": {x: 140, y: 440, rotation: 0}
+    "^gate_drive:n_PWM4_int": {x: 740, y: 440, rotation: 0}
+    "^modulator:n2": {x: 280, y: 820, rotation: 0}
+    "^modulator:n7": {x: 420, y: 320, rotation: 0}
+    "^modulator:n8": {x: 200, y: 400, rotation: 0}
+    "^modulator:n9": {x: 500, y: 780, rotation: 0}
+    "^modulator:n_PWM1_int": {x: 500, y: 120, rotation: 0}
+    "^modulator:n_PWM2_int": {x: 500, y: 380, rotation: 0}
+    "^modulator:n_PWM3_int": {x: 420, y: 60, rotation: 0}
+    "^modulator:n_PWM4_int": {x: 320, y: 480, rotation: 0}
+    "^modulator:n_ctrl_raw": {x: 560, y: 520, rotation: 0}
+    "^modulator:n_ref": {x: 80, y: 280, rotation: 0}
+    "^modulator:n_tri_low": {x: 80, y: 840, rotation: 0}
+    "^modulator:n_tri_up": {x: 1080, y: 420, rotation: 0}
+    "^reference:n10": {x: -160, y: 200, rotation: 0}
+    "^reference:n6": {x: -140, y: 240, rotation: 0}
+    "^reference:n_ctrl_raw": {x: 720, y: 20, rotation: 0}
+    "^voltage_loop:n10": {x: 100, y: 240, rotation: 0}
+    "^voltage_loop:n6": {x: 140, y: 320, rotation: 0}
+    "^voltage_loop:n_ref": {x: 980, y: 380, rotation: 0}
+    n0: {x: 120, y: 100, rotation: 270}
+    n1: {x: 200, y: 1740, rotation: 0}
+    n10: {x: 760, y: 280, rotation: 0}
+    n1_drv: {x: 380, y: 200, rotation: 180}
+    n2: {x: 120, y: 500, rotation: 90}
+    n3: {x: 600, y: 180, rotation: 90}
+    n4: {x: 300, y: 1820, rotation: 0}
+    n4_drv: {x: 980, y: 200, rotation: 180}
+    n5: {x: 600, y: 400, rotation: 90}
+    n6: {x: 120, y: 300, rotation: 90}
+    n7: {x: 200, y: 1940, rotation: 0}
+    n7_drv: {x: 380, y: 620, rotation: 180}
+    n8: {x: 360, y: 500, rotation: 90}
+    n9: {x: 200, y: 1980, rotation: 0}
+    n9_drv: {x: 980, y: 620, rotation: 180}
+    n_PWM1_int: {x: 100, y: 100, rotation: 180}
+    n_PWM2_int: {x: 700, y: 100, rotation: 180}
+    n_PWM3_int: {x: 100, y: 520, rotation: 180}
+    n_PWM4_int: {x: 700, y: 520, rotation: 180}
+    n_ctrl_raw: {x: 800, y: 540, rotation: 180}
+    n_ctrl_sum: {x: 720, y: 380, rotation: 180}
+    n_err: {x: 280, y: 60, rotation: 270}
+    n_p: {x: 600, y: 240, rotation: 180}
+    n_pi_int: {x: 580, y: 120, rotation: 0}
+    n_ref: {x: 300, y: 140, rotation: 180}
+    n_ref_target: {x: 400, y: 500, rotation: 180}
+    n_tri_low: {x: 80, y: 520, rotation: 180}
+    n_tri_up: {x: 100, y: 120, rotation: 270}
+    "~GND@B_SW1.B": {x: 60, y: 220, rotation: 0}
+    "~GND@B_SW2.B": {x: 60, y: 220, rotation: 0}
+    "~GND@B_SW3.B": {x: 60, y: 220, rotation: 0}
+    "~GND@B_SW4.B": {x: 140, y: 700, rotation: 0}
+    "~GND@B_ctrl.B": {x: 660, y: 320, rotation: 0}
+    "~GND@B_ref.B": {x: 800, y: 720, rotation: 0}
+    "~GND@E_PWM1.CN": {x: 60, y: 260, rotation: 0}
+    "~GND@E_PWM2.CN": {x: 660, y: 240, rotation: 0}
+    "~GND@E_PWM3.CN": {x: 60, y: 680, rotation: 0}
+    "~GND@E_PWM4.CN": {x: 660, y: 660, rotation: 0}
+    "~GND@V_ref_target.B": {x: 320, y: 560, rotation: 0}
+    "~GND@V_tri_lower.B": {x: 80, y: 1140, rotation: 0}
+    "~n10@#reference.C_FILT_pos": {x: -120, y: 980, rotation: 180}
+    "~n10@#voltage_loop.C_FILT_pos": {x: -120, y: 1520, rotation: 180}
+    "~n1@SW1.G": {x: 340, y: 80, rotation: 180}
+    "~n2@#gate_drive.C2_neg": {x: -120, y: 1700, rotation: 180}
+    "~n2@#modulator.C2_neg": {x: 440, y: 980, rotation: 180}
+    "~n3@#channel_1_control.D_CLAMP_P_cathode": {x: 1000, y: 940, rotation: 180}
+    "~n3@#gate_drive.D_CLAMP_P_cathode": {x: -120, y: 1780, rotation: 180}
+    "~n4@SW2.G": {x: 340, y: 280, rotation: 180}
+    "~n5@#channel_2_control.E_PWM2_-": {x: 1000, y: 1200, rotation: 180}
+    "~n5@#gate_drive.E_PWM2_-": {x: -120, y: 1820, rotation: 180}
+    "~n6@#reference.C1_neg": {x: -120, y: 940, rotation: 180}
+    "~n6@#voltage_loop.C1_neg": {x: -120, y: 1480, rotation: 180}
+    "~n7@SW3.G": {x: 340, y: 320, rotation: 180}
+    "~n8@#gate_drive.D_CLAMP_N_anode": {x: -120, y: 1740, rotation: 180}
+    "~n8@#modulator.D_CLAMP_N_anode": {x: 440, y: 1020, rotation: 180}
+    "~n9@SW4.G": {x: 380, y: 600, rotation: 180}
+    "~n_PWM1_int@#gate_drive.n_PWM1_int": {x: -180, y: 1860, rotation: 180}
+    "~n_PWM1_int@#modulator.n_PWM1_int": {x: 820, y: 960, rotation: 0}
+    "~n_PWM2_int@#gate_drive.n_PWM2_int": {x: -180, y: 1900, rotation: 180}
+    "~n_PWM2_int@#modulator.n_PWM2_int": {x: 820, y: 1000, rotation: 0}
+    "~n_PWM3_int@#gate_drive.n_PWM3_int": {x: -180, y: 1940, rotation: 180}
+    "~n_PWM3_int@#modulator.n_PWM3_int": {x: 820, y: 1040, rotation: 0}
+    "~n_PWM4_int@#gate_drive.n_PWM4_int": {x: -180, y: 1980, rotation: 180}
+    "~n_PWM4_int@#modulator.n_PWM4_int": {x: 820, y: 1080, rotation: 0}
+    "~n_ref@#channel_1_control.n_ref": {x: 980, y: 980, rotation: 180}
+    "~n_ref@#channel_2_control.n_ref": {x: 980, y: 1240, rotation: 180}
+    "~n_ref@#modulator.n_ref": {x: 420, y: 1020, rotation: 180}
+    "~n_ref@#voltage_loop.n_ref": {x: 220, y: 1500, rotation: 0}
+    "~n_ref@^modulator:n_ref.P": {x: -160, y: -20, rotation: 180}
+    "~n_tri_low@#channel_2_control.n_tri_low": {x: 960, y: 1280, rotation: 180}
+    "~n_tri_low@#modulator.n_tri_low": {x: 800, y: 1060, rotation: 0}
+    "~n_tri_low@^modulator:n_tri_low.P": {x: -200, y: 520, rotation: 180}
+    "~n_tri_up@^modulator:n_tri_up.P": {x: -180, y: 100, rotation: 180}
+  wires:
+  - {id: W1, from: GND.P, to: R_GND_ANCHOR.B}
+  - {id: W2, from: C1.A, to: VDC_TOP.A}
+  - {id: W3, from: SW1.D, to: VDC_TOP.A}
+  - {id: W4, from: VDC_TOP.A, to: n0.P}
+  - {id: W5, from: "#gate_drive.PWM1_drive_neg", to: n1.P}
+  - {id: W6, from: SW1.G, to: "~n1@SW1.G.P"}
+  - {id: W7, from: C_FILT.A, to: L_FILT.B}
+  - {id: W8, from: C_FILT.A, to: R_LOAD.A}
+  - {id: W9, from: C_FILT.A, to: n10.P}
+  - {id: W10, from: "#voltage_loop.C_FILT_pos", to: "~n10@#voltage_loop.C_FILT_pos.P"}
+  - {id: W11, from: C2.B, to: VDC_BOT.B}
+  - {id: W12, from: SW4.S, to: VDC_BOT.B}
+  - {id: W13, from: VDC_BOT.B, to: n2.P}
+  - {id: W14, from: "#gate_drive.C2_neg", to: "~n2@#gate_drive.C2_neg.P"}
+  - {id: W15, from: SW1.S, to: SW2.D}
+  - {id: W16, from: D_CLAMP_P.B, to: SW1.S}
+  - {id: W17, from: SW1.S, to: n3.P}
+  - {id: W18, from: "#gate_drive.D_CLAMP_P_cathode", to: "~n3@#gate_drive.D_CLAMP_P_cathode.P"}
+  - {id: W19, from: "#gate_drive.PWM2_drive_neg", to: n4.P}
+  - {id: W20, from: SW2.G, to: "~n4@SW2.G.P"}
+  - {id: W21, from: SW2.S, to: SW3.D}
+  - {id: W22, from: L_FILT.A, to: SW2.S}
+  - {id: W23, from: L_FILT.A, to: n5.P}
+  - {id: W24, from: "#gate_drive.E_PWM2_-", to: "~n5@#gate_drive.E_PWM2_-.P"}
+  - {id: W25, from: C1.B, to: C2.A}
+  - {id: W26, from: C1.B, to: VDC_TOP.B}
+  - {id: W27, from: C2.A, to: VDC_BOT.A}
+  - {id: W28, from: C_FILT.B, to: R_LOAD.B}
+  - {id: W29, from: D_CLAMP_N.B, to: D_CLAMP_P.A}
+  - {id: W30, from: D_CLAMP_N.B, to: VDC_BOT.A}
+  - {id: W31, from: D_CLAMP_N.B, to: R_GND_ANCHOR.A}
+  - {id: W32, from: C_FILT.B, to: D_CLAMP_N.B}
+  - {id: W33, from: VDC_TOP.B, to: n6.P}
+  - {id: W34, from: "#voltage_loop.C1_neg", to: "~n6@#voltage_loop.C1_neg.P"}
+  - {id: W35, from: "#gate_drive.PWM3_drive_neg", to: n7.P}
+  - {id: W36, from: SW3.G, to: "~n7@SW3.G.P"}
+  - {id: W37, from: SW3.S, to: SW4.D}
+  - {id: W38, from: D_CLAMP_N.A, to: SW3.S}
+  - {id: W39, from: D_CLAMP_N.A, to: n8.P}
+  - {id: W40, from: "#gate_drive.D_CLAMP_N_anode", to: "~n8@#gate_drive.D_CLAMP_N_anode.P"}
+  - {id: W41, from: "#gate_drive.PWM4_drive_neg", to: n9.P}
+  - {id: W42, from: SW4.G, to: "~n9@SW4.G.P"}
+  - {id: W43, from: "#gate_drive.n_PWM1_int", to: "~n_PWM1_int@#gate_drive.n_PWM1_int.P"}
+  - {id: W44, from: "#modulator.n_PWM1_int", to: "~n_PWM1_int@#modulator.n_PWM1_int.P"}
+  - {id: W45, from: "#gate_drive.n_PWM2_int", to: "~n_PWM2_int@#gate_drive.n_PWM2_int.P"}
+  - {id: W46, from: "#modulator.n_PWM2_int", to: "~n_PWM2_int@#modulator.n_PWM2_int.P"}
+  - {id: W47, from: "#gate_drive.n_PWM3_int", to: "~n_PWM3_int@#gate_drive.n_PWM3_int.P"}
+  - {id: W48, from: "#modulator.n_PWM3_int", to: "~n_PWM3_int@#modulator.n_PWM3_int.P"}
+  - {id: W49, from: "#gate_drive.n_PWM4_int", to: "~n_PWM4_int@#gate_drive.n_PWM4_int.P"}
+  - {id: W50, from: "#modulator.n_PWM4_int", to: "~n_PWM4_int@#modulator.n_PWM4_int.P"}
+  - {id: W51, from: "#modulator.n_ref", to: "~n_ref@#modulator.n_ref.P"}
+  - {id: W52, from: "#voltage_loop.n_ref", to: "~n_ref@#voltage_loop.n_ref.P"}
+  groups:
+    voltage_loop: {label: "Voltage loop", members: [V_ref_target, SUM_E, KP, INT, SUM_C, K_NORM, LIM_REF, IC_PI]}
+    modulator: {label: "Phase-disposition PWM", members: [CAR_UP, CAR_LOW, CMP_SW1, CMP_SW2, CMP_SW3, CMP_SW4]}
+    gate_drive: {label: "Gate drive", members: [E_PWM1, E_PWM2, E_PWM3, E_PWM4, PWM1_drive, PWM2_drive, PWM3_drive, PWM4_drive]}
+    spice_directives: {label: "SPICE directives", members: [COMMENT_DC_LINK, COMMENT_GND_ANCHOR, COMMENT_CTRL_1, COMMENT_CTRL_2, COMMENT_ERR, COMMENT_PI, COMMENT_CTRL_EFFORT, COMMENT_ANTI_WINDUP, COMMENT_TRI, COMMENT_PWM_1, COMMENT_PWM_2, COMMENT_GATE_DRV, COMMENT_POWER_STAGE, COMMENT_FILTER_LOAD]}
+  sheets:
+    gate_drive:
+      wires:
+      - {id: W1, from: E_PWM1.CN, to: "~GND@E_PWM1.CN.P"}
+      - {id: W2, from: E_PWM2.CN, to: "~GND@E_PWM2.CN.P"}
+      - {id: W3, from: E_PWM3.CN, to: "~GND@E_PWM3.CN.P"}
+      - {id: W4, from: E_PWM4.CN, to: "~GND@E_PWM4.CN.P"}
+      - {id: W5, from: PWM1_drive.B, to: "^gate_drive:n1.P"}
+      - {id: W6, from: E_PWM1.A, to: PWM1_drive.A}
+      - {id: W7, from: E_PWM1.A, to: n1_drv.P}
+      - {id: W8, from: E_PWM4.B, to: "^gate_drive:n2.P"}
+      - {id: W9, from: E_PWM1.B, to: "^gate_drive:n3.P"}
+      - {id: W10, from: PWM2_drive.B, to: "^gate_drive:n4.P"}
+      - {id: W11, from: E_PWM2.A, to: PWM2_drive.A}
+      - {id: W12, from: E_PWM2.A, to: n4_drv.P}
+      - {id: W13, from: E_PWM2.B, to: "^gate_drive:n5.P"}
+      - {id: W14, from: PWM3_drive.B, to: "^gate_drive:n7.P"}
+      - {id: W15, from: E_PWM3.A, to: PWM3_drive.A}
+      - {id: W16, from: E_PWM3.A, to: n7_drv.P}
+      - {id: W17, from: E_PWM3.B, to: "^gate_drive:n8.P"}
+      - {id: W18, from: PWM4_drive.B, to: "^gate_drive:n9.P"}
+      - {id: W19, from: E_PWM4.A, to: PWM4_drive.A}
+      - {id: W20, from: E_PWM4.A, to: n9_drv.P}
+      - {id: W21, from: E_PWM1.CP, to: "^gate_drive:n_PWM1_int.P"}
+      - {id: W22, from: "^gate_drive:n_PWM1_int.P", to: n_PWM1_int.P}
+      - {id: W23, from: E_PWM2.CP, to: "^gate_drive:n_PWM2_int.P"}
+      - {id: W24, from: "^gate_drive:n_PWM2_int.P", to: n_PWM2_int.P}
+      - {id: W25, from: E_PWM3.CP, to: "^gate_drive:n_PWM3_int.P"}
+      - {id: W26, from: "^gate_drive:n_PWM3_int.P", to: n_PWM3_int.P}
+      - {id: W27, from: E_PWM4.CP, to: "^gate_drive:n_PWM4_int.P"}
+      - {id: W28, from: "^gate_drive:n_PWM4_int.P", to: n_PWM4_int.P}
+    modulator:
+      wires:
+      - {id: W1, from: CMP_SW1.out, to: "^modulator:n_PWM1_int.P"}
+      - {id: W2, from: CMP_SW2.out, to: "^modulator:n_PWM2_int.P"}
+      - {id: W3, from: CMP_SW3.out, to: "^modulator:n_PWM3_int.P"}
+      - {id: W4, from: CMP_SW4.out, to: "^modulator:n_PWM4_int.P"}
+      - {id: W5, from: CMP_SW2.inp, to: CMP_SW3.inn}
+      - {id: W6, from: CMP_SW3.inn, to: "^modulator:n_ref.P"}
+      - {id: W7, from: CMP_SW4.inn, to: "^modulator:n_ref.P"}
+      - {id: W8, from: CMP_SW1.inp, to: CMP_SW3.inn}
+      - {id: W9, from: CMP_SW1.inp, to: n_ref.P}
+      - {id: W10, from: CMP_SW2.inn, to: CMP_SW4.inp}
+      - {id: W11, from: CAR_LOW.out, to: CMP_SW2.inn}
+      - {id: W12, from: CAR_LOW.out, to: n_tri_low.P}
+      - {id: W13, from: CMP_SW1.inn, to: CMP_SW3.inp}
+      - {id: W14, from: CAR_UP.out, to: CMP_SW3.inp}
+      - {id: W15, from: CMP_SW3.inp, to: n_tri_up.P}
+    voltage_loop:
+      wires:
+      - {id: W1, from: V_ref_target.B, to: "~GND@V_ref_target.B.P"}
+      - {id: W2, from: SUM_E.in2, to: "^voltage_loop:n10.P"}
+      - {id: W3, from: SUM_E.in3, to: "^voltage_loop:n6.P"}
+      - {id: W4, from: K_NORM.out, to: LIM_REF.in}
+      - {id: W5, from: LIM_REF.in, to: n_ctrl_raw.P}
+      - {id: W6, from: K_NORM.in, to: SUM_C.out}
+      - {id: W7, from: K_NORM.in, to: n_ctrl_sum.P}
+      - {id: W8, from: KP.in, to: SUM_E.out}
+      - {id: W9, from: INT.in, to: SUM_E.out}
+      - {id: W10, from: INT.in, to: n_err.P}
+      - {id: W11, from: KP.out, to: SUM_C.in1}
+      - {id: W12, from: KP.out, to: n_p.P}
+      - {id: W13, from: INT.out, to: SUM_C.in2}
+      - {id: W14, from: INT.out, to: n_pi_int.P}
+      - {id: W15, from: LIM_REF.out, to: "^voltage_loop:n_ref.P"}
+      - {id: W16, from: SUM_E.in1, to: V_ref_target.A}
+      - {id: W17, from: SUM_C.in3, to: V_ref_target.A}
+      - {id: W18, from: SUM_C.in3, to: n_ref_target.P}

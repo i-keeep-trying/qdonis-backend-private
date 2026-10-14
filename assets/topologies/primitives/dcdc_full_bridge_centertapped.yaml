@@ -1159,3 +1159,77 @@ metadata:
     - full-bridge
     - isolated
     - high-power
+schematic:
+  tuned: true
+  components:
+    CSN_P: {x: 740, y: 260, rotation: 0}
+    CSN_S: {x: 1020, y: 240, rotation: 0}
+    C_OUT: {x: 1420, y: 220, rotation: 0}
+    D1: {x: 340, y: 60, rotation: 180}
+    D2: {x: 340, y: 340, rotation: 180}
+    D3: {x: 660, y: 60, rotation: 180}
+    D4: {x: 660, y: 340, rotation: 180}
+    DR1: {x: 1140, y: -20, rotation: 270}
+    DR2: {x: 1120, y: 320, rotation: 270}
+    L_OUT: {x: 1320, y: -20, rotation: 270}
+    PWM1: {x: 100, y: 100, rotation: 0}
+    PWM2: {x: 140, y: 400, rotation: 0}
+    PWM3: {x: 420, y: 100, rotation: 0}
+    PWM4: {x: 520, y: 440, rotation: 0}
+    RSN_P: {x: 740, y: 160, rotation: 0}
+    RSN_S: {x: 1020, y: 160, rotation: 0}
+    R_ISO: {x: 1000, y: 460, rotation: 90}
+    R_LOAD: {x: 1540, y: 220, rotation: 0}
+    S1: {x: 240, y: 60, rotation: 180, mirrorX: true}
+    S2: {x: 240, y: 340, rotation: 0}
+    S3: {x: 560, y: 60, rotation: 180, mirrorX: true}
+    S4: {x: 600, y: 400, rotation: 0}
+    T1: {x: 860, y: 200, rotation: 0}
+    VIN: {x: 0, y: 200, rotation: 0}
+    "~GND@D2.A": {x: 340, y: 640, rotation: 0}
+    "~GND@PWM1.B": {x: 100, y: 260, rotation: 0}
+    "~GND@PWM3.B": {x: 420, y: 220, rotation: 0}
+    "~GND@R_ISO.B": {x: 880, y: 500, rotation: 0}
+  wires:
+  - {id: W1, from: D2.A, to: S2.S, path: [[340, 380], [340, 580], [240, 580], [240, 380]]}
+  - {id: W2, from: D4.A, to: S4.S, path: [[660, 380], [660, 580], [600, 580], [600, 440]]}
+  - {id: W3, from: D2.A, to: PWM4.B, path: [[340, 380], [340, 580], [360, 580], [360, 580], [520, 580], [520, 480]]}
+  - {id: W5, from: PWM2.B, to: S2.S, path: [[140, 440], [140, 580], [240, 580], [240, 380]]}
+  - {id: W6, from: PWM4.B, to: S4.S, path: [[520, 480], [520, 580], [600, 580], [600, 440]]}
+  - {id: W9, from: D2.A, to: "~GND@D2.A.P"}
+  - {id: W4, from: PWM1.B, to: VIN.B, path: [[100, 140], [100, 580], [60, 580], [60, 580], [0, 580], [0, 240]]}
+  - {id: W11, from: D1.B, to: S1.S}
+  - {id: W12, from: D3.B, to: S3.S}
+  - {id: W13, from: D1.B, to: S3.S}
+  - {id: W14, from: S1.S, to: VIN.A}
+  - {id: W15, from: DR1.B, to: L_OUT.A}
+  - {id: W16, from: DR1.B, to: DR2.B}
+  - {id: W17, from: C_OUT.A, to: R_LOAD.A, path: [[1420, 180], [1420, -20], [1540, -20], [1540, 180]]}
+  - {id: W18, from: C_OUT.A, to: L_OUT.B}
+  - {id: W19, from: C_OUT.B, to: R_LOAD.B, path: [[1420, 260], [1420, 380], [1540, 380], [1540, 260]]}
+  - {id: W20, from: C_OUT.B, to: T1.SCT}
+  - {id: W21, from: R_ISO.A, to: T1.SCT}
+  - {id: W22, from: CSN_P.A, to: RSN_P.B}
+  - {id: W23, from: CSN_S.A, to: RSN_S.B}
+  - {id: W24, from: D1.A, to: S1.D}
+  - {id: W25, from: D2.B, to: S2.D}
+  - {id: W26, from: RSN_P.A, to: T1.P1, path: [[740, 120], [740, -20], [840, -20], [840, 160]]}
+  - {id: W27, from: D1.A, to: D2.B}
+  - {id: W28, from: D1.A, to: RSN_P.A}
+  - {id: W29, from: CSN_P.B, to: D4.B}
+  - {id: W30, from: D3.A, to: S3.D}
+  - {id: W31, from: D4.B, to: S4.D}
+  - {id: W32, from: CSN_P.B, to: T1.P2}
+  - {id: W33, from: D3.A, to: D4.B}
+  - {id: W34, from: PWM1.A, to: S1.G}
+  - {id: W35, from: PWM2.A, to: S2.G}
+  - {id: W36, from: PWM3.A, to: S3.G}
+  - {id: W37, from: PWM4.A, to: S4.G, path: [[520, 400], [520, 400], [560, 400], [560, 400], [580, 400]]}
+  - {id: W38, from: DR1.A, to: RSN_S.A, path: [[1100, -20], [1040, -20], [1040, -20], [1020, -20], [1020, 120]]}
+  - {id: W39, from: RSN_S.A, to: T1.S1, path: [[1020, 120], [1020, -20], [880, -20], [880, 160]]}
+  - {id: W40, from: CSN_S.B, to: DR2.A}
+  - {id: W41, from: CSN_S.B, to: T1.S2, path: [[1020, 280], [1020, 320], [880, 320], [880, 240]]}
+  - {id: W8, from: R_ISO.B, to: "~GND@R_ISO.B.P"}
+  - {id: W42, from: PWM1.B, to: D2.A, path: [[100, 140], [100, 580], [280, 580], [280, 580], [340, 580], [340, 380]]}
+  - {id: W43, from: PWM3.B, to: PWM4.B, path: [[420, 140], [420, 580], [520, 580], [520, 480]]}
+  groups: {}

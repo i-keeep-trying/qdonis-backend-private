@@ -134,6 +134,8 @@ analysis:
     requirements:
     - rid: tr_flyback_pfc_dcm
       requirement: Verify Flyback PFC operation in DCM
+      criteria:
+        target_vout: 11.7
       measurement:
       - ref: VOUT
         plot:
@@ -166,3 +168,36 @@ metadata:
   - acdc
 models:
 - .model sw_mod SW(vt=5 vh=0.1 ron=0.1 roff=1MEG)
+schematic:
+  tuned: false
+  components:
+    CIN: {x: 120, y: 200, rotation: 0}
+    Cout: {x: 620, y: 340, rotation: 0}
+    D1: {x: 480, y: 260, rotation: 270}
+    GND: {x: 0, y: 320, rotation: 0}
+    PWM: {x: 160, y: 320, rotation: 0}
+    R_LOAD: {x: 740, y: 340, rotation: 0}
+    R_SENSE: {x: 300, y: 380, rotation: 0}
+    SW: {x: 300, y: 260, rotation: 0}
+    T1: {x: 320, y: 120, rotation: 0}
+    VIN: {x: 0, y: 200, rotation: 0}
+    "~GND@Cout.B": {x: 620, y: 460, rotation: 0}
+    "~GND@T1.S1": {x: 340, y: 0, rotation: 0}
+  wires:
+  - {id: W1, from: GND.P, to: VIN.B}
+  - {id: W2, from: CIN.B, to: VIN.B}
+  - {id: W4, from: CIN.B, to: PWM.B}
+  - {id: W5, from: CIN.B, to: SW.CN}
+  - {id: W6, from: R_SENSE.B, to: SW.CN}
+  - {id: W3, from: Cout.B, to: R_LOAD.B}
+  - {id: W7, from: Cout.B, to: "~GND@Cout.B.P"}
+  - {id: W8, from: T1.S1, to: "~GND@T1.S1.P"}
+  - {id: W9, from: CIN.A, to: VIN.A}
+  - {id: W10, from: CIN.A, to: T1.P1}
+  - {id: W11, from: SW.A, to: T1.P2}
+  - {id: W12, from: R_SENSE.A, to: SW.B}
+  - {id: W13, from: PWM.A, to: SW.CP}
+  - {id: W14, from: D1.A, to: T1.S2}
+  - {id: W15, from: Cout.A, to: R_LOAD.A}
+  - {id: W16, from: Cout.A, to: D1.B}
+  groups: {}

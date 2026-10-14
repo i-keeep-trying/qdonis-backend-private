@@ -87,6 +87,8 @@ analysis:
     requirements:
       - rid: tr_centre_tapped_fw
         requirement: Verify full wave rectification via centre-tapped secondary.
+        criteria:
+          target_vout: 13.0
         environment:
           - ref: time_domain
             t_step: 1.0e-06
@@ -110,3 +112,24 @@ analysis:
           - var: vout_avg_v
             formula: abs([Vout_avg])
             description: Average Output Voltage
+schematic:
+  tuned: true
+  components:
+    D1: {x: 460, y: 80, rotation: 270}
+    D2: {x: 460, y: 320, rotation: 270}
+    GND: {x: 360, y: 280, rotation: 0}
+    R_IN: {x: 140, y: 300, rotation: 90}
+    R_LOAD: {x: 660, y: 120, rotation: 0}
+    TX: {x: 300, y: 200, rotation: 0}
+    VAC: {x: 0, y: 200, rotation: 180}
+  wires:
+  - {id: W1, from: GND.P, to: TX.SCT, path: [[360, 260], [360, 200], [340, 200], [340, 200], [320, 200]]}
+  - {id: W2, from: GND.P, to: R_LOAD.B, path: [[360, 260], [360, 200], [660, 200], [660, 160]]}
+  - {id: W3, from: R_IN.B, to: VAC.A}
+  - {id: W4, from: TX.P1, to: VAC.B}
+  - {id: W5, from: R_IN.A, to: TX.P2}
+  - {id: W6, from: D1.A, to: TX.S1}
+  - {id: W7, from: D2.A, to: TX.S2}
+  - {id: W8, from: D1.B, to: R_LOAD.A, path: [[500, 80], [600, 80], [600, 80], [660, 80], [660, 80]]}
+  - {id: W9, from: D1.B, to: D2.B}
+  groups: {}

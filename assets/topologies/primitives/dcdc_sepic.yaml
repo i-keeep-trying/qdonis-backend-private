@@ -183,7 +183,7 @@ analysis:
       vntol: 1.0e-05
       chgtol: 1.0e-12
       gmin: 1.0e-10
-      trtol: 1.0
+      trtol: 4.0  # 1.0 (written earlier, applied from 2026-10-11) ran 495 s and ran out of memory; 4: 8 s
       method: gear
       maxord: 2
     requirements:
@@ -590,3 +590,32 @@ metadata:
     - sepic
     - step-up
     - step-down
+schematic:
+  tuned: true
+  components:
+    Ccouple: {x: 380, y: 80, rotation: 270}
+    Cout: {x: 760, y: 200, rotation: 0}
+    D: {x: 620, y: 80, rotation: 270}
+    L1: {x: 140, y: 80, rotation: 270}
+    L2: {x: 500, y: 200, rotation: 0}
+    PWM: {x: 160, y: 260, rotation: 0}
+    R_LOAD: {x: 880, y: 200, rotation: 0}
+    SW: {x: 260, y: 200, rotation: 0}
+    VIN: {x: 0, y: 200, rotation: 0}
+    "~GND@Cout.B": {x: 400, y: 420, rotation: 0}
+  wires:
+  - {id: W1, from: Cout.B, to: R_LOAD.B, path: [[760, 240], [760, 320], [880, 320], [880, 240]]}
+  - {id: W2, from: PWM.B, to: SW.S}
+  - {id: W3, from: PWM.B, to: VIN.B}
+  - {id: W4, from: L2.B, to: SW.S, path: [[500, 240], [500, 320], [260, 320], [260, 240]]}
+  - {id: W5, from: Cout.B, to: L2.B, path: [[760, 240], [760, 320], [500, 320], [500, 240]]}
+  - {id: W6, from: Cout.B, to: "~GND@Cout.B.P", path: [[760, 240], [760, 320], [400, 320], [400, 400]]}
+  - {id: W7, from: L1.A, to: VIN.A}
+  - {id: W8, from: Ccouple.A, to: L1.B}
+  - {id: W9, from: Ccouple.A, to: SW.D, path: [[340, 80], [260, 80], [260, 100], [260, 100], [260, 160]]}
+  - {id: W10, from: Ccouple.B, to: D.A}
+  - {id: W11, from: Ccouple.B, to: L2.A, path: [[420, 80], [500, 80], [500, 100], [500, 100], [500, 160]]}
+  - {id: W12, from: PWM.A, to: SW.G}
+  - {id: W13, from: Cout.A, to: R_LOAD.A, path: [[760, 160], [760, 80], [880, 80], [880, 160]]}
+  - {id: W14, from: Cout.A, to: D.B}
+  groups: {}
