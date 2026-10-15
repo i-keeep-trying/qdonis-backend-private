@@ -273,6 +273,48 @@ export class SchematicService {
     }
   }
 
+  /**
+   * DEV-LAYOUT: drops the branch's own layout, so the library layout shows
+   * (the Circuit node is updated in place).
+   */
+  async resetLayout(user: Actor, projectId: string, branchId: string) {
+    const ctx = await this.context(user, projectId, branchId, 'canEdit');
+    let branchName = '';
+    const meta = await this.projects.mutateStudio(
+      projectId,
+      user.id,
+      (studio) => {
+        const current = stageNodeOnBranch(studio, 'visualization', branchId);
+        if (!current || current.id !== ctx.node.id) {
+          throw AppError.conflict(
+            ErrorCode.RevisionConflict,
+            'The circuit changed meanwhile. Reload and try again.',
+          );
+        }
+        branchName = studio.branches[branchId]?.name ?? '';
+        return patchNode(studio, current.id, {
+          rev: current.rev + 1,
+          data: { ...current.data, layout: null },
+        });
+      },
+      branchId,
+    );
+    const node = await this.graph.stage(
+      projectId,
+      user.id,
+      branchId,
+      'visualization',
+    );
+    if (!node) throw new Error('The layout reset was not recorded');
+    return {
+      node,
+      branchId,
+      forked: false,
+      branchName,
+      workspaceVersion: meta.revision,
+    };
+  }
+
   private async context(
     user: Actor,
     projectId: string,

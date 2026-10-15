@@ -1,6 +1,8 @@
 import {
   Body,
   Controller,
+  Delete,
+  UseGuards,
   HttpCode,
   HttpStatus,
   Param,
@@ -21,6 +23,7 @@ import type { AuthenticatedUser } from '../auth/auth.types';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { ParseGraphIdPipe } from '../projects/dto/studio-graph.dto';
 import { RenderSchematicDto, SchematicEditDto } from './dto/schematic.dto';
+import { LayoutToolGuard } from './dev-layout/layout-tool.guard';
 import { SchematicService } from './schematic.service';
 
 @ApiTags('studio stages')
@@ -93,5 +96,20 @@ export class SchematicController {
     @Body() dto: SchematicEditDto,
   ) {
     return this.schematic.apply(user, projectId, branchId, dto);
+  }
+
+  /** DEV-LAYOUT: drop the branch's own layout (the library layout shows again). */
+  @Delete('layout')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(LayoutToolGuard)
+  @ApiOperation({
+    summary: 'Developer layout tool: reset the drawing to the library layout',
+  })
+  resetLayout(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('projectId', ParseUUIDPipe) projectId: string,
+    @Param('branchId', ParseGraphIdPipe) branchId: string,
+  ) {
+    return this.schematic.resetLayout(user, projectId, branchId);
   }
 }

@@ -11,6 +11,11 @@ export class TopologiesRepository implements OnModuleInit {
   private loaded: TopologyCatalog | null = null;
 
   async onModuleInit(): Promise<void> {
+    await this.reload();
+  }
+
+  /** Loads (again) from `assets/`; DEV-LAYOUT calls it after saving a library layout. */
+  async reload(): Promise<void> {
     const started = Date.now();
     this.loaded = await loadTopologyCatalog(ASSETS_ROOT);
     this.logger.log(

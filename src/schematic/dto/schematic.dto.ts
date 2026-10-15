@@ -62,3 +62,65 @@ export class SchematicEditDto {
   @IsObject()
   layout?: Record<string, unknown>;
 }
+
+// DEV-LAYOUT: developer layout tool bodies (temporary).
+
+/** Body of `POST /dev/schematic/render`. */
+export class LibraryRenderDto extends RenderSchematicDto {
+  @ApiProperty({ example: 'dcdc_buck', maxLength: 256 })
+  @IsString()
+  @MaxLength(256)
+  topologyId!: string;
+
+  @ApiPropertyOptional({
+    description:
+      'The unsaved layout being tuned, drawn over the library layout.',
+    type: Object,
+  })
+  @IsOptional()
+  @IsObject()
+  layout?: Record<string, unknown>;
+}
+
+/** Body of `POST /dev/schematic/check`. */
+export class LibraryCheckDto {
+  @ApiProperty({ example: 'dcdc_buck', maxLength: 256 })
+  @IsString()
+  @MaxLength(256)
+  topologyId!: string;
+
+  @ApiProperty({ type: Object })
+  @IsObject()
+  schematic!: Record<string, unknown>;
+
+  @ApiPropertyOptional({ maxLength: 256 })
+  @IsOptional()
+  @IsString()
+  @MaxLength(256)
+  sheet?: string;
+
+  @ApiPropertyOptional({ type: Object })
+  @IsOptional()
+  @IsObject()
+  layout?: Record<string, unknown>;
+}
+
+/** Body of `POST /dev/schematic/library-layout`. */
+export class SaveLibraryLayoutDto {
+  @ApiProperty({ example: 'dcdc_buck', maxLength: 256 })
+  @IsString()
+  @MaxLength(256)
+  topologyId!: string;
+
+  @ApiProperty({
+    description: 'The full layout (every sheet, the grouping).',
+    type: Object,
+  })
+  @IsObject()
+  layout!: Record<string, unknown>;
+
+  @ApiPropertyOptional({ description: 'Hand-tuned (default) or a draft.' })
+  @IsOptional()
+  @IsBoolean()
+  tuned?: boolean;
+}

@@ -116,6 +116,24 @@ dropped, values edited in the schematic replace the row value, as typed), and th
 edited circuit, so the next simulation runs exactly what is drawn. Simulation and later stages are not carried
 (run them again). Not carried: an uploaded deck, or decks that can not be generated (`designCarried: false`).
 
+## Developer layout tool (DEV-LAYOUT, temporary)
+
+For hand-tuning the library layouts once. Remove before the public release: everything is tagged `DEV-LAYOUT`
+(`grep -rn "DEV-LAYOUT"` in both repos). Only where `SCHEMATIC_LAYOUT_TOOL=true` (never in production); 404
+elsewhere (`dev-layout/layout-tool.guard.ts`).
+
+| Route | Does |
+|---|---|
+| `GET /dev/schematic/library-status` | Every library topology: parts, has a layout, tuned |
+| `POST /dev/schematic/render` `{topologyId, sheet?, fresh?, regroup?, layout?}` | Draws a library topology without a project (`layout`: the unsaved layout being tuned) |
+| `POST /dev/schematic/check` `{topologyId, schematic, sheet?, layout?}` | Layout only or not (the tuner saves presentation only) |
+| `POST /dev/schematic/library-layout` `{topologyId, layout, tuned?}` | Writes the `schematic:` section of `assets/topologies/primitives/<id>.yaml`, updates its `MANIFEST.json` entry, reloads the library |
+| `DELETE .../stages/visualization/schematic/layout` | Drops a branch's own layout (the library layout shows again) |
+
+The writer (`library/layout-yaml.ts`, port of `layout_to_yaml` / `replace_schematic_section`) refuses to write
+when anything but the section would change or the layout does not read back identically. Saved assets no longer
+match core `0054f72` (`import-core-assets.mjs --check` reports them); commit them with the backend.
+
 ## Plan
 
 1. Control blocks in the netlist generator — done.
@@ -127,9 +145,21 @@ edited circuit, so the next simulation runs exactly what is drawn. Simulation an
 6. qdonis-web: engine synced mode and wire router — done (engine protocol and web change log:
    `qdonis-web/docs/synced-schematic.md`).
 7. qdonis-web: synced schematic in the Circuit tab (sheets, check, apply) — done (see the web doc).
-8. Developer layout tool (temporary, tagged `DEV-LAYOUT`).
+8. Developer layout tool (temporary, tagged `DEV-LAYOUT`) — done (web side: see the web doc).
+
+Still open from the original notes: hand-tuning every library layout with the tuner (by the user, at the end);
+removing `DEV-LAYOUT` when the Studio goes public; probes / scopes from the drawing; the chat agent does not know
+about sheets.
 
 ## Change log
+
+### 2026-10-15 — Developer layout tool, backend (part 8)
+- `SCHEMATIC_LAYOUT_TOOL` (env validation, configuration, `.env.example`); `schematic/dev-layout/`
+  (guard, controller, service); `library/layout-yaml.ts`; `SchematicService.resetLayout`;
+  `TopologiesService.reload`.
+- Checks: every library YAML's section is rewritten byte for byte from its parsed layout (35); the save test
+  writes a layout, checks the rest of the file and the boot-time asset check, then restores `assets/`; the
+  guard; all unit tests pass (1592).
 
 ### 2026-10-15 — Edited circuits are designed and simulated (part 5)
 - `simulation.service.ts`: the design (both paths), `setDesignValues`, `runSimulation` and `selectDevices` use the
