@@ -33,9 +33,9 @@ that part's Python on top of `0054f72`, so a fixture never contains a later part
 2. Topology library (done): the teammates' YAML / prompt fixes (VSI, NPC, T-type, 1-ph / 3-ph AFE, interleaved buck,
    flyback PFC, totem pole, DAB, full-bridge CT, Zeta, diode bridge; 11 prompts) merged into `assets/` keeping
    the `schematic:` layouts and control blocks; checked by running ngspice.
-3. Deterministic sizing (`topology_improver.py` -> `simulation/sizing/`): SI-prefix parsing, DAB output power
-   references `{components.R_LOAD.resistance}`, single-phase PFC operating point and sizing, VSI / NPC / T-type /
-   AFE sizing.
+3. Deterministic sizing (`topology_improver.py` -> `simulation/sizing/`) — done: SI-prefix parsing, DAB output
+   power references `{components.R_LOAD.resistance}`, single-phase PFC operating point and sizing, VSI / NPC /
+   T-type / AFE sizing.
 4. Loss vs junction temperature (loss engine + endpoint + chart); circuit inventory `power_sources`,
    `output_voltage`, `load_resistance`; waveform stats `links` of nested parts.
 5. Devices folded into the Simulation stage (agent tools / prompt, stage list, web), parts picked in the loss
@@ -48,6 +48,57 @@ that part's Python on top of `0054f72`, so a fixture never contains a later part
 ## Change log
 
 Newest first.
+
+### 2026-10-15 — Part 3: deterministic sizing
+
+Ported from core `topology_improver.py` (`a4fdaf2`, `7f41908`, `6b8f8dd`, `ed875a3`) into
+`simulation/sizing/sizing.logic.ts`:
+
+- `extract_numeric_param`: only the SI prefix written right after the number scales it (`65 kHz`, `200 mV`,
+  `4.7 uF`); `380 VDC bus` or `325 V peak` no longer read as kilo / milli.
+- Sized without the model (`prepareSizing`, as core checks them before any call): DAB (aliases), T-type,
+  3-ph AFE, 1-ph AFE, diode bridge. DAB `pout_avg_w` divides by `{components.R_LOAD.resistance}`, so the
+  design summary carries the load to re-runs.
+- Scaled after the model's reply (`processReply`): single-phase PFCs (boost, interleaved, totem pole: line
+  amplitude, load, divider, multiplier, loop target, integrator pre-charge, hold-up capacitor; flyback PFC: DCM
+  on-time duty, Lm, turns ratio, snubbers, no diode Tt), VSI (modulation index and frequency of the SPWM
+  references, gate drive, balancing resistors, Bv, per-phase load), Vienna, NPC (reference amplitude, Vdc/2
+  normalisation, per-phase load), interleaved buck (phase-shifted high / low side PWMs with 40 ns dead time).
+  For these and the AFEs every model edit to the control is dropped; elsewhere only behavioural-source
+  expressions using `if(` / `limit(` ... (unsupported by ngspice).
+- 3-ph AFE: chat-first tuning (0.5 / 0.1 mH, C_DC by power up to 15 mF, Kp 0.02, ki 500, current clamp,
+  feed-forward 10 / (Vdc/2), 20 kHz carrier, `.model` lines without Tt, `use_ic`, 40-50 ms window, VOUT probe).
+  1-ph AFE: `.param V_TARGET / V_PEAK`, Kp 0.05, ki 10, clamp, `.ic`, C_DC for 2x line ripple, Bv. Diode bridge:
+  load, line resistance, C_OUT for the ripple (added if missing, also when the model names it), ratings,
+  two-line-cycle window. T-type: R-L load, current reference and feed-forward amplitude / phase, C1 / C2,
+  snubbers, midpoint `.ic`.
+- Full-bridge centre-tapped (model path): turns ratio covers the rectifier drop (~0.8 V + 6 mOhm x Iout); Lm raised
+  until the magnetizing current is under 10 % of the reflected load current.
+- System prompt: "shunt resistors are not parasitics" (do not lower balancing / divider / pull-down / snubber
+  resistors). Quick-params templates for the diode bridge.
+
+**Control-block mapping (beyond chat-first).** The chat-first adapters write behavioural sources (`B_MULT`,
+`B_Verr`, `B_ctrl_a`, `G_INT` ...) that the library rebuilt as control blocks, so their scaling silently went
+nowhere. `controlUpdate` writes the block when only the block exists: MULT gain; REF_V value; LIM_PI / LIM_MAG
+upper; INT_V ki / ic / upper; LPF_MAG ic; VAC_NORM / FF_D expressions; REF_x and K_FF_x / K_NORM_x gains; CAR;
+the VSI's sine-source amplitude / frequency instead of a raw `SINE()` line. Blocks that already match need no
+update (POL comparators, Vienna feed-forward on the measured bus, 1-ph AFE `V_TARGET` / `V_PEAK`). The same
+change is in the parity reference. Without it: boost PFC 120 VAC -> 380 V gave 340 V, totem pole regulated to
+the template's 400 V instead of 380 V.
+
+Not ported: the 3-ph AFE's in-place migration of pre-block templates (`R_N_star`, `B_INT`), which no library
+template or saved design has, and core's unreachable reply-path branches for the topologies sized without the
+model.
+
+Checked by sizing and simulating specs off the template point through the reference: boost PFC 120 VAC -> 380 V
+378.4 V; interleaved PFC 400 V 399 V; totem 380 V 379.6 V; flyback PFC 12 V 11.5 V (9.7 V before); 1-ph AFE
+380 V 380 V; 3-ph AFE 400 V -> 700 V 696 V; Vienna 800 V 806 V; NPC 400 V line-line 397 V; T-type 396 V; VSI
+700 V -> 400 V 367 V (m = 0.93; drops); diode bridge 300 V 303.5 V. Interleaved buck: phases balanced (0.04 %),
+but its output stays open loop on the model's duty (1.415 V at D = 0.1 for 1.2 V).
+
+Parity reference: Part 2 reference + chat-first `topology_improver.py` + the block mapping. Re-captured: sizing
+(sync unchanged; netlist / schematic do not use the sizing). Tested: sizing parity (76), full jest suite (the
+known dev-layout race failed `schematic.service.spec` once; passes alone), typecheck, lint of the changed files.
 
 ### 2026-10-15 — Part 2: topology library
 
