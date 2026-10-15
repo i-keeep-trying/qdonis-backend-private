@@ -59,7 +59,9 @@ import {
   emitControlBlock,
   isControlBlock,
 } from './signal-blocks';
+import { designSummaryLine } from './design-summary';
 import { requirementsOf } from './spice-command';
+import { detectPwmPeriod } from './timing';
 
 export type AnalysisKind = 'dc' | 'ac' | 'transient';
 export const ANALYSIS_KINDS: readonly AnalysisKind[] = [
@@ -84,6 +86,99 @@ function clampCapacitorEsl(design: Dict): void {
       if (toFloat(esl) > MAX_CAP_ESL) params.esl = MAX_CAP_ESL;
     } catch {
       // TypeError / ValueError: leave it
+    }
+  }
+}
+
+const DIODE_BRIDGE_IDS = [
+  'acdc_single_phase_diode_bridge',
+  'single_phase_diode_bridge',
+];
+const C_OUT_DEFAULT = (): Dict => ({
+  type: 'capacitor',
+  role: 'output_filter',
+  params: {
+    capacitance: 0.0022,
+    voltage_rating: 400.0,
+    std_voltage_rating: 400.0,
+  },
+});
+
+/** `[ref, pin]` of a net member (`[ref, pin]` list or `{ref, pin}` object). */
+function netMember(entry: unknown): [unknown, unknown] {
+  if (Array.isArray(entry)) return [entry[0] ?? '', entry[1] ?? ''];
+  if (isDict(entry)) return [get(entry, 'ref'), get(entry, 'pin')];
+  return ['', ''];
+}
+
+/**
+ * The single-phase diode bridge always gets an output filter capacitor C_OUT
+ * (in place), tied to the DC rails when the design lists explicit `nets`.
+ */
+function ensureDiodeBridgeFilterCapacitor(design: Dict): void {
+  const topId = pyStr(
+    has(design, 'id') ? get(design, 'id') : get(design, 'topology', ''),
+  ).toLowerCase();
+  if (!DIODE_BRIDGE_IDS.includes(topId)) return;
+
+  if (!has(design, 'components')) design.components = [];
+  const components = design.components;
+  if (Array.isArray(components)) {
+    const hasCout = components.some(
+      (c) =>
+        isDict(c) &&
+        (c.ref === 'C_OUT' || c.id === 'C_OUT' || c.type === 'capacitor'),
+    );
+    if (!hasCout) components.push({ ref: 'C_OUT', ...C_OUT_DEFAULT() });
+  } else if (isDict(components)) {
+    const hasCout = Object.entries(components).some(
+      ([key, c]) =>
+        key === 'C_OUT' ||
+        (isDict(c) && (c.type === 'capacitor' || c.role === 'output_filter')),
+    );
+    if (!hasCout) components.C_OUT = C_OUT_DEFAULT();
+  }
+
+  if (!has(design, 'nets')) design.nets = [];
+  const nets = iter(design.nets).filter((net): net is unknown[] =>
+    Array.isArray(net),
+  );
+  let posConnected = false;
+  let negConnected = false;
+  for (const net of nets) {
+    for (const entry of net) {
+      const [ref, pin] = netMember(entry);
+      if (ref !== 'C_OUT') continue;
+      if (pin === 'pos' || pin === '+' || pin === 'pin1') posConnected = true;
+      else if (pin === 'neg' || pin === '-' || pin === 'pin2')
+        negConnected = true;
+    }
+  }
+  for (const net of nets) {
+    let posRail = false;
+    let negRail = false;
+    for (const entry of net) {
+      const [ref, pin] = netMember(entry);
+      if (
+        (ref === 'R_LOAD' &&
+          (pin === 'pos' || pin === '+' || pin === 'pin1')) ||
+        ((ref === 'D3' || ref === 'D4') && pin === 'cathode')
+      )
+        posRail = true;
+      if (
+        (ref === 'R_LOAD' &&
+          (pin === 'neg' || pin === '-' || pin === 'pin2')) ||
+        ((ref === 'D1' || ref === 'D2') && pin === 'anode')
+      )
+        negRail = true;
+    }
+    if (posRail && !posConnected) {
+      net.push(['C_OUT', 'pos']);
+      posConnected = true;
+    }
+    if (negRail && !negConnected) {
+      net.push(['C_OUT', 'neg']);
+      negConnected = true;
     }
   }
 }
@@ -1007,6 +1102,7 @@ export function generateNetlist(
   design: Dict,
   analysisFilter: readonly string[] | null = null,
 ): GeneratedNetlist {
+  ensureDiodeBridgeFilterCapacitor(design);
   clampCapacitorEsl(design);
   const [compNets, notes] = buildCompNets(design);
   buildComponentsIndex(design);
@@ -1061,8 +1157,10 @@ export function generateNetlist(
   const subckts = subcktTemplatesNeeded(design);
   if (subckts.trim()) lines.push(subckts);
 
-  let pwmPeriod = emitElements(design, compNets, lines, 'base', new Set());
-  if (pwmPeriod === null) pwmPeriod = 1e-5;
+  const pwmPeriod =
+    emitElements(design, compNets, lines, 'base', new Set()) ??
+    detectPwmPeriod(design) ??
+    1e-5;
 
   const wanted =
     analysisFilter === null ? null : analysisFilter.map((a) => a.toLowerCase());
@@ -1094,6 +1192,7 @@ export function generateNetlistForAnalysis(
   design: Dict,
   kind: AnalysisKind,
 ): string {
+  ensureDiodeBridgeFilterCapacitor(design);
   clampCapacitorEsl(design);
   const [compNets, notes] = buildCompNets(design);
   buildComponentsIndex(design);
@@ -1336,11 +1435,21 @@ export function generateAnalysisCirs(
   const { netlist, controls } = generateNetlist(design, null);
   const wanted: readonly AnalysisKind[] =
     analysisType === 'all' ? ANALYSIS_KINDS : [analysisType];
+  const designLine = designSummaryLine(design);
   const decks: Partial<Record<AnalysisKind, string>> = {};
   for (const kind of wanted) {
     const control = controls[kind] ?? '';
     if (!control || !control.trim()) continue;
-    decks[kind] = `${generateNetlistForAnalysis(design, kind)}\n\n${control}`;
+    let body = generateNetlistForAnalysis(design, kind);
+    if (designLine) {
+      // Keep the SPICE title as the first line; the summary is a plain comment.
+      const cut = body.indexOf('\n');
+      body =
+        cut < 0
+          ? `${body}\n${designLine}\n`
+          : `${body.slice(0, cut)}\n${designLine}\n${body.slice(cut + 1)}`;
+    }
+    decks[kind] = `${body}\n\n${control}`;
   }
   return { netlist, analysis_cirs: decks };
 }

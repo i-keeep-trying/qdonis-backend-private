@@ -174,6 +174,22 @@ export function deviceCurrentVector(comp: Dict): string | null {
 }
 
 const LABEL_PINS = new Set(['pin', 'net', 'label', 'net_name', 'node']);
+const MAIN_DC_REFS = new Set<unknown>([
+  'VIN',
+  'V5',
+  'VDC',
+  'V_DC',
+  'V_IN',
+  'V_BUS',
+  'Vdc',
+  'Vin',
+]);
+const MAIN_DC_ROLES = new Set<unknown>([
+  'dc_link_voltage',
+  'dc_bus',
+  'input_voltage',
+  'input_source',
+]);
 
 /**
  * `build_comp_nets`: merges nets that share a pin, names each one (`0` for
@@ -248,10 +264,11 @@ export function buildCompNets(design: Dict): [CompNets, string[]] {
           groundMember = [ref, pin];
           break;
         }
+        // Main DC voltage source with minus pin (traditional ground reference)
         if (
           get(params, 'node_type') === 'voltage_source' &&
           (pin === '-' || pin === 'neg') &&
-          ref === 'VIN'
+          (MAIN_DC_REFS.has(ref) || MAIN_DC_ROLES.has(get(comp, 'role')))
         ) {
           groundMember = [ref, pin];
           break;
