@@ -1,31 +1,86 @@
 id: acdc_flyback_pfc_dcm
 name: Flyback PFC DCM
-description: Flyback Power Factor Correction (PFC) operating in Discontinuous Conduction
-  Mode (DCM)
+description: Single-stage AC-DC flyback Power Factor Correction (PFC) converter operating
+  in Discontinuous Conduction Mode (DCM). The AC line is rectified by a diode bridge
+  into a small high-frequency input capacitor, so the flyback primary sees the rectified
+  line voltage. With a constant on-time (fixed duty) in DCM the input current follows
+  the line voltage, giving natural power factor correction. Output = Vpk * D * sqrt(R_LOAD
+  / (4 * Lm * fsw)) averaged over the line cycle. The line source starts at its peak,
+  the windings carry RC snubbers and the bus a bleeder resistor so the solver stays
+  well-conditioned through the line zero crossings.
 components:
 - ref: GND
   type: node
   params:
     node_type: ground
-- ref: VIN
+- ref: VAC
   type: node
   role: input_source
   params:
     node_type: voltage_source
-    source: dc
-    voltage: 160
+    source: sine
+    offset: 0
+    amplitude: 325
+    frequency: 50
+    phase: 90
+- ref: R_LINE
+  type: resistor
+  role: line_impedance
+  params:
+    resistance: 0.1
+- ref: DB1
+  type: diode
+  role: input_rectifier
+  params:
+    Is: 1.0e-11
+    n: 1
+    Rs: 0.01
+    Cjo: 1.0e-11
+    Tt: 0
+- ref: DB2
+  type: diode
+  role: input_rectifier
+  params:
+    Is: 1.0e-11
+    n: 1
+    Rs: 0.01
+    Cjo: 1.0e-11
+    Tt: 0
+- ref: DB3
+  type: diode
+  role: input_rectifier
+  params:
+    Is: 1.0e-11
+    n: 1
+    Rs: 0.01
+    Cjo: 1.0e-11
+    Tt: 0
+- ref: DB4
+  type: diode
+  role: input_rectifier
+  params:
+    Is: 1.0e-11
+    n: 1
+    Rs: 0.01
+    Cjo: 1.0e-11
+    Tt: 0
 - ref: CIN
   type: capacitor
   role: input_filter
   params:
-    capacitance: 10e-6
+    capacitance: 1.0e-06
+- ref: R_BLEED
+  type: resistor
+  role: bus_bleeder
+  params:
+    resistance: 47000.0
 - ref: PWM
   type: node
   role: pwm_control
   params:
     node_type: pwm_control
-    frequency: 1e5
-    duty_cycle: 0.34
+    frequency: 100000.0
+    duty_cycle: 0.2
     vhigh: 10.0
     vlow: 0.0
     trise: 1e-8
@@ -45,9 +100,9 @@ components:
   type: transformer
   role: flyback_transformer
   params:
-    Lm_primary: 500e-6
+    Lm_primary: 0.0005
     turns_ratio: 0.1
-    k_coupling: 0.9999
+    k_coupling: 0.985
     phase: same
     Rp: 1e-3
     Rs: 1e-3
@@ -60,12 +115,32 @@ components:
     n: 1
     Rs: 0.01
     Cjo: 10e-12
-    Tt: 10e-9
+    Tt: 0
+- ref: R_SNUB_P
+  type: resistor
+  role: primary_snubber
+  params:
+    resistance: 22.0
+- ref: C_SNUB_P
+  type: capacitor
+  role: primary_snubber
+  params:
+    capacitance: 2.2e-09
+- ref: R_SNUB_S
+  type: resistor
+  role: secondary_snubber
+  params:
+    resistance: 100.0
+- ref: C_SNUB_S
+  type: capacitor
+  role: secondary_snubber
+  params:
+    capacitance: 1.0e-09
 - ref: Cout
   type: capacitor
   role: output_filter
   params:
-    capacitance: 220e-6
+    capacitance: 0.0022
     ic: 12
 - ref: R_LOAD
   type: resistor
@@ -73,22 +148,48 @@ components:
   params:
     resistance: 4.8
 nets:
-- - - VIN
+- - - VAC
     - +
+  - - R_LINE
+    - pin1
+- - - R_LINE
+    - pin2
+  - - DB1
+    - anode
+  - - DB3
+    - cathode
+- - - VAC
+    - '-'
+  - - DB2
+    - anode
+  - - DB4
+    - cathode
+- - - DB1
+    - cathode
+  - - DB2
+    - cathode
   - - CIN
     - pos
   - - T1
     - P1
+  - - C_SNUB_P
+    - neg
+  - - R_BLEED
+    - pos
 - - - T1
     - P2
   - - SW
+    - pos
+  - - R_SNUB_P
     - pos
 - - - SW
     - neg
   - - R_SENSE
     - pos
-- - - VIN
-    - '-'
+- - - DB3
+    - anode
+  - - DB4
+    - anode
   - - CIN
     - neg
   - - R_SENSE
@@ -105,6 +206,10 @@ nets:
     - neg
   - - GND
     - pin
+  - - C_SNUB_S
+    - neg
+  - - R_BLEED
+    - neg
 - - - PWM
     - pos
   - - SW
@@ -113,18 +218,26 @@ nets:
     - S2
   - - D1
     - anode
+  - - R_SNUB_S
+    - pos
 - - - D1
     - cathode
   - - Cout
     - pos
   - - R_LOAD
     - pos
+- - - R_SNUB_P
+    - neg
+  - - C_SNUB_P
+    - pos
+- - - R_SNUB_S
+    - neg
+  - - C_SNUB_S
+    - pos
 analysis:
   transient:
     spice_settings:
-      tstop: 0.002
-      tstart: 0.0019
-      tstep: 2.0e-08
+      tstop: 0.06
       use_ic: true
       reltol: 0.005
       abstol: 1.0e-06
@@ -133,10 +246,29 @@ analysis:
       method: gear
     requirements:
     - rid: tr_flyback_pfc_dcm
-      requirement: Verify Flyback PFC operation in DCM
-      criteria:
-        target_vout: 11.7
+      requirement: 'Verify Flyback PFC operation in DCM: regulated output and line-following
+        input current'
       measurement:
+      - ref: VIN
+        plot:
+          x_axis: time
+          title: AC Line Voltage
+        quantity: voltage
+        nets:
+        - - VAC
+          - +
+        - - VAC
+          - '-'
+      - ref: IIN
+        plot:
+          x_axis: time
+          title: AC Line Current
+        component: R_LINE
+        quantity: current
+        data:
+        - name: Iin_rms
+          spice_command: rms
+          description: RMS line current
       - ref: VOUT
         plot:
           x_axis: time
@@ -151,16 +283,33 @@ analysis:
         - name: Vout_avg
           spice_command: avg
           description: Average Output Voltage
+        - name: Vout_ripple_vpp
+          spice_command: pp
+          description: Output ripple peak-to-peak (twice line frequency)
       outputs:
       - var: vout_avg_v
         formula: abs([Vout_avg])
         description: Average Output Voltage
+      - var: vout_ripple_vpp
+        formula: '[Vout_ripple_vpp]'
+        description: Output Voltage Ripple peak-to-peak
+      - var: iin_rms_a
+        formula: '[Iin_rms]'
+        description: RMS line current
+      environment:
+      - ref: time_domain
+        t_stop: 0.06
+      criteria:
+        target_vout: 12
+  spice_settings:
+    abstol: 1.0e-06
+    vntol: 0.0001
 metadata:
   stage:
   - pfc
   - rectifier
   topology: flyback_pfc_dcm
-  control: open_loop
+  control: open_loop_constant_on_time
   tags:
   - flyback
   - pfc
@@ -171,33 +320,57 @@ models:
 schematic:
   tuned: false
   components:
-    CIN: {x: 120, y: 200, rotation: 0}
-    Cout: {x: 620, y: 340, rotation: 0}
-    D1: {x: 480, y: 260, rotation: 270}
-    GND: {x: 0, y: 320, rotation: 0}
-    PWM: {x: 160, y: 320, rotation: 0}
-    R_LOAD: {x: 740, y: 340, rotation: 0}
-    R_SENSE: {x: 300, y: 380, rotation: 0}
-    SW: {x: 300, y: 260, rotation: 0}
-    T1: {x: 320, y: 120, rotation: 0}
-    VIN: {x: 0, y: 200, rotation: 0}
-    "~GND@Cout.B": {x: 620, y: 460, rotation: 0}
-    "~GND@T1.S1": {x: 340, y: 0, rotation: 0}
+    CIN: {x: 720, y: 200, rotation: 0}
+    C_SNUB_P: {x: 480, y: -100, rotation: 0}
+    C_SNUB_S: {x: 860, y: 60, rotation: 0}
+    Cout: {x: 660, y: 320, rotation: 0}
+    D1: {x: 620, y: 180, rotation: 0}
+    DB1: {x: 0, y: 100, rotation: 180}
+    DB2: {x: 340, y: 100, rotation: 180}
+    DB3: {x: 0, y: 300, rotation: 180}
+    DB4: {x: 340, y: 300, rotation: 180}
+    GND: {x: 0, y: 420, rotation: 0}
+    PWM: {x: 500, y: 320, rotation: 0}
+    R_BLEED: {x: 880, y: 200, rotation: 0}
+    R_LINE: {x: -340, y: 200, rotation: 270}
+    R_LOAD: {x: 800, y: 320, rotation: 180}
+    R_SENSE: {x: 480, y: 440, rotation: 0}
+    R_SNUB_P: {x: 320, y: -40, rotation: 180}
+    R_SNUB_S: {x: 700, y: 40, rotation: 0}
+    SW: {x: 480, y: 180, rotation: 0}
+    T1: {x: 520, y: 40, rotation: 0}
+    VAC: {x: -500, y: 260, rotation: 0}
+    "~GND@T1.S1": {x: 600, y: -80, rotation: 0}
   wires:
-  - {id: W1, from: GND.P, to: VIN.B}
-  - {id: W2, from: CIN.B, to: VIN.B}
-  - {id: W4, from: CIN.B, to: PWM.B}
-  - {id: W5, from: CIN.B, to: SW.CN}
-  - {id: W6, from: R_SENSE.B, to: SW.CN}
-  - {id: W3, from: Cout.B, to: R_LOAD.B}
-  - {id: W7, from: Cout.B, to: "~GND@Cout.B.P"}
-  - {id: W8, from: T1.S1, to: "~GND@T1.S1.P"}
-  - {id: W9, from: CIN.A, to: VIN.A}
-  - {id: W10, from: CIN.A, to: T1.P1}
-  - {id: W11, from: SW.A, to: T1.P2}
-  - {id: W12, from: R_SENSE.A, to: SW.B}
-  - {id: W13, from: PWM.A, to: SW.CP}
-  - {id: W14, from: D1.A, to: T1.S2}
-  - {id: W15, from: Cout.A, to: R_LOAD.A}
-  - {id: W16, from: Cout.A, to: D1.B}
+  - {id: W1, from: DB3.A, to: GND.P}
+  - {id: W2, from: CIN.B, to: R_LOAD.B}
+  - {id: W3, from: R_BLEED.B, to: R_LOAD.B}
+  - {id: W4, from: PWM.B, to: R_SENSE.B}
+  - {id: W5, from: C_SNUB_S.B, to: R_BLEED.B}
+  - {id: W6, from: Cout.B, to: PWM.B}
+  - {id: W7, from: CIN.B, to: Cout.B}
+  - {id: W8, from: DB4.A, to: PWM.B}
+  - {id: W9, from: PWM.B, to: SW.CN}
+  - {id: W10, from: DB4.A, to: GND.P}
+  - {id: W11, from: T1.S1, to: "~GND@T1.S1.P"}
+  - {id: W12, from: R_LINE.A, to: VAC.A}
+  - {id: W13, from: DB1.A, to: DB3.B}
+  - {id: W14, from: DB1.A, to: R_LINE.B}
+  - {id: W15, from: C_SNUB_P.A, to: R_SNUB_P.B}
+  - {id: W16, from: C_SNUB_S.A, to: R_SNUB_S.B}
+  - {id: W17, from: DB2.A, to: DB4.B}
+  - {id: W18, from: DB4.B, to: VAC.B}
+  - {id: W19, from: C_SNUB_P.B, to: T1.P1}
+  - {id: W20, from: CIN.A, to: R_BLEED.A}
+  - {id: W21, from: DB2.B, to: T1.P1}
+  - {id: W22, from: DB1.B, to: DB2.B}
+  - {id: W23, from: CIN.A, to: T1.P1}
+  - {id: W24, from: SW.A, to: T1.P2}
+  - {id: W25, from: R_SNUB_P.A, to: T1.P2}
+  - {id: W26, from: R_SENSE.A, to: SW.B}
+  - {id: W27, from: PWM.A, to: SW.CP}
+  - {id: W28, from: D1.A, to: T1.S2}
+  - {id: W29, from: D1.A, to: R_SNUB_S.A}
+  - {id: W30, from: Cout.A, to: D1.B}
+  - {id: W31, from: Cout.A, to: R_LOAD.A}
   groups: {}

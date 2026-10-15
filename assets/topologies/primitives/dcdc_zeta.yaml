@@ -17,12 +17,12 @@ components:
     role: power_switch
     params:
       family: mosfet
-      type: pnp
+      type: nmos
       mode: enhancement
       voltage_rating: 100
       current_rating: 5
-      Vto: -2.0
-      Kp: 5.0
+      Vto: 1.5
+      Kn: 5.0
       Lambda: 0.01
       Cgs: 500e-12
       Cgd: 100e-12
@@ -137,7 +137,7 @@ nets:
   - - - Vs
       - +
     - - SW
-      - source
+      - drain
   - - - Vs
       - '-'
     - - L1
@@ -149,7 +149,9 @@ nets:
     - - R1
       - neg
   - - - SW
-      - drain
+      - source
+    - - PWM
+      - neg
     - - L1
       - pin1
     - - C1
@@ -170,10 +172,6 @@ nets:
       - pos
     - - SW
       - gate
-  - - - PWM
-      - neg
-    - - Vs
-      - '-'
 analysis:
   # Solver settings (the netlist generator reads them here, at analysis level). Until 2026-10-11 they sat under
   # transient.simulator and were never applied; applied, ripple is within 6 % of a tight-tolerance reference

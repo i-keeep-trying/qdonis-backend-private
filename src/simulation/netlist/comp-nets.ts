@@ -252,6 +252,20 @@ export function buildCompNets(design: Dict): [CompNets, string[]] {
     }
   }
 
+  const explicitGround =
+    [...compByRef.values()].some(
+      (c) =>
+        get(c, 'type') === 'node' &&
+        get(or(get(c, 'params'), {}), 'node_type') === 'ground',
+    ) ||
+    netsAsSets.some((pinSet) =>
+      [...pinSet.values()].some(
+        ([ref]) =>
+          !(typeof ref === 'string' && compByRef.has(ref)) &&
+          ['GND', '0'].includes(pyStr(ref).toUpperCase()),
+      ),
+    );
+
   netsAsSets.forEach((pinSet, idx) => {
     let groundMember: Member | null = null;
     let namedMember: unknown = null;
@@ -264,11 +278,16 @@ export function buildCompNets(design: Dict): [CompNets, string[]] {
           groundMember = [ref, pin];
           break;
         }
-        // Main DC voltage source with minus pin (traditional ground reference)
+        // Main DC voltage source with minus pin (traditional ground reference).
+        // Sources other than VIN only when the circuit has no ground of its own:
+        // with a split DC link (NPC: midpoint grounded) grounding every rail's
+        // minus pin would short the rails.
         if (
           get(params, 'node_type') === 'voltage_source' &&
           (pin === '-' || pin === 'neg') &&
-          (MAIN_DC_REFS.has(ref) || MAIN_DC_ROLES.has(get(comp, 'role')))
+          (ref === 'VIN' ||
+            (!explicitGround &&
+              (MAIN_DC_REFS.has(ref) || MAIN_DC_ROLES.has(get(comp, 'role')))))
         ) {
           groundMember = [ref, pin];
           break;

@@ -137,7 +137,7 @@ components:
 - ref: R_DC
   type: resistor
   params:
-    resistance: 100.0
+    resistance: 53.33
 
 - ref: n_vref
   type: node
@@ -184,14 +184,14 @@ components:
   type: gain
   role: voltage_p
   params:
-    gain: 0.1
+    gain: 0.05
 
 - ref: INT_V
   type: integrator
   role: voltage_i
   params:
-    ki: 20
-    ic: 29.5
+    ki: 10
+    ic: 18.44
 
 - ref: SUM_PI
   type: sum
@@ -210,9 +210,9 @@ components:
   type: lowpass
   role: current_amplitude_filter
   params:
-    tau: 0.00999001
+    tau: 0.0021978022
     gain: 0.999001
-    ic: 29.5
+    ic: 18.44
 
 - ref: SUM_VAC
   type: sum
@@ -307,7 +307,7 @@ components:
 - ref: IC_CMD
   type: custom_spice
   params:
-    spice_line: .ic V(n_DC_BUS)=400 V(n_INT)=29.5 V(n_mag_flt)=29.5
+    spice_line: .ic V(n_DC_BUS)=400 V(n_INT)=18.44 V(n_mag_flt)=18.44
 nets:
 - - - GND
     - pin

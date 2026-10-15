@@ -1156,7 +1156,7 @@ analysis:
             formula: abs([ILk_rms])
             description: RMS Tank Current
           - var: pout_avg_w
-            formula: (abs([Vout_avg])**2) / 1.25
+            formula: (abs([Vout_avg])**2) / {components.R_LOAD.resistance}
             description: Delivered Output Power
 metadata:
   stage:

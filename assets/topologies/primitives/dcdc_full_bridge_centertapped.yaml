@@ -22,8 +22,8 @@ components:
       node_type: pwm_control
       frequency: 50e3
       duty_cycle: 0.44
-      vhigh: 48.0
-      vlow: 36.0
+      vhigh: 12.0
+      vlow: 0.0
       trise: 1e-7
       tfall: 1e-7
       tdelay: 0
@@ -48,8 +48,8 @@ components:
       node_type: pwm_control
       frequency: 50e3
       duty_cycle: 0.44
-      vhigh: 48.0
-      vlow: 36.0
+      vhigh: 12.0
+      vlow: 0.0
       trise: 1e-7
       tfall: 1e-7
       tdelay: 10e-6
@@ -72,12 +72,12 @@ components:
     role: upper_left
     params:
       family: mosfet
-      type: pmos
+      type: nmos
       mode: enhancement
       voltage_rating: 100
       current_rating: 10
-      Vto: -2.0
-      Kp: 50e-3
+      Vto: 2.0
+      Kn: 50e-3
       Lambda: 0.01
       Cgs: 500e-12
       Cgd: 100e-12
@@ -110,12 +110,12 @@ components:
     role: upper_right
     params:
       family: mosfet
-      type: pmos
+      type: nmos
       mode: enhancement
       voltage_rating: 100
       current_rating: 10
-      Vto: -2.0
-      Kp: 50e-3
+      Vto: 2.0
+      Kn: 50e-3
       Lambda: 0.01
       Cgs: 500e-12
       Cgd: 100e-12
@@ -370,9 +370,9 @@ nets:
   - - - VIN
       - +
     - - S1
-      - source
+      - drain
     - - S3
-      - source
+      - drain
     - - D1
       - cathode
     - - D3
@@ -387,16 +387,14 @@ nets:
       - anode
     - - D4
       - anode
-    - - PWM1
-      - neg
     - - PWM2
-      - neg
-    - - PWM3
       - neg
     - - PWM4
       - neg
   - - - S1
-      - drain
+      - source
+    - - PWM1
+      - neg
     - - S2
       - drain
     - - D1
@@ -406,7 +404,9 @@ nets:
     - - T1
       - P1
   - - - S3
-      - drain
+      - source
+    - - PWM3
+      - neg
     - - S4
       - drain
     - - D3

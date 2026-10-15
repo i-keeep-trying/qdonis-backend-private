@@ -58,7 +58,7 @@ components:
     params:
       node_type: "label"
 
-  # Modulation sources (were raw SPICE lines): 160 Hz three-phase sine references and the 16 kHz carrier
+  # Modulation sources (were raw SPICE lines): 50 Hz three-phase sine references and the 16 kHz carrier
   - ref: V1
     type: node
     role: voltage_source
@@ -82,7 +82,7 @@ components:
       source: "sine"
       offset: 0
       amplitude: 8
-      frequency: 160
+      frequency: 50
       series_resistance: 0
 
   - ref: V3
@@ -93,7 +93,7 @@ components:
       source: "sine"
       offset: 0
       amplitude: 8
-      frequency: 160
+      frequency: 50
       delay: 0
       damping: 0
       phase: 120
@@ -107,7 +107,7 @@ components:
       source: "sine"
       offset: 0
       amplitude: 8
-      frequency: 160
+      frequency: 50
       delay: 0
       damping: 0
       phase: 240
@@ -121,7 +121,8 @@ components:
     params:
       high: 1
       low: 0
-      width: 1e-06
+      width: 0.02
+      threshold: 0.2
 
   - ref: CMP_AL
     type: comparator
@@ -129,7 +130,8 @@ components:
     params:
       high: 1
       low: 0
-      width: 1e-06
+      width: 0.02
+      threshold: 0.2
 
   - ref: CMP_BH
     type: comparator
@@ -137,7 +139,8 @@ components:
     params:
       high: 1
       low: 0
-      width: 1e-06
+      width: 0.02
+      threshold: 0.2
 
   - ref: CMP_BL
     type: comparator
@@ -145,7 +148,8 @@ components:
     params:
       high: 1
       low: 0
-      width: 1e-06
+      width: 0.02
+      threshold: 0.2
 
   - ref: CMP_CH
     type: comparator
@@ -153,7 +157,8 @@ components:
     params:
       high: 1
       low: 0
-      width: 1e-06
+      width: 0.02
+      threshold: 0.2
 
   - ref: CMP_CL
     type: comparator
@@ -161,18 +166,19 @@ components:
     params:
       high: 1
       low: 0
-      width: 1e-06
+      width: 0.02
+      threshold: 0.2
 
   - ref: E1
     type: e_source
     role: gate_driver_a_high
     params:
-      gain: 100
+      gain: 15
   - ref: R1
     type: resistor
     role: gate_resistor_a_high
     params:
-      resistance: 1k
+      resistance: 50
   - ref: R2
     type: resistor
     role: gate_pulldown_a_high
@@ -182,12 +188,12 @@ components:
     type: e_source
     role: gate_driver_a_low
     params:
-      gain: 100
+      gain: 15
   - ref: R3
     type: resistor
     role: gate_resistor_a_low
     params:
-      resistance: 1k
+      resistance: 50
   - ref: R4
     type: resistor
     role: gate_pulldown_a_low
@@ -197,12 +203,12 @@ components:
     type: e_source
     role: gate_driver_b_high
     params:
-      gain: 100
+      gain: 15
   - ref: R5
     type: resistor
     role: gate_resistor_b_high
     params:
-      resistance: 1k
+      resistance: 50
   - ref: R6
     type: resistor
     role: gate_pulldown_b_high
@@ -212,12 +218,12 @@ components:
     type: e_source
     role: gate_driver_b_low
     params:
-      gain: 100
+      gain: 15
   - ref: R7
     type: resistor
     role: gate_resistor_b_low
     params:
-      resistance: 1k
+      resistance: 50
   - ref: R8
     type: resistor
     role: gate_pulldown_b_low
@@ -227,12 +233,12 @@ components:
     type: e_source
     role: gate_driver_c_high
     params:
-      gain: 100
+      gain: 15
   - ref: R9
     type: resistor
     role: gate_resistor_c_high
     params:
-      resistance: 1k
+      resistance: 50
   - ref: R10
     type: resistor
     role: gate_pulldown_c_high
@@ -242,12 +248,12 @@ components:
     type: e_source
     role: gate_driver_c_low
     params:
-      gain: 100
+      gain: 15
   - ref: R11
     type: resistor
     role: gate_resistor_c_low
     params:
-      resistance: 1k
+      resistance: 50
   - ref: R12
     type: resistor
     role: gate_pulldown_c_low
@@ -262,9 +268,9 @@ components:
       voltage: 380
   - ref: R13
     type: resistor
-    role: dc_link_filter_res1
+    role: dc_link_balancing_resistor
     params:
-      resistance: 10
+      resistance: 100000.0
   - ref: C1
     type: capacitor
     role: dc_link_filter_cap1
@@ -272,9 +278,9 @@ components:
       capacitance: 10u
   - ref: R14
     type: resistor
-    role: dc_link_filter_res2
+    role: dc_link_balancing_resistor
     params:
-      resistance: 10
+      resistance: 100000.0
   - ref: C2
     type: capacitor
     role: dc_link_filter_cap2
@@ -287,7 +293,7 @@ components:
       family: mosfet
       type: nmos
       model: FDH210N08
-      Bv: 500
+      Bv: 800
   - ref: M2
     type: transistor
     role: mosfet_a_low
@@ -295,7 +301,7 @@ components:
       family: mosfet
       type: nmos
       model: FDH210N08
-      Bv: 500
+      Bv: 800
   - ref: M3
     type: transistor
     role: mosfet_b_high
@@ -303,7 +309,7 @@ components:
       family: mosfet
       type: nmos
       model: FDH210N08
-      Bv: 500
+      Bv: 800
   - ref: M4
     type: transistor
     role: mosfet_b_low
@@ -311,7 +317,7 @@ components:
       family: mosfet
       type: nmos
       model: FDH210N08
-      Bv: 500
+      Bv: 800
   - ref: M5
     type: transistor
     role: mosfet_c_high
@@ -319,7 +325,7 @@ components:
       family: mosfet
       type: nmos
       model: FDH210N08
-      Bv: 500
+      Bv: 800
   - ref: M6
     type: transistor
     role: mosfet_c_low
@@ -327,7 +333,7 @@ components:
       family: mosfet
       type: nmos
       model: FDH210N08
-      Bv: 500
+      Bv: 800
   - ref: L1
     type: inductor
     role: load_inductor_a
@@ -631,170 +637,201 @@ nets:
       - '-'
     - - V4
       - '-'
+  # The power stage is referenced to the control ground (chat-first 7f41908): DC link minus = GND.
+  - - - GND
+      - pin
+    - - C2
+      - neg
 analysis:
   transient:
     requirements:
-      - rid: tr_comprehensive
-        requirement: Plot all key waveforms
-        criteria:
-          target_vout: 380.0
-        # 62.5 ms = ten cycles of the 160 Hz modulation (the default run, ~2.4 cycles, gave unbalanced RMS phase
-        # voltages 322 / 270 / 194 V).
-        environment:
-          - ref: time_domain
-            t_stop: 0.0625
-            t_step: 5.0e-06
-        measurement:
-          - ref: VIN
-            plot:
-              x_axis: time
-              title: Input DC Link Voltage
-            quantity: voltage
-            nets:
-              - - V5
-                - +
-              - - V5
-                - '-'
-            data:
-              - name: Vin_avg
-                spice_command: avg
-                description: Average input voltage
-          - ref: VOUT_A
-            plot:
-              x_axis: time
-              title: Phase A Output Voltage
-            quantity: voltage
-            nets:
-              - - L1
-                - pos
-              - - M2
-                - source
-            data:
-              - name: Vout_A_rms
-                spice_command: rms
-                description: RMS output voltage for Phase A
-          - ref: VOUT_B
-            plot:
-              x_axis: time
-              title: Phase B Output Voltage
-            quantity: voltage
-            nets:
-              - - L2
-                - pos
-              - - M4
-                - source
-            data:
-              - name: Vout_B_rms
-                spice_command: rms
-                description: RMS output voltage for Phase B
-          - ref: VOUT_C
-            plot:
-              x_axis: time
-              title: Phase C Output Voltage
-            quantity: voltage
-            nets:
-              - - L3
-                - pos
-              - - M6
-                - source
-            data:
-              - name: Vout_C_rms
-                spice_command: rms
-                description: RMS output voltage for Phase C
-          - ref: IOUT_A
-            plot:
-              x_axis: time
-              title: Phase A Load Current
-            quantity: current
-            component: L1
-            data:
-              - name: Iout_A_rms
-                spice_command: rms
-                description: RMS output current for Phase A
-          - ref: IOUT_B
-            plot:
-              x_axis: time
-              title: Phase B Load Current
-            quantity: current
-            component: L2
-            data:
-              - name: Iout_B_rms
-                spice_command: rms
-                description: RMS output current for Phase B
-          - ref: IOUT_C
-            plot:
-              x_axis: time
-              title: Phase C Load Current
-            quantity: current
-            component: L3
-            data:
-              - name: Iout_C_rms
-                spice_command: rms
-                description: RMS output current for Phase C
-          - ref: GATE_A_HIGH
-            plot:
-              x_axis: time
-              title: Phase A High-Side Gate Pulse (Vgs)
-            quantity: voltage
-            nets:
-              - - M1
-                - gate
-              - - M1
-                - source
-          - ref: GATE_A_LOW
-            plot:
-              x_axis: time
-              title: Phase A Low-Side Gate Pulse (Vgs)
-            quantity: voltage
-            nets:
-              - - M2
-                - gate
-              - - M2
-                - source
-          - ref: GATE_B_HIGH
-            plot:
-              x_axis: time
-              title: Phase B High-Side Gate Pulse (Vgs)
-            quantity: voltage
-            nets:
-              - - M3
-                - gate
-              - - M3
-                - source
-          - ref: GATE_B_LOW
-            plot:
-              x_axis: time
-              title: Phase B Low-Side Gate Pulse (Vgs)
-            quantity: voltage
-            nets:
-              - - M4
-                - gate
-              - - M4
-                - source
-          - ref: GATE_C_HIGH
-            plot:
-              x_axis: time
-              title: Phase C High-Side Gate Pulse (Vgs)
-            quantity: voltage
-            nets:
-              - - M5
-                - gate
-              - - M5
-                - source
-          - ref: GATE_C_LOW
-            plot:
-              x_axis: time
-              title: Phase C Low-Side Gate Pulse (Vgs)
-            quantity: voltage
-            nets:
-              - - M6
-                - gate
-              - - M6
-                - source
-        outputs:
-          - var: vout_a_rms_v
-            formula: '[Vout_A_rms]'
-            description: Phase A RMS Voltage
+    - rid: tr_comprehensive
+      requirement: Plot all key waveforms
+      criteria:
+        target_vout: 380.0
+      measurement:
+      - ref: VIN
+        plot:
+          x_axis: time
+          title: Input DC Link Voltage
+        quantity: voltage
+        nets:
+        - - V5
+          - +
+        - - V5
+          - '-'
+        data:
+        - name: Vin_avg
+          spice_command: avg
+          description: Average input voltage
+      - ref: VOUT_A
+        plot:
+          x_axis: time
+          title: Phase A load voltage (line-to-neutral)
+        quantity: voltage
+        nets:
+        - - R15
+          - neg
+        - - R15
+          - pos
+        data:
+        - name: Vout_A_rms
+          spice_command: rms
+          description: RMS phase A line-to-neutral voltage at the load
+      - ref: VOUT_B
+        plot:
+          x_axis: time
+          title: Phase B load voltage (line-to-neutral)
+        quantity: voltage
+        nets:
+        - - R16
+          - neg
+        - - R16
+          - pos
+        data:
+        - name: Vout_B_rms
+          spice_command: rms
+          description: RMS phase B line-to-neutral voltage at the load
+      - ref: VOUT_C
+        plot:
+          x_axis: time
+          title: Phase C load voltage (line-to-neutral)
+        quantity: voltage
+        nets:
+        - - R17
+          - neg
+        - - R17
+          - pos
+        data:
+        - name: Vout_C_rms
+          spice_command: rms
+          description: RMS phase C line-to-neutral voltage at the load
+      - ref: VOUT_AB
+        plot:
+          x_axis: time
+          title: Line-to-line load voltage A-B
+        quantity: voltage
+        nets:
+        - - R15
+          - neg
+        - - R16
+          - neg
+        data:
+        - name: Vout_AB_rms
+          spice_command: rms
+          description: RMS line-to-line output voltage A-B
+      - ref: IOUT_A
+        plot:
+          x_axis: time
+          title: Phase A Load Current
+        quantity: current
+        component: L1
+        data:
+        - name: Iout_A_rms
+          spice_command: rms
+          description: RMS output current for Phase A
+      - ref: IOUT_B
+        plot:
+          x_axis: time
+          title: Phase B Load Current
+        quantity: current
+        component: L2
+        data:
+        - name: Iout_B_rms
+          spice_command: rms
+          description: RMS output current for Phase B
+      - ref: IOUT_C
+        plot:
+          x_axis: time
+          title: Phase C Load Current
+        quantity: current
+        component: L3
+        data:
+        - name: Iout_C_rms
+          spice_command: rms
+          description: RMS output current for Phase C
+      - ref: GATE_A_HIGH
+        plot:
+          x_axis: time
+          title: Phase A High-Side Gate Pulse (Vgs)
+        quantity: voltage
+        nets:
+        - - M1
+          - gate
+        - - M1
+          - source
+      - ref: GATE_A_LOW
+        plot:
+          x_axis: time
+          title: Phase A Low-Side Gate Pulse (Vgs)
+        quantity: voltage
+        nets:
+        - - M2
+          - gate
+        - - M2
+          - source
+      - ref: GATE_B_HIGH
+        plot:
+          x_axis: time
+          title: Phase B High-Side Gate Pulse (Vgs)
+        quantity: voltage
+        nets:
+        - - M3
+          - gate
+        - - M3
+          - source
+      - ref: GATE_B_LOW
+        plot:
+          x_axis: time
+          title: Phase B Low-Side Gate Pulse (Vgs)
+        quantity: voltage
+        nets:
+        - - M4
+          - gate
+        - - M4
+          - source
+      - ref: GATE_C_HIGH
+        plot:
+          x_axis: time
+          title: Phase C High-Side Gate Pulse (Vgs)
+        quantity: voltage
+        nets:
+        - - M5
+          - gate
+        - - M5
+          - source
+      - ref: GATE_C_LOW
+        plot:
+          x_axis: time
+          title: Phase C Low-Side Gate Pulse (Vgs)
+        quantity: voltage
+        nets:
+        - - M6
+          - gate
+        - - M6
+          - source
+      outputs:
+      - var: vout_ll_rms_v
+        formula: '[Vout_AB_rms]'
+        description: Line-to-line RMS output voltage
+      - var: vout_a_rms_v
+        formula: '[Vout_A_rms]'
+        description: Phase A RMS Voltage (line-to-neutral)
+      - var: vout_b_rms_v
+        formula: '[Vout_B_rms]'
+        description: Phase B RMS Voltage (line-to-neutral)
+      - var: vout_c_rms_v
+        formula: '[Vout_C_rms]'
+        description: Phase C RMS Voltage (line-to-neutral)
+      - var: phase_unbalance_pct
+        formula: 100*(max([Vout_A_rms],[Vout_B_rms],[Vout_C_rms]) - min([Vout_A_rms],[Vout_B_rms],[Vout_C_rms]))/max([Vout_A_rms],[Vout_B_rms],[Vout_C_rms])
+        description: Phase voltage unbalance
+      # 40 ms = two cycles of the 50 Hz modulation; AVG/RMS windows span whole line cycles.
+      environment:
+      - ref: time_domain
+        t_stop: 0.04
+        t_step: 2u
+        max_step: 5u
   # NOT APPLIED: an `ac` section without requirements runs no AC analysis (kept for reference).
   # ac:
   #   frequency:

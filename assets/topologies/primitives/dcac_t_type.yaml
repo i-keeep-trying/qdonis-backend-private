@@ -1037,7 +1037,7 @@ components:
 - ref: C_SNUB_A
   type: capacitor
   params:
-    capacitance: 1n
+    capacitance: 100n
     sense: false
 - ref: R_SNUB_B
   type: resistor
@@ -1047,7 +1047,7 @@ components:
 - ref: C_SNUB_B
   type: capacitor
   params:
-    capacitance: 1n
+    capacitance: 100n
     sense: false
 - ref: R_SNUB_C
   type: resistor
@@ -1057,7 +1057,7 @@ components:
 - ref: C_SNUB_C
   type: capacitor
   params:
-    capacitance: 1n
+    capacitance: 100n
     sense: false
 nets:
 - - - N001
@@ -1794,12 +1794,16 @@ analysis:
       itl4: 100
       ic: v(N008)=400
     requirements:
-    - rid: tr_phase_currents
-      requirement: Regulate three-phase output load currents to 20A peak at 160Hz
-        via closed-loop control
+    # One consolidated run (was three: tr_phase_currents, tr_line_voltage, tr_midpoint_balance), as on
+    # chat-first; criteria, run length and the two-cycle RMS / midpoint windows from the 2026-10-11 fix.
+    - rid: tr_three_phase_inverter
+      requirement: 'Three-phase three-level T-type inverter: closed-loop AC current regulation (20 A peak at 160 Hz on an 800
+        V bus), 3-level line-to-line voltages and DC bus midpoint stability'
       criteria:
         target_current_peak_a: 20
         fundamental_freq_hz: 160
+        vdc_bus_v: 800
+        vmid_target_v: 400
       environment:
       - ref: time_domain
         t_step: 2.0e-07
@@ -1809,7 +1813,8 @@ analysis:
       - ref: VIN
         plot:
           x_axis: time
-          title: DC Input Voltage (V1)
+          title: DC Input Voltage
+          group: DC Link Stability
         component: VIN
         quantity: voltage
         nets:
@@ -1821,24 +1826,33 @@ analysis:
         - name: Vin_avg
           spice_command: avg
           description: Avg Input Voltage
-      - ref: V_OUT
+      - ref: VMID
         plot:
           x_axis: time
-          title: Phase A Load Voltage
+          title: DC Bus Midpoint Potential V(N008)
+          group: DC Link Stability
         nets:
-        - - N011
+        - - N008
           - pin
-        - - N020
+        - - GND
           - pin
         quantity: voltage
         data:
-        - name: Vout_rms
-          spice_command: rms
-          description: RMS Load Voltage
+        - name: Vmid_avg
+          spice_command: avg
+          description: Avg Midpoint Voltage
+          from: 0.0475
+          to: 0.06
+        - name: Vmid_pp
+          spice_command: pp
+          description: Midpoint Peak-to-Peak Voltage Ripple
+          from: 0.0475
+          to: 0.06
       - ref: I_PHASE_A
         plot:
           x_axis: time
           title: Phase A Output Current
+          group: Three-Phase Currents
         component: VSENSE_A
         quantity: current
         data:
@@ -1850,13 +1864,14 @@ analysis:
           description: Peak negative Phase A output current
         - name: Iphase_a_rms
           spice_command: rms
-          description: RMS Phase A output current (two 160 Hz cycles)
+          description: RMS Phase A output current
           from: 0.0475
           to: 0.06
       - ref: I_PHASE_B
         plot:
           x_axis: time
           title: Phase B Output Current
+          group: Three-Phase Currents
         component: VSENSE_B
         quantity: current
         data:
@@ -1868,13 +1883,14 @@ analysis:
           description: Peak negative Phase B output current
         - name: Iphase_b_rms
           spice_command: rms
-          description: RMS Phase B output current (two 160 Hz cycles)
+          description: RMS Phase B output current
           from: 0.0475
           to: 0.06
       - ref: I_PHASE_C
         plot:
           x_axis: time
           title: Phase C Output Current
+          group: Three-Phase Currents
         component: VSENSE_C
         quantity: current
         data:
@@ -1886,54 +1902,77 @@ analysis:
           description: Peak negative Phase C output current
         - name: Iphase_c_rms
           spice_command: rms
-          description: RMS Phase C output current (two 160 Hz cycles)
+          description: RMS Phase C output current
           from: 0.0475
           to: 0.06
       - ref: I_REF_A
         plot:
           x_axis: time
-          title: Phase A Current Reference (20A Peak)
-        component: V_IREF_A
+          title: Phase A Current Reference Command
+          group: Three-Phase Currents
         quantity: voltage
         nets:
-        - - V_IREF_A
-          - +
-        - - V_IREF_A
-          - '-'
+        - - I_REF_A
+          - pin
+        - - GND
+          - pin
         data:
-        - name: Iref_a_max
-          spice_command: max
-          description: Peak reference current command
-      outputs:
-      - var: iphase_a_peak_a
-        formula: '[Iphase_a_max]'
-        description: Peak Phase A current (regulated to 20A)
-      - var: iphase_b_peak_a
-        formula: '[Iphase_b_max]'
-        description: Peak Phase B current (regulated to 20A)
-      - var: iphase_c_peak_a
-        formula: '[Iphase_c_max]'
-        description: Peak Phase C current (regulated to 20A)
-      - var: iphase_a_rms_a
-        formula: '[Iphase_a_rms]'
-        description: RMS Phase A current
-      - var: current_tracking_error_pct
-        formula: 100*abs([Iphase_a_max] - [Iref_a_max])/[Iref_a_max]
-        description: Closed-loop Phase A current tracking error percentage
-    - rid: tr_line_voltage
-      requirement: Three-level Line-to-Line PWM AC voltage (V_N1 - V_N2)
-      criteria:
-        vdc_bus_v: 800
-      environment:
-      - ref: time_domain
-        t_step: 2.0e-07
-        t_stop: 0.06
-        t_max_step: 1.0e-06
-      measurement:
+        - name: Iref_a_rms
+          spice_command: rms
+          description: RMS reference current command
+      - ref: V_OUT_A
+        plot:
+          x_axis: time
+          title: Phase A Load Voltage
+          group: Phase Load Voltages
+        nets:
+        - - N011
+          - pin
+        - - N020
+          - pin
+        quantity: voltage
+        data:
+        - name: Vout_a_rms
+          spice_command: rms
+          description: RMS Phase A Load Voltage
+        - name: Vout_rms
+          spice_command: rms
+          description: RMS Load Voltage
+      - ref: V_OUT_B
+        plot:
+          x_axis: time
+          title: Phase B Load Voltage
+          group: Phase Load Voltages
+        nets:
+        - - N012
+          - pin
+        - - N020
+          - pin
+        quantity: voltage
+        data:
+        - name: Vout_b_rms
+          spice_command: rms
+          description: RMS Phase B Load Voltage
+      - ref: V_OUT_C
+        plot:
+          x_axis: time
+          title: Phase C Load Voltage
+          group: Phase Load Voltages
+        nets:
+        - - N013
+          - pin
+        - - N020
+          - pin
+        quantity: voltage
+        data:
+        - name: Vout_c_rms
+          spice_command: rms
+          description: RMS Phase C Load Voltage
       - ref: VLINE_AB
         plot:
           x_axis: time
-          title: Line-to-Line Output Voltage (V_N1 - V_N2)
+          title: Line-to-Line AC Voltage V(AB)
+          group: Line-to-Line AC Voltages
         quantity: voltage
         nets:
         - - VSENSE_A
@@ -1943,35 +1982,69 @@ analysis:
         data:
         - name: Vline_ab_max
           spice_command: max
-          description: Peak positive line-to-line voltage
+          description: Peak positive line-to-line voltage AB
         - name: Vline_ab_min
           spice_command: min
-          description: Peak negative line-to-line voltage
+          description: Peak negative line-to-line voltage AB
         - name: Vline_ab_pp
           spice_command: pp
-          description: Peak-to-peak line-to-line voltage
-      outputs:
-      - var: vline_ab_max_v
-        formula: '[Vline_ab_max]'
-        description: Peak line-to-line voltage
-      - var: vline_ab_pp_v
-        formula: '[Vline_ab_pp]'
-        description: Peak-to-peak line-to-line voltage
-    - rid: tr_midpoint_balance
-      requirement: DC bus midpoint stability and 3-level pole-to-midpoint voltage
-        (V_N1 - V_N008)
-      criteria:
-        vmid_target_v: 400
-      environment:
-      - ref: time_domain
-        t_step: 2.0e-07
-        t_stop: 0.06
-        t_max_step: 1.0e-06
-      measurement:
+          description: Peak-to-peak line-to-line voltage AB
+        - name: Vline_ab_rms
+          spice_command: rms
+          description: RMS line-to-line voltage AB
+      - ref: VLINE_BC
+        plot:
+          x_axis: time
+          title: Line-to-Line AC Voltage V(BC)
+          group: Line-to-Line AC Voltages
+        quantity: voltage
+        nets:
+        - - VSENSE_B
+          - +
+        - - VSENSE_C
+          - +
+        data:
+        - name: Vline_bc_max
+          spice_command: max
+          description: Peak positive line-to-line voltage BC
+        - name: Vline_bc_min
+          spice_command: min
+          description: Peak negative line-to-line voltage BC
+        - name: Vline_bc_pp
+          spice_command: pp
+          description: Peak-to-peak line-to-line voltage BC
+        - name: Vline_bc_rms
+          spice_command: rms
+          description: RMS line-to-line voltage BC
+      - ref: VLINE_CA
+        plot:
+          x_axis: time
+          title: Line-to-Line AC Voltage V(CA)
+          group: Line-to-Line AC Voltages
+        quantity: voltage
+        nets:
+        - - VSENSE_C
+          - +
+        - - VSENSE_A
+          - +
+        data:
+        - name: Vline_ca_max
+          spice_command: max
+          description: Peak positive line-to-line voltage CA
+        - name: Vline_ca_min
+          spice_command: min
+          description: Peak negative line-to-line voltage CA
+        - name: Vline_ca_pp
+          spice_command: pp
+          description: Peak-to-peak line-to-line voltage CA
+        - name: Vline_ca_rms
+          spice_command: rms
+          description: RMS line-to-line voltage CA
       - ref: VPOLE_A
         plot:
           x_axis: time
-          title: Pole-to-Midpoint Voltage V(N1) - V(N008)
+          title: 3-Level Pole-to-Midpoint Voltage V(N1 - N008)
+          group: Pole-to-Midpoint 3-Level Voltages
         quantity: voltage
         nets:
         - - VSENSE_A
@@ -1981,32 +2054,86 @@ analysis:
         data:
         - name: Vpole_a_max
           spice_command: max
-          description: Maximum pole-to-midpoint voltage (+400V)
+          description: Maximum pole-to-midpoint voltage (+Vdc/2)
         - name: Vpole_a_min
           spice_command: min
-          description: Minimum pole-to-midpoint voltage (-400V)
-      - ref: VMID
+          description: Minimum pole-to-midpoint voltage (-Vdc/2)
+      - ref: VPOLE_B
         plot:
           x_axis: time
-          title: DC Bus Midpoint Voltage V(N008)
+          title: 3-Level Pole-to-Midpoint Voltage V(N2 - N008)
+          group: Pole-to-Midpoint 3-Level Voltages
         quantity: voltage
         nets:
+        - - VSENSE_B
+          - +
         - - C2
           - pos
-        - - C2
-          - neg
         data:
-        - name: Vmid_avg
-          spice_command: avg
-          description: DC bus midpoint average voltage (two 160 Hz cycles)
-          from: 0.0475
-          to: 0.06
-        - name: Vmid_pp
-          spice_command: pp
-          description: DC bus midpoint ripple (two 160 Hz cycles)
-          from: 0.0475
-          to: 0.06
+        - name: Vpole_b_max
+          spice_command: max
+          description: Maximum pole-to-midpoint voltage (+Vdc/2)
+        - name: Vpole_b_min
+          spice_command: min
+          description: Minimum pole-to-midpoint voltage (-Vdc/2)
+      - ref: VPOLE_C
+        plot:
+          x_axis: time
+          title: 3-Level Pole-to-Midpoint Voltage V(N3 - N008)
+          group: Pole-to-Midpoint 3-Level Voltages
+        quantity: voltage
+        nets:
+        - - VSENSE_C
+          - +
+        - - C2
+          - pos
+        data:
+        - name: Vpole_c_max
+          spice_command: max
+          description: Maximum pole-to-midpoint voltage (+Vdc/2)
+        - name: Vpole_c_min
+          spice_command: min
+          description: Minimum pole-to-midpoint voltage (-Vdc/2)
       outputs:
+      - var: vout_ll_rms_v
+        formula: ([Vout_a_rms] + [Vout_b_rms] + [Vout_c_rms]) / 3 * sqrt(3)
+        description: Line-to-line RMS output voltage across three phases
+      - var: vout_rms_v
+        formula: ([Vout_a_rms] + [Vout_b_rms] + [Vout_c_rms]) / 3
+        description: RMS phase (line-to-neutral) load voltage
+      - var: iphase_a_peak_a
+        formula: '[Iphase_a_max]'
+        description: Peak Phase A current (regulated to reference)
+      - var: iphase_b_peak_a
+        formula: '[Iphase_b_max]'
+        description: Peak Phase B current (regulated to reference)
+      - var: iphase_c_peak_a
+        formula: '[Iphase_c_max]'
+        description: Peak Phase C current (regulated to reference)
+      - var: iphase_a_rms_a
+        formula: '[Iphase_a_rms]'
+        description: RMS Phase A current
+      - var: iphase_b_rms_a
+        formula: '[Iphase_b_rms]'
+        description: RMS Phase B current
+      - var: iphase_c_rms_a
+        formula: '[Iphase_c_rms]'
+        description: RMS Phase C current
+      - var: vline_ab_max_v
+        formula: '[Vline_ab_max]'
+        description: Peak line-to-line voltage AB
+      - var: vline_ab_pp_v
+        formula: '[Vline_ab_pp]'
+        description: Peak-to-peak line-to-line voltage AB
+      - var: vline_ab_rms_v
+        formula: '[Vline_ab_rms]'
+        description: RMS line-to-line voltage AB
+      - var: vline_bc_rms_v
+        formula: '[Vline_bc_rms]'
+        description: RMS line-to-line voltage BC
+      - var: vline_ca_rms_v
+        formula: '[Vline_ca_rms]'
+        description: RMS line-to-line voltage CA
       - var: vmid_avg_v
         formula: '[Vmid_avg]'
         description: DC bus midpoint average voltage
@@ -2019,6 +2146,12 @@ analysis:
       - var: vpole_a_min_v
         formula: '[Vpole_a_min]'
         description: Peak negative pole-to-midpoint voltage
+      - var: phase_current_unbalance_pct
+        formula: 100*abs([Iphase_a_rms] - [Iphase_b_rms])/(([Iphase_a_rms] + [Iphase_b_rms] + [Iphase_c_rms])/3)
+        description: Three-phase current unbalance percentage across phases
+      - var: current_tracking_error_pct
+        formula: 100*abs([Iphase_a_rms] - [Iref_a_rms])/[Iref_a_rms]
+        description: Closed-loop Phase A RMS current tracking error percentage
 metadata:
   stage:
   - power_switch

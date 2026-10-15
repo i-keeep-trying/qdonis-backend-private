@@ -30,7 +30,7 @@ that part's Python on top of `0054f72`, so a fixture never contains a later part
 ## Plan
 
 1. Netlist / simulator fixes (core `simulator/`) — done.
-2. Topology library: the teammates' YAML / prompt fixes (VSI, NPC, T-type, 1-ph / 3-ph AFE, interleaved buck,
+2. Topology library (done): the teammates' YAML / prompt fixes (VSI, NPC, T-type, 1-ph / 3-ph AFE, interleaved buck,
    flyback PFC, totem pole, DAB, full-bridge CT, Zeta, diode bridge; 11 prompts) merged into `assets/` keeping
    the `schematic:` layouts and control blocks; checked by running ngspice.
 3. Deterministic sizing (`topology_improver.py` -> `simulation/sizing/`): SI-prefix parsing, DAB output power
@@ -48,6 +48,47 @@ that part's Python on top of `0054f72`, so a fixture never contains a later part
 ## Change log
 
 Newest first.
+
+### 2026-10-15 — Part 2: topology library
+
+The teammates' YAML / prompt fixes merged into `assets/topologies` (`MANIFEST.json` updated: 967 files, 35
+prompts). Base of every merge: core `326d618` (common ancestor); the library keeps the synced-schematic
+control blocks and layouts. Per topology:
+
+| Topology | Taken from chat-first | Kept from synced |
+|---|---|---|
+| flyback PFC (DCM) | real AC input (VAC sine, DB1-DB4 bridge, R_LINE, snubbers, bleeder), values, 12 V target | - (layout regenerated) |
+| 1-ph AFE | retune as blocks: `KP_V` 0.05, `INT_V` ki 10 (G_INT 0.001 / 100 uF), `LPF_MAG` tau 2.2 ms, ic 18.44, R_DC 53.33 | blocks, layout, 400 V target |
+| diode bridge | C_OUT; target 12.7 -> 16.7 V (with the capacitor) | layout |
+| 3-ph AFE | 0.1 / 0.5 mH, 5 mF bus at 700 V, neutral divider 10k/10k, Kp 0.02, current loop = 10/350 v_phase feed-forward - 0.1 error clamped +-9.5 (new `K_FF_x`, `SUM_Fx`), 20 kHz carrier, swapped PWM polarity, no diode Tt, analysis, models | blocks incl. conditional anti-windup (layout regenerated) |
+| totem pole | polarity detectors already high at v = 0 (no t = 0 shoot-through): comparator `threshold` -1e-6, `width` 1e-7; Pout formula references R_LOAD | blocks, layout |
+| NPC | three-phase NPC (phases a/b/c, shared carriers), its analysis | each phase's loop rebuilt as blocks (`SUM_E_x`, `KP_x`, `INT_x`, `K_NORM_x` 1/400 ...), `CAR_UP/LOW` (layout regenerated) |
+| T-type | 100 nF snubbers; one consolidated requirement (one run instead of three) | blocks / carriers (chat-first's PULSE carriers are the same waveforms), the 2026-10-11 fix: 20 A peak, 800 V bus / 400 V midpoint criteria, 60 ms, two-cycle windows |
+| VSI | 50 Hz modulation, dead band (comparator `threshold` 0.2, `width` 0.02), gate gain 15 / 50 ohm, 100k balancing resistors, Bv 800, load-side phase + line-line measurements, 40 ms run; DC link minus tied to GND | blocks, layout, no `ac` / `time_domain` |
+| interleaved buck | four phases | - (layout regenerated) |
+| DAB, full-bridge CT, Zeta | Pout formula via R_LOAD; NMOS high side; NMOS high side | blocks / layouts; Zeta duty 0.526 + window |
+
+Prompts: chat-first's (4 new); hand-made part names in them now also name the blocks (1-ph AFE, VSI), and "do not
+edit behavioural sources" covers control blocks.
+
+**Ground fix (beyond chat-first).** The Part 1 rule (chat-first `7f41908`) grounded the minus pin of every main
+DC source / `input_source`; in circuits that have their own ground this shorts parts of the circuit: the NPC split
+link (both rails to 0: ~112 V line-line instead of 380 V) and the flyback PFC's AC source (7 V, 1446 A line
+current). Now VIN always, other main sources only when the circuit has no ground node / GND label
+(`comp-nets.ts`; the same change in the parity reference's `build_comp_nets`). NPC now 376 V line-line
+(217 V phase RMS for a 219 V reference), flyback PFC 9.7 V / 0.21 A.
+
+Layouts regenerated from scratch (draft, automatic grouping) where the parts changed and the layout was untuned:
+flyback PFC, interleaved buck, NPC (4 sheets), 3-ph AFE (6 sheets). Tuned layouts kept (new parts are placed by
+the renderer: diode bridge C_OUT).
+
+Verified by simulating synced / chat-first / merged through the core pipeline (outputs vs criteria): totem
+400.03 V; 1-ph AFE 399.8 V (= chat-first); 3-ph AFE 702.0 V; T-type 20.75 A peak, midpoint 401.1 V; Zeta
+11.98 V; full-bridge CT 12.15 V; DAB 59.0 V; diode bridge 16.65 V; VSI 158 V line-line (= chat-first; target 380
+open); interleaved buck 1.65 V vs 1.2 V and flyback PFC 9.7 V vs 12 V as in chat-first (their templates rely on
+the deterministic sizing, Part 3). Fixtures re-captured from the Part 2 reference (Part 1 reference + ground fix
++ this library): netlist, sync, sizing, schematic, schematic-apply. Full jest suite passes (the dev-layout spec
+can race `manifest.spec` / `schematic.service.spec` on `dcdc_buck`, as before).
 
 ### 2026-10-15 — Part 1: netlist / simulator fixes
 

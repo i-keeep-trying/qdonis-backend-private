@@ -327,14 +327,17 @@ components:
       resistance: 40.0
       sense: false
 
-  # 1. Smooth AC polarity detection (0..1 and -1..+1)
+  # 1. AC polarity detection (0..1 and -1..+1). A near-hard step that is already
+  #    high at v = 0 (threshold just below zero), so both legs are not half-on at t = 0
+  #    (shoot-through), as the chat-first `>= 0 ? 1 : 0` comparators did.
   - ref: POL
     type: comparator
     role: ac_polarity
     params:
       high: 1
       low: 0
-      width: 0.01
+      threshold: -1.0e-6
+      width: 1.0e-7
 
   - ref: POL_SIGN
     type: comparator
@@ -342,7 +345,8 @@ components:
     params:
       high: 1
       low: -1
-      width: 0.01
+      threshold: -1.0e-6
+      width: 1.0e-7
 
   # 2. Outer voltage loop: PI = 0.01 * err + 100 * integral(err), clamped 0..45
   - ref: REF_V
@@ -880,7 +884,7 @@ analysis:
             formula: abs([Iin_rms])
             description: RMS Input Current
           - var: pout_avg_w
-            formula: (abs([Vout_avg])**2) / 40.0
+            formula: (abs([Vout_avg])**2) / {components.R_LOAD.resistance}
             description: Delivered Output Power
 metadata:
   stage:

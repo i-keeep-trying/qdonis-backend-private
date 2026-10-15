@@ -52,6 +52,12 @@ components:
     type: resistor
     params:
       resistance: 9.0
+  - ref: C_OUT
+    type: capacitor
+    role: output_filter
+    params:
+      capacitance: 0.0022
+      voltage_rating: 50
 nets:
   - - - VAC
       - '-'
@@ -77,11 +83,15 @@ nets:
       - cathode
     - - R_LOAD
       - pos
+    - - C_OUT
+      - pos
   - - - D1
       - anode
     - - D2
       - anode
     - - R_LOAD
+      - neg
+    - - C_OUT
       - neg
 analysis:
   transient:
@@ -89,7 +99,9 @@ analysis:
       - rid: tr_rectifier
         requirement: Verify full-wave rectification and output ripple.
         criteria:
-          target_vout: 12.7
+          # 16.65 V with the output capacitor C_OUT (always present since chat-first 7f41908); 12.7 V was the
+          # average of the unfiltered rectified sine.
+          target_vout: 16.7
         environment:
           - ref: time_domain
             t_step: 1.0e-06
