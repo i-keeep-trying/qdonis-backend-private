@@ -15,6 +15,7 @@ import {
   type StudioProject,
 } from '../projects/studio/studio-graph';
 import {
+  byRef,
   circuitParts,
   customWound,
   magneticDesigns,
@@ -89,6 +90,9 @@ export interface MtbfPart {
   temperatureSource: TemperatureSource;
   voltageV: number | null;
   ratedVoltageV: number | null;
+  /** Simulated RMS current and the current rating, A (devices with a selection). */
+  currentA: number | null;
+  ratedCurrentA: number | null;
   status: ThermalStatus | null;
   included: boolean;
   /** Why the part is left out by default (load, line model, helper). */
@@ -134,7 +138,13 @@ interface PartContext {
   >;
   stresses: Map<
     string,
-    { part: string | null; vPeakV: number | null; vRatingV: number | null }
+    {
+      part: string | null;
+      vPeakV: number | null;
+      vRatingV: number | null;
+      iRmsA: number | null;
+      iRatingA: number | null;
+    }
   >;
   designs: ReturnType<typeof magneticDesigns>;
 }
@@ -191,7 +201,13 @@ function branchContext(project: StudioProject): PartContext {
   const stresses = new Map(
     [...selectedDevices(project)].map(([k, d]) => [
       k,
-      { part: d.part, vPeakV: d.vPeakV, vRatingV: d.vRatingV },
+      {
+        part: d.part,
+        vPeakV: d.vPeakV,
+        vRatingV: d.vRatingV,
+        iRmsA: d.iRmsA,
+        iRatingA: d.iRatingA,
+      },
     ]),
   );
   return {
@@ -221,9 +237,10 @@ function operatingPoint(
   | 'status'
   | 'voltageV'
   | 'ratedVoltageV'
+  | 'currentA'
+  | 'ratedCurrentA'
   | 'partNumber'
 > {
-  const k = key(ref);
   const ambient = {
     temperatureC: ctx.ambientC,
     temperatureSource:
@@ -232,13 +249,15 @@ function operatingPoint(
         : ('ambient' as const),
     status: null,
   };
-  const stress = ctx.stresses.get(k);
+  const stress = byRef(ctx.stresses, ref);
   const electrical = {
     voltageV: stress?.vPeakV ?? null,
     ratedVoltageV: stress?.vRatingV ?? null,
+    currentA: stress?.iRmsA ?? null,
+    ratedCurrentA: stress?.iRatingA ?? null,
   };
   if (type === 'mosfet' || type === 'diode') {
-    const device = ctx.devices.get(k);
+    const device = byRef(ctx.devices, ref);
     return {
       ...(device
         ? {
@@ -252,8 +271,8 @@ function operatingPoint(
     };
   }
   if (type === 'inductor' || type === 'transformer') {
-    const mag = ctx.magnetics.get(k);
-    const design = ctx.designs.get(k);
+    const mag = byRef(ctx.magnetics, ref);
+    const design = byRef(ctx.designs, ref);
     return {
       ...(mag
         ? {
@@ -267,10 +286,19 @@ function operatingPoint(
         : ambient),
       voltageV: null,
       ratedVoltageV: null,
+      currentA: null,
+      ratedCurrentA: null,
       partNumber: design ? customWound(design) : null,
     };
   }
-  return { ...ambient, voltageV: null, ratedVoltageV: null, partNumber: null };
+  return {
+    ...ambient,
+    voltageV: null,
+    ratedVoltageV: null,
+    currentA: null,
+    ratedCurrentA: null,
+    partNumber: null,
+  };
 }
 
 /** Parts of the branch circuit with their operating points. */
@@ -370,6 +398,12 @@ export function evaluateMtbf(
       ...(p.voltageV !== null ? { peakVoltage: String(p.voltageV) } : {}),
       ...(p.ratedVoltageV !== null
         ? { ratedVoltage: String(p.ratedVoltageV) }
+        : {}),
+      ...(p.currentA != null && p.ratedCurrentA != null
+        ? {
+            rmsCurrent: String(p.currentA),
+            ratedCurrent: String(p.ratedCurrentA),
+          }
         : {}),
       ...(p.status ? { thermalStatus: p.status } : {}),
     },
@@ -535,8 +569,13 @@ export async function planMtbf(
       `${noStress.map((p) => p.ref).join(', ')}: no simulated voltage stress (generic 20 V of a 30 V rating); simulate and select devices for real derating.`,
     );
   }
+  const withCurrent = included.filter(
+    (p) => p.currentA != null && p.ratedCurrentA != null,
+  );
   assumptions.push(
-    'Current stress uses the engine default (3 A of a 4.5 A rating) for every part.',
+    withCurrent.length
+      ? `Current stress: simulated RMS current over the selected device's rating for ${withCurrent.length} part(s); the engine default (3 A of a 4.5 A rating) for the others.`
+      : 'Current stress uses the engine default (3 A of a 4.5 A rating) for every part.',
   );
   if (fswHz === null) {
     assumptions.push('Switching frequency unknown: 200 kHz assumed.');

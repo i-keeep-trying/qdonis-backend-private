@@ -383,6 +383,12 @@ export class SourcedPartDto {
   @ValidateNested({ each: true })
   @Type(() => PriceTierDto)
   pricingTiers!: PriceTierDto[];
+  /** ISO currency of the prices (older clients: absent, read as USD). */
+  @ApiPropertyOptional({ nullable: true, example: 'GBP' })
+  @IsOptional()
+  @ValidateIf((_, v) => v !== null)
+  @Matches(/^[A-Z]{3}$/, { message: 'currency must be an ISO code like USD' })
+  currency?: string | null;
   @Text(200) availability!: string | null;
   @Text(120) leadTime!: string | null;
   @Text(120) rohsStatus!: string | null;

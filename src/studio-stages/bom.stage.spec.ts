@@ -12,8 +12,12 @@ import {
   type BomLine,
   exportParts,
   mergeChoices,
+  type PartLookup,
+  partKey,
+  partsToLookUp,
   planBom,
   type SourcedPart,
+  unitPriceAt,
 } from './bom.stage';
 import type {
   CircuitDataProvider,
@@ -58,6 +62,7 @@ const MOUSER: SourcedPart = {
     { quantity: 1, price: 2.5 },
     { quantity: 10, price: 2.1 },
   ],
+  currency: 'GBP',
   availability: '1,234 In Stock',
   leadTime: '12 Weeks',
   rohsStatus: 'RoHS Compliant',
@@ -137,7 +142,7 @@ describe('BOM stage', () => {
     expect(line(plan, 'SW')).toMatchObject({
       manufacturer: 'Wolfspeed',
       partNumber: 'C3M0065090D',
-      description: 'MOSFET, 900 V / 36 A, SiC Gen 3',
+      description: 'SiC Gen 3, 900 V / 36 A',
       source: 'device_selection',
     });
     expect(line(plan, 'L1')).toMatchObject({
@@ -192,6 +197,7 @@ describe('BOM stage', () => {
       lines: 4,
       quantity: 6,
       cost: 7.5,
+      currency: 'GBP',
       pricedLines: 1,
       inStockLines: 1,
     });
@@ -233,7 +239,135 @@ describe('BOM stage', () => {
       quantity: 2,
       extendedPrice: 5,
     });
-    expect(bomCsv(rows).toString('utf8')).toContain('"810-C5750X7R1H476M"');
+    const csv = bomCsv(rows, 'GBP').toString('utf8');
+    expect(csv).toContain('"810-C5750X7R1H476M"');
+    expect(csv).toContain('Unit Price (£)');
+    // Unpriced lines leave the price cells empty.
+    expect(csv.split('\n')[1]).toContain(',,');
+  });
+
+  it('matches every phase leg to the simulated leg and groups same parts', async () => {
+    let project = withCircuit('dcac_neutral_point_clamped');
+    project = commitStage(project, 'simulation', {
+      deviceSelection: {
+        selections: ['SW1', 'SW2', 'SW3', 'SW4'].map((ref) => ({
+          ref,
+          stress: { vPeakV: 500, iRmsA: 21 },
+          selected: {
+            part: 'C3M0065090D',
+            manufacturer: 'Wolfspeed',
+            type: 'MOSFET',
+            family: 'SiC MOSFET',
+            vRatingV: 900,
+            iRatingA: 36,
+          },
+        })),
+      },
+    }).project;
+    const plan = await planBom(project, {}, provider());
+    const switches = linesOf(plan).find((l) => l.partNumber === 'C3M0065090D')!;
+    expect(switches.refs).toHaveLength(12);
+    expect(switches.refs.slice(0, 4)).toEqual([
+      'SW1_a',
+      'SW2_a',
+      'SW3_a',
+      'SW4_a',
+    ]);
+    expect(switches).toMatchObject({
+      ref: 'SW1_a',
+      quantity: 12,
+      included: true,
+    });
+    // Same-valued filter capacitors of the three phases are one line.
+    const caps = linesOf(plan).find((l) => l.ref === 'C_FILT_a')!;
+    expect(caps.refs).toEqual(['C_FILT_a', 'C_FILT_b', 'C_FILT_c']);
+    // A designator changed on its own leaves the group.
+    const split = await planBom(
+      project,
+      { SW1_c: { included: false } },
+      provider(),
+    );
+    expect(
+      linesOf(split).find((l) => l.partNumber === 'C3M0065090D' && l.included)!
+        .quantity,
+    ).toBe(11);
+  });
+
+  it('prices the selected devices from the Mouser lookups', async () => {
+    let project = withCircuit('dcdc_buck');
+    project = commitStage(project, 'simulation', {
+      deviceSelection: {
+        selections: [
+          {
+            ref: 'SW',
+            selected: {
+              part: 'C5750X7R1H476M',
+              manufacturer: 'TDK',
+              type: 'MOSFET',
+            },
+          },
+          {
+            ref: 'D',
+            selected: {
+              part: 'DIM600DDM12-A000',
+              manufacturer: 'Dynex',
+              type: 'Diode',
+            },
+          },
+        ],
+      },
+    }).project;
+    const first = ok(
+      await planBom(project, { SW: { quantity: 12 } }, provider()),
+    );
+    expect(
+      partsToLookUp(first.data.lines as BomLine[], {}, false).sort(),
+    ).toEqual(['C5750X7R1H476M', 'DIM600DDM12-A000']);
+
+    const checkedAt = '2026-10-16T12:00:00.000Z';
+    const plan = ok(
+      await planBom(project, { SW: { quantity: 12 } }, provider(), {
+        [partKey('C5750X7R1H476M')]: { part: MOUSER, checkedAt },
+        [partKey('DIM600DDM12-A000')]: { part: null, checkedAt },
+      }),
+    );
+    // 12 reaches the 10-piece break.
+    expect(line(plan, 'SW')).toMatchObject({
+      source: 'mouser',
+      autoMatched: true,
+      unitPrice: 2.1,
+      extendedPrice: 25.2,
+      currency: 'GBP',
+    });
+    expect(line(plan, 'D')).toMatchObject({
+      source: 'device_selection',
+      unitPrice: null,
+    });
+    expect(line(plan, 'D').note).toMatch(/not listed on Mouser/);
+    expect(plan.data.totals).toMatchObject({ cost: 25.2, currency: 'GBP' });
+
+    // Stored lookups are reused; the missing part is retried on a rebuild only.
+    const stored = commitStage(project, 'bom', plan.data).project;
+    const again = ok(await planBom(stored, {}, provider()));
+    expect(line(again, 'SW').autoMatched).toBe(true);
+    const lookups = again.data.lookups as Record<string, PartLookup>;
+    expect(
+      partsToLookUp(again.data.lines as BomLine[], lookups, false),
+    ).toEqual([]);
+    expect(partsToLookUp(again.data.lines as BomLine[], lookups, true)).toEqual(
+      ['DIM600DDM12-A000'],
+    );
+  });
+
+  it('prices at the quantity break and flags a minimum order', () => {
+    const tiers = [
+      { quantity: 1, price: 0 },
+      { quantity: 5, price: 3 },
+      { quantity: 50, price: 2 },
+    ];
+    expect(unitPriceAt(tiers, 2)).toEqual({ price: 3, minimum: 5 });
+    expect(unitPriceAt(tiers, 60)).toEqual({ price: 2, minimum: 5 });
+    expect(unitPriceAt([{ quantity: 1, price: 0 }], 1)).toBeNull();
   });
 
   it('builds a BOM for every library topology', async () => {

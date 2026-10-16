@@ -21,6 +21,8 @@ export interface BomSourcePart {
   rohsStatus?: string;
   lifecycleStatus?: string;
   datasheetLink?: string;
+  /** No distributor price yet: the price cells stay empty (Studio BOM). */
+  unpriced?: boolean;
 }
 
 export interface BomRow {
@@ -34,6 +36,8 @@ export interface BomRow {
   packageType: string;
   unitPrice: number;
   extendedPrice: number;
+  /** False when the part has no price (cells left empty, not 0.00). */
+  priced: boolean;
   availability: string;
   leadTime: string;
   rohsStatus: string;
@@ -49,6 +53,12 @@ export interface BomSummary {
   inStockItems: number;
   stockPercentage: number;
 }
+
+/** Price columns name the currency (old layout: $). */
+const SYMBOL: Record<string, string> = { USD: '$', GBP: '£', EUR: '€' };
+const symbolOf = (currency = 'USD') => SYMBOL[currency] ?? `${currency} `;
+const headers = (currency?: string) =>
+  HEADERS.map((h) => h.replace('($)', `(${symbolOf(currency).trim()})`));
 
 const HEADERS = [
   'Line #',
@@ -90,6 +100,7 @@ export function bomRows(parts: BomSourcePart[]): BomRow[] {
         part.mountingType || part.electricalSpecs?.['Package'] || 'N/A',
       unitPrice,
       extendedPrice: unitPrice * quantity,
+      priced: !part.unpriced,
       availability: part.availability || 'Check Stock',
       leadTime: part.leadTime || 'Contact Supplier',
       rohsStatus: part.rohsStatus || 'RoHS Compliant',
@@ -130,8 +141,8 @@ const cells = (r: BomRow): Array<string | number> => [
   r.description,
   r.quantity,
   r.packageType,
-  r.unitPrice.toFixed(2),
-  r.extendedPrice.toFixed(2),
+  r.priced ? r.unitPrice.toFixed(2) : '',
+  r.priced ? r.extendedPrice.toFixed(2) : '',
   r.availability,
   r.leadTime,
   r.rohsStatus,
@@ -158,8 +169,10 @@ export async function bomXlsx(
   rows: BomRow[],
   projectName: string,
   now = new Date(),
+  currency?: string,
 ): Promise<Buffer> {
   const summary = bomSummary(rows);
+  const symbol = symbolOf(currency);
   const workbook = new ExcelJS.Workbook();
   workbook.created = now;
   const sheet = workbook.addWorksheet('Bill of Materials');
@@ -171,11 +184,11 @@ export async function bomXlsx(
   sheet.addRow([
     `Total Components: ${summary.totalItems}`,
     `Total Quantity: ${summary.totalQuantity}`,
-    `Total Cost: $${summary.totalCost.toFixed(2)}`,
+    `Total Cost: ${symbol}${summary.totalCost.toFixed(2)}`,
     `Manufacturers: ${summary.uniqueManufacturers}`,
   ]);
   sheet.addRow([]);
-  sheet.addRow(HEADERS).font = { bold: true };
+  sheet.addRow(headers(currency)).font = { bold: true };
   for (const r of rows) sheet.addRow(cells(r).map(safe));
   sheet.addRow([]);
   sheet.addRow([
@@ -188,7 +201,7 @@ export async function bomXlsx(
     summary.totalQuantity,
     '',
     '',
-    `$${summary.totalCost.toFixed(2)}`,
+    `${symbol}${summary.totalCost.toFixed(2)}`,
   ]);
   WIDTHS.forEach((width, i) => {
     sheet.getColumn(i + 1).width = width;
@@ -197,13 +210,13 @@ export async function bomXlsx(
   return Buffer.from(out);
 }
 
-export function bomCsv(rows: BomRow[]): Buffer {
+export function bomCsv(rows: BomRow[], currency?: string): Buffer {
   const quote = (v: string | number) =>
     typeof v === 'number'
       ? String(v)
       : `"${neutralizeFormula(v).replace(/"/g, '""')}"`;
   const lines = [
-    HEADERS.join(','),
+    headers(currency).join(','),
     ...rows.map((r) =>
       cells(r)
         .map((v, i) => (i === 8 || i === 9 ? String(v) : quote(v)))

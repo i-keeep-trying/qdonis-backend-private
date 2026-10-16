@@ -137,6 +137,63 @@ describe('MTBF stage', () => {
     });
   });
 
+  it('gives every phase leg the stress and temperatures of the simulated leg', async () => {
+    let project = withCircuit('dcac_neutral_point_clamped');
+    project = commitStage(project, 'simulation', {
+      deviceSelection: {
+        selections: [
+          {
+            ref: 'SW1',
+            stress: { vPeakV: 500, iRmsA: 30 },
+            selected: { part: 'C3M0016120K', vRatingV: 1200, iRatingA: 40 },
+          },
+        ],
+      },
+    }).project;
+    project = commitStage(project, 'magnetics', {
+      designs: [
+        {
+          ref: 'L_FILT',
+          core: 'E55/28/21',
+          material: '3C97',
+          stacked: 3,
+          hotspot_C: 80,
+        },
+      ],
+    }).project;
+    project = commitStage(project, 'thermal', {
+      result: {
+        ambientC: 40,
+        devices: [{ ref: 'SW1', tjC: 110, status: 'ok' }],
+        magnetics: [],
+      },
+    }).project;
+    const plan = await planMtbf(project, {}, provider());
+    const parts = partsOf(plan);
+    for (const ref of ['SW1_a', 'SW1_b', 'SW1_c']) {
+      expect(parts.find((p) => p.ref === ref)).toMatchObject({
+        partNumber: 'C3M0016120K',
+        voltageV: 500,
+        ratedVoltageV: 1200,
+        currentA: 30,
+        ratedCurrentA: 40,
+        temperatureC: 110,
+        temperatureSource: 'thermal',
+      });
+    }
+    expect(parts.find((p) => p.ref === 'L_FILT_b')).toMatchObject({
+      partNumber: '3× E55/28/21 3C97 (custom wound)',
+      temperatureC: 80,
+    });
+    // 30 A of 40 A raises the stress factor over the placeholder current.
+    const result = resultOf(plan) as unknown as {
+      components: Array<{ designator: string; lambda: number }>;
+    };
+    const lambda = (ref: string) =>
+      result.components.find((c) => c.designator === ref)!.lambda;
+    expect(lambda('SW1_a')).toBeGreaterThan(lambda('SW2_a'));
+  });
+
   it('keeps the method, environment and overrides of the previous run', async () => {
     const first = ok(
       await planMtbf(

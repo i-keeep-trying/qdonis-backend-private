@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 
 import type { AuthenticatedUser } from '../auth/auth.types';
 import { AppError, ErrorCode } from '../common/errors/error-codes';
@@ -31,6 +31,7 @@ import {
 } from '../projects/studio/studio-graph';
 import { StudioGraphService } from '../projects/studio/studio-graph.service';
 import { SimulationArtifactsService } from '../simulation/simulation-artifacts.service';
+import { SourcingService } from '../sourcing/sourcing.service';
 import {
   CIRCUIT_DATA_PROVIDER,
   type CircuitDataProvider,
@@ -54,7 +55,15 @@ import {
   planMagnetics,
   type StagePlan,
 } from './magnetics.stage';
-import { type LineChoicePatch, planBom } from './bom.stage';
+import {
+  type BomLine,
+  type LineChoicePatch,
+  type PartLookup,
+  partKey,
+  partsToLookUp,
+  planBom,
+  sourcedPart,
+} from './bom.stage';
 import { type MtbfOptions, planMtbf } from './mtbf.stage';
 import { planThermal } from './thermal.stage';
 
@@ -99,7 +108,53 @@ export class StudioStagesService {
     private readonly circuit: CircuitDataProvider,
     private readonly artifacts: SimulationArtifactsService,
     private readonly graph: StudioGraphService,
+    private readonly sourcing: SourcingService,
   ) {}
+
+  private readonly logger = new Logger(StudioStagesService.name);
+
+  /**
+   * BOM plan with the selected devices looked up on Mouser by exact part
+   * number. Best effort: without Mouser (not configured, rate limited,
+   * failing) the lines stay unpriced and are looked up on the next run.
+   * Parts not listed are retried on a plain rebuild (no line changes).
+   */
+  private async planBomSourced(
+    user: Actor,
+    projectId: string,
+    studio: Awaited<ReturnType<ProjectsService['loadStudio']>>,
+    changes: Record<string, LineChoicePatch>,
+  ) {
+    const plan = await planBom(studio, changes, this.circuit);
+    if (!plan.ok) return plan;
+    const needed = partsToLookUp(
+      plan.data.lines as BomLine[],
+      plan.data.lookups as Record<string, PartLookup>,
+      Object.keys(changes).length === 0,
+    );
+    if (!needed.length) return plan;
+    const fresh: Record<string, PartLookup> = {};
+    for (const partNumber of needed) {
+      try {
+        const found = await this.sourcing.exactPart(
+          { userId: user.id, projectId },
+          partNumber,
+        );
+        fresh[partKey(partNumber)] = {
+          part: found ? sourcedPart(found) : null,
+          checkedAt: new Date().toISOString(),
+        };
+      } catch (error) {
+        this.logger.warn(
+          `BOM lookup of ${partNumber} stopped: ${error instanceof Error ? error.message : String(error)}`,
+        );
+        break;
+      }
+    }
+    return Object.keys(fresh).length
+      ? planBom(studio, changes, this.circuit, fresh)
+      : plan;
+  }
 
   /** `branchId` defaults to the caller's branch (the Studio chat passes its own). */
   async runMagnetics(
@@ -170,7 +225,7 @@ export class StudioStagesService {
       user.id,
       studio.activeBranchId,
       'bom',
-      await planBom(studio, changes, this.circuit),
+      await this.planBomSourced(user, projectId, studio, changes),
     );
   }
 
@@ -358,10 +413,15 @@ export class StudioStagesService {
           `${ref} is changed twice.`,
         );
       }
-      changes[ref] = change;
+      changes[ref] = change.part
+        ? {
+            ...change,
+            part: { ...change.part, currency: change.part.currency ?? null },
+          }
+        : (change as LineChoicePatch);
     }
     const studio = await this.projects.loadStudio(projectId, user.id, branchId);
-    const plan = await planBom(studio, changes, this.circuit);
+    const plan = await this.planBomSourced(user, projectId, studio, changes);
     return this.commitStageRun(user, projectId, branchId, 'bom', plan);
   }
 

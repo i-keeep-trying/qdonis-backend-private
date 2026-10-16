@@ -46,6 +46,8 @@ export interface SelectedDevice {
   deviceType: string | null;
   vPeakV: number | null;
   vRatingV: number | null;
+  /** Simulated RMS current, A. */
+  iRmsA: number | null;
   iRatingA: number | null;
   /** Co-packaged / companion diode part. */
   diode: string | null;
@@ -64,6 +66,21 @@ const fin = (v: unknown): number | undefined =>
 
 /** Case-insensitive ref key (stage results do not always keep the case). */
 export const refKey = (ref: string) => ref.toLowerCase();
+
+/** Phase suffix of a replicated leg (`SW1_a`, `L_FILT_b`). */
+const PHASE_SUFFIX = /_[abc]$/i;
+
+/**
+ * A part's entry in a stage result keyed by ref: the exact ref, else the ref
+ * without its phase suffix. Three-phase circuits draw every leg (`SW1_a`,
+ * `SW1_b`, `SW1_c`), but the simulation runs one leg (`SW1`), and its device
+ * selection, losses, temperatures and magnetics designs use those refs.
+ */
+export function byRef<T>(map: Map<string, T>, ref: string): T | undefined {
+  const exact = map.get(refKey(ref));
+  if (exact !== undefined || !PHASE_SUFFIX.test(ref)) return exact;
+  return map.get(refKey(ref.replace(PHASE_SUFFIX, '')));
+}
 
 /** Library component type -> part class (null: not a hardware part). */
 export function partType(type: string): PartType | null {
@@ -184,7 +201,8 @@ export function selectedDevices(
   for (const choice of records(rec(sim.data.deviceSelection).selections)) {
     const ref = str(choice.ref);
     const selected = rec(choice.selected);
-    const part = str(selected.part);
+    // "DIM600DDM12-A000 - DIODE": the diode of a module, ordered as the module.
+    const part = str(selected.part)?.replace(/\s+-\s+DIODE$/i, '');
     if (!ref || !part) continue;
     out.set(refKey(ref), {
       part,
@@ -193,6 +211,7 @@ export function selectedDevices(
       deviceType: str(selected.type) ?? null,
       vPeakV: fin(rec(choice.stress).vPeakV) ?? null,
       vRatingV: fin(selected.vRatingV) || null,
+      iRmsA: fin(rec(choice.stress).iRmsA) ?? null,
       iRatingA: fin(selected.iRatingA) || null,
       diode: str(selected.diode) ?? null,
     });

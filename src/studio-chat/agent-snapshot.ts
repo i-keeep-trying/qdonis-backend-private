@@ -16,6 +16,7 @@ import {
   selectionLines,
   summarizeSimulation,
 } from './agent-results';
+import { money } from '../studio-stages/bom.stage';
 import type { AttachmentRef } from './studio-chat.types';
 
 const str = (v: unknown): string | undefined =>
@@ -172,7 +173,7 @@ export function buildAgentSnapshot(
             .filter((l) => l.included === true)
             .map(
               (l) =>
-                `${String(l.ref)} ×${String(l.quantity)}: ${String(l.partNumber ?? l.description)}${typeof l.unitPrice === 'number' ? ` ($${l.unitPrice.toFixed(2)})` : ''}`,
+                `${(Array.isArray(l.refs) ? l.refs : [l.ref]).map(String).join(', ')} ×${String(l.quantity)}: ${String(l.partNumber ?? l.description)}${typeof l.unitPrice === 'number' ? ` (${money(l.unitPrice, typeof l.currency === 'string' ? l.currency : null)} each)` : ''}`,
             ),
         }
       : null,

@@ -114,7 +114,16 @@ export class BomService {
       ? (node.data.lines as BomLine[])
       : [];
     const rows = bomRows(exportParts(lines));
-    return this.exportRows(user, projectId, access.projectName, rows, format);
+    const currency =
+      typeof node.data.currency === 'string' ? node.data.currency : undefined;
+    return this.exportRows(
+      user,
+      projectId,
+      access.projectName,
+      rows,
+      format,
+      currency,
+    );
   }
 
   private async exportRows(
@@ -123,6 +132,7 @@ export class BomService {
     projectName: string,
     rows: BomRow[],
     format: 'xlsx' | 'csv',
+    currency?: string,
   ) {
     if (rows.length === 0) {
       throw AppError.badRequest(
@@ -132,7 +142,9 @@ export class BomService {
     }
     const now = new Date();
     const body =
-      format === 'xlsx' ? await bomXlsx(rows, projectName, now) : bomCsv(rows);
+      format === 'xlsx'
+        ? await bomXlsx(rows, projectName, now, currency)
+        : bomCsv(rows, currency);
     const file = await this.files.putExport({
       projectId,
       actorId: user.id,

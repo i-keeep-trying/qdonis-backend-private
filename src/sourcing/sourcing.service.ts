@@ -213,6 +213,41 @@ export class SourcingService {
     return options;
   }
 
+  /**
+   * The part with exactly this manufacturer part number (the BOM's selected
+   * devices), or null when Mouser does not list it. Several packagings of the
+   * same part: a priced, in-stock one first. Throws when the search is not
+   * configured, rate limited or failing.
+   */
+  async exactPart(ctx: SearchContext, manufacturerPartNumber: string): Promise<ComponentOption | null> {
+    this.assertConfigured();
+    let call: MouserCall;
+    try {
+      call = await this.call(
+        ctx,
+        () =>
+          this.api.partNumber(
+            { SearchByPartRequest: { mouserPartNumber: manufacturerPartNumber, partSearchOptions: 'Exact' } },
+            15_000,
+          ),
+        manufacturerPartNumber,
+      );
+    } catch (error) {
+      if (error instanceof RateLimited) this.rateLimited();
+      throw error;
+    }
+    if (!call.response) this.raise(call, manufacturerPartNumber);
+    if (call.response.Errors?.length) return null;
+    const key = (pn: string) => pn.toUpperCase().replace(/[^A-Z0-9]/g, '');
+    const score = (part: MouserPart) =>
+      (part.PriceBreaks?.some((b) => parseFloat(b.Price.replace(/[^0-9.]+/g, '')) > 0) ? 2 : 0) +
+      (/in stock/i.test(part.Availability ?? '') ? 1 : 0);
+    const matches = (call.response.SearchResults?.Parts ?? [])
+      .filter((part) => key(part.ManufacturerPartNumber ?? '') === key(manufacturerPartNumber))
+      .sort((a, b) => score(b) - score(a));
+    return matches[0] ? transformMouserPartToComponentOption(matches[0], 0, manufacturerPartNumber) : null;
+  }
+
   async partDetails(ctx: SearchContext, mouserPartNumber: string): Promise<ComponentOption | null> {
     this.assertConfigured();
     const part = await this.partByNumber(ctx, mouserPartNumber);

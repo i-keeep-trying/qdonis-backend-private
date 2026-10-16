@@ -44,6 +44,45 @@ Plan (one part per turn, the user commits each):
 
 ## Change log
 
+### 2026-10-16: accuracy pass on MTBF and BOM
+
+Found by replaying the 2 kW NPC project (three-phase) through both planners:
+- The circuit draws every phase leg (`SW1_a`, `SW1_b`, `SW1_c`), but the simulation runs one leg (`SW1`), and the
+  device selection, thermal temperatures and magnetics designs use those refs. Nothing matched, so every switch and
+  diode had no part, ran at the ambient in MTBF, and the BOM showed "Not sourced". `branch-parts.ts` `byRef` matches
+  the exact ref first, then the ref without its phase suffix. MTBF and BOM both use it.
+- BOM:
+  - Designators with the same part are one line (`refs`, quantity = designator count). A change on a grouped line
+    is sent for each designator; a designator changed on its own leaves the group.
+  - The selected devices are looked up on Mouser by exact manufacturer part number (`SourcingService.exactPart`,
+    run by `StudioStagesService` around `planBom`). Results are kept on the node (`lookups`). Parts Mouser does not
+    list are retried on a plain rebuild. Without Mouser (not configured, rate limited) the lines stay unpriced.
+  - Prices: the break for the line quantity, not always the first. A minimum order above the quantity is bought
+    whole. 0-priced breaks are ignored. Currency comes from Mouser (the account's currency; GBP for this key), not
+    an assumed USD. The total only adds lines in that currency.
+  - Every unpriced line has a `note` saying why (not listed on Mouser, custom wound, heatsink to pick, no part yet).
+  - The co-packaged diode name `X - DIODE` from the device selection is ordered as `X`.
+  - The export takes the line's own price and currency, and leaves unpriced cells empty instead of `0.00`.
+- MTBF: the selected devices' RMS current and current rating feed the engine's current stress (it used a
+  placeholder 3 A / 4.5 A for every part). The engine reads the optional `rmsCurrent` / `ratedCurrent`; without
+  them it behaves as before.
+- Agent: the payload lists `refs`, the unit price and currency, and each line's note. Prompt item 8 and the BOM flow
+  line now say devices are priced automatically and the phases are real parts, not duplicates. The 16 parity
+  fixtures were updated by script.
+- Web:
+  - BOM: designators column, notes, "Mouser · matched" tag, quantity fixed for grouped lines, lines not on the BOM
+    folded at the end, prices in the line's currency, `normalizeBom` for BOMs saved before this change. Mock store
+    version 6, fixture migrated.
+  - MTBF: the table shows the current stress.
+- Dev setup: `MOUSER_API_KEY` added to the backend `.env` (the old frontend's `VITE_MOUSER_API_KEY`).
+- Tests: BOM 11 (phase grouping, lookups and retry, quantity breaks), MTBF 11 (three-phase stress, temperatures and
+  current). Full suite: 1629 pass, plus the known flaky schematic spec, which passes alone.
+- Not fixed here, because it lives upstream (reported to the user):
+  - Thermal sizes the heatsink for one leg.
+  - The device library's rating for CAB525F12XM3 (800 V / 1100 A) disagrees with Mouser (1200 V / 525 A
+    half-bridge module).
+  - The simulation measures about 1 V peak on SW4 and D_CLAMP_N.
+
 ### 2026-10-16: agent fallback after a failed stage
 
 In a chat, the agent called `run_mtbf` and `build_bom`, and both failed with `invalid input value for enum
