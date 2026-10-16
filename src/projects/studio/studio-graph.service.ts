@@ -57,6 +57,7 @@ const VIEW_OF: Record<StageKind, string> = {
   devices: 'simulation',
   magnetics: 'magnetics',
   thermal: 'thermal',
+  mtbf: 'mtbf',
 };
 
 export interface MutateOptions {

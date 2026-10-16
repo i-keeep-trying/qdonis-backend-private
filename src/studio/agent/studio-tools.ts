@@ -6,8 +6,9 @@ import type {
 /**
  * Studio agent tool registry: exact port of qdonis-core
  * `studio_agent.build_tools` (same names, descriptions, JSON schemas,
- * property order). Exactness is enforced by the parity fixtures under
- * test/parity/fixtures/studio-agent.
+ * property order), plus the MTBF stage (`run_mtbf`, and `mtbf` in the
+ * stage enums), which the core never had. Exactness is enforced by the
+ * parity fixtures under test/parity/fixtures/studio-agent.
  */
 
 /** Workspace stages, in display order (`STAGES` in the core). */
@@ -18,6 +19,7 @@ export const STUDIO_STAGES = [
   'simulation',
   'magnetics',
   'thermal',
+  'mtbf',
 ] as const;
 
 /** Tools whose result is the user's next message (the client stops the loop). */
@@ -568,6 +570,77 @@ export function buildStudioTools(
       },
     ),
     fn(
+      'run_mtbf',
+      'MTBF / RELIABILITY tool, usable on its own. Predicts the failure rate (FIT) and MTBF of the converter with MIL-HDBK-217F, Telcordia SR-332, IEC TR 62380 or FIDES 2022. Two input modes:\n- STANDALONE: pass `parts` (ref + type, optionally part number, temperature, voltage stress and rating). No design or simulation is needed.\n- CIRCUIT: omit them to evaluate every part of the branch circuit. Loads, source/line impedances and simulation helpers are left out by default (use `include` / `exclude`). Switch and diode part numbers and voltage stress come from the Simulation device selection, junction and hotspot temperatures from the Thermal stage (magnetics hotspots from the Magnetics stage), other parts run at the ambient. Run Thermal first for realistic temperatures.\nA re-run without inputs keeps the previously entered parts, the method, the environment and the include/exclude choices unless changed.',
+      {
+        prediction_method: {
+          type: 'string',
+          enum: [
+            'MIL-HDBK-217F',
+            'Telcordia SR-332',
+            'IEC TR 62380',
+            'FIDES 2022',
+          ],
+          description: 'Default MIL-HDBK-217F (or the previous run).',
+        },
+        environment: {
+          type: 'string',
+          description:
+            "Exact environment label of the method, e.g. 'GF - Ground, Fixed (πE=2.0)' (MIL-HDBK-217F), 'Partially Controlled (πE=2.0)' (Telcordia), 'Automotive (πE=30.0)' (IEC), 'Ground, Mobile (γE=3.0)' (FIDES). Default: the method's most benign environment. An unknown label returns the valid list.",
+        },
+        parts: {
+          type: 'array',
+          description: 'Standalone mode: the parts to evaluate.',
+          items: {
+            type: 'object',
+            properties: {
+              ref: { type: 'string' },
+              type: {
+                type: 'string',
+                enum: [
+                  'mosfet',
+                  'diode',
+                  'inductor',
+                  'transformer',
+                  'capacitor',
+                  'resistor',
+                  'ic',
+                ],
+                description: 'IGBTs and other switches count as mosfet.',
+              },
+              part_number: { type: 'string' },
+              temperature_c: {
+                type: 'number',
+                description:
+                  'Operating (junction / hotspot) temperature; default the Thermal result or the ambient.',
+              },
+              voltage_v: {
+                type: 'number',
+                description: 'Peak applied voltage.',
+              },
+              rated_voltage_v: { type: 'number' },
+            },
+            required: ['ref', 'type'],
+          },
+        },
+        include: {
+          type: 'array',
+          items: { type: 'string' },
+          description: 'Circuit parts to count that are left out by default.',
+        },
+        exclude: {
+          type: 'array',
+          items: { type: 'string' },
+          description: 'Circuit parts to leave out of the estimate.',
+        },
+        from_circuit: {
+          type: 'boolean',
+          description:
+            'Use the branch circuit instead of previously entered parts.',
+        },
+      },
+    ),
+    fn(
       'open_view',
       'Focus a stage view in the workspace without changing anything.',
       {
@@ -580,6 +653,7 @@ export function buildStudioTools(
             'simulation',
             'magnetics',
             'thermal',
+            'mtbf',
           ],
         },
       },
@@ -603,6 +677,7 @@ export function buildStudioTools(
             'simulation',
             'magnetics',
             'thermal',
+            'mtbf',
           ],
           description:
             "For 'create': the new branch keeps everything BEFORE this stage.",

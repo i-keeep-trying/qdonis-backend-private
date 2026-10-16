@@ -44,6 +44,7 @@ import type {
 import type {
   MagneticPartStageDto,
   RunMagneticsStageDto,
+  RunMtbfStageDto,
   RunThermalStageDto,
 } from './dto/stage-runs.dto';
 import {
@@ -52,6 +53,7 @@ import {
   planMagnetics,
   type StagePlan,
 } from './magnetics.stage';
+import { type MtbfOptions, planMtbf } from './mtbf.stage';
 import { planThermal } from './thermal.stage';
 
 type Actor = Pick<AuthenticatedUser, 'id' | 'role'>;
@@ -131,6 +133,24 @@ export class StudioStagesService {
       studio.activeBranchId,
       'thermal',
       await planThermal(studio, dto, this.circuit),
+    );
+  }
+
+  /** MTBF of the branch parts, or of entered parts (Studio agent). */
+  async runMtbf(
+    user: Actor,
+    projectId: string,
+    options: MtbfOptions,
+    branchId?: string,
+  ) {
+    await this.access.require(user, projectId, 'canEdit');
+    const studio = await this.projects.loadStudio(projectId, user.id, branchId);
+    return this.commit(
+      projectId,
+      user.id,
+      studio.activeBranchId,
+      'mtbf',
+      await planMtbf(studio, options, this.circuit),
     );
   }
 
@@ -263,12 +283,51 @@ export class StudioStagesService {
     return this.commitStageRun(user, projectId, branchId, 'thermal', plan);
   }
 
+  /** MTBF stage of a branch: its circuit's parts, or entered parts. */
+  async runMtbfStage(
+    user: Actor,
+    projectId: string,
+    branchId: string,
+    dto: RunMtbfStageDto,
+  ) {
+    await this.access.require(user, projectId, 'canEdit');
+    const parts = dto.origin === 'input' ? (dto.inputs ?? []) : [];
+    if (dto.origin === 'input' && parts.length === 0) {
+      throw AppError.badRequest(
+        ErrorCode.ValidationFailed,
+        'Add at least one part.',
+      );
+    }
+    const studio = await this.projects.loadStudio(projectId, user.id, branchId);
+    const s = dto.settings;
+    const previous = rec(
+      rec(stageNodeOnBranch(studio, 'mtbf', branchId)?.data).settings,
+    ).overrides;
+    // The form sends the full set: drop the overrides it no longer has.
+    const overrides: Record<string, boolean | null> = Object.fromEntries(
+      Object.keys(rec(previous)).map((ref) => [ref, null]),
+    );
+    Object.assign(overrides, s.overrides);
+    const plan = await planMtbf(
+      studio,
+      {
+        predictionMethod: s.predictionMethod,
+        environment: s.environment,
+        overrides,
+        parts: parts,
+        fromCircuit: dto.origin === 'circuit',
+      },
+      this.circuit,
+    );
+    return this.commitStageRun(user, projectId, branchId, 'mtbf', plan);
+  }
+
   /** Commits a stage plan on `branchId` and answers the Studio stage-action shape. */
   private async commitStageRun(
     user: Actor,
     projectId: string,
     branchId: string,
-    stage: 'magnetics' | 'thermal',
+    stage: 'magnetics' | 'thermal' | 'mtbf',
     plan: StagePlan,
   ) {
     if (!plan.ok) {

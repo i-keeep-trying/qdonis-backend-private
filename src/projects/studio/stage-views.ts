@@ -15,6 +15,7 @@ import type {
   ThermalResult,
 } from '../../engines/thermal/thermal-engine';
 import type { MagneticPartInput } from '../../studio-stages/magnetics.stage';
+import { environmentsOf, MTBF_METHODS } from '../../studio-stages/mtbf.stage';
 import type { ThermalInputs } from '../../studio-stages/thermal.stage';
 import type { JsonObject, StageKind } from './studio-graph';
 
@@ -22,12 +23,14 @@ import type { JsonObject, StageKind } from './studio-graph';
  * Stage data as the Studio client reads it. Specs, magnetics and thermal
  * are stored in the shapes the Studio agent and the stage planners use
  * (`studio-specs.logic`, `magnetics.stage`, `thermal.stage`); this maps
- * them to the qdonis-web contract. Other stages are stored in that shape.
+ * them to the qdonis-web contract. Other stages are stored in that shape
+ * (MTBF gets the methods and environments it can be re-run with).
  */
 export function stageDataView(stage: StageKind, data: JsonObject): JsonObject {
   if (stage === 'specs') return specsView(data);
   if (stage === 'magnetics') return magneticsView(data);
   if (stage === 'thermal') return thermalView(data);
+  if (stage === 'mtbf') return { ...data, catalog: MTBF_CATALOG };
   return data;
 }
 
@@ -47,6 +50,11 @@ const num = (v: unknown): number | null =>
   typeof v === 'number' && Number.isFinite(v) ? v : null;
 const strings = (v: unknown): string[] =>
   list(v).filter((x): x is string => typeof x === 'string');
+
+const MTBF_CATALOG = MTBF_METHODS.map((method) => ({
+  method,
+  environments: environmentsOf(method),
+}));
 
 // --- specs -----------------------------------------------------------------------
 

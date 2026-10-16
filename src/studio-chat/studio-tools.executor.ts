@@ -30,6 +30,13 @@ import {
 } from '../simulation/simulation.types';
 import { SpecsService } from '../specs/specs.service';
 import type { MagneticPartInput } from '../studio-stages/magnetics.stage';
+import {
+  MTBF_METHODS,
+  MTBF_PART_TYPES,
+  type MtbfMethod,
+  type MtbfPartInput,
+  type MtbfPartType,
+} from '../studio-stages/mtbf.stage';
 import { StudioStagesService } from '../studio-stages/studio-stages.service';
 import type { ThermalInputs } from '../studio-stages/thermal.stage';
 import { TopologiesService } from '../topologies/topologies.service';
@@ -91,6 +98,7 @@ export const TOOL_INFO: Record<
   select_devices: { label: 'Selecting devices', stage: 'simulation' },
   design_magnetics: { label: 'Designing magnetics', stage: 'magnetics' },
   run_thermal: { label: 'Solving the thermal network', stage: 'thermal' },
+  run_mtbf: { label: 'Predicting the MTBF', stage: 'mtbf' },
   open_view: { label: 'Switching view', stage: null },
   manage_branch: { label: 'Updating branches', stage: null },
 };
@@ -247,6 +255,8 @@ export class StudioToolsExecutor {
         return this.designMagnetics(ctx, input);
       case 'run_thermal':
         return this.runThermal(ctx, input);
+      case 'run_mtbf':
+        return this.runMtbf(ctx, input);
       case 'open_view':
         return Promise.resolve(this.openView(ctx, input));
       case 'manage_branch':
@@ -961,6 +971,46 @@ export class StudioToolsExecutor {
     return this.plannedOutcome(ctx, result, 'thermal');
   }
 
+  private async runMtbf(ctx: ToolContext, input: JsonObject) {
+    const parts: MtbfPartInput[] = records(input.parts)
+      .filter(
+        (p) =>
+          str(p.ref) !== undefined &&
+          (MTBF_PART_TYPES as readonly string[]).includes(String(p.type)),
+      )
+      .map((p) => ({
+        ref: str(p.ref)!,
+        type: p.type as MtbfPartType,
+        partNumber: str(p.part_number) ?? null,
+        temperatureC: num(p.temperature_c) ?? null,
+        voltageV: num(p.voltage_v) ?? null,
+        ratedVoltageV: num(p.rated_voltage_v) ?? null,
+      }));
+    const refs = (v: unknown) =>
+      list(v).filter((r): r is string => typeof r === 'string' && r !== '');
+    const method = (MTBF_METHODS as readonly string[]).includes(
+      String(input.prediction_method),
+    )
+      ? (input.prediction_method as MtbfMethod)
+      : undefined;
+    const result = await this.stages.runMtbf(
+      ctx.user,
+      ctx.projectId,
+      {
+        predictionMethod: method,
+        environment: str(input.environment),
+        overrides: {
+          ...Object.fromEntries(refs(input.include).map((r) => [r, true])),
+          ...Object.fromEntries(refs(input.exclude).map((r) => [r, false])),
+        },
+        parts,
+        fromCircuit: input.from_circuit === true,
+      },
+      ctx.branchId,
+    );
+    return this.plannedOutcome(ctx, result, 'mtbf');
+  }
+
   private async plannedOutcome(
     ctx: ToolContext,
     result: {
@@ -970,7 +1020,7 @@ export class StudioToolsExecutor {
       branchId: string;
       forked: boolean;
     },
-    stage: 'magnetics' | 'thermal',
+    stage: 'magnetics' | 'thermal' | 'mtbf',
   ) {
     const outcome: StageResult = {
       ok: result.ok,

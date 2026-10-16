@@ -7,7 +7,13 @@ import type { StageKind } from '../projects/studio/studio-graph';
  */
 
 export type StudioView =
-  'specs' | 'circuit' | 'design' | 'simulation' | 'magnetics' | 'thermal';
+  | 'specs'
+  | 'circuit'
+  | 'design'
+  | 'simulation'
+  | 'magnetics'
+  | 'thermal'
+  | 'mtbf';
 
 export const VIEW_OF_STAGE: Record<StageKind, StudioView> = {
   specs: 'specs',
@@ -18,6 +24,7 @@ export const VIEW_OF_STAGE: Record<StageKind, StudioView> = {
   devices: 'simulation',
   magnetics: 'magnetics',
   thermal: 'thermal',
+  mtbf: 'mtbf',
 };
 
 export type AttachmentKind = 'netlist' | 'document';

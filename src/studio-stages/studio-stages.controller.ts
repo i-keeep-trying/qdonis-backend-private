@@ -23,7 +23,11 @@ import { BomService } from './bom.service';
 import type { AuthenticatedUser } from '../auth/auth.types';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { ParseGraphIdPipe } from '../projects/dto/studio-graph.dto';
-import { RunMagneticsStageDto, RunThermalStageDto } from './dto/stage-runs.dto';
+import {
+  RunMagneticsStageDto,
+  RunMtbfStageDto,
+  RunThermalStageDto,
+} from './dto/stage-runs.dto';
 import {
   BomExportDto,
   BomQuantityDto,
@@ -119,6 +123,25 @@ export class StudioStageRunsController {
     @Body() dto: RunThermalStageDto,
   ) {
     return this.stages.runThermalStage(user, projectId, branchId, dto);
+  }
+
+  @Post('mtbf/run')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary:
+      'MTBF of the branch (circuit parts with their simulated stresses and temperatures, or entered parts)',
+    description: STAGE_RESULT,
+  })
+  @ApiForbiddenResponse({ description: 'View-only project' })
+  @ApiNotFoundResponse({ description: 'PROJECT_NOT_FOUND, BRANCH_NOT_FOUND' })
+  @ApiConflictResponse({ description: 'STAGE_INPUT_MISSING' })
+  mtbf(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('projectId', ParseUUIDPipe) projectId: string,
+    @Param('branchId', ParseGraphIdPipe) branchId: string,
+    @Body() dto: RunMtbfStageDto,
+  ) {
+    return this.stages.runMtbfStage(user, projectId, branchId, dto);
   }
 }
 

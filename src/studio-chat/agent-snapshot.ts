@@ -39,6 +39,7 @@ export function buildAgentSnapshot(
   const sim = stageNodeOnBranch(project, 'simulation');
   const magnetics = stageNodeOnBranch(project, 'magnetics');
   const thermal = stageNodeOnBranch(project, 'thermal');
+  const mtbf = stageNodeOnBranch(project, 'mtbf');
 
   const inventory = rec(vis?.data.inventory);
   const thermalResult = rec(thermal?.data.result);
@@ -142,6 +143,25 @@ export function buildAgentSnapshot(
           ),
           totals: thermalResult.totals,
           warnings: thermalResult.warnings,
+        }
+      : null,
+    mtbf: mtbf
+      ? {
+          origin:
+            mtbf.data.origin === 'input'
+              ? 'entered parts (standalone)'
+              : 'circuit on this branch',
+          ...rec(mtbf.data.settings),
+          mtbf_hours: rec(mtbf.data.result).mtbfHours,
+          failure_rate_fit: rec(mtbf.data.result).failureRateFit,
+          top_contributors: [...records(rec(mtbf.data.result).components)]
+            .sort((a, b) => Number(b.contribution) - Number(a.contribution))
+            .slice(0, 5)
+            .map(
+              (c) =>
+                `${String(c.designator)}: ${fixed(c.lambda, 1)} FIT (${fixed(c.contribution, 1)} %)`,
+            ),
+          issues: rec(mtbf.data.result).issues,
         }
       : null,
     other_branches: project.branchOrder

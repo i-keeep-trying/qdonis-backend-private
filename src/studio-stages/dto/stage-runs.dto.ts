@@ -19,9 +19,17 @@ import {
   ValidateNested,
 } from 'class-validator';
 
+import {
+  MTBF_METHODS,
+  MTBF_PART_TYPES,
+  type MtbfMethod,
+  type MtbfPartType,
+} from '../mtbf.stage';
+
 /**
- * Bodies of the branch stage runs of magnetics and thermal, in the
- * qdonis-web contract (`RunMagneticsInput`, `RunThermalInput`).
+ * Bodies of the branch stage runs of magnetics, thermal and MTBF, in the
+ * qdonis-web contract (`RunMagneticsInput`, `RunThermalInput`,
+ * `RunMtbfInput`).
  */
 
 const Num = (min: number, max: number) =>
@@ -262,4 +270,79 @@ export class RunThermalStageDto {
   @ValidateNested()
   @Type(() => ThermalSettingsDto)
   settings!: ThermalSettingsDto;
+}
+
+// --- MTBF ------------------------------------------------------------------------
+
+/** `{ref: include}` for at most 200 parts. */
+function IsIncludeMap(): PropertyDecorator {
+  return ValidateBy({
+    name: 'isIncludeMap',
+    validator: {
+      validate: (value: unknown) =>
+        typeof value === 'object' &&
+        value !== null &&
+        !Array.isArray(value) &&
+        Object.keys(value).length <= 200 &&
+        Object.entries(value).every(
+          ([ref, include]) =>
+            /^[A-Za-z]\w{0,39}$/.test(ref) && typeof include === 'boolean',
+        ),
+      defaultMessage: () => 'overrides must map part refs to true / false',
+    },
+  });
+}
+
+export class MtbfSettingsDto {
+  @ApiProperty({ enum: MTBF_METHODS })
+  @IsIn(MTBF_METHODS)
+  predictionMethod!: MtbfMethod;
+
+  @ApiProperty({ description: "One of the method's environments" })
+  @IsString()
+  @MaxLength(120)
+  environment!: string;
+
+  @ApiProperty({
+    description: 'Parts included (true) or left out (false) by the user',
+    example: { R_LOAD: false },
+  })
+  @IsIncludeMap()
+  overrides!: Record<string, boolean>;
+}
+
+export class MtbfPartStageDto {
+  @Ref() ref!: string;
+  @ApiProperty({ enum: MTBF_PART_TYPES })
+  @IsIn(MTBF_PART_TYPES)
+  type!: MtbfPartType;
+  @ApiProperty({ nullable: true, maxLength: 60 })
+  @ValidateIf((_, v) => v !== null)
+  @IsString()
+  @MaxLength(60)
+  partNumber!: string | null;
+  @NullableNum(-55, 250) temperatureC!: number | null;
+  @NullableNum(0, 100_000) voltageV!: number | null;
+  @NullableNum(0.1, 100_000) ratedVoltageV!: number | null;
+}
+
+/** Body of `POST /projects/:projectId/branches/:branchId/stages/mtbf/run`. */
+export class RunMtbfStageDto {
+  @ApiProperty({ enum: ['circuit', 'input'] })
+  @IsIn(['circuit', 'input'])
+  origin!: 'circuit' | 'input';
+
+  @ApiPropertyOptional({ type: [MtbfPartStageDto] })
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(64)
+  @ValidateNested({ each: true })
+  @Type(() => MtbfPartStageDto)
+  inputs?: MtbfPartStageDto[];
+
+  @ApiProperty({ type: MtbfSettingsDto })
+  @IsObject()
+  @ValidateNested()
+  @Type(() => MtbfSettingsDto)
+  settings!: MtbfSettingsDto;
 }
