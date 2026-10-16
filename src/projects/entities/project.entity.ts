@@ -8,7 +8,12 @@ import type {
   ProjectPermissions,
 } from '../project-permissions';
 import type { ProjectListRow, ProjectMeta } from '../projects.repository';
-import type { StudioProject } from '../studio/studio-graph';
+import {
+  STAGE_ORDER,
+  type StageKind,
+  type StudioProject,
+} from '../studio/studio-graph';
+import { entryStepOf, scopeOf } from '../studio/studio-scope';
 
 /** The name call is aborted after 120 s; a little slack on top. */
 const NAMING_TIMEOUT_MS = 150_000;
@@ -62,6 +67,13 @@ export class ProjectSummaryEntity {
   role: EffectiveRole;
   @ApiProperty() completedSteps: number;
   @ApiProperty() totalSteps: number;
+  @ApiPropertyOptional({
+    enum: STAGE_ORDER,
+    nullable: true,
+    description:
+      'Step the project starts at (`specs` = full design flow); null while not chosen yet',
+  })
+  entryStep: StageKind | null = 'specs';
   @ApiProperty() revision: number;
   @ApiProperty() lastAccessedAt: Date;
   @ApiProperty() createdAt: Date;
@@ -113,6 +125,7 @@ export class ProjectDetailEntity extends ProjectSummaryEntity {
     this.access = new ProjectAccessEntity(access);
     this.data = data;
     this.studio = studio;
+    this.entryStep = entryStepOf(scopeOf(studio));
   }
 }
 

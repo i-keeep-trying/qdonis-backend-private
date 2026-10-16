@@ -25,7 +25,17 @@ import { ProjectChatRepository } from '../project-chat/project-chat.repository';
 import { ProjectAccessService } from '../projects/project-access.service';
 import type { ProjectAccess } from '../projects/project-permissions';
 import { ProjectsService } from '../projects/projects.service';
+import { STAGE_LABEL } from '../projects/studio/studio-graph';
+import { StudioGraphService } from '../projects/studio/studio-graph.service';
+import {
+  allowedStages,
+  FULL_SCOPE,
+  nextSteps,
+  readyOn,
+  scopeOf,
+} from '../projects/studio/studio-scope';
 import { STUDIO_AGENT_STEP } from '../studio/studio.types';
+import { namedSteps } from '../studio/agent/stage-contracts';
 import { buildStudioRequest } from '../studio/agent/studio-request.builder';
 import { isNetlistFile } from '../storage/document-text';
 import { StoredFilesService } from '../storage/stored-files.service';
@@ -44,6 +54,7 @@ import {
   type ChatWidget,
   type LlmTurn,
   type StudioChatMeta,
+  VIEW_OF_STAGE,
   type WidgetAnswer,
 } from './studio-chat.types';
 import {
@@ -182,6 +193,7 @@ export class StudioChatService implements OnApplicationBootstrap {
     private readonly tools: StudioToolsExecutor,
     private readonly topologies: TopologiesService,
     private readonly files: StoredFilesService,
+    private readonly graph: StudioGraphService,
   ) {}
 
   // --- entry points (all checks happen before the stream opens) ------------------
@@ -208,11 +220,20 @@ export class StudioChatService implements OnApplicationBootstrap {
     await this.projects.loadStudio(projectId, user.id, dto.branchId);
     const attachments = await this.attachmentsFor(projectId, dto.attachmentIds);
     const step = await this.runner.prepareStream({ actorId: user.id, access });
+    // A step picked in the tool selector sets the entry step itself: the
+    // model is told, it does not have to read it from the text.
+    const requested = dto.requestedStep;
+    if (requested) {
+      await this.graph.chooseEntryStep(projectId, user.id, requested);
+    }
     const run = this.claim(projectId, user.id);
 
     return async (emit) => {
       try {
-        const llmText = [text, ...attachments.map(describeAttachment)]
+        const picked = requested
+          ? `[Tool selector] The user picked ${requested === 'specs' ? 'Start from scratch (full design)' : `the ${STAGE_LABEL[requested]} step`}; the entry step is set to \`${requested}\`.`
+          : '';
+        const llmText = [text, ...attachments.map(describeAttachment), picked]
           .filter(Boolean)
           .join('\n\n');
         const meta: StudioChatMeta = {
@@ -238,6 +259,16 @@ export class StudioChatService implements OnApplicationBootstrap {
           runId: run.runId,
           userMessage: messageView(row),
         });
+        if (requested) {
+          emit({
+            type: 'workspace.updated',
+            branchId: dto.branchId,
+            stages: [],
+            focus: VIEW_OF_STAGE[requested],
+            forked: null,
+            scopeChanged: true,
+          });
+        }
         await this.turn(
           {
             user,
@@ -289,11 +320,25 @@ export class StudioChatService implements OnApplicationBootstrap {
         ? meta.branchId
         : studio.activeBranchId;
     const step = await this.runner.prepareStream({ actorId: user.id, access });
+    // The choice of where to start is applied by the server, not the model.
+    if (answer.step) {
+      await this.graph.chooseEntryStep(projectId, user.id, answer.step);
+    }
     const run = this.claim(projectId, user.id);
 
     return async (emit) => {
       try {
         emit({ type: 'run.accepted', runId: run.runId, userMessage: null });
+        if (answer.step) {
+          emit({
+            type: 'workspace.updated',
+            branchId,
+            stages: [],
+            focus: VIEW_OF_STAGE[answer.step],
+            forked: null,
+            scopeChanged: true,
+          });
+        }
         if (block.widget.kind === 'spec_approval' && answer.approve) {
           await this.projects.mutateStudio(
             projectId,
@@ -441,6 +486,13 @@ export class StudioChatService implements OnApplicationBootstrap {
       attachments,
       signal,
       newId: (prefix) => `${prefix}_${randomUUID().slice(0, 12)}`,
+      // Read from the graph at the start of every model step.
+      scope: FULL_SCOPE,
+      named: namedSteps(
+        history.findLast((row) => row.sender === ChatSender.USER)?.content ??
+          '',
+      ),
+      checked: new Set(),
     };
 
     const llm: LlmTurn[] = preface ? [preface] : [];
@@ -493,12 +545,21 @@ export class StudioChatService implements OnApplicationBootstrap {
           user.id,
           ctx.branchId,
         );
+        // The entry step decides the prompt section and which tools exist.
+        ctx.scope = scopeOf(studio);
+        const ready = readyOn(studio);
         const request = buildStudioRequest({
           modelId: step.modelId,
           messages: [...this.transcript(history), ...llm],
           projectState: buildAgentSnapshot(studio, attachments),
           topologyIds: this.topologies.ids(),
           signal,
+          scope: {
+            scope: ctx.scope,
+            ready: allowedStages(ctx.scope).filter(ready),
+            next: nextSteps(ctx.scope, ready),
+            named: ctx.named,
+          },
         });
 
         // 1. Stream the model's step.
@@ -607,13 +668,19 @@ export class StudioChatService implements OnApplicationBootstrap {
             summary: chip.summary,
             stage: info.stage,
           });
-          if (outcome.stages.length || outcome.focus || outcome.forked) {
+          if (
+            outcome.stages.length ||
+            outcome.focus ||
+            outcome.forked ||
+            outcome.scopeChanged
+          ) {
             emit({
               type: 'workspace.updated',
               branchId: outcome.branchId,
               stages: outcome.stages,
               focus: outcome.focus,
               forked: outcome.forked,
+              ...(outcome.scopeChanged ? { scopeChanged: true } : {}),
             });
           }
           if (outcome.widget) {
@@ -747,19 +814,43 @@ export class StudioChatService implements OnApplicationBootstrap {
         unit: f.unit ?? '',
       }));
       const filled = rows.filter((r) => r.value);
+      const assume = widget.allowAssume === true && answer.assumeRest === true;
       const table = [
         '| Parameter | Value | Unit |',
         '|---|---|---|',
         ...rows.map(
-          (r) => `| ${r.name} | ${r.value || '(not specified)'} | ${r.unit} |`,
+          (r) =>
+            `| ${r.name} | ${r.value || (assume ? '(Q assumes)' : '(not specified)')} | ${r.unit} |`,
         ),
       ].join('\n');
+      const instruction = !widget.step
+        ? ''
+        : assume
+          ? `\n\nThat is everything I have: assume the values left blank yourself (typical for this application), run the ${STAGE_LABEL[widget.step]} step with them listed in \`assumed\`, then show your assumptions.`
+          : `\n\nThese are the ${STAGE_LABEL[widget.step]} inputs. Check them with check_step_inputs, then run the step.`;
       return {
         resolution:
-          filled.map((r) => `${r.name}: ${r.value}`).join(' · ') ||
-          'No values given',
-        llmText: `Filled in ${filled.length} of ${rows.length} values.\n\nValues from the table:\n${table}`,
+          [
+            filled.map((r) => `${r.name}: ${r.value}`).join(' · '),
+            assume ? 'Q fills the rest' : '',
+          ]
+            .filter(Boolean)
+            .join(' · ') || 'No values given',
+        llmText: `Filled in ${filled.length} of ${rows.length} values.\n\nValues from the table:\n${table}${instruction}`,
         approve: undefined,
+      };
+    }
+    if (widget.kind === 'entry_step' && answer.kind === 'entry_step') {
+      const option = widget.options.find((o) => o.step === answer.step);
+      if (!option) throw mismatch();
+      return {
+        resolution: option.title,
+        llmText:
+          option.step === 'specs'
+            ? 'Start from scratch: I want the full design.\n\n(Entry step set to `specs`.)'
+            : `Let's do the ${STAGE_LABEL[option.step]} step only.\n\n(Entry step set to \`${option.step}\`. Check its inputs with check_step_inputs.)`,
+        approve: undefined,
+        step: option.step,
       };
     }
     if (widget.kind === 'topologies' && answer.kind === 'topologies') {

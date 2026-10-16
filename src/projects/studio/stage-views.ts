@@ -24,10 +24,19 @@ import type { JsonObject, StageKind } from './studio-graph';
  * them to the qdonis-web contract. Other stages are stored in that shape.
  */
 export function stageDataView(stage: StageKind, data: JsonObject): JsonObject {
-  if (stage === 'specs') return specsView(data);
-  if (stage === 'magnetics') return magneticsView(data);
-  if (stage === 'thermal') return thermalView(data);
-  return data;
+  const view =
+    stage === 'specs'
+      ? specsView(data)
+      : stage === 'magnetics'
+        ? magneticsView(data)
+        : stage === 'thermal'
+          ? thermalView(data)
+          : data;
+  // Inputs Q assumed (single-step projects) stay visible on every stage.
+  const assumed = strings(data.assumedInputs);
+  return assumed.length && view !== data
+    ? { ...view, assumedInputs: assumed }
+    : view;
 }
 
 const rec = (v: unknown): JsonObject =>

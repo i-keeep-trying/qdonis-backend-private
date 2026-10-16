@@ -15,8 +15,23 @@ export const STAGE_ORDER = [
   'devices',
   'magnetics',
   'thermal',
+  'emc',
+  'components',
+  'bom',
+  'mtbf',
 ] as const;
 export type StageKind = (typeof STAGE_ORDER)[number];
+
+/** The stages of the original full-design flow (always shown for full projects). */
+export const CORE_STAGES = [
+  'specs',
+  'visualization',
+  'design',
+  'simulation',
+  'devices',
+  'magnetics',
+  'thermal',
+] as const satisfies readonly StageKind[];
 
 export const STAGE_LABEL: Record<StageKind, string> = {
   specs: 'Specs',
@@ -26,6 +41,10 @@ export const STAGE_LABEL: Record<StageKind, string> = {
   devices: 'Devices',
   magnetics: 'Magnetics',
   thermal: 'Thermal',
+  emc: 'EMC',
+  components: 'Components',
+  bom: 'BOM',
+  mtbf: 'MTBF',
 };
 
 export type NodeStatus = 'running' | 'ready' | 'error';
@@ -65,8 +84,20 @@ export interface StudioProject {
   focus: StageKind | null;
   messages: JsonObject[];
   initialPrompt?: string;
+  /** Entry step of the project; absent on projects made before it existed (= full). */
+  scope?: StudioScope;
   createdAt: string;
 }
+
+/**
+ * Which part of the flow a project covers. `undecided`: a new project whose
+ * first step is not chosen yet. `entry`: the project starts at `entry` and
+ * may only continue downstream of it; `entry: 'specs'` is the full flow.
+ * `locked` turns true when the entry step first runs: until then the user
+ * may still pick another entry step.
+ */
+export type StudioScope =
+  { mode: 'undecided' } | { mode: 'entry'; entry: StageKind; locked: boolean };
 
 export const newId = (prefix = ''): string =>
   prefix ? `${prefix}_${randomUUID()}` : randomUUID();
@@ -80,7 +111,10 @@ export function isStageKind(value: unknown): value is StageKind {
   );
 }
 
-export function createEmptyProject(initialPrompt?: string): StudioProject {
+export function createEmptyProject(
+  initialPrompt?: string,
+  scope?: StudioScope,
+): StudioProject {
   const main: Branch = {
     id: newId('br'),
     name: 'main',
@@ -97,6 +131,7 @@ export function createEmptyProject(initialPrompt?: string): StudioProject {
     focus: null,
     messages: [],
     ...(initialPrompt ? { initialPrompt } : {}),
+    ...(scope ? { scope } : {}),
     createdAt: now(),
   };
 }

@@ -51,8 +51,23 @@ import {
   type StagePlan,
 } from './magnetics.stage';
 import { planThermal } from './thermal.stage';
+import {
+  branchParts,
+  type ComponentPart,
+  type EmcInput,
+  type MtbfMethod,
+  partsOfStage,
+  planBom,
+  planComponents,
+  planEmc,
+  planMtbf,
+} from './extra-stages';
+import { SourcingService } from '../sourcing/sourcing.service';
 
 type Actor = Pick<AuthenticatedUser, 'id' | 'role'>;
+
+/** Supplier lookups per component-selection run (each is a paced API call). */
+const SOURCED_PARTS = 15;
 
 const rec = (v: unknown): Record<string, unknown> =>
   typeof v === 'object' && v !== null && !Array.isArray(v)
@@ -75,6 +90,7 @@ export class StudioStagesService {
     private readonly circuit: CircuitDataProvider,
     private readonly artifacts: SimulationArtifactsService,
     private readonly graph: StudioGraphService,
+    private readonly sourcing: SourcingService,
   ) {}
 
   /** `branchId` defaults to the caller's branch (the Studio chat passes its own). */
@@ -336,6 +352,150 @@ export class StudioStagesService {
       branchId,
     );
     return { ...result, revision: meta.revision, branchId: landed, forked };
+  }
+
+  // --- EMC / components / BOM / MTBF as branch stages (Studio agent) --------------
+
+  async runEmc(
+    user: Actor,
+    projectId: string,
+    input: EmcInput,
+    branchId?: string,
+    assumed?: string[],
+  ) {
+    await this.access.require(user, projectId, 'canEdit');
+    const studio = await this.projects.loadStudio(projectId, user.id, branchId);
+    return this.commit(
+      projectId,
+      user.id,
+      studio.activeBranchId,
+      'emc',
+      planEmc(input, assumed),
+    );
+  }
+
+  /** Parts list of the branch (or entered), with supplier parts when asked and configured. */
+  async runComponents(
+    user: Actor,
+    projectId: string,
+    options: { parts?: ComponentPart[]; searchSupplier?: boolean },
+    branchId?: string,
+    assumed?: string[],
+  ) {
+    await this.access.require(user, projectId, 'canEdit');
+    const studio = await this.projects.loadStudio(projectId, user.id, branchId);
+    const entered = options.parts?.length ? options.parts : null;
+    const parts = entered ?? branchParts(studio);
+    const notes: string[] = [];
+    if (options.searchSupplier && parts.length) {
+      notes.push(...(await this.sourceParts(user.id, projectId, parts)));
+    }
+    return this.commit(
+      projectId,
+      user.id,
+      studio.activeBranchId,
+      'components',
+      planComponents(parts, entered ? 'input' : 'branch', notes, assumed),
+    );
+  }
+
+  async runBom(
+    user: Actor,
+    projectId: string,
+    options: { parts?: ComponentPart[]; buildQuantity?: number },
+    branchId?: string,
+    assumed?: string[],
+  ) {
+    await this.access.require(user, projectId, 'canEdit');
+    const studio = await this.projects.loadStudio(projectId, user.id, branchId);
+    const parts = options.parts?.length ? options.parts : partsOfStage(studio);
+    return this.commit(
+      projectId,
+      user.id,
+      studio.activeBranchId,
+      'bom',
+      planBom(parts, options.buildQuantity ?? 1, assumed),
+    );
+  }
+
+  async runMtbfStage(
+    user: Actor,
+    projectId: string,
+    options: {
+      method: MtbfMethod;
+      environment: string;
+      parts?: ComponentPart[];
+      temperatureC?: number;
+    },
+    branchId?: string,
+    assumed?: string[],
+  ) {
+    await this.access.require(user, projectId, 'canEdit');
+    const studio = await this.projects.loadStudio(projectId, user.id, branchId);
+    const parts = options.parts?.length ? options.parts : partsOfStage(studio);
+    return this.commit(
+      projectId,
+      user.id,
+      studio.activeBranchId,
+      'mtbf',
+      planMtbf(studio, { ...options, parts }, assumed),
+    );
+  }
+
+  /**
+   * Fills supplier parts for the parts without a part number (at most
+   * {@link SOURCED_PARTS}, paced by the sourcing service). Failures become
+   * notes: the stage still lists the parts.
+   */
+  private async sourceParts(
+    userId: string,
+    projectId: string,
+    parts: ComponentPart[],
+  ): Promise<string[]> {
+    try {
+      this.sourcing.assertConfigured();
+    } catch {
+      return [
+        'Supplier search is not configured on this server; part numbers were not looked up.',
+      ];
+    }
+    const notes: string[] = [];
+    const open = parts.filter((p) => !p.partNumber).slice(0, SOURCED_PARTS);
+    for (const part of open) {
+      const keyword = [part.value, part.type, part.rating]
+        .filter(Boolean)
+        .join(' ');
+      if (!keyword.trim()) continue;
+      try {
+        const [hit] = await this.sourcing.keywordSearch(
+          { userId, projectId },
+          { keyword, records: 1, startingRecord: 0 },
+        );
+        if (!hit) {
+          notes.push(`${part.ref}: no supplier match for "${keyword}".`);
+          continue;
+        }
+        part.manufacturer = hit.manufacturer;
+        part.partNumber = hit.partNumber;
+        part.mouserPartNumber = hit.mouserPartNumber;
+        part.description = hit.description || part.description;
+        part.unitPrice = hit.pricingTiers[0]?.price;
+        part.availability = hit.availability;
+        part.datasheetUrl = hit.datasheetLink;
+        part.source = 'supplier';
+      } catch (error) {
+        notes.push(
+          `${part.ref}: supplier search failed (${error instanceof Error ? error.message : String(error)}).`,
+        );
+        break;
+      }
+    }
+    if (parts.filter((p) => !p.partNumber).length > open.length) {
+      notes.push(
+        `Only the first ${SOURCED_PARTS} parts without a part number were looked up.`,
+      );
+    }
+    return notes;
   }
 
   // --- MTBF ----------------------------------------------------------------------

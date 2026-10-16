@@ -78,6 +78,15 @@ export class SetActiveBranchDto {
   branchId!: string;
 }
 
+export class SetEntryStepDto {
+  @ApiProperty({
+    enum: STAGE_ORDER,
+    description: '`specs` = start from scratch (full design)',
+  })
+  @IsIn(STAGE_ORDER)
+  step!: StageKind;
+}
+
 export class CreateBranchDto {
   @ApiPropertyOptional({
     maxLength: BRANCH_NAME_MAX,

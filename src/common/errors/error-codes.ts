@@ -115,6 +115,10 @@ export const ErrorCode = {
   // design steps
   AiResponseInvalid: 'AI_RESPONSE_INVALID',
   StageInputMissing: 'STAGE_INPUT_MISSING',
+  /** The entry step already ran; only later steps may follow. */
+  EntryStepLocked: 'ENTRY_STEP_LOCKED',
+  /** The step is upstream of (or unrelated to) the project's entry step. */
+  StageOutOfScope: 'STAGE_OUT_OF_SCOPE',
   SupplierNotConfigured: 'SUPPLIER_NOT_CONFIGURED',
   SupplierError: 'SUPPLIER_ERROR',
   StageNotAvailable: 'STAGE_NOT_AVAILABLE',

@@ -13,7 +13,11 @@ export type StudioView =
   | 'simulation'
   | 'devices'
   | 'magnetics'
-  | 'thermal';
+  | 'thermal'
+  | 'emc'
+  | 'components'
+  | 'bom'
+  | 'mtbf';
 
 export const VIEW_OF_STAGE: Record<StageKind, StudioView> = {
   specs: 'specs',
@@ -23,7 +27,19 @@ export const VIEW_OF_STAGE: Record<StageKind, StudioView> = {
   devices: 'devices',
   magnetics: 'magnetics',
   thermal: 'thermal',
+  emc: 'emc',
+  components: 'components',
+  bom: 'bom',
+  mtbf: 'mtbf',
 };
+
+/** One choice of the entry-step widget (`specs` = start from scratch). */
+export interface EntryStepOption {
+  step: StageKind;
+  title: string;
+  summary: string;
+  recommended: boolean;
+}
 
 export type AttachmentKind = 'netlist' | 'document';
 
@@ -64,16 +80,28 @@ export type ChatWidget =
         unit: string | null;
         suggestion: string | null;
         required: boolean;
+        /** Pre-filled from what the user already said (step inputs). */
+        value?: string | null;
       }>;
+      /** The step these are inputs of (absent: the first requirements table). */
+      step?: StageKind | null;
+      /** Shows "Q fills the rest": blank values are assumed by Q. */
+      allowAssume?: boolean;
     })
   | (WidgetBase & { kind: 'topologies'; options: TopologyOptionView[] })
-  | (WidgetBase & { kind: 'spec_approval'; approved: boolean });
+  | (WidgetBase & { kind: 'spec_approval'; approved: boolean })
+  | (WidgetBase & {
+      kind: 'entry_step';
+      prompt: string;
+      options: EntryStepOption[];
+    });
 
 export type WidgetAnswer =
   | { kind: 'question'; optionIds: string[] }
-  | { kind: 'fields'; values: Record<string, string> }
+  | { kind: 'fields'; values: Record<string, string>; assumeRest?: boolean }
   | { kind: 'topologies'; topologyId: string }
-  | { kind: 'spec_approval'; approve: boolean };
+  | { kind: 'spec_approval'; approve: boolean }
+  | { kind: 'entry_step'; step: StageKind };
 
 export type ToolStatus = 'running' | 'done' | 'error';
 
@@ -171,6 +199,8 @@ export type ChatStreamEvent =
       stages: StageKind[];
       focus: StudioView | null;
       forked: { branchId: string; branchName: string } | null;
+      /** The entry step changed (the workspace tabs follow it). */
+      scopeChanged?: boolean;
     }
   | { type: 'usage'; tokensUsed: number; tokensRemaining: number }
   | { type: 'run.completed'; messageId: string }
@@ -197,4 +227,6 @@ export interface ToolOutcome {
   forked: { branchId: string; branchName: string } | null;
   /** Shown in the chat; ends the turn until the user answers. */
   widget?: ChatWidget;
+  /** The tool changed the project's entry step. */
+  scopeChanged?: boolean;
 }

@@ -39,6 +39,7 @@ import {
   type JsonObject,
   type StudioProject,
 } from './studio/studio-graph';
+import { entryStepOf, FULL_SCOPE, parseScope } from './studio/studio-scope';
 import {
   revisionConflict,
   StudioGraphService,
@@ -114,7 +115,17 @@ export class ProjectsService {
     ) {
       throw AppError.notFound(ErrorCode.TeamNotFound, 'Team not found');
     }
-    const studio = createEmptyProject(dto.prompt);
+    // A new project starts undecided unless the person picked a step up front.
+    const studio = createEmptyProject(
+      dto.prompt,
+      dto.entryStep
+        ? {
+            mode: 'entry',
+            entry: dto.entryStep,
+            locked: dto.entryStep === 'specs',
+          }
+        : { mode: 'undecided' },
+    );
     const data = projectDataFor(studio, null);
     this.assertSize(data);
     const progress = studioProgress(studio);
@@ -172,7 +183,24 @@ export class ProjectsService {
       // Team membership only grants EDITOR/ADMIN; a direct share may be higher.
       return new ProjectSummaryEntity(row, row.memberRole ?? 'EDITOR');
     });
-    return new PaginatedResultDto(rows, total, query.skip, query.take);
+    return new PaginatedResultDto(
+      await this.withEntrySteps(rows),
+      total,
+      query.skip,
+      query.take,
+    );
+  }
+
+  /** Fills each summary's entry step (the dashboard badge). */
+  private async withEntrySteps<T extends ProjectSummaryEntity>(
+    rows: T[],
+  ): Promise<T[]> {
+    const scopes = await this.repository.studioScopes(rows.map((r) => r.id));
+    for (const row of rows) {
+      const scope = parseScope(scopes.get(row.id));
+      row.entryStep = entryStepOf(scope ?? FULL_SCOPE);
+    }
+    return rows;
   }
 
   async adminList(
@@ -185,7 +213,9 @@ export class ProjectsService {
       take: query.take,
     });
     return new PaginatedResultDto(
-      items.map((row) => new ProjectSummaryEntity(row, 'VIEWER')),
+      await this.withEntrySteps(
+        items.map((row) => new ProjectSummaryEntity(row, 'VIEWER')),
+      ),
       total,
       query.skip,
       query.take,
@@ -254,7 +284,10 @@ export class ProjectsService {
       });
     }
     const row = await this.repository.findListRow(projectId);
-    return new ProjectSummaryEntity(row!, access.role);
+    const [summary] = await this.withEntrySteps([
+      new ProjectSummaryEntity(row!, access.role),
+    ]);
+    return summary;
   }
 
   /**

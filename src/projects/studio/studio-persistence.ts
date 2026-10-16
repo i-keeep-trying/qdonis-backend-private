@@ -8,7 +8,9 @@ import {
   type StageNode,
   stageNodeOnBranch,
   type StudioProject,
+  type StudioScope,
 } from './studio-graph';
+import { parseScope } from './studio-scope';
 import { humanizeTopology, mapTopologyNameToBackend } from './topology-names';
 
 /**
@@ -151,6 +153,7 @@ export function parseStudioProject(value: unknown): StudioProject {
     ...(str(value.initialPrompt)
       ? { initialPrompt: str(value.initialPrompt)!.slice(0, 20_000) }
       : {}),
+    ...(parseScope(value.scope) ? { scope: parseScope(value.scope)! } : {}),
     createdAt: str(value.createdAt) ?? new Date().toISOString(),
   };
 }
@@ -436,6 +439,8 @@ export interface StudioMeta {
   initialPrompt?: string;
   focus: StudioProject['focus'];
   messages: JsonObject[];
+  /** Entry step (absent on older projects, which are full projects). */
+  scope?: StudioScope;
   createdAt: string;
 }
 
@@ -448,6 +453,7 @@ export function studioMetaOf(project: StudioProject): StudioMeta {
     ...(project.initialPrompt ? { initialPrompt: project.initialPrompt } : {}),
     focus: project.focus,
     messages: project.messages,
+    ...(project.scope ? { scope: project.scope } : {}),
     createdAt: project.createdAt,
   };
 }
@@ -456,6 +462,7 @@ export function studioMetaOf(project: StudioProject): StudioMeta {
 export function readStudioMeta(projectData: JsonObject): StudioMeta {
   const stored = isObject(projectData.studio) ? projectData.studio : {};
   const prompt = str(stored.initialPrompt);
+  const scope = parseScope(stored.scope);
   return {
     version: 2,
     ...(prompt ? { initialPrompt: prompt.slice(0, 20_000) } : {}),
@@ -463,6 +470,7 @@ export function readStudioMeta(projectData: JsonObject): StudioMeta {
     messages: Array.isArray(stored.messages)
       ? (stored.messages as unknown[]).filter(isObject).slice(-MAX_MESSAGES)
       : [],
+    ...(scope ? { scope } : {}),
     createdAt: str(stored.createdAt) ?? new Date().toISOString(),
   };
 }
@@ -520,7 +528,7 @@ export function loadStudioProject(projectData: JsonObject): StudioProject {
     // Already in tables; a copy of the data blob alone has no results.
     const meta = readStudioMeta(projectData);
     return {
-      ...createEmptyProject(meta.initialPrompt),
+      ...createEmptyProject(meta.initialPrompt, meta.scope),
       focus: meta.focus,
       messages: meta.messages,
       createdAt: meta.createdAt,

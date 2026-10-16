@@ -24,6 +24,8 @@ export interface StudioHeader {
   revision: number;
   initialPrompt: string | null;
   focus: string | null;
+  /** Raw `data.studio.scope` (parsed by the caller). */
+  scope: unknown;
 }
 
 const NODE_LIGHT = {
@@ -122,11 +124,13 @@ export class StudioGraphRepository {
         revision: number;
         initialPrompt: string | null;
         focus: string | null;
+        scope: unknown;
       }>
     >`
       SELECT name, revision,
              data->'studio'->>'initialPrompt' AS "initialPrompt",
-             data->'studio'->>'focus' AS focus
+             data->'studio'->>'focus' AS focus,
+             data->'studio'->'scope' AS scope
       FROM projects WHERE id = ${projectId}::uuid
     `;
     return rows[0] ?? null;
