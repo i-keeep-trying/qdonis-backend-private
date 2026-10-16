@@ -9,7 +9,7 @@ endpoints read `projects.data.selectedParts`, which nothing in the Studio writes
 Plan (one part per turn, the user commits each):
 
 - [x] Part 1: MTBF stage (backend + agent + web)
-- [ ] Part 2: BOM stage
+- [x] Part 2: BOM stage (backend + agent + web)
 
 ## Design
 
@@ -28,7 +28,49 @@ Plan (one part per turn, the user commits each):
   system MTBF/FIT, per-part λ, contribution, status, calculation details and curves, every standard at its
   environment (`byMethod`), issues.
 
+- BOM is a Studio stage (`bom`) after MTBF (`STAGE_ORDER` has 8; enum migration
+  `20261016180000_studio_stage_bom`). The shared parts logic lives in `src/studio-stages/branch-parts.ts`
+  (circuit parts, default exclusions, device selection, magnetics designs), used by both MTBF and BOM.
+- One line per physical part of the circuit (loads, line models, helpers and body diodes unlisted by default),
+  with the Simulation device selection (manufacturer, part number, ratings), the custom-wound magnetics
+  (core + material, turns, wire) and a heatsink line (`HS1`) from the Thermal cooling recommendation.
+- Distributor parts: the user searches Mouser per line from the BOM view (existing `POST /sourcing/mouser/search`)
+  and picks one. A whole-BOM automatic search was not done: Mouser pacing makes it minutes long. Prices are the
+  first price break (single unit, USD), as in the old screen.
+- The user's choices (`choices`: part, quantity, listed or not, added lines) are stored on the node and kept
+  when the BOM is rebuilt from the branch; choices for parts no longer in the circuit are dropped.
+- Export: XLSX / CSV of the listed lines through the existing `engines/bom` writer (old column layout), stored
+  in S3, signed link.
+
 ## Change log
+
+### 2026-10-16: Part 2, BOM stage
+
+Backend:
+- `src/studio-stages/branch-parts.ts` (shared with MTBF; MTBF refactored onto it, behaviour unchanged).
+- `src/studio-stages/bom.stage.ts`: `planBom` (lines, heatsink, choices merge, pricing, totals, agent payload),
+  `exportParts` for the export engine.
+- `POST /projects/:id/branches/:branchId/stages/bom/run` (`RunBomStageDto`: optional per-line `changes`) and
+  `POST .../stages/bom/export` (`BomExportDto`, `canExport`, activity logged, signed URL); `BomService.exportStage`.
+  The project-level `/projects/:id/bom` endpoints (old `selectedParts`) are left as they were.
+- Stage registration as for MTBF (graph, labels, views, chat view, Prisma enum + migration).
+- Agent: `build_bom` tool (quantities, include/exclude, add/remove lines), `bom` in the stage enums, prompt item 8
+  and the flow line, snapshot `bom` block; the parity fixtures updated by the same script as Part 1.
+- Tests: `bom.stage.spec.ts` (7: no circuit, buck lines, devices/magnetics/heatsink, choices kept/reset and
+  pricing, merge, export rows, all 35 topologies); progress total now 8. Full suite passes except
+  `schematic.service.spec` "saved layout", which fails only in full runs: `dev-layout.service.spec` writes the
+  topology layout files while it reads them (an existing race; it passes alone).
+
+Web:
+- Types `types/bom.ts`, schema `schemas/bom.ts`, service `runBom` / `exportBom` / `searchParts` (HTTP: Mouser
+  results mapped to `SourcedPart`; mock: bookkeeping + CSV data URL), RTK mutations (`runBom` tracked by the save
+  status), `bom` view/stage everywhere.
+- View `components/views/bom/`: stats (parts, cost, manufacturers, in stock), filter, add a part, rebuild from the
+  branch, table (list checkbox, part with its source, package, quantity, prices, availability/lead time,
+  datasheet, Find on Mouser with a result picker, reset part, remove added line), totals row, Excel / CSV export.
+- Mock: buck demo seeded with a BOM node (planner output), store version 5; mock-service BOM test.
+- Checks: typecheck, lint, 101 tests pass. Not checked in a browser (login redirect).
+
 
 ### 2026-10-16: Part 1, MTBF stage
 

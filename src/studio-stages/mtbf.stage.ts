@@ -1,6 +1,4 @@
-import { toNumber } from '../circuits/library/circuit-inventory';
 import { specsOf } from '../design/studio-specs.logic';
-import type { MagneticDesign } from '../engines/magnetics/magnetics-engine';
 import {
   calculateMTBFComponents,
   calculateSystemMTBF,
@@ -16,7 +14,15 @@ import {
   stageNodeOnBranch,
   type StudioProject,
 } from '../projects/studio/studio-graph';
-import { formatSi } from '../visualization/library/visualization-format';
+import {
+  circuitParts,
+  customWound,
+  magneticDesigns,
+  PART_TYPES,
+  type PartType,
+  refKey,
+  selectedDevices,
+} from './branch-parts';
 import type { CircuitDataProvider } from './circuit-data.provider';
 import type { StagePlan } from './magnetics.stage';
 import { round, specTemperatures, specValue } from './stage-math';
@@ -38,16 +44,8 @@ export const MTBF_METHODS = [
 export type MtbfMethod = (typeof MTBF_METHODS)[number];
 
 /** Part classes of the reliability engine. */
-export const MTBF_PART_TYPES = [
-  'mosfet',
-  'diode',
-  'inductor',
-  'transformer',
-  'capacitor',
-  'resistor',
-  'ic',
-] as const;
-export type MtbfPartType = (typeof MTBF_PART_TYPES)[number];
+export const MTBF_PART_TYPES = PART_TYPES;
+export type MtbfPartType = PartType;
 
 /** A part entered by the user (standalone mode). */
 export interface MtbfPartInput {
@@ -107,7 +105,7 @@ const str = (v: unknown): string | undefined =>
   typeof v === 'string' && v !== '' ? v : undefined;
 const fin = (v: unknown): number | undefined =>
   typeof v === 'number' && Number.isFinite(v) ? v : undefined;
-const key = (ref: string) => ref.toLowerCase();
+const key = refKey;
 
 const fail = (
   summary: string,
@@ -119,75 +117,6 @@ const fail = (
 
 export const environmentsOf = (method: MtbfMethod): string[] =>
   Object.keys(ENVIRONMENT_FACTORS[method]);
-
-/** Library component type -> reliability class (null: not a hardware part). */
-export function partType(type: string): MtbfPartType | null {
-  const t = type.toLowerCase();
-  if (/^(transistor|switch|nmos|pmos|mosfet|igbt)$/.test(t)) return 'mosfet';
-  if (t === 'diode') return 'diode';
-  if (t === 'inductor' || t === 'coupled_inductor') return 'inductor';
-  if (/transformer$/.test(t)) return 'transformer';
-  if (t === 'capacitor') return 'capacitor';
-  if (t === 'resistor') return 'resistor';
-  return null;
-}
-
-const LOAD_REFS = new Set(['R_LOAD', 'RLOAD', 'ROUT', 'R_OUT', 'R_DC']);
-
-/**
- * Parts the simulation models but the product does not contain: the load,
- * the source / line impedance, winding resistances and solver helpers, and
- * MOSFET body diodes (counted with their switch).
- */
-export function defaultExclusion(
-  ref: string,
-  type: MtbfPartType,
-  role: string | null,
-): string | null {
-  const r = ref.toUpperCase();
-  const ro = (role ?? '').toLowerCase();
-  if (type === 'diode' && ro === 'body_diode') {
-    return 'Body diode of a MOSFET (counted with the switch)';
-  }
-  if (type === 'resistor' || type === 'inductor') {
-    if (LOAD_REFS.has(r) || /load/.test(ro) || /LOAD/.test(r)) {
-      return 'Load (outside the converter)';
-    }
-  }
-  if (type !== 'resistor') return null;
-  if (
-    /line_impedance/.test(ro) ||
-    /^R_?(GRID|LINE|IN)(_|$)/.test(r) ||
-    /^RAC_|_SERIES$/.test(r)
-  ) {
-    return 'Source / line impedance model';
-  }
-  if (/^R_?(PRI|SEC)$/.test(r) || /ESR/.test(r)) {
-    return 'Winding or ESR resistance of another part';
-  }
-  // R_ISO: ~100 MΩ ground anchor of an isolated side (as in the thermal stage).
-  if (
-    /ANCHOR|GND|TIE|_DRIVE(_|$)|^R+_?ISO/.test(r) ||
-    /anchor|isolation_resistor|ground_tie/.test(ro)
-  ) {
-    return 'Simulation helper (not a physical part)';
-  }
-  return null;
-}
-
-const VALUE_PARAM: Partial<Record<MtbfPartType, [string, string]>> = {
-  capacitor: ['capacitance', 'F'],
-  resistor: ['resistance', 'Ω'],
-  inductor: ['inductance', 'H'],
-};
-
-function valueOf(
-  type: MtbfPartType,
-  params: Record<string, unknown>,
-): string | null {
-  const spec = VALUE_PARAM[type];
-  return spec ? formatSi(toNumber(params[spec[0]]), spec[1]) : null;
-}
 
 const THERMAL_STATUS: Record<string, ThermalStatus> = {
   ok: 'safe',
@@ -207,15 +136,13 @@ interface PartContext {
     string,
     { part: string | null; vPeakV: number | null; vRatingV: number | null }
   >;
-  designs: Map<string, MagneticDesign>;
+  designs: ReturnType<typeof magneticDesigns>;
 }
 
 /** Temperatures, stresses and part numbers the branch already has. */
 function branchContext(project: StudioProject): PartContext {
   const thermal = rec(stageNodeOnBranch(project, 'thermal')?.data);
   const result = rec(thermal.result);
-  const magneticsNode = rec(stageNodeOnBranch(project, 'magnetics')?.data);
-  const sim = stageNodeOnBranch(project, 'simulation');
   const specs = specsOf(stageNodeOnBranch(project, 'specs'));
 
   const thermalAmbient = Array.isArray(result.devices)
@@ -242,18 +169,11 @@ function branchContext(project: StudioProject): PartContext {
     string,
     { hotspotC: number; status: ThermalStatus | null; from: string }
   >();
-  const designs = new Map<string, MagneticDesign>();
-  for (const d of records(magneticsNode.designs)) {
-    const ref = str(d.ref);
-    if (!ref) continue;
-    designs.set(key(ref), d as unknown as MagneticDesign);
+  const designs = magneticDesigns(project);
+  for (const [k, d] of designs) {
     const hotspot = fin(d.hotspot_C);
     if (hotspot !== undefined) {
-      magnetics.set(key(ref), {
-        hotspotC: hotspot,
-        status: null,
-        from: 'magnetics',
-      });
+      magnetics.set(k, { hotspotC: hotspot, status: null, from: 'magnetics' });
     }
   }
   // The thermal stage's hotspots include its own ambient and status.
@@ -268,22 +188,12 @@ function branchContext(project: StudioProject): PartContext {
       });
     }
   }
-  const stresses = new Map<
-    string,
-    { part: string | null; vPeakV: number | null; vRatingV: number | null }
-  >();
-  const selection =
-    sim?.status === 'ready' ? rec(sim.data.deviceSelection) : {};
-  for (const choice of records(selection.selections)) {
-    const ref = str(choice.ref);
-    if (!ref) continue;
-    const selected = rec(choice.selected);
-    stresses.set(key(ref), {
-      part: str(selected.part) ?? null,
-      vPeakV: fin(rec(choice.stress).vPeakV) ?? null,
-      vRatingV: fin(selected.vRatingV) || null,
-    });
-  }
+  const stresses = new Map(
+    [...selectedDevices(project)].map(([k, d]) => [
+      k,
+      { part: d.part, vPeakV: d.vPeakV, vRatingV: d.vRatingV },
+    ]),
+  );
   return {
     ambientC,
     ambientSource:
@@ -357,16 +267,14 @@ function operatingPoint(
         : ambient),
       voltageV: null,
       ratedVoltageV: null,
-      partNumber: design
-        ? `${design.stacked > 1 ? `${design.stacked}× ` : ''}${design.core} ${design.material} (custom wound)`
-        : null,
+      partNumber: design ? customWound(design) : null,
     };
   }
   return { ...ambient, voltageV: null, ratedVoltageV: null, partNumber: null };
 }
 
-/** Parts of the branch circuit (library topology or the edited circuit). */
-async function circuitParts(
+/** Parts of the branch circuit with their operating points. */
+async function circuitPartsAt(
   project: StudioProject,
   ctx: PartContext,
   provider: CircuitDataProvider,
@@ -374,40 +282,15 @@ async function circuitParts(
   parts: Array<Omit<MtbfPart, 'included'>>;
   fswHz: number | null;
 } | null> {
-  const vis = stageNodeOnBranch(project, 'visualization');
-  const design = stageNodeOnBranch(project, 'design');
-  const sim = stageNodeOnBranch(project, 'simulation');
-  const topologyId =
-    str(vis?.data.topologyId) ??
-    str(design?.data.topologyId) ??
-    str(rec(sim?.data.metadata).topology);
-  if (!topologyId) return null;
-  const inventory = await provider.inventory({
-    topologyId,
-    circuit: vis?.data.customCircuit,
-    recalculated: Array.isArray(design?.data.recalculatedParameters)
-      ? (design.data.recalculatedParameters as unknown[])
-      : undefined,
-  });
-  if (!inventory) return null;
-  const parts: Array<Omit<MtbfPart, 'included'>> = [];
-  const seen = new Set<string>();
-  for (const comp of inventory.components) {
-    const ref = typeof comp.ref === 'string' ? comp.ref : '';
-    const type = partType(String(comp.type ?? ''));
-    if (!ref || !type || seen.has(key(ref))) continue;
-    seen.add(key(ref));
-    const role = typeof comp.role === 'string' ? comp.role : null;
-    parts.push({
-      ref,
-      type,
-      role,
-      value: valueOf(type, comp.params ?? {}),
-      ...operatingPoint(ctx, ref, type),
-      excludedReason: defaultExclusion(ref, type, role),
-    });
-  }
-  return { parts, fswHz: inventory.switching_frequency ?? null };
+  const circuit = await circuitParts(project, provider);
+  if (!circuit) return null;
+  return {
+    parts: circuit.parts.map((p) => ({
+      ...p,
+      ...operatingPoint(ctx, p.ref, p.type),
+    })),
+    fswHz: circuit.fswHz,
+  };
 }
 
 function enteredParts(
@@ -566,7 +449,7 @@ export async function planMtbf(
     rawParts = enteredParts(entered, ctx);
     fswHz = specFsw;
   } else {
-    const circuit = await circuitParts(project, ctx, provider);
+    const circuit = await circuitPartsAt(project, ctx, provider);
     if (!circuit) {
       return fail(
         'There is no circuit on this branch, so give the parts directly: call run_mtbf with `parts` (ref, type, and optionally part_number, temperature_c, voltage_v, rated_voltage_v). No design or simulation is needed for that.',

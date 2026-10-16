@@ -40,6 +40,7 @@ export function buildAgentSnapshot(
   const magnetics = stageNodeOnBranch(project, 'magnetics');
   const thermal = stageNodeOnBranch(project, 'thermal');
   const mtbf = stageNodeOnBranch(project, 'mtbf');
+  const bom = stageNodeOnBranch(project, 'bom');
 
   const inventory = rec(vis?.data.inventory);
   const thermalResult = rec(thermal?.data.result);
@@ -162,6 +163,17 @@ export function buildAgentSnapshot(
                 `${String(c.designator)}: ${fixed(c.lambda, 1)} FIT (${fixed(c.contribution, 1)} %)`,
             ),
           issues: rec(mtbf.data.result).issues,
+        }
+      : null,
+    bom: bom
+      ? {
+          totals: bom.data.totals,
+          lines: records(bom.data.lines)
+            .filter((l) => l.included === true)
+            .map(
+              (l) =>
+                `${String(l.ref)} ×${String(l.quantity)}: ${String(l.partNumber ?? l.description)}${typeof l.unitPrice === 'number' ? ` ($${l.unitPrice.toFixed(2)})` : ''}`,
+            ),
         }
       : null,
     other_branches: project.branchOrder

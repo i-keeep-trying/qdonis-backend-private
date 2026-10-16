@@ -30,6 +30,7 @@ import {
 } from '../simulation/simulation.types';
 import { SpecsService } from '../specs/specs.service';
 import type { MagneticPartInput } from '../studio-stages/magnetics.stage';
+import type { BomCategory, LineChoicePatch } from '../studio-stages/bom.stage';
 import {
   MTBF_METHODS,
   MTBF_PART_TYPES,
@@ -99,6 +100,7 @@ export const TOOL_INFO: Record<
   design_magnetics: { label: 'Designing magnetics', stage: 'magnetics' },
   run_thermal: { label: 'Solving the thermal network', stage: 'thermal' },
   run_mtbf: { label: 'Predicting the MTBF', stage: 'mtbf' },
+  build_bom: { label: 'Building the BOM', stage: 'bom' },
   open_view: { label: 'Switching view', stage: null },
   manage_branch: { label: 'Updating branches', stage: null },
 };
@@ -257,6 +259,8 @@ export class StudioToolsExecutor {
         return this.runThermal(ctx, input);
       case 'run_mtbf':
         return this.runMtbf(ctx, input);
+      case 'build_bom':
+        return this.buildBom(ctx, input);
       case 'open_view':
         return Promise.resolve(this.openView(ctx, input));
       case 'manage_branch':
@@ -1011,6 +1015,56 @@ export class StudioToolsExecutor {
     return this.plannedOutcome(ctx, result, 'mtbf');
   }
 
+  private async buildBom(ctx: ToolContext, input: JsonObject) {
+    const changes: Record<string, LineChoicePatch> = {};
+    const change = (ref: unknown, patch: LineChoicePatch) => {
+      const key = str(ref);
+      if (key) changes[key] = { ...changes[key], ...patch };
+    };
+    const count = (v: unknown) =>
+      typeof v === 'number' && Number.isInteger(v) && v >= 1 && v <= 1_000_000
+        ? v
+        : undefined;
+    const CATEGORIES: readonly string[] = [
+      'mosfet',
+      'diode',
+      'inductor',
+      'transformer',
+      'capacitor',
+      'resistor',
+      'ic',
+      'heatsink',
+      'other',
+    ];
+    for (const line of records(input.add_lines)) {
+      const description = str(line.description);
+      if (!description) continue;
+      change(line.ref, {
+        extra: {
+          category: (CATEGORIES.includes(String(line.category))
+            ? line.category
+            : 'other') as BomCategory,
+          description: description.slice(0, 200),
+        },
+        ...(count(line.quantity) ? { quantity: count(line.quantity) } : {}),
+      });
+    }
+    for (const q of records(input.quantities)) {
+      const quantity = count(q.quantity);
+      if (quantity) change(q.ref, { quantity });
+    }
+    for (const ref of list(input.include)) change(ref, { included: true });
+    for (const ref of list(input.exclude)) change(ref, { included: false });
+    for (const ref of list(input.remove_lines)) change(ref, { extra: null });
+    const result = await this.stages.runBom(
+      ctx.user,
+      ctx.projectId,
+      changes,
+      ctx.branchId,
+    );
+    return this.plannedOutcome(ctx, result, 'bom');
+  }
+
   private async plannedOutcome(
     ctx: ToolContext,
     result: {
@@ -1020,7 +1074,7 @@ export class StudioToolsExecutor {
       branchId: string;
       forked: boolean;
     },
-    stage: 'magnetics' | 'thermal' | 'mtbf',
+    stage: 'magnetics' | 'thermal' | 'mtbf' | 'bom',
   ) {
     const outcome: StageResult = {
       ok: result.ok,

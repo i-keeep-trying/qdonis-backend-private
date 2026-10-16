@@ -15,8 +15,10 @@ import { ProjectActivityType } from '../generated/prisma/enums';
 import { ProjectAccessService } from '../projects/project-access.service';
 import { ProjectsRepository } from '../projects/projects.repository';
 import { ProjectsService } from '../projects/projects.service';
+import { stageNodeOnBranch } from '../projects/studio/studio-graph';
 import { StoredFileEntity } from '../storage/entities/stored-file.entity';
 import { StoredFilesService } from '../storage/stored-files.service';
+import { type BomLine, exportParts } from './bom.stage';
 
 type Actor = Pick<AuthenticatedUser, 'id' | 'role'>;
 
@@ -89,21 +91,52 @@ export class BomService {
   async export(user: Actor, projectId: string, format: 'xlsx' | 'csv') {
     const access = await this.access.require(user, projectId, 'canExport');
     const rows = bomRows(partsOf(await this.dataOf(projectId)));
+    return this.exportRows(user, projectId, access.projectName, rows, format);
+  }
+
+  /** XLSX / CSV of a branch's BOM stage (its included lines). */
+  async exportStage(
+    user: Actor,
+    projectId: string,
+    branchId: string,
+    format: 'xlsx' | 'csv',
+  ) {
+    const access = await this.access.require(user, projectId, 'canExport');
+    const studio = await this.projects.loadStudio(projectId, user.id, branchId);
+    const node = stageNodeOnBranch(studio, 'bom', branchId);
+    if (!node || node.status !== 'ready') {
+      throw AppError.conflict(
+        ErrorCode.StageInputMissing,
+        'Build the BOM of this branch first.',
+      );
+    }
+    const lines = Array.isArray(node.data.lines)
+      ? (node.data.lines as BomLine[])
+      : [];
+    const rows = bomRows(exportParts(lines));
+    return this.exportRows(user, projectId, access.projectName, rows, format);
+  }
+
+  private async exportRows(
+    user: Actor,
+    projectId: string,
+    projectName: string,
+    rows: BomRow[],
+    format: 'xlsx' | 'csv',
+  ) {
     if (rows.length === 0) {
       throw AppError.badRequest(
         ErrorCode.StageInputMissing,
-        'No selected parts to export',
+        'No parts to export',
       );
     }
     const now = new Date();
     const body =
-      format === 'xlsx'
-        ? await bomXlsx(rows, access.projectName, now)
-        : bomCsv(rows);
+      format === 'xlsx' ? await bomXlsx(rows, projectName, now) : bomCsv(rows);
     const file = await this.files.putExport({
       projectId,
       actorId: user.id,
-      filename: bomFilename(access.projectName, format, now),
+      filename: bomFilename(projectName, format, now),
       contentType:
         format === 'xlsx'
           ? 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'

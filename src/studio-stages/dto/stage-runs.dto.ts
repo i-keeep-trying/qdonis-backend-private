@@ -6,6 +6,7 @@ import {
   IsArray,
   IsBoolean,
   IsIn,
+  IsInt,
   IsNumber,
   IsObject,
   IsOptional,
@@ -19,6 +20,7 @@ import {
   ValidateNested,
 } from 'class-validator';
 
+import { BOM_CATEGORIES, type BomCategory } from '../bom.stage';
 import {
   MTBF_METHODS,
   MTBF_PART_TYPES,
@@ -27,9 +29,9 @@ import {
 } from '../mtbf.stage';
 
 /**
- * Bodies of the branch stage runs of magnetics, thermal and MTBF, in the
- * qdonis-web contract (`RunMagneticsInput`, `RunThermalInput`,
- * `RunMtbfInput`).
+ * Bodies of the branch stage runs of magnetics, thermal, MTBF and BOM, in
+ * the qdonis-web contract (`RunMagneticsInput`, `RunThermalInput`,
+ * `RunMtbfInput`, `RunBomInput`).
  */
 
 const Num = (min: number, max: number) =>
@@ -345,4 +347,113 @@ export class RunMtbfStageDto {
   @ValidateNested()
   @Type(() => MtbfSettingsDto)
   settings!: MtbfSettingsDto;
+}
+
+// --- BOM -------------------------------------------------------------------------
+
+const Text = (max: number) =>
+  applyDecorators(
+    ApiProperty({ nullable: true, maxLength: max }),
+    ValidateIf((_, v) => v !== null),
+    IsString(),
+    MaxLength(max),
+  );
+
+export class PriceTierDto {
+  @ApiProperty() @IsInt() @Min(1) @Max(10_000_000) quantity!: number;
+  @ApiProperty() @Num(0, 1_000_000) price!: number;
+}
+
+/** A distributor part picked for a line (a Mouser search result). */
+export class SourcedPartDto {
+  @ApiProperty({ maxLength: 120 })
+  @IsString()
+  @MaxLength(120)
+  manufacturer!: string;
+  @ApiProperty({ maxLength: 120 })
+  @IsString()
+  @MaxLength(120)
+  partNumber!: string;
+  @Text(120) mouserPartNumber!: string | null;
+  @Text(500) description!: string | null;
+  @Text(120) packageType!: string | null;
+  @ApiProperty({ type: [PriceTierDto] })
+  @IsArray()
+  @ArrayMaxSize(20)
+  @ValidateNested({ each: true })
+  @Type(() => PriceTierDto)
+  pricingTiers!: PriceTierDto[];
+  @Text(200) availability!: string | null;
+  @Text(120) leadTime!: string | null;
+  @Text(120) rohsStatus!: string | null;
+  @Text(120) lifecycleStatus!: string | null;
+  @ApiProperty({ nullable: true, maxLength: 1000 })
+  @ValidateIf((_, v) => v !== null)
+  @IsString()
+  @MaxLength(1000)
+  @Matches(/^https?:\/\//, { message: 'datasheetUrl must be an http(s) URL' })
+  datasheetUrl!: string | null;
+}
+
+export class BomExtraLineDto {
+  @ApiProperty({ enum: BOM_CATEGORIES })
+  @IsIn(BOM_CATEGORIES)
+  category!: BomCategory;
+  @ApiProperty({ maxLength: 200 })
+  @IsString()
+  @MaxLength(200)
+  @Matches(/\S/, { message: 'description must not be empty' })
+  description!: string;
+}
+
+/** A change to one line; `null` resets the field (or removes an added line). */
+export class BomLinePatchDto {
+  @ApiPropertyOptional({ nullable: true })
+  @IsOptional()
+  @ValidateIf((_, v) => v !== null)
+  @IsBoolean()
+  included?: boolean | null;
+
+  @ApiPropertyOptional({ nullable: true, minimum: 1, maximum: 1_000_000 })
+  @IsOptional()
+  @ValidateIf((_, v) => v !== null)
+  @IsInt()
+  @Min(1)
+  @Max(1_000_000)
+  quantity?: number | null;
+
+  @ApiPropertyOptional({ type: SourcedPartDto, nullable: true })
+  @IsOptional()
+  @ValidateIf((_, v) => v !== null)
+  @IsObject()
+  @ValidateNested()
+  @Type(() => SourcedPartDto)
+  part?: SourcedPartDto | null;
+
+  @ApiPropertyOptional({ type: BomExtraLineDto, nullable: true })
+  @IsOptional()
+  @ValidateIf((_, v) => v !== null)
+  @IsObject()
+  @ValidateNested()
+  @Type(() => BomExtraLineDto)
+  extra?: BomExtraLineDto | null;
+}
+
+export class BomLineChangeDto extends BomLinePatchDto {
+  @Ref() ref!: string;
+}
+
+/** Body of `POST /projects/:projectId/branches/:branchId/stages/bom/run`. */
+export class RunBomStageDto {
+  @ApiPropertyOptional({
+    type: [BomLineChangeDto],
+    description:
+      'Line changes; omit to rebuild from the branch keeping the stored choices',
+  })
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(200)
+  @ValidateNested({ each: true })
+  @Type(() => BomLineChangeDto)
+  changes?: BomLineChangeDto[];
 }

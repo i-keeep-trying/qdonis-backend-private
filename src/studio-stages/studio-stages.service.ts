@@ -43,6 +43,7 @@ import type {
 } from './dto/stages.dto';
 import type {
   MagneticPartStageDto,
+  RunBomStageDto,
   RunMagneticsStageDto,
   RunMtbfStageDto,
   RunThermalStageDto,
@@ -53,6 +54,7 @@ import {
   planMagnetics,
   type StagePlan,
 } from './magnetics.stage';
+import { type LineChoicePatch, planBom } from './bom.stage';
 import { type MtbfOptions, planMtbf } from './mtbf.stage';
 import { planThermal } from './thermal.stage';
 
@@ -151,6 +153,24 @@ export class StudioStagesService {
       studio.activeBranchId,
       'mtbf',
       await planMtbf(studio, options, this.circuit),
+    );
+  }
+
+  /** BOM of the branch parts with line changes (Studio agent). */
+  async runBom(
+    user: Actor,
+    projectId: string,
+    changes: Record<string, LineChoicePatch>,
+    branchId?: string,
+  ) {
+    await this.access.require(user, projectId, 'canEdit');
+    const studio = await this.projects.loadStudio(projectId, user.id, branchId);
+    return this.commit(
+      projectId,
+      user.id,
+      studio.activeBranchId,
+      'bom',
+      await planBom(studio, changes, this.circuit),
     );
   }
 
@@ -322,12 +342,35 @@ export class StudioStagesService {
     return this.commitStageRun(user, projectId, branchId, 'mtbf', plan);
   }
 
+  /** BOM stage of a branch: rebuilt from the branch, with the line changes applied. */
+  async runBomStage(
+    user: Actor,
+    projectId: string,
+    branchId: string,
+    dto: RunBomStageDto,
+  ) {
+    await this.access.require(user, projectId, 'canEdit');
+    const changes: Record<string, LineChoicePatch> = {};
+    for (const { ref, ...change } of dto.changes ?? []) {
+      if (ref in changes) {
+        throw AppError.badRequest(
+          ErrorCode.ValidationFailed,
+          `${ref} is changed twice.`,
+        );
+      }
+      changes[ref] = change;
+    }
+    const studio = await this.projects.loadStudio(projectId, user.id, branchId);
+    const plan = await planBom(studio, changes, this.circuit);
+    return this.commitStageRun(user, projectId, branchId, 'bom', plan);
+  }
+
   /** Commits a stage plan on `branchId` and answers the Studio stage-action shape. */
   private async commitStageRun(
     user: Actor,
     projectId: string,
     branchId: string,
-    stage: 'magnetics' | 'thermal' | 'mtbf',
+    stage: 'magnetics' | 'thermal' | 'mtbf' | 'bom',
     plan: StagePlan,
   ) {
     if (!plan.ok) {

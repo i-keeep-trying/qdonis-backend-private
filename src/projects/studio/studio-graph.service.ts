@@ -58,6 +58,7 @@ const VIEW_OF: Record<StageKind, string> = {
   magnetics: 'magnetics',
   thermal: 'thermal',
   mtbf: 'mtbf',
+  bom: 'bom',
 };
 
 export interface MutateOptions {

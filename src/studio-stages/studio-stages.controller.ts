@@ -24,6 +24,7 @@ import type { AuthenticatedUser } from '../auth/auth.types';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { ParseGraphIdPipe } from '../projects/dto/studio-graph.dto';
 import {
+  RunBomStageDto,
   RunMagneticsStageDto,
   RunMtbfStageDto,
   RunThermalStageDto,
@@ -85,7 +86,10 @@ const STAGE_RESULT =
 @ApiBearerAuth()
 @Controller('projects/:projectId/branches/:branchId/stages')
 export class StudioStageRunsController {
-  constructor(private readonly stages: StudioStagesService) {}
+  constructor(
+    private readonly stages: StudioStagesService,
+    private readonly boms: BomService,
+  ) {}
 
   @Post('magnetics/run')
   @HttpCode(HttpStatus.OK)
@@ -142,6 +146,42 @@ export class StudioStageRunsController {
     @Body() dto: RunMtbfStageDto,
   ) {
     return this.stages.runMtbfStage(user, projectId, branchId, dto);
+  }
+
+  @Post('bom/run')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary:
+      'BOM of the branch (circuit parts, selected devices, custom magnetics, heatsink), with line changes',
+    description: STAGE_RESULT,
+  })
+  @ApiForbiddenResponse({ description: 'View-only project' })
+  @ApiNotFoundResponse({ description: 'PROJECT_NOT_FOUND, BRANCH_NOT_FOUND' })
+  @ApiConflictResponse({ description: 'STAGE_INPUT_MISSING' })
+  bom(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('projectId', ParseUUIDPipe) projectId: string,
+    @Param('branchId', ParseGraphIdPipe) branchId: string,
+    @Body() dto: RunBomStageDto,
+  ) {
+    return this.stages.runBomStage(user, projectId, branchId, dto);
+  }
+
+  @Post('bom/export')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary:
+      'Generate the branch BOM file (stored in S3) and a signed download URL',
+  })
+  @ApiForbiddenResponse({ description: 'No export permission' })
+  @ApiConflictResponse({ description: 'STAGE_INPUT_MISSING (no BOM yet)' })
+  bomExport(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('projectId', ParseUUIDPipe) projectId: string,
+    @Param('branchId', ParseGraphIdPipe) branchId: string,
+    @Body() dto: BomExportDto,
+  ) {
+    return this.boms.exportStage(user, projectId, branchId, dto.format);
   }
 }
 

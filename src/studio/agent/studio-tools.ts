@@ -6,8 +6,8 @@ import type {
 /**
  * Studio agent tool registry: exact port of qdonis-core
  * `studio_agent.build_tools` (same names, descriptions, JSON schemas,
- * property order), plus the MTBF stage (`run_mtbf`, and `mtbf` in the
- * stage enums), which the core never had. Exactness is enforced by the
+ * property order), plus the MTBF and BOM stages (`run_mtbf`, `build_bom`,
+ * and `mtbf` / `bom` in the stage enums), which the core never had. Exactness is enforced by the
  * parity fixtures under test/parity/fixtures/studio-agent.
  */
 
@@ -20,6 +20,7 @@ export const STUDIO_STAGES = [
   'magnetics',
   'thermal',
   'mtbf',
+  'bom',
 ] as const;
 
 /** Tools whose result is the user's next message (the client stops the loop). */
@@ -641,6 +642,71 @@ export function buildStudioTools(
       },
     ),
     fn(
+      'build_bom',
+      "BOM tool: builds the bill of materials of the branch circuit. One line per physical part (loads, line-impedance models and simulation helpers are left out unless included), with the Simulation device selection's part numbers, the custom-wound magnetics of the Magnetics stage, and a heatsink line from the Thermal stage's cooling recommendation. Needs a circuit (a topology or an imported netlist). Distributor parts and prices are picked by the user per line in the BOM view (Mouser search), which also exports XLSX / CSV; never invent prices or distributor part numbers. A re-run keeps the user's per-line choices.",
+      {
+        quantities: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              ref: { type: 'string' },
+              quantity: { type: 'integer', minimum: 1 },
+            },
+            required: ['ref', 'quantity'],
+          },
+          description: 'Quantity per board of a line (default 1).',
+        },
+        include: {
+          type: 'array',
+          items: { type: 'string' },
+          description: 'Lines to list that are left out by default.',
+        },
+        exclude: {
+          type: 'array',
+          items: { type: 'string' },
+          description: 'Lines to leave out of the BOM.',
+        },
+        add_lines: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              ref: { type: 'string', description: 'e.g. U1, J1, F1' },
+              category: {
+                type: 'string',
+                enum: [
+                  'mosfet',
+                  'diode',
+                  'inductor',
+                  'transformer',
+                  'capacitor',
+                  'resistor',
+                  'ic',
+                  'heatsink',
+                  'other',
+                ],
+              },
+              description: {
+                type: 'string',
+                description:
+                  "What the part is, e.g. 'PWM controller', 'Input fuse 5 A'.",
+              },
+              quantity: { type: 'integer', minimum: 1 },
+            },
+            required: ['ref', 'category', 'description'],
+          },
+          description:
+            'Parts that are not in the circuit (controller, connectors, fuse, ...).',
+        },
+        remove_lines: {
+          type: 'array',
+          items: { type: 'string' },
+          description: 'Refs of lines added earlier to remove.',
+        },
+      },
+    ),
+    fn(
       'open_view',
       'Focus a stage view in the workspace without changing anything.',
       {
@@ -654,6 +720,7 @@ export function buildStudioTools(
             'magnetics',
             'thermal',
             'mtbf',
+            'bom',
           ],
         },
       },
@@ -678,6 +745,7 @@ export function buildStudioTools(
             'magnetics',
             'thermal',
             'mtbf',
+            'bom',
           ],
           description:
             "For 'create': the new branch keeps everything BEFORE this stage.",

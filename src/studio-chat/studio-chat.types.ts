@@ -13,7 +13,8 @@ export type StudioView =
   | 'simulation'
   | 'magnetics'
   | 'thermal'
-  | 'mtbf';
+  | 'mtbf'
+  | 'bom';
 
 export const VIEW_OF_STAGE: Record<StageKind, StudioView> = {
   specs: 'specs',
@@ -25,6 +26,7 @@ export const VIEW_OF_STAGE: Record<StageKind, StudioView> = {
   magnetics: 'magnetics',
   thermal: 'thermal',
   mtbf: 'mtbf',
+  bom: 'bom',
 };
 
 export type AttachmentKind = 'netlist' | 'document';

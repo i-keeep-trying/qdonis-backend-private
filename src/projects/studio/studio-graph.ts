@@ -15,6 +15,7 @@ export const STAGE_ORDER = [
   'magnetics',
   'thermal',
   'mtbf',
+  'bom',
 ] as const;
 /**
  * Stages a stored node can have: the workspace stages plus `devices`, a
@@ -34,6 +35,7 @@ export const STAGE_LABEL: Record<StageKind, string> = {
   magnetics: 'Magnetics',
   thermal: 'Thermal',
   mtbf: 'MTBF',
+  bom: 'BOM',
 };
 
 export type NodeStatus = 'running' | 'ready' | 'error';
