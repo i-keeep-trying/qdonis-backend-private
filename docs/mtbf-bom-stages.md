@@ -44,6 +44,19 @@ Plan (one part per turn, the user commits each):
 
 ## Change log
 
+### 2026-10-16: agent fallback after a failed stage
+
+In a chat, the agent called `run_mtbf` and `build_bom`, and both failed with `invalid input value for enum
+studio_stage: "mtbf"` (and `"bom"`), because the two migrations above had not been applied to the dev database.
+The agent then wrote a "manual" MTBF estimate and BOM and listed both stages as done. Fixes:
+- Applied `20261016120000_studio_stage_mtbf` and `20261016180000_studio_stage_bom` to the local DB with
+  `prisma migrate deploy`. Every environment needs the same step.
+- System prompt (Style section): a failed stage tool means the stage did not run, so the agent must never put its
+  own estimate or a "manual" result in its place, and must never report the stage as done. The 16 parity fixtures
+  were updated by script with the same lines.
+- Web: the chat header's stage list (`chat-pane.tsx`, `IDLE_SUBTITLE`) now ends in MTBF and BOM.
+- Checks: agent and parity tests pass (147), web studio tests pass (62).
+
 ### 2026-10-16: Part 2, BOM stage
 
 Backend:
