@@ -23,8 +23,6 @@ export const records = (v: unknown): JsonObject[] =>
     (x): x is JsonObject =>
       typeof x === 'object' && x !== null && !Array.isArray(x),
   );
-const num = (v: unknown): number | null =>
-  typeof v === 'number' && Number.isFinite(v) ? v : null;
 
 /** A model-facing scalar as text ('' for anything else). */
 export const scalar = (v: unknown): string =>
@@ -257,10 +255,7 @@ export function selectionLines(value: unknown): string[] | null {
   );
 }
 
-export const selectionJunctionC = (value: unknown): number | null =>
-  num(rec(value).junctionC);
-
-/** Losses of a Devices-stage result for the model. */
+/** Semiconductor losses (`{ losses: LossComponent[] }`) for the model. */
 export function deviceLosses(data: JsonObject) {
   const components = records(data.losses) as unknown as LossComponent[];
   const total = components.reduce((a, c) => a + (c.totalLossW || 0), 0);

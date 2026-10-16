@@ -7,20 +7,15 @@ import type { StageKind } from '../projects/studio/studio-graph';
  */
 
 export type StudioView =
-  | 'specs'
-  | 'circuit'
-  | 'design'
-  | 'simulation'
-  | 'devices'
-  | 'magnetics'
-  | 'thermal';
+  'specs' | 'circuit' | 'design' | 'simulation' | 'magnetics' | 'thermal';
 
 export const VIEW_OF_STAGE: Record<StageKind, StudioView> = {
   specs: 'specs',
   visualization: 'circuit',
   design: 'design',
   simulation: 'simulation',
-  devices: 'devices',
+  // Former stage: its results open the Simulation view.
+  devices: 'simulation',
   magnetics: 'magnetics',
   thermal: 'thermal',
 };

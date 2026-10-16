@@ -53,7 +53,8 @@ const VIEW_OF: Record<StageKind, string> = {
   visualization: 'circuit',
   design: 'design',
   simulation: 'simulation',
-  devices: 'devices',
+  // Former stage: its results open the Simulation view.
+  devices: 'simulation',
   magnetics: 'magnetics',
   thermal: 'thermal',
 };
@@ -119,18 +120,6 @@ export class StudioGraphService {
     const header = await this.rows.header(projectId);
     if (!header) throw this.projectNotFound();
     const active = project.activeBranchId;
-    // Devices count as done when the branch's simulation already chose them.
-    const simNode = stageNodeOnBranch(project, 'devices', active)
-      ? null
-      : stageNodeOnBranch(project, 'simulation', active);
-    const simulation = simNode
-      ? await this.rows.nodeWithData(projectId, simNode.id)
-      : null;
-    const hasSimDevices = Boolean(
-      simulation?.status === 'ready' &&
-      (isObject(simulation.data.device_selection) ||
-        isObject(simulation.data.deviceSelection)),
-    );
     return {
       projectId,
       name: header.name,
@@ -138,7 +127,7 @@ export class StudioGraphService {
       version: header.revision,
       activeBranchId: active,
       branches: branchViews(project),
-      stages: stageViews(project, active, hasSimDevices),
+      stages: stageViews(project, active),
       defaultView: this.defaultView(project, active),
       // The dashboard prompt is sent once, as the person's first chat message.
       pendingInitialPrompt:

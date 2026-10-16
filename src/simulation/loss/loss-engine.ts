@@ -470,23 +470,33 @@ export interface LossAnalysis {
   components: Dict[];
 }
 
-/** `calculate_losses(dir, tj=, component_models=, device_types=)`. */
-export function calculateLosses(
-  dir: string,
-  tj: number = DEFAULT_TJ,
-  componentModels: Record<string, unknown> | null = null,
-  deviceTypes: Record<string, DeviceKind> | null = null,
-): LossAnalysis {
+interface LossDevice {
+  ref: string;
+  files: SeriesFiles & { V: string; I: string };
+  isSwitch: boolean;
+  model: JsonLossModel;
+  diodeModel: JsonLossModel | null;
+}
+
+/** Upper-cased `component_models` without empty entries (null when none). */
+function customModels(
+  componentModels: Record<string, unknown> | null,
+): Map<string, unknown> | null {
   const models = new Map<string, unknown>();
   for (const [k, v] of Object.entries(componentModels ?? {})) {
     if (truthy(v)) models.set(k.toUpperCase(), v);
   }
-  const custom = models.size ? models : null;
+  return models.size ? models : null;
+}
 
-  const defaultSwitch = loadModelPath(DEFAULT_SWITCH_MODEL);
-  const defaultDiode = loadModelPath(DEFAULT_DIODE_MODEL);
-
-  const results: Dict[] = [];
+/** `_devices`: every semiconductor with V and I traces, with the models it is evaluated with. */
+function* lossDevices(
+  dir: string,
+  custom: Map<string, unknown> | null,
+  deviceTypes: Record<string, DeviceKind> | null,
+  defaultSwitch: JsonLossModel | null,
+  defaultDiode: JsonLossModel | null,
+): Generator<LossDevice> {
   for (const [ref, files] of collectComponentSeries(dir)) {
     if (files.V === undefined || files.I === undefined) continue;
     const kind = classifyRef(ref, files, deviceTypes);
@@ -502,26 +512,145 @@ export function calculateLosses(
     let active = truthy(modelName) ? loadModel(pyStr(modelName)) : null;
     if (active === null) active = isSwitch ? defaultSwitch : defaultDiode;
     const diodeName = custom ? custom.get(`${refUpper}_DIODE`) : null;
-    const customDiode = truthy(diodeName) ? loadModel(pyStr(diodeName)) : null;
+    const diodeModel = truthy(diodeName) ? loadModel(pyStr(diodeName)) : null;
     if (active === null) continue;
+    yield {
+      ref,
+      files: { ...files, V: files.V, I: files.I },
+      isSwitch,
+      model: active,
+      diodeModel,
+    };
+  }
+}
 
+// Device tables sometimes carry far-off guard points (e.g. 900 °C) for extrapolation.
+const PHYSICAL_TJ_RANGE: [number, number] = [-75.0, 250.0];
+
+/** `model_temperatures`: sorted junction temperatures (°C) the models' loss tables are characterised at. */
+export function modelTemperatures(
+  ...models: Array<JsonLossModel | null>
+): number[] {
+  const temps = new Set<number>();
+  for (const model of models) {
+    for (const t of model?.temperatures ?? []) temps.add(t);
+  }
+  const [lo, hi] = PHYSICAL_TJ_RANGE;
+  return [...temps].filter((t) => lo <= t && t <= hi).sort((a, b) => a - b);
+}
+
+export interface LossTemperatureCurve {
+  component: string;
+  model: string;
+  diode_model: string | null;
+  device_type: 'switch' | 'diode';
+  points: Array<{
+    tj_c: number;
+    total_loss_w: number;
+    conduction_loss_w: number;
+    switching_loss_w: number;
+  }>;
+}
+
+/**
+ * `losses_vs_temperature`: each device's losses at every junction temperature
+ * its model (and its separate antiparallel / body-diode model) is
+ * characterised at, on the same simulated waveforms. Between those points the
+ * engine interpolates linearly.
+ */
+export function lossesVsTemperature(
+  dir: string,
+  componentModels: Record<string, unknown> | null = null,
+  deviceTypes: Record<string, DeviceKind> | null = null,
+): LossTemperatureCurve[] {
+  const defaultDiode = loadModelPath(DEFAULT_DIODE_MODEL);
+  const curves: LossTemperatureCurve[] = [];
+  for (const device of lossDevices(
+    dir,
+    customModels(componentModels),
+    deviceTypes,
+    loadModelPath(DEFAULT_SWITCH_MODEL),
+    defaultDiode,
+  )) {
+    const { ref, isSwitch, model } = device;
+    let diodeModel = device.diodeModel;
+    if (isSwitch && isIgbt(model) && diodeModel === null) {
+      diodeModel = defaultDiode;
+    }
     try {
-      const [t, vDs, iD, vGate] = readComponentSeries({
-        ...files,
-        V: files.V,
-        I: files.I,
-      });
+      const [t, vDs, iD, vGate] = readComponentSeries(device.files);
+      const points: LossTemperatureCurve['points'] = [];
+      for (const tj of modelTemperatures(model, isSwitch ? diodeModel : null)) {
+        const entry = componentLosses(
+          t,
+          vDs,
+          iD,
+          vGate,
+          model,
+          tj,
+          isSwitch,
+          diodeModel,
+        );
+        if (entry) {
+          points.push({
+            tj_c: tj,
+            total_loss_w: entry.total_loss_w as number,
+            conduction_loss_w: entry.conduction_loss_w as number,
+            switching_loss_w: entry.switching_loss_w as number,
+          });
+        }
+      }
+      if (points.length) {
+        curves.push({
+          component: ref,
+          model: pyStr(model.partNumber),
+          diode_model:
+            diodeModel && isSwitch ? pyStr(diodeModel.partNumber) : null,
+          device_type: isSwitch ? 'switch' : 'diode',
+          points,
+        });
+      }
+    } catch {
+      // Python logged the failure and skipped this ref.
+    }
+  }
+  return curves.sort((a, b) =>
+    a.component < b.component ? -1 : a.component > b.component ? 1 : 0,
+  );
+}
+
+/** `calculate_losses(dir, tj=, component_models=, device_types=)`. */
+export function calculateLosses(
+  dir: string,
+  tj: number = DEFAULT_TJ,
+  componentModels: Record<string, unknown> | null = null,
+  deviceTypes: Record<string, DeviceKind> | null = null,
+): LossAnalysis {
+  const custom = customModels(componentModels);
+  const defaultSwitch = loadModelPath(DEFAULT_SWITCH_MODEL);
+  const defaultDiode = loadModelPath(DEFAULT_DIODE_MODEL);
+
+  const results: Dict[] = [];
+  for (const device of lossDevices(
+    dir,
+    custom,
+    deviceTypes,
+    defaultSwitch,
+    defaultDiode,
+  )) {
+    try {
+      const [t, vDs, iD, vGate] = readComponentSeries(device.files);
       const entry = componentLosses(
         t,
         vDs,
         iD,
         vGate,
-        active,
+        device.model,
         tj,
-        isSwitch,
-        customDiode,
+        device.isSwitch,
+        device.diodeModel,
       );
-      if (entry) results.push({ component: ref, ...entry });
+      if (entry) results.push({ component: device.ref, ...entry });
     } catch {
       // Python logged the traceback and skipped this ref.
     }

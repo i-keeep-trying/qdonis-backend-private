@@ -16,7 +16,6 @@ export const STUDIO_STAGES = [
   'visualization',
   'design',
   'simulation',
-  'devices',
   'magnetics',
   'thermal',
 ] as const;
@@ -355,53 +354,8 @@ export function buildStudioTools(
     ),
     fn(
       'select_devices',
-      "DEVICES tool, usable on its own: choose the power semiconductors from the device library and evaluate their losses. Two input modes:\n- STANDALONE: pass `devices` with each device's stresses. Nothing else is needed: no specs, design or simulation. Use this whenever the user asks for device / MOSFET / diode selection directly or there is no simulation on the branch. Required per device: ref, kind (switch | diode), v_block_v (peak blocking voltage), fsw_khz, and i_peak_a / i_rms_a / i_avg_a (one or more; peak + RMS gives the best current shape); optional duty (conduction fraction, default 0.5) and zvs (soft turn-on). Parts are evaluated on idealised waveforms built from those stresses; the result appears in the Devices tab and run_thermal uses its losses when there is no simulation.\n- SIMULATION: omit `devices` to choose from the SIMULATED waveforms of the branch (peak voltage, peak/RMS current, switching events) and redo the simulation's loss analysis with the parts. Runs automatically after the first simulation.\nBoth: every viable part is evaluated at the junction temperature; the lowest-loss part with an adequate voltage class (>= 1.3x peak) and a sensible current size wins, and devices in the same circuit position share a part. Allowed kinds: switch = MOSFET with built-in diode, or IGBT + external antiparallel diode; diode = discrete diode. Call it again to change the technology preference or to force specific parts; a re-run without `devices` keeps the previously entered stresses unless from_simulation is true.",
+      "Part of the SIMULATION stage (there is no separate devices stage): choose the power semiconductors from the device library using the SIMULATED waveforms of the branch (peak voltage, peak/RMS current, switching events) and redo the simulation's loss analysis with the parts. Runs automatically after the first simulation; needs a successful simulation on the branch. Every viable part is evaluated at the junction temperature; the lowest-loss part with an adequate voltage class (>= 1.3x peak) and a sensible current size wins, and devices in the same circuit position share a part. Allowed kinds: switch = MOSFET with built-in diode, or IGBT + external antiparallel diode; diode = discrete diode. Call it again to change the technology preference or to force specific parts.",
       {
-        devices: {
-          type: 'array',
-          description:
-            'Standalone mode: the switches / diodes and their stresses.',
-          items: {
-            type: 'object',
-            properties: {
-              ref: { type: 'string', description: "Name, e.g. 'Q1', 'D1'." },
-              kind: { type: 'string', enum: ['switch', 'diode'] },
-              v_block_v: {
-                type: 'number',
-                description: 'Peak blocking voltage, V.',
-              },
-              fsw_khz: { type: 'number' },
-              i_peak_a: { type: 'number' },
-              i_rms_a: { type: 'number' },
-              i_avg_a: { type: 'number' },
-              duty: {
-                type: 'number',
-                description: 'Conduction fraction, 0..1 (default 0.5).',
-              },
-              zvs: {
-                type: 'boolean',
-                description:
-                  'Zero-voltage (soft) turn-on, e.g. resonant / phase-shifted bridges.',
-              },
-            },
-            required: ['ref', 'kind'],
-          },
-        },
-        fsw_khz: {
-          type: 'number',
-          description:
-            'Switching frequency for every entered device that does not set its own.',
-        },
-        junction_temperature_c: {
-          type: 'number',
-          description:
-            "Tj for the loss evaluation (default: the specs' value, else 100 C).",
-        },
-        from_simulation: {
-          type: 'boolean',
-          description:
-            'Select from the branch simulation instead of previously entered stresses.',
-        },
         preference: {
           type: 'string',
           enum: ['auto', 'mosfet', 'igbt'],
@@ -624,7 +578,6 @@ export function buildStudioTools(
             'visualization',
             'design',
             'simulation',
-            'devices',
             'magnetics',
             'thermal',
           ],
@@ -648,7 +601,6 @@ export function buildStudioTools(
             'visualization',
             'design',
             'simulation',
-            'devices',
             'magnetics',
             'thermal',
           ],

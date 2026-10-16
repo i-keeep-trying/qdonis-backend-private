@@ -20,10 +20,15 @@ import { ASSETS_ROOT } from '../common/assets/assets-root';
 import {
   catalogue,
   selectDevices,
-  selectDevicesFromStresses,
   type Overrides,
 } from './loss/device-selection';
-import { calculateLosses, type DeviceKind } from './loss/loss-engine';
+import { circuitInventory } from '../circuits/library/circuit-inventory';
+import { parsePyYaml } from '../topologies/library/pyyaml-schema';
+import {
+  calculateLosses,
+  lossesVsTemperature,
+  type DeviceKind,
+} from './loss/loss-engine';
 import type { Dict } from './netlist/py';
 import { readZip } from './ngspice/zip';
 import { waveformStats } from './waveforms/waveform-stats';
@@ -56,6 +61,7 @@ interface Fixture {
   override?: Overrides;
   selection_override?: unknown;
   recalc_150: unknown;
+  loss_vs_temperature: unknown;
   error?: string;
 }
 
@@ -132,31 +138,22 @@ describe('studio data parity with qdonis-core', () => {
     expect(diff(plain(catalogue()), load('_catalogue.json'))).toEqual([]);
   });
 
-  it('selects devices from entered stresses', () => {
-    const { stresses, results } = load('_standalone.json') as {
-      stresses: Dict[];
-      results: Record<string, unknown>;
-    };
-    expect(
-      diff(
-        plain(selectDevicesFromStresses(stresses.slice(0, 3), 100.0)),
-        results.auto,
-      ),
-    ).toEqual([]);
-    expect(
-      diff(
-        plain(selectDevicesFromStresses(stresses, 125.0, 'igbt')),
-        results.igbt,
-      ),
-    ).toEqual([]);
-    expect(
-      diff(
-        plain(
-          selectDevicesFromStresses([{ ref: 'Q1', kind: 'switch' }], 100.0),
-        ),
-        results.missing,
-      ),
-    ).toEqual([]);
+  it('circuit inventory of every library topology', () => {
+    const expected = load('_inventory.json') as Record<string, unknown>;
+    expect(Object.keys(expected).length).toBeGreaterThan(30);
+    for (const [topology, inventory] of Object.entries(expected)) {
+      const path = join(
+        ASSETS_ROOT,
+        'topologies',
+        'primitives',
+        `${topology}.yaml`,
+      );
+      const yaml = parsePyYaml(readFileSync(path, 'utf8'), path) as Dict;
+      expect([
+        topology,
+        diff(plain(circuitInventory(yaml)), inventory),
+      ]).toEqual([topology, []]);
+    }
   });
 
   describe.each(fixtures.map((f) => [f.topology, f] as const))(
@@ -208,6 +205,18 @@ describe('studio data parity with qdonis-core', () => {
               ),
             ),
             fx.recalc_150,
+          ),
+        ).toEqual([]);
+      });
+
+      it('losses versus junction temperature', () => {
+        const sel = selectDevices(dir, 100.0, fx.device_types);
+        expect(
+          diff(
+            plain(
+              lossesVsTemperature(dir, sel.component_models, fx.device_types),
+            ),
+            fx.loss_vs_temperature,
           ),
         ).toEqual([]);
       });

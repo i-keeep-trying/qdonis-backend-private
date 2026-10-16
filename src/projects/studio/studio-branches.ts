@@ -9,6 +9,7 @@ import {
   type StageNode,
   stageNodeOnBranch,
   type StudioProject,
+  type WorkspaceStage,
 } from './studio-graph';
 import { MAX_BRANCHES } from './studio-persistence';
 
@@ -321,16 +322,12 @@ export interface StageView {
   error: string | null;
 }
 
-/**
- * State of every stage on a branch (old StageRail). Devices also count as
- * ready when the branch's simulation selected them (`hasSimDevices`).
- */
+/** State of every workspace stage on a branch (old StageRail). */
 export function stageViews(
   project: StudioProject,
   branchId: string,
-  hasSimDevices: boolean,
-): Record<StageKind, StageView> {
-  const out = {} as Record<StageKind, StageView>;
+): Record<WorkspaceStage, StageView> {
+  const out = {} as Record<WorkspaceStage, StageView>;
   for (const stage of STAGE_ORDER) {
     const node = stageNodeOnBranch(project, stage, branchId);
     out[stage] = node
@@ -340,12 +337,7 @@ export function stageViews(
           updatedAt: node.updatedAt,
           error: node.error ?? null,
         }
-      : {
-          status: stage === 'devices' && hasSimDevices ? 'ready' : 'empty',
-          nodeId: null,
-          updatedAt: null,
-          error: null,
-        };
+      : { status: 'empty', nodeId: null, updatedAt: null, error: null };
   }
   return out;
 }

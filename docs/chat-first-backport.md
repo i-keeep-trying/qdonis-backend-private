@@ -37,17 +37,159 @@ that part's Python on top of `0054f72`, so a fixture never contains a later part
    power references `{components.R_LOAD.resistance}`, single-phase PFC operating point and sizing, VSI / NPC /
    T-type / AFE sizing.
 4. Loss vs junction temperature (loss engine + endpoint + chart); circuit inventory `power_sources`,
-   `output_voltage`, `load_resistance`; waveform stats `links` of nested parts.
-5. Devices folded into the Simulation stage (agent tools / prompt, stage list, web), parts picked in the loss
-   table kept across re-runs.
-6. Magnetics: operating point per part, editable per-part inputs and ambient, 3D model.
-7. Thermal: nested-resistor loss fix, R_ISO excluded, cooling recommendation (+ agent rule).
+   `output_voltage`, `load_resistance`; waveform stats `links` of nested parts — done.
+5. Devices folded into the Simulation stage (agent tools / prompt, stage list, web) — done.
+6. Magnetics: operating point per part, editable per-part inputs, 3D model — done.
+7. Thermal: nested-resistor loss fix, R_ISO excluded, cooling recommendation (+ agent rule) — done.
 8. Simulation / Specs UI: split view, waveform viewer (toggle chips, DC output names), loss table, constraint
-   domains.
+   domains — done.
 
 ## Change log
 
 Newest first.
+
+### 2026-10-16 — Part 8: Simulation and Specs UI (qdonis-web)
+
+From web `6d59ca0`, `1309970`, `cab4f1f`:
+
+- Simulation tab: tabs are now **Waveforms & losses** (waveforms left, losses right; stacked below ~1040 px
+  through a container query), **Results** and **Netlist**. The losses column is the loss table, the library
+  selection (`DevicesPanel`) and the compact loss-vs-Tj chart. The side-rail loss bars are gone (`loss-bars.tsx`
+  removed).
+- Loss table: Tj chip and models in the header, a share bar per device, the backend's total in a Σ footer. The
+  switching-events column is gone. The gate-drive and leakage columns only show when a device has them; only the
+  two default models carry Qg / I_leak data.
+- Waveform viewer: in the split view, every signal is a toggle chip in one wrapping row, with All / Gates only
+  and no header. Panels are 165 px high there. All panels share one time cursor (x spikes). DC output names
+  (`V_DC_OUT`, `VDC`, `VDC_*` …) are shown by default, like `VOUT` (`isOutputSignal`).
+- Specs: the constraints list is grouped for reading by engineering domain and sub-group
+  (`constraint-domains.ts`, chat-first `constraintDomains`). It has domain tabs with counts and "need a value",
+  a "Needs a value" filter, and open counts per group. The inspector shows domain · group and the category label.
+  Stored categories are unchanged.
+
+Not ported: the Tj input with Recalculate and the per-row part dropdowns of the old embedded `SimulationScreen`
+loss table (and with them "parts picked in the loss table kept across re-runs", chat-first `loss_component_models`).
+The new web never had that table: parts are changed through the device selection, which re-runs keep. Also not
+ported: chat-first's "add constraint uses the open domain's category", because the new web has no add-constraint row.
+
+### 2026-10-16 — Part 7: thermal
+
+- `thermal.stage.ts` `passiveLosses`: a nested resistor without its own telemetry is now estimated from its own
+  series capacitor and the parent pins it spans, using the waveform-stats `links` (Part 4):
+  P = C·ΔV²·fsw·tanh(T/4RC). A secondary-side snubber sees n·ΔV_pri. The old estimate took the first capacitor
+  under the parent and the primary voltage for every resistor, so RSN_P, RSN_S and R_ISO all showed the same
+  0.11 W. When the part cannot be resolved, it is listed with "re-run the design and simulation to export it".
+- R_ISO and other `*_ground_anchor` resistors are left out of the budget and listed under assumptions as
+  "Excluded from the budget". They are SPICE references for the isolated side, not real parts.
+- `thermal-engine.ts` `recommendCooling` produces `ThermalResult.cooling`: method tier, Rθsa target, heat, sink
+  temperature, size from volumetric resistance (≈ 650 / 115 / 65 cm³·°C/W), airflow, mounting, alternatives and
+  notes. The agent payload carries it as `cooling_recommendation`. The agent prompt now says to end every
+  `run_thermal` with a "Recommended cooling" section (core `08fa795`; captured in Part 5's agent fixtures). The
+  web shows a "Recommended cooling" card, and older results fall back to the heatsink card.
+- Exported nested-resistor waveforms (`V_<ref>.csv`) came with Part 1.
+
+### 2026-10-16 — Part 6: magnetics
+
+- `studio-stages/magnetics-operating-point.ts`: the old frontend's `magneticsOperatingPoint.ts` (cab4f1f), ported
+  verbatim with typed inputs.
+  - It builds the converter operating point (Vin, Vout, Pout, η, fsw, line frequency, phases), taking each value
+    from the specs first, then the design values, the circuit inventory (Part 4) and the simulation.
+  - It then builds the winding waveforms of each part from the converter's steady-state relations: DC-DC CCM/DCM,
+    flyback (also PFC), forward, bridges, LLC, DAB, PFC / AFE / inverter over a half line cycle, and the
+    rectifier transformer.
+- `planMagnetics` uses these estimates where a part has no simulated waveform, scaled to the plot-trace RMS when
+  there is one. A dual centre-tapped primary is designed per half.
+- Each requirement and design carries `inputs` (basis, rows, assumptions). The result carries `operatingPoint`,
+  and the agent payload carries `operating_point` and `design_inputs`.
+- Per-part overrides (6d59ca0): `partOverrides` / `clearOverrides` / `clearAllOverrides` on `POST …/magnetics/run`.
+  - A circuit part with entered values is designed from idealised waveforms built from them.
+  - The values persist in `data.overrides` until reset, and the payload lists them as `entered_in_workspace`.
+  - Entered parts take the edits in place.
+- Engine: `MagneticRequirement.inputs` → `MagneticDesign.inputs`.
+- The magnetics view adds `inputs`, `coreGeometry` (library Ae / window, for the 3D model), `overrides` and
+  `operatingPoint`.
+- Web Magnetics tab:
+  - **Part tabs.**
+  - **"Input parameters" panel:**
+    - It shows the converter operating point, the part's own operating point, and the design inputs per kind,
+      editable. The inputs are prefilled from the entered values, or derived from the design: flyback
+      D = 3·(Irms/Ipk)² and V_pri = λ/(D·T); transformer V_pri = 2λ·fsw.
+    - It has Run design and Reset <ref>.
+  - **3D model** (`magnetic-3d-model.tsx`, Plotly mesh3d):
+    - Two core halves with a seam, and the gap highlighted and labelled.
+    - Bobbin, pins, windings with the designed turns, layers and wire, tape, and lead-outs.
+    - View presets and an X-ray toggle.
+
+  Ambient was already editable in the settings bar.
+
+Not ported: the old view's removal of the stat cards and large title, which is a layout choice the new web
+does not share.
+
+### 2026-10-16 — Part 5: devices folded into the Simulation stage
+
+Core `326d618` and web `cab4f1f`: device selection is part of the Simulation stage. There is no standalone
+selection from entered stresses.
+
+- Agent: chat-first `studio_agent.py`.
+  - `STAGES` has no `devices`.
+  - `select_devices` is simulation-only: its `devices`, `fsw_khz`, `junction_temperature_c` and
+    `from_simulation` inputs are gone.
+  - The prompt lines changed, and the "Recommended cooling" rule was added.
+  - Fixtures were re-captured. The Part 5 reference is the Part 4 reference plus chat-first `studio_agent.py`.
+  - This keeps the backend's pre-synced `edit_circuit` wording: the synced-schematic core rewrote it, and that
+    is the synced port's business.
+  - The executor's `select_devices` reports to the simulation stage, and the snapshot has no `devices` section.
+- `POST …/stages/simulation/devices` (was `devices/run`, without `inputs`) picks parts on the simulation's
+  waveforms. It updates the simulation node in place (`rev + 1`; `forked` is always false) and never creates a
+  devices node.
+  - `selectDevicesFromStresses`, its compute job, DTO, format helper, parity test and `_standalone.json`
+    fixture are removed. `studio_capture.py` no longer writes it.
+- Stages: `STAGE_ORDER` (the rail, progress out of 6, branch DTOs) has no `devices`. `StageKind` keeps it as a
+  former stage (`STAGE_KINDS`), so stored nodes still load and show in the history. Its results open the
+  Simulation view. Thermal has no `devices` origin any more; old results keep theirs for display.
+- Web:
+  - The Devices view, the stress form and the device loss table are removed.
+  - `StudioView` has no `devices`. `?view=devices` now opens Simulation, and the URL is rewritten.
+  - `WorkspaceStage` is the rail's stages. History and branch labels use `STAGE_LABEL`, so old nodes still read
+    "Devices".
+  - `selectDevices` posts to the new route and returns the simulation node.
+  - The mock store and fixtures have no devices node (store version 3).
+
+### 2026-10-16 — Part 4: loss vs Tj, circuit inventory, waveform-stats links
+
+- `loss-engine.ts`:
+  - `lossesVsTemperature` and `modelTemperatures` (core `326d618`): each device is evaluated at every model
+    temperature within −75…250 °C, on the same waveforms.
+  - `calculateLosses` and the new function share `lossDevices`.
+  - `JsonLossModel.temperatures` lists the tables' t axes.
+- Compute job `lossVsTemperature`.
+- `GET /projects/:projectId/simulations/:nodeId/loss-vs-temperature` returns
+  `{ curves: [{ component, model, diodeModel, deviceType, points: [{ tjC, totalLossW, conductionLossW,
+  switchingLossW }] }] }`. It uses the stored raw waveforms, the simulation's selected parts, and the device types
+  of the branch circuit the node belongs to.
+- Web: a loss-vs-Tj chart (`loss-temperature-chart.tsx`) with Tj marked, as one RTK query keyed by the parts in
+  use.
+- `circuitInventory` gets `power_sources` (power voltage sources, without sense / ref / carrier sources),
+  `output_voltage` (analysis `target_vout` …) and `load_resistance` (core `326d618`).
+- `waveformStats`: nested parts carry `links`, their `[ref, pin]` connections (core `08fa795`).
+
+Parity: the Part 4 reference is the Part 3 reference plus chat-first `studio_waveforms.py`. The synced core already
+had the loss engine and inventory changes, because `326d618` is the common ancestor.
+- New `test/parity/capture/studio_derived_capture.py`:
+  - It re-derives `waveform_stats` and adds `loss_vs_temperature` for the studio fixtures, from their committed
+    archives.
+  - It writes `_inventory.json`, the inventory of all 35 library topologies, read with the PyYAML-compatible
+    loader.
+- `studio.parity.spec.ts` checks both.
+
+Tested (all parts):
+
+| Repo | Checks |
+|---|---|
+| backend | full jest suite: 1608 of 1610 pass (1 skipped; the known dev-layout race failed `schematic.service.spec`, which passes alone); new `chat-first-stages.spec.ts`; typecheck; lint of the changed files |
+| web | vitest: 100 tests, including new tests for constraint domains, the output-signal default and the scope panel height; typecheck; eslint |
+
+Not run: the live app in the browser.
 
 ### 2026-10-15 — Part 3: deterministic sizing
 

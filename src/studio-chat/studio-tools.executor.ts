@@ -23,7 +23,6 @@ import {
 } from '../projects/studio/studio-graph';
 import { StudioGraphService } from '../projects/studio/studio-graph.service';
 import { SimulationService } from '../simulation/simulation.service';
-import type { DeviceStressInput } from '../simulation/devices.format';
 import {
   DECK_KINDS,
   type DeckKind,
@@ -89,7 +88,7 @@ export const TOOL_INFO: Record<
   run_simulation: { label: 'Running ngspice', stage: 'simulation' },
   import_netlist: { label: 'Importing your netlist', stage: 'design' },
   edit_circuit: { label: 'Editing the circuit', stage: 'visualization' },
-  select_devices: { label: 'Selecting devices', stage: 'devices' },
+  select_devices: { label: 'Selecting devices', stage: 'simulation' },
   design_magnetics: { label: 'Designing magnetics', stage: 'magnetics' },
   run_thermal: { label: 'Solving the thermal network', stage: 'thermal' },
   open_view: { label: 'Switching view', stage: null },
@@ -848,37 +847,13 @@ export class StudioToolsExecutor {
           ...forkNote(started.forked, started.branchName),
         },
       },
-      ['simulation', 'devices'],
+      ['simulation'],
       'simulation',
       started,
     );
   }
 
   private async selectDevices(ctx: ToolContext, input: JsonObject) {
-    const fsw = num(input.fsw_khz);
-    let inputs: DeviceStressInput[] | undefined = records(input.devices).map(
-      (d, i) =>
-        ({
-          ref: str(d.ref) ?? `Q${i + 1}`,
-          kind: d.kind === 'diode' ? 'diode' : 'switch',
-          vBlockV: num(d.v_block_v) ?? null,
-          fswKhz: num(d.fsw_khz) ?? fsw ?? null,
-          iPeakA: num(d.i_peak_a) ?? null,
-          iRmsA: num(d.i_rms_a) ?? null,
-          iAvgA: num(d.i_avg_a) ?? null,
-          duty: num(d.duty) ?? null,
-          zvs: d.zvs === true,
-        }) as unknown as DeviceStressInput,
-    );
-    if (!inputs.length) {
-      // A re-run without devices keeps the entered stresses unless the simulation is asked for.
-      const previous = stageNodeOnBranch(await this.load(ctx), 'devices');
-      const entered = records(previous?.data.inputs);
-      inputs =
-        input.from_simulation !== true && entered.length
-          ? (entered as unknown as DeviceStressInput[])
-          : undefined;
-    }
     const overrides: Record<string, string> = {};
     for (const o of records(input.overrides)) {
       if (str(o.ref) && str(o.part)) overrides[str(o.ref)!] = str(o.part)!;
@@ -893,37 +868,31 @@ export class StudioToolsExecutor {
       ctx.projectId,
       ctx.branchId,
       {
-        inputs,
         preference,
         overrides: Object.keys(overrides).length ? overrides : undefined,
       },
     )) as unknown as Landed;
     this.land(ctx, landed);
     const data = landed.node.data;
-    const devices = describeSelection(data.selection);
-    const { losses, total_semiconductor_loss_w } = deviceLosses(data);
-    const standalone = Boolean(inputs?.length);
+    const devices = describeSelection(data.deviceSelection);
+    const { total_semiconductor_loss_w } = deviceLosses({
+      losses: rec(data.lossAnalysis).components ?? [],
+    });
     return this.outcome(
       ctx,
       {
         ok: true,
         summary: `${devices.filter((d) => d.device !== 'none suitable').length} devices selected · ${total_semiconductor_loss_w.toFixed(2)} W`,
         payload: {
-          mode: standalone
-            ? 'standalone (entered stresses, idealised waveforms)'
-            : 'simulated waveforms of the active branch',
+          mode: 'simulated waveforms of the active branch',
           devices,
-          ...(standalone ? { losses } : {}),
           total_semiconductor_loss_w,
-          junction_temperature_c: rec(data.selection).junctionC,
-          note: standalone
-            ? 'Parts were chosen by evaluating every viable library part with the loss engine on idealised waveforms built from the entered stresses (ramp current while conducting, hard switching unless zvs). Report these exact parts; a simulation of the real circuit would refine the losses. run_thermal can use these losses directly.'
-            : 'Devices were chosen from the library by evaluating every viable part on the simulated waveforms. Report these exact parts and reasons; do not claim any other device technology.',
-          ...forkNote(landed.forked, landed.branchName),
+          junction_temperature_c: rec(data.deviceSelection).junctionC,
+          note: 'Devices were chosen from the library by evaluating every viable part on the simulated waveforms. Report these exact parts and reasons; do not claim any other device technology.',
         },
       },
-      standalone ? ['devices'] : ['devices', 'simulation'],
-      'devices',
+      ['simulation'],
+      'simulation',
       landed,
     );
   }

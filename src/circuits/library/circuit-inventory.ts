@@ -1,5 +1,10 @@
 import { PY_WHITESPACE } from '../../common/python/python-json';
 import { jsonText, pyStrKey } from '../../common/python/python-semantics';
+import { pyStr, truthy } from '../../simulation/netlist/py';
+import type {
+  OutputVoltageTarget,
+  PowerSource,
+} from '../../studio-stages/circuit-data.provider';
 import type { CircuitInventory } from '../circuits.types';
 
 /**
@@ -210,5 +215,86 @@ export function circuitInventory(yamlDict: Json): CircuitInventory {
     magnetics,
     switching_frequency: switchingFrequency(yamlDict),
     input_voltage: inputVoltage,
+    power_sources: powerSources(yamlDict),
+    output_voltage: outputVoltageTarget(yamlDict),
+    load_resistance: loadResistance(yamlDict),
   };
+}
+
+/** Python `str(value or "")`. */
+const textOr = (value: unknown): string => (truthy(value) ? pyStr(value) : '');
+/** Python `a or b`. */
+const or = (a: unknown, b: unknown): unknown => (truthy(a) ? a : b);
+
+const CONTROL_SOURCE =
+  /sense|ref|tri|carrier|ramp|pwm|ff|feedforward|gate|drive/i;
+
+/** Power voltage sources (not sense / reference / carrier sources): DC value or AC peak and frequency. */
+function powerSources(yamlDict: Json): PowerSource[] {
+  const sources: PowerSource[] = [];
+  for (const [comp] of iterComponents(yamlDict.components)) {
+    const params = paramsOf(comp);
+    if (params.node_type !== 'voltage_source') continue;
+    const ref = textOr(comp.ref);
+    const role = textOr(comp.role);
+    if (CONTROL_SOURCE.test(ref) || CONTROL_SOURCE.test(role)) continue;
+    const kind = pyStr(or(params.source, 'dc')).toLowerCase();
+    if (kind === 'sine' || kind === 'sin' || kind === 'ac') {
+      const peak = toNumber(or(params.amplitude, params.voltage));
+      if (peak) {
+        sources.push({
+          ref,
+          role: role || null,
+          kind: 'ac',
+          peak,
+          frequency: toNumber(params.frequency),
+        });
+      }
+    } else if (kind === 'dc') {
+      const value = toNumber(params.voltage);
+      if (value) sources.push({ ref, role: role || null, kind: 'dc', value });
+    }
+  }
+  return sources;
+}
+
+const VOUT_KEYS = [
+  'target_vout',
+  'target_vout_rms',
+  'vout_target',
+  'target_output_voltage',
+  'vout_nominal',
+];
+
+/** Output-voltage target from the analysis criteria (`target_vout` …), if the template defines one. */
+function outputVoltageTarget(yamlDict: Json): OutputVoltageTarget | null {
+  const analyses = isObject(yamlDict.analysis) ? yamlDict.analysis : {};
+  for (const analysis of Object.values(analyses)) {
+    const requirements = isObject(analysis) ? analysis.requirements : null;
+    if (!Array.isArray(requirements)) continue;
+    for (const req of requirements) {
+      const criteria =
+        isObject(req) && isObject(req.criteria) ? req.criteria : {};
+      for (const key of VOUT_KEYS) {
+        const value = toNumber(criteria[key]);
+        if (value !== null) return { value, rms: key.endsWith('_rms'), key };
+      }
+    }
+  }
+  return null;
+}
+
+const LOAD_REFS = new Set(['R_LOAD', 'RLOAD', 'ROUT', 'R_OUT', 'R_DC']);
+
+function loadResistance(yamlDict: Json): number | null {
+  for (const [comp] of iterComponents(yamlDict.components)) {
+    if (comp.type !== 'resistor') continue;
+    const ref = textOr(comp.ref).toUpperCase();
+    const role = textOr(comp.role).toLowerCase();
+    if (LOAD_REFS.has(ref) || role.includes('load')) {
+      const value = toNumber(paramsOf(comp).resistance);
+      if (value) return value;
+    }
+  }
+  return null;
 }

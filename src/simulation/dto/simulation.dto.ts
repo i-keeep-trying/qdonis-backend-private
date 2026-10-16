@@ -5,13 +5,8 @@ import {
   ArrayMinSize,
   ArrayUnique,
   IsArray,
-  IsBoolean,
   IsIn,
-  IsNumber,
-  Max,
-  Min,
   ValidateBy,
-  ValidateIf,
   IsNotEmpty,
   IsObject,
   IsOptional,
@@ -131,78 +126,8 @@ export class RunSimulationDto {
   analyses!: DeckKind[];
 }
 
-/** Stresses of one device entered by hand (qdonis-web `DeviceStressInput`). */
-export class DeviceStressDto {
-  @ApiProperty({ example: 'Q1', maxLength: 32 })
-  @IsString()
-  @Matches(/\S/)
-  @MaxLength(32)
-  ref!: string;
-
-  @ApiProperty({ enum: ['switch', 'diode'] })
-  @IsIn(['switch', 'diode'])
-  kind!: 'switch' | 'diode';
-
-  @ApiProperty({ description: 'Peak blocking voltage, V' })
-  @IsNumber({ allowNaN: false, allowInfinity: false })
-  @Min(0.1)
-  @Max(10_000)
-  vBlockV!: number;
-
-  @ApiProperty()
-  @IsNumber({ allowNaN: false, allowInfinity: false })
-  @Min(0.01)
-  @Max(10_000)
-  fswKhz!: number;
-
-  @ApiProperty()
-  @IsNumber({ allowNaN: false, allowInfinity: false })
-  @Min(0)
-  @Max(5_000)
-  iPeakA!: number;
-
-  @ApiProperty()
-  @IsNumber({ allowNaN: false, allowInfinity: false })
-  @Min(0)
-  @Max(5_000)
-  iRmsA!: number;
-
-  @ApiPropertyOptional({ nullable: true })
-  @ValidateIf((_, v) => v !== null && v !== undefined)
-  @IsNumber({ allowNaN: false, allowInfinity: false })
-  @Min(0)
-  @Max(5_000)
-  iAvgA!: number | null;
-
-  @ApiPropertyOptional({
-    nullable: true,
-    description: 'Conduction fraction, 0..1',
-  })
-  @ValidateIf((_, v) => v !== null && v !== undefined)
-  @IsNumber({ allowNaN: false, allowInfinity: false })
-  @Min(0)
-  @Max(1)
-  duty!: number | null;
-
-  @ApiProperty()
-  @IsBoolean()
-  zvs!: boolean;
-}
-
-/** Body of `POST /projects/:projectId/branches/:branchId/stages/devices/run`. */
+/** Body of `POST /projects/:projectId/branches/:branchId/stages/simulation/devices`. */
 export class SelectDevicesDto {
-  @ApiPropertyOptional({
-    type: [DeviceStressDto],
-    description: "Without inputs the branch's simulated waveforms are used.",
-  })
-  @IsOptional()
-  @IsArray()
-  @ArrayMinSize(1)
-  @ArrayMaxSize(32)
-  @ValidateNested({ each: true })
-  @Type(() => DeviceStressDto)
-  inputs?: DeviceStressDto[];
-
   @ApiPropertyOptional({ enum: ['auto', 'mosfet', 'igbt'] })
   @IsOptional()
   @IsIn(['auto', 'mosfet', 'igbt'])

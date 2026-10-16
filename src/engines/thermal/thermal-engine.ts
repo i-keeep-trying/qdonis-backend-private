@@ -124,8 +124,39 @@ export interface ThermalResult {
     outputPowerSource?: 'simulation' | 'specs' | 'input';
     efficiencyPct?: number;
   };
+  /** Recommended cooling method for the whole design. */
+  cooling: CoolingRecommendation;
   assumptions: string[];
   warnings: string[];
+}
+
+export interface CoolingRecommendation {
+  /** Short name, e.g. "Natural-convection extruded heatsink". */
+  method: string;
+  tier:
+    | 'none'
+    | 'natural'
+    | 'natural_large'
+    | 'forced_air'
+    | 'high_airflow'
+    | 'liquid';
+  /** Why this method fits the numbers. */
+  rationale: string;
+  /** Heatsink spec, when one is needed. */
+  heatsink?: {
+    rsaMaxCW: number;
+    heatW: number;
+    sinkTempC: number;
+    /** Approximate heatsink volume from the volumetric thermal resistance of the method, cm³. */
+    volumeCm3: number;
+    /** Rough size, e.g. "≈ 60 × 60 × 35 mm". */
+    sizeHint: string;
+    airflow?: string;
+  };
+  mounting: string;
+  /** Other options, best first. */
+  alternatives: string[];
+  notes: string[];
 }
 
 const PACKAGE: Record<string, { rthJc: number; rthJa: number; tjMax: number }> =
@@ -146,6 +177,163 @@ const status = (
   margin: number,
 ): 'ok' | 'warm' | 'over' =>
   t > limit ? 'over' : t > limit - margin ? 'warm' : 'ok';
+
+// Volumetric thermal resistance of heatsinks, cm³·°C/W (typical mid-range values):
+// natural convection 500–800, forced air 1 m/s 150–250, 2.5 m/s 80–150, 5 m/s 50–80.
+const VOLUMETRIC = { natural: 650, forced: 115, high: 65 };
+
+function sizeHint(volumeCm3: number): string {
+  // Typical extrusion: footprint about twice the fin height (W = L = 2H).
+  const h = Math.cbrt(volumeCm3 / 4) * 10; // mm
+  const w = 2 * h;
+  const r = (x: number) => Math.max(5, Math.round(x / 5) * 5);
+  return `≈ ${r(w)} × ${r(w)} × ${r(h)} mm (L × W × fin height)`;
+}
+
+/** Cooling method for the whole design (old frontend `recommendCooling`, chat-first 6d59ca0). */
+function recommendCooling(
+  ambientC: number,
+  heatsink: ThermalResult['heatsink'],
+  sinkW: number,
+  devices: ThermalDeviceResult[],
+  magnetics: ThermalResult['magnetics'],
+  rthCs: number,
+): CoolingRecommendation {
+  const notes: string[] = [];
+  const mounting = `Mount every TO-247 on the shared sink with an insulating thermal pad or grease + mica/ceramic washer (Rθcs ≈ ${rthCs} °C/W assumed; isolation is needed because the tabs sit at different potentials). Torque the clip/screw to the datasheet value.`;
+  const hotMag = magnetics.filter(
+    (m): m is typeof m & { hotspotC: number } =>
+      m.status !== 'ok' && m.hotspotC !== null,
+  );
+  if (hotMag.length)
+    notes.push(
+      `${hotMag.map((m) => m.ref).join(', ')}: hotspot ${hotMag.map((m) => `${Math.round(m.hotspotC)} °C`).join(', ')} — give the magnetics airflow too, or move to a larger core.`,
+    );
+  if (heatsink && heatsink.sinkTempC > 60)
+    notes.push(
+      `Sink runs at ≈ ${Math.round(heatsink.sinkTempC)} °C: above the ~60 °C touch-safe limit, so guard it inside the enclosure.`,
+    );
+
+  if (!heatsink && devices.some((d) => d.status === 'over')) {
+    const over = devices
+      .filter((d) => d.status === 'over')
+      .map((d) => `${d.ref} reaches ≈ ${Math.round(d.tjC)} °C`)
+      .join(', ');
+    return {
+      method: 'A heatsink is required',
+      tier: 'natural',
+      rationale: `Without a heatsink ${over}, above the limit. Re-run with the heatsink strategy "auto" to size it.`,
+      mounting,
+      alternatives: [],
+      notes,
+    };
+  }
+  if (!heatsink) {
+    const worst = devices.reduce(
+      (a, d) => (d.marginC < a ? d.marginC : a),
+      Infinity,
+    );
+    return {
+      method: 'No heatsink — free-air packages on the PCB',
+      tier: 'none',
+      rationale: devices.length
+        ? `Every junction stays ${Number.isFinite(worst) ? `≥ ${Math.round(worst)} °C` : 'well'} below its limit in free air at ${ambientC} °C ambient.`
+        : 'No semiconductor heat to remove.',
+      mounting:
+        'Keep the devices in free air with clearance around the tabs; generous copper pours under SMD parts help.',
+      alternatives: [
+        'A small clip-on TO-247 heatsink (≈ 10–15 °C/W) adds margin for a hotter enclosure.',
+      ],
+      notes,
+    };
+  }
+
+  const rsa = heatsink.rsaRequired;
+  if (!heatsink.feasible) {
+    return {
+      method: 'Liquid cold plate and split devices across sinks',
+      tier: 'liquid',
+      rationale: `Even an ideal shared heatsink cannot hold every junction within limits with ${sinkW.toFixed(1)} W on it (needed Rθsa ${rsa.toFixed(2)} °C/W).`,
+      mounting,
+      alternatives: [
+        'Reduce the losses first: lower-Rds(on)/faster devices, lower switching frequency or soft switching.',
+        'Give the hottest device its own sink so its Rθjc + Rθcs path is not loaded by the others.',
+      ],
+      notes,
+    };
+  }
+
+  let tier: CoolingRecommendation['tier'];
+  let method: string;
+  let volumetric: number;
+  let airflow: string | undefined;
+  const alternatives: string[] = [];
+  if (rsa >= 8) {
+    tier = 'natural';
+    method = 'Clip-on / board-mount TO-247 heatsink (natural convection)';
+    volumetric = VOLUMETRIC.natural;
+    alternatives.push(
+      'A small extruded profile shared by all devices, if they sit together.',
+      'For a sealed enclosure, conduct the heat to the enclosure wall with a thermal pad.',
+    );
+  } else if (rsa >= 3) {
+    tier = 'natural';
+    method = 'Natural-convection extruded aluminium heatsink';
+    volumetric = VOLUMETRIC.natural;
+    alternatives.push(
+      'A board-mount TO-247 heatsink per device, if the layout keeps them apart.',
+      'A small fan would shrink the sink by about 5× if space matters more than noise.',
+    );
+  } else if (rsa >= 1.2) {
+    tier = 'natural_large';
+    method = 'Large natural-convection heatsink (vertical fins)';
+    volumetric = VOLUMETRIC.natural;
+    alternatives.push(
+      `Forced air (≈ 1–2 m/s from a small fan) with a ≈ ${Math.round(VOLUMETRIC.forced / rsa)} cm³ sink — much smaller, at the cost of a fan.`,
+    );
+  } else if (rsa >= 0.4) {
+    tier = 'forced_air';
+    method = 'Finned heatsink with forced air (fan)';
+    volumetric = VOLUMETRIC.forced;
+    airflow = '≈ 2–3 m/s across the fins (a 60–80 mm axial fan)';
+    alternatives.push(
+      `Natural convection would need ≈ ${Math.round(VOLUMETRIC.natural / rsa)} cm³ of extrusion — only practical in an open frame.`,
+    );
+  } else if (rsa >= 0.12) {
+    tier = 'high_airflow';
+    method = 'Dense-fin heatsink with high airflow, or a liquid cold plate';
+    volumetric = VOLUMETRIC.high;
+    airflow = '≈ 5 m/s (ducted fan / blower)';
+    alternatives.push(
+      'A liquid cold plate (≈ 0.05–0.1 °C/W) if fan noise or size is a problem.',
+    );
+  } else {
+    tier = 'liquid';
+    method = 'Liquid cold plate';
+    volumetric = 0;
+    alternatives.push(
+      'Split the devices across several air-cooled sinks to relax the per-sink Rθsa.',
+    );
+  }
+  const volumeCm3 = volumetric ? Math.round(volumetric / rsa) : 0;
+  const headroom = Math.round(Math.min(...devices.map((d) => d.marginC)));
+  return {
+    method,
+    tier,
+    rationale: `${sinkW.toFixed(1)} W into one sink must keep the hottest junction ${headroom} °C below its limit at ${ambientC} °C ambient, which needs Rθsa ≤ ${rsa.toFixed(2)} °C/W.`,
+    heatsink: {
+      rsaMaxCW: rsa,
+      heatW: sinkW,
+      sinkTempC: heatsink.sinkTempC,
+      volumeCm3,
+      sizeHint: volumeCm3 ? sizeHint(volumeCm3) : 'cold plate',
+      airflow,
+    },
+    mounting,
+    alternatives,
+    notes,
+  };
+}
 
 function coolingFor(rsa: number): string {
   if (rsa >= 3)
@@ -340,10 +528,24 @@ export function analyzeThermal(
       `Not evaluated: ${notEvaluated.map((n) => `${n.ref} (${n.reason})`).join('; ')}.`,
     );
 
+  const cooling = recommendCooling(
+    Ta,
+    heatsink,
+    sinkW,
+    deviceResults,
+    magnetics,
+    rthCs,
+  );
+  if (cooling.heatsink?.volumeCm3)
+    assumptions.push(
+      'Heatsink volume from typical volumetric thermal resistance: ≈ 650 cm³·°C/W natural convection, ≈ 115 forced air (2–3 m/s), ≈ 65 high airflow (5 m/s); pick the actual part from a vendor Rθsa curve.',
+    );
+
   return {
     ambientC: Ta,
     strategy,
     heatsink,
+    cooling,
     devices: deviceResults,
     magnetics,
     budget,

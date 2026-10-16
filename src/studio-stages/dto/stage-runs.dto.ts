@@ -145,6 +145,35 @@ export class RunMagneticsStageDto {
   @IsObject()
   @IsCoreMap()
   coreOverrides?: Record<string, string>;
+
+  @ApiPropertyOptional({
+    type: [MagneticPartStageDto],
+    description:
+      "Circuit parts designed from these values instead of their simulated waveforms (by ref); kept across re-designs. With origin 'input' they replace the entered parts.",
+  })
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(16)
+  @ValidateNested({ each: true })
+  @Type(() => MagneticPartStageDto)
+  partOverrides?: MagneticPartStageDto[];
+
+  @ApiPropertyOptional({
+    type: [String],
+    description:
+      'Refs whose entered values are dropped (back to the circuit waveforms)',
+  })
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(16)
+  @IsString({ each: true })
+  @MaxLength(32, { each: true })
+  clearOverrides?: string[];
+
+  @ApiPropertyOptional({ description: 'Drop every entered value' })
+  @IsOptional()
+  @IsBoolean()
+  clearAllOverrides?: boolean;
 }
 
 // --- thermal ---------------------------------------------------------------------
@@ -217,9 +246,9 @@ export class ThermalInputsStageDto {
 
 /** Body of `POST /projects/:projectId/branches/:branchId/stages/thermal/run`. */
 export class RunThermalStageDto {
-  @ApiProperty({ enum: ['simulation', 'devices', 'input'] })
-  @IsIn(['simulation', 'devices', 'input'])
-  origin!: 'simulation' | 'devices' | 'input';
+  @ApiProperty({ enum: ['simulation', 'input'] })
+  @IsIn(['simulation', 'input'])
+  origin!: 'simulation' | 'input';
 
   @ApiPropertyOptional({ type: ThermalInputsStageDto })
   @IsOptional()

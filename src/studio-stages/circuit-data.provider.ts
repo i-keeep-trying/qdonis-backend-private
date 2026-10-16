@@ -31,6 +31,27 @@ export interface CircuitInventory {
   }>;
   switching_frequency?: number | null;
   input_voltage?: number | null;
+  /** Power sources (sense / reference / carrier sources excluded). */
+  power_sources?: PowerSource[];
+  /** Output-voltage target from the template's analysis criteria. */
+  output_voltage?: OutputVoltageTarget | null;
+  load_resistance?: number | null;
+}
+
+/** A power source: DC `value`, or AC `peak` and `frequency`. */
+export interface PowerSource {
+  ref: string;
+  role: string | null;
+  kind: 'dc' | 'ac';
+  value?: number;
+  peak?: number;
+  frequency?: number | null;
+}
+
+export interface OutputVoltageTarget {
+  value: number;
+  rms: boolean;
+  key: string;
 }
 
 export interface WaveSummary {
@@ -48,6 +69,8 @@ export interface ComponentWaveStats {
   role?: string | null;
   parent?: string | null;
   params: Record<string, number>;
+  /** Nested parts: their connections as [ref, pin] pairs. */
+  links?: Array<[string, string]>;
   v?: WaveSummary;
   i?: WaveSummary;
   i_pri?: WaveSummary;

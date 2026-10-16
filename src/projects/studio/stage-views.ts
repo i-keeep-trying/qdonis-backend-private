@@ -4,6 +4,7 @@ import {
   type SpecRow,
   type TopologyOption,
 } from '../../design/studio-specs.logic';
+import { CORE_GEOMETRY_DATA } from '../../engines/magnetics/data/core-geometry.data';
 import {
   AVAILABLE_CORES,
   AVAILABLE_MATERIALS,
@@ -122,6 +123,8 @@ function specsView(data: JsonObject): JsonObject {
 // --- magnetics ---------------------------------------------------------------------
 
 function magneticDesignView(d: MagneticDesign): JsonObject {
+  const geometry = CORE_GEOMETRY_DATA[d.core] as
+    (typeof CORE_GEOMETRY_DATA)[string] | undefined;
   return {
     ref: d.ref,
     role: d.role ?? null,
@@ -168,6 +171,25 @@ function magneticDesignView(d: MagneticDesign): JsonObject {
     },
     voltSecondsUvs: d.voltSeconds_uVs,
     fswHz: d.fsw,
+    // Library core data the 3D model is drawn from (no drawings in the library).
+    coreGeometry: geometry
+      ? {
+          effectiveAreaMm2: geometry.effectiveArea,
+          windowAreaMm2: geometry.windowArea ?? null,
+        }
+      : null,
+    // The electrical operating point the part was designed for.
+    inputs: d.inputs
+      ? {
+          basis: d.inputs.basis,
+          rows: d.inputs.rows.map((r) => ({
+            label: r.label,
+            value: r.value,
+            note: r.note ?? null,
+          })),
+          assumptions: d.inputs.assumptions ?? [],
+        }
+      : null,
     warnings: d.warnings ?? [],
   };
 }
@@ -226,6 +248,26 @@ function magneticsView(data: JsonObject): JsonObject {
     inputs: (records(data.inputs) as unknown as MagneticPartInput[]).map((p) =>
       magneticPartView(p, fswHz),
     ),
+    // Circuit parts designed from values entered in the workspace.
+    overrides: (
+      Object.values(rec(data.overrides)) as unknown as MagneticPartInput[]
+    ).map((p) => magneticPartView(p, fswHz)),
+    operatingPoint: operatingPointView(data.operatingPoint),
+  };
+}
+
+function operatingPointView(value: unknown): JsonObject | null {
+  const op = rec(value);
+  if (!Array.isArray(op.rows)) return null;
+  return {
+    rows: records(op.rows).map((r) => ({
+      label: str(r.label) ?? '',
+      value: str(r.value) ?? '',
+      note: str(r.note),
+    })),
+    notes: Array.isArray(op.notes)
+      ? op.notes.filter((n): n is string => typeof n === 'string')
+      : [],
   };
 }
 
@@ -249,6 +291,27 @@ function thermalResultView(r: ThermalResult): JsonObject {
     ambientC: r.ambientC,
     strategy: r.strategy,
     heatsink: r.heatsink ?? null,
+    // Results saved before the cooling recommendation have none.
+    cooling: r.cooling
+      ? {
+          method: r.cooling.method,
+          tier: r.cooling.tier,
+          rationale: r.cooling.rationale,
+          heatsink: r.cooling.heatsink
+            ? {
+                rsaMaxCW: r.cooling.heatsink.rsaMaxCW,
+                heatW: r.cooling.heatsink.heatW,
+                sinkTempC: r.cooling.heatsink.sinkTempC,
+                volumeCm3: r.cooling.heatsink.volumeCm3,
+                sizeHint: r.cooling.heatsink.sizeHint,
+                airflow: r.cooling.heatsink.airflow ?? null,
+              }
+            : null,
+          mounting: r.cooling.mounting,
+          alternatives: r.cooling.alternatives,
+          notes: r.cooling.notes,
+        }
+      : null,
     devices: r.devices.map((d) => ({
       ref: d.ref,
       kind: d.kind,

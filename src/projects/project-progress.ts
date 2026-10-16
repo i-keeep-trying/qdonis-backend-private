@@ -45,7 +45,7 @@ export function legacyProgress(data: Data): Progress {
   return { completed, total: 10 };
 }
 
-/** Studio projects: READY stages on the active branch, out of 7. */
+/** Studio projects: READY stages on the active branch, out of 6. */
 export function studioProgress(project: StudioProject): Progress {
   const completed = STAGE_ORDER.filter(
     (stage) => stageNodeOnBranch(project, stage)?.status === 'ready',

@@ -12,11 +12,17 @@ export const STAGE_ORDER = [
   'visualization',
   'design',
   'simulation',
-  'devices',
   'magnetics',
   'thermal',
 ] as const;
-export type StageKind = (typeof STAGE_ORDER)[number];
+/**
+ * Stages a stored node can have: the workspace stages plus `devices`, a
+ * former stage (device selection now lives on the simulation node). Old
+ * `devices` nodes stay in the history; nothing creates new ones.
+ */
+export const STAGE_KINDS = [...STAGE_ORDER, 'devices'] as const;
+export type WorkspaceStage = (typeof STAGE_ORDER)[number];
+export type StageKind = (typeof STAGE_KINDS)[number];
 
 export const STAGE_LABEL: Record<StageKind, string> = {
   specs: 'Specs',
@@ -76,7 +82,7 @@ const now = (): string => new Date().toISOString();
 export function isStageKind(value: unknown): value is StageKind {
   return (
     typeof value === 'string' &&
-    (STAGE_ORDER as readonly string[]).includes(value)
+    (STAGE_KINDS as readonly string[]).includes(value)
   );
 }
 

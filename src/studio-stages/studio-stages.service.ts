@@ -42,10 +42,12 @@ import type {
   RunThermalDto,
 } from './dto/stages.dto';
 import type {
+  MagneticPartStageDto,
   RunMagneticsStageDto,
   RunThermalStageDto,
 } from './dto/stage-runs.dto';
 import {
+  type MagneticPartInput,
   type MagneticsOptions,
   planMagnetics,
   type StagePlan,
@@ -65,6 +67,24 @@ const rec = (v: unknown): Record<string, unknown> =>
  * `ok: false` and a payload explaining what is needed, which is what the
  * Studio agent relays to the user; HTTP errors are for auth and validation.
  */
+/** A part of the web's magnetics form -> the stage's (core-style) part input. */
+const magneticPart = (p: MagneticPartStageDto): MagneticPartInput => ({
+  ref: p.ref,
+  kind: p.kind,
+  role: p.role ?? undefined,
+  inductance_uh: p.inductanceUh ?? undefined,
+  turns_ratio: p.turnsRatio ?? undefined,
+  fsw_khz: p.fswKhz,
+  duty: p.duty ?? undefined,
+  i_dc_a: p.iDcA ?? undefined,
+  i_ripple_pp_a: p.iRipplePpA ?? undefined,
+  i_peak_a: p.iPeakA ?? undefined,
+  i_rms_a: p.iRmsA ?? undefined,
+  v_primary_v: p.vPrimaryV ?? undefined,
+  power_w: p.powerW ?? undefined,
+  unipolar: p.unipolar,
+});
+
 @Injectable()
 export class StudioStagesService {
   constructor(
@@ -163,22 +183,9 @@ export class StudioStagesService {
         ambientC: s.ambientC,
         coreOverrides: dto.coreOverrides,
         fromCircuit: dto.origin === 'circuit',
-        parts: parts.map((p) => ({
-          ref: p.ref,
-          kind: p.kind,
-          role: p.role ?? undefined,
-          inductance_uh: p.inductanceUh ?? undefined,
-          turns_ratio: p.turnsRatio ?? undefined,
-          fsw_khz: p.fswKhz,
-          duty: p.duty ?? undefined,
-          i_dc_a: p.iDcA ?? undefined,
-          i_ripple_pp_a: p.iRipplePpA ?? undefined,
-          i_peak_a: p.iPeakA ?? undefined,
-          i_rms_a: p.iRmsA ?? undefined,
-          v_primary_v: p.vPrimaryV ?? undefined,
-          power_w: p.powerW ?? undefined,
-          unipolar: p.unipolar,
-        })),
+        parts: parts.map(magneticPart),
+        partOverrides: dto.partOverrides?.map(magneticPart),
+        clearOverrides: dto.clearAllOverrides ? true : dto.clearOverrides,
       },
       this.circuit,
     );
@@ -204,23 +211,14 @@ export class StudioStagesService {
       );
     }
     const studio = await this.projects.loadStudio(projectId, user.id, branchId);
-    const needs =
-      dto.origin === 'simulation'
-        ? {
-            stage: 'simulation' as const,
-            message: 'Run a simulation first, or enter the losses.',
-          }
-        : dto.origin === 'devices'
-          ? {
-              stage: 'devices' as const,
-              message: 'Select devices first, or enter the losses.',
-            }
-          : null;
     if (
-      needs &&
-      stageNodeOnBranch(studio, needs.stage, branchId)?.status !== 'ready'
+      dto.origin === 'simulation' &&
+      stageNodeOnBranch(studio, 'simulation', branchId)?.status !== 'ready'
     ) {
-      throw AppError.conflict(ErrorCode.StageInputMissing, needs.message);
+      throw AppError.conflict(
+        ErrorCode.StageInputMissing,
+        'Run a simulation first, or enter the losses.',
+      );
     }
     await this.artifacts.hydrate(projectId, studio);
     const s = dto.settings;
@@ -234,7 +232,6 @@ export class StudioStagesService {
         strategy: s.strategy,
         outputPowerW: s.outputPowerW ?? undefined,
         fromSimulation: dto.origin === 'simulation',
-        fromDevices: dto.origin === 'devices',
         inputs: inputs
           ? {
               devices: inputs.devices.map((d) => ({

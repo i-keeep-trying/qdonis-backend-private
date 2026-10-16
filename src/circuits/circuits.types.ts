@@ -1,3 +1,8 @@
+import type {
+  OutputVoltageTarget,
+  PowerSource,
+} from '../studio-stages/circuit-data.provider';
+
 /** `POST /studio/circuit-info` inventory (snake_case, as qdonis-core returned it). */
 export interface CircuitInventory {
   id: unknown;
@@ -21,6 +26,9 @@ export interface CircuitInventory {
   }>;
   switching_frequency: number | null;
   input_voltage: number | null;
+  power_sources: PowerSource[];
+  output_voltage: OutputVoltageTarget | null;
+  load_resistance: number | null;
 }
 
 export interface CircuitInfoInput {

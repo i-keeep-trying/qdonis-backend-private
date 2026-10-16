@@ -13,7 +13,6 @@ import {
   rec,
   records,
   scalar,
-  selectionJunctionC,
   selectionLines,
   summarizeSimulation,
 } from './agent-results';
@@ -38,7 +37,6 @@ export function buildAgentSnapshot(
   const vis = stageNodeOnBranch(project, 'visualization');
   const design = stageNodeOnBranch(project, 'design');
   const sim = stageNodeOnBranch(project, 'simulation');
-  const devices = stageNodeOnBranch(project, 'devices');
   const magnetics = stageNodeOnBranch(project, 'magnetics');
   const thermal = stageNodeOnBranch(project, 'thermal');
 
@@ -104,16 +102,6 @@ export function buildAgentSnapshot(
             selectionLines(sim.data.deviceSelection) ??
             'not selected yet (generic default models in the loss analysis)',
           ...(sim.status === 'ready' ? summarizeSimulation(sim.data, 40) : {}),
-        }
-      : null,
-    devices: devices
-      ? {
-          origin: records(devices.data.inputs).length
-            ? 'entered stresses (standalone, idealised waveforms)'
-            : 'simulated waveforms of this branch',
-          entered: devices.data.inputs,
-          selected: selectionLines(devices.data.selection) ?? [],
-          junction_temperature_c: selectionJunctionC(devices.data.selection),
         }
       : null,
     magnetics: magnetics
