@@ -536,6 +536,18 @@ components:
   role: lower_clamp_diode_a
   params:
     model: Dmodel
+- ref: R_SHARE2_a
+  type: resistor
+  role: inner_upper_sharing_resistor_a
+  params:
+    resistance: 100000.0
+    sense: false
+- ref: R_SHARE3_a
+  type: resistor
+  role: inner_lower_sharing_resistor_a
+  params:
+    resistance: 100000.0
+    sense: false
 - ref: COMMENT_FILT_a
   type: custom_spice
   params:
@@ -736,6 +748,18 @@ components:
   role: lower_clamp_diode_b
   params:
     model: Dmodel
+- ref: R_SHARE2_b
+  type: resistor
+  role: inner_upper_sharing_resistor_b
+  params:
+    resistance: 100000.0
+    sense: false
+- ref: R_SHARE3_b
+  type: resistor
+  role: inner_lower_sharing_resistor_b
+  params:
+    resistance: 100000.0
+    sense: false
 - ref: COMMENT_FILT_b
   type: custom_spice
   params:
@@ -936,6 +960,18 @@ components:
   role: lower_clamp_diode_c
   params:
     model: Dmodel
+- ref: R_SHARE2_c
+  type: resistor
+  role: inner_upper_sharing_resistor_c
+  params:
+    resistance: 100000.0
+    sense: false
+- ref: R_SHARE3_c
+  type: resistor
+  role: inner_lower_sharing_resistor_c
+  params:
+    resistance: 100000.0
+    sense: false
 - ref: COMMENT_FILT_c
   type: custom_spice
   params:
@@ -1109,6 +1145,8 @@ nets:
     - cathode
   - - E_PWM1_a
     - '-'
+  - - R_SHARE2_a
+    - pos
 - - - n4_a
     - pin
   - - PWM2_drive_a
@@ -1125,6 +1163,10 @@ nets:
     - pos
   - - E_PWM2_a
     - '-'
+  - - R_SHARE2_a
+    - neg
+  - - R_SHARE3_a
+    - pos
 - - - n7_a
     - pin
   - - PWM3_drive_a
@@ -1141,6 +1183,8 @@ nets:
     - anode
   - - E_PWM3_a
     - '-'
+  - - R_SHARE3_a
+    - neg
 - - - n9_a
     - pin
   - - PWM4_drive_a
@@ -1261,6 +1305,8 @@ nets:
     - cathode
   - - E_PWM1_b
     - '-'
+  - - R_SHARE2_b
+    - pos
 - - - n4_b
     - pin
   - - PWM2_drive_b
@@ -1277,6 +1323,10 @@ nets:
     - pos
   - - E_PWM2_b
     - '-'
+  - - R_SHARE2_b
+    - neg
+  - - R_SHARE3_b
+    - pos
 - - - n7_b
     - pin
   - - PWM3_drive_b
@@ -1293,6 +1343,8 @@ nets:
     - anode
   - - E_PWM3_b
     - '-'
+  - - R_SHARE3_b
+    - neg
 - - - n9_b
     - pin
   - - PWM4_drive_b
@@ -1413,6 +1465,8 @@ nets:
     - cathode
   - - E_PWM1_c
     - '-'
+  - - R_SHARE2_c
+    - pos
 - - - n4_c
     - pin
   - - PWM2_drive_c
@@ -1429,6 +1483,10 @@ nets:
     - pos
   - - E_PWM2_c
     - '-'
+  - - R_SHARE2_c
+    - neg
+  - - R_SHARE3_c
+    - pos
 - - - n7_c
     - pin
   - - PWM3_drive_c
@@ -1445,6 +1503,8 @@ nets:
     - anode
   - - E_PWM3_c
     - '-'
+  - - R_SHARE3_c
+    - neg
 - - - n9_c
     - pin
   - - PWM4_drive_c

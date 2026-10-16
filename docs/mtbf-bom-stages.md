@@ -44,6 +44,48 @@ Plan (one part per turn, the user commits each):
 
 ## Change log
 
+### 2026-10-17: NPC simulation, device choice and prices
+
+Found on the 2 kW NPC project (BOM £8,967.75 for two lines, £992 per switch):
+- The project's design and simulation date from 2026-10-15, before the NPC library fixes (Part 2 of
+  `chat-first-backport.md`). Their decks are the old single leg with both DC sources grounded, so the bottom rail is
+  the midpoint: SW4 and D_CLAMP_N see ~1 V, the output is wrong, and later "modify design" runs edited the same
+  broken deck. On current code the library NPC simulates correctly (2 kW, 48 Ω/phase: 309 V line-line, 3.7 A,
+  401 V on the outer switches). The project has to be re-designed from the circuit; nothing in the code reads the
+  old decks.
+- NPC library (`dcac_neutral_point_clamped.yaml`): nothing shared the off-state voltage of the inner switches, so
+  SW2/SW3 ratcheted to 530-710 V (capacitive coupling at each output step, held only by the clamp diodes on one
+  side). Added `R_SHARE2_x` / `R_SHARE3_x`, 100 kΩ across SW2 / SW3 of each phase (static sharing, as in hardware);
+  1 MΩ was too weak (500-610 V). Inner switches now 403-433 V and all 12 switches get the same part. The renderer
+  places the new parts (no saved positions, like the diode-bridge `C_OUT`). Manifest updated.
+- Device ratings (`devices/library/part-ratings.ts`): `CAB525F12XM3` (F variant) was not parsed, so the LUT's
+  800 V / 1100 A was used for a 1200 V / 525 A module; it entered the 650-800 V classes and won on loss. Module
+  voltage now also reads `F`; modules named by current (`CAB450M12XM3`, `CAS120M12BM2`) take that current instead
+  of the LUT's 2-3× range; the family check covers `A` / `F` codes. New `isModulePart`.
+- Device selection (`simulation/loss/device-selection.ts`), a deliberate difference from qdonis-core: a module is
+  only a candidate when no discrete part of the voltage class carries the peak current, and in `auto` the IGBTs
+  (all modules) only compete when no discrete MOSFET does. Before: 800 V / 40 A picked `CAB004A12GM4`, 1000 V /
+  15 A a 2300 V `CHB` module. The 2 kW NPC now gets `E4M0045075J2` (750 V discrete, £8.97) and `E6D10065A`
+  (£4.33).
+- BOM pricing (`SourcingService.exactPart`): Mouser lists some parts only as the reel (`E4M0045075J2-TR`); the
+  lookup searches `BeginsWith` and takes the exact number, else a `-TR` / `REEL` packaging of it.
+- Agent prompt (BOM line): no estimated costs, price ranges, per-category budgets or currency conversions; no
+  recounting parts for another phase count (the agent had written a "$3,760-4,420 single-phase" table). 16 parity
+  fixtures updated by script.
+- Web: the Power devices panel is no longer `sticky` (with 18 devices it covered the loss-vs-Tj chart while
+  scrolling); the loss-vs-Tj chart reserves a legend row per two curves (compact) and anchors the legend to the
+  bottom of the plot (`yref: container`), so 18 curves no longer spill over the panel. Chat replies render `$` as
+  text (`$$…$$` math still works): "$260 — $400" had become inline math.
+- Parity fixtures: netlist, schematic, schematic-apply and sizing re-captured for the NPC from the Part 5 reference
+  plus this YAML (the unchanged reference reproduced the old fixtures byte for byte first); studio `_catalogue.json`
+  (43 rating / family fields) and `_inventory.json` (NPC, 6 resistors) written from the backend. The gated ngspice
+  parity fixture for the NPC is still the old single-phase circuit and failed before this change too.
+- Not changed: the specs ask 310 V RMS line-to-neutral (438 V peak) from 800 V, but the NPC's modulation limit is
+  0.98 × 400 V = 392 V peak (277 V RMS); it needs ≥ 894 V DC, or 310 V line-to-line.
+- Tests: `part-ratings.spec.ts` (ratings, module detection, discrete-first selection, module fallback),
+  `sourcing.service.spec.ts` (reel packaging, exact first). Full suite 1634 pass (+ the known flaky schematic spec,
+  passes alone); web typecheck, lint, 101 tests.
+
 ### 2026-10-16: accuracy pass on MTBF and BOM
 
 Found by replaying the 2 kW NPC project (three-phase) through both planners:

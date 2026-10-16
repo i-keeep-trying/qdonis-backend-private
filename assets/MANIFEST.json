@@ -4544,8 +4544,8 @@
     },
     {
       "path": "topologies/primitives/dcac_neutral_point_clamped.yaml",
-      "bytes": 63020,
-      "sha256": "21264462d44e5de5e786b96a1de2f8ebdf664a3e5623d3286ec2ef7baafca85c"
+      "bytes": 64100,
+      "sha256": "61f24e10ef758b845acb134bcdc9616155230960ba9a2068d6a39e8a57d5cfc9"
     },
     {
       "path": "topologies/primitives/dcac_single_phase_h_bridge.yaml",

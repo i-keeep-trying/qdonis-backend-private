@@ -4529,6 +4529,26 @@
    {
     "inside": null,
     "params": {
+     "resistance": 100000.0,
+     "sense": false
+    },
+    "ref": "R_SHARE2_a",
+    "role": "inner_upper_sharing_resistor_a",
+    "type": "resistor"
+   },
+   {
+    "inside": null,
+    "params": {
+     "resistance": 100000.0,
+     "sense": false
+    },
+    "ref": "R_SHARE3_a",
+    "role": "inner_lower_sharing_resistor_a",
+    "type": "resistor"
+   },
+   {
+    "inside": null,
+    "params": {
      "spice_line": "* Filter & Load"
     },
     "ref": "COMMENT_FILT_a",
@@ -4872,6 +4892,26 @@
    {
     "inside": null,
     "params": {
+     "resistance": 100000.0,
+     "sense": false
+    },
+    "ref": "R_SHARE2_b",
+    "role": "inner_upper_sharing_resistor_b",
+    "type": "resistor"
+   },
+   {
+    "inside": null,
+    "params": {
+     "resistance": 100000.0,
+     "sense": false
+    },
+    "ref": "R_SHARE3_b",
+    "role": "inner_lower_sharing_resistor_b",
+    "type": "resistor"
+   },
+   {
+    "inside": null,
+    "params": {
      "spice_line": "* Filter & Load"
     },
     "ref": "COMMENT_FILT_b",
@@ -5211,6 +5251,26 @@
     "ref": "D_CLAMP_N_c",
     "role": "lower_clamp_diode_c",
     "type": "diode"
+   },
+   {
+    "inside": null,
+    "params": {
+     "resistance": 100000.0,
+     "sense": false
+    },
+    "ref": "R_SHARE2_c",
+    "role": "inner_upper_sharing_resistor_c",
+    "type": "resistor"
+   },
+   {
+    "inside": null,
+    "params": {
+     "resistance": 100000.0,
+     "sense": false
+    },
+    "ref": "R_SHARE3_c",
+    "role": "inner_lower_sharing_resistor_c",
+    "type": "resistor"
    },
    {
     "inside": null,

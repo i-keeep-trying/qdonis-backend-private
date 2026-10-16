@@ -3,7 +3,8 @@
  * qdonis-core `simulator/device_selection.py`: shortlist library parts by
  * voltage class and current fit, evaluate each with the loss engine on the
  * device's waveforms and pick the lowest loss (lightly penalising
- * over-sizing).
+ * over-sizing). Beyond the core: a power module is only a candidate when no
+ * discrete part of the voltage class carries the current.
  */
 
 import { readdirSync, readFileSync, statSync } from 'node:fs';
@@ -11,6 +12,7 @@ import { join } from 'node:path';
 
 import {
   currentFromPart,
+  isModulePart,
   partFamily,
   voltageFromPart,
 } from '../../devices/library/part-ratings';
@@ -192,7 +194,11 @@ function shortlist(
     .sort((a, b) => a - b)
     .slice(0, 2);
   pool = pool.filter((p) => classes.includes(p.v_rating));
-  const adequate = pool.filter((p) => p.i_lut >= iReq);
+  let adequate = pool.filter((p) => p.i_lut >= iReq);
+  // Discrete parts first: a module's lower loss never justifies its size and
+  // price when a discrete part carries the current.
+  const discrete = adequate.filter((p) => !isModulePart(p.part));
+  if (discrete.length) adequate = discrete;
   if (adequate.length === 0) {
     return [...pool].sort((a, b) => b.i_lut - a.i_lut).slice(0, MAX_CANDIDATES);
   }
@@ -331,7 +337,19 @@ function select(
           out.push({ ...p, diode: null });
         }
       }
-      if (preference === 'auto' || preference === 'igbt' || out.length === 0) {
+      // The library's IGBTs are all modules: in `auto` they only compete
+      // when no discrete MOSFET is adequate.
+      const discreteMosfet =
+        preference === 'auto' &&
+        out.some(
+          (p) =>
+            !isModulePart(p.part) &&
+            p.i_lut >= Math.max(stress.i_peak * CURRENT_MARGIN, 0.5),
+        );
+      if (
+        !discreteMosfet &&
+        (preference === 'auto' || preference === 'igbt' || out.length === 0)
+      ) {
         let igbts = shortlist('switch', (x) => x.type === 'IGBT', stress);
         if (preference === 'auto' && out.length) {
           igbts = igbts.filter((p) => p.i_rating <= currentBandLimit(stress));
