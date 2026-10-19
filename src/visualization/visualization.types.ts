@@ -1,3 +1,5 @@
+import type { SchematicLayout } from '../schematic/schematic.types';
+
 /** Schematic in the qdonis-web engine format (`public/engine.html` LOAD_CIRCUIT). */
 export interface EngineComponent {
   id: string;
@@ -45,6 +47,17 @@ export interface DisplayInventory {
   inputVoltage: string | null;
 }
 
+/** One circuit change, as the Circuit tab lists it. */
+export interface CircuitEdit {
+  id: string;
+  instruction: string;
+  summary: string;
+  changes: string[];
+  added: string[];
+  removed: string[];
+  appliedAt: string;
+}
+
 /** Data of a `visualization` stage node. */
 export interface VisualizationData {
   topologyId: string;
@@ -54,6 +67,13 @@ export interface VisualizationData {
   /** Base SPICE netlist of the library topology (null if it could not be generated). */
   netlist: string | null;
   inventory: DisplayInventory | null;
-  edits: unknown[];
+  edits: CircuitEdit[];
   customStructure: boolean;
+  /**
+   * The edited circuit (topology YAML as JSON, without its `schematic:`
+   * section) once the schematic was edited; null = the library topology.
+   */
+  customCircuit?: Record<string, unknown> | null;
+  /** The project's own drawing layout (moves, edits); null = the library layout. */
+  layout?: SchematicLayout | null;
 }

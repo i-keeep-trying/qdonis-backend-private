@@ -129,6 +129,14 @@ export class EnvironmentVariables {
   })
   BODY_LIMIT: string = '1mb';
 
+  /**
+   * DEV-LAYOUT: the developer schematic layout tool (writes library layouts
+   * into `assets/`). Development only; never enabled in production.
+   */
+  @toBoolean()
+  @IsBoolean()
+  SCHEMATIC_LAYOUT_TOOL: boolean = false;
+
   /** Server-side request timeout; slow or stalled clients are cut off. */
   @toInteger()
   @IsInt()

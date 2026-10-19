@@ -52,7 +52,8 @@ def main() -> int:
     if os.environ.get("PYTHONHASHSEED") != "0":
         env = {**os.environ, "PYTHONHASHSEED": "0", "PYTHONDONTWRITEBYTECODE": "1"}
         return subprocess.call([sys.executable, "-B", *sys.argv], env=env)
-    sys.path.insert(0, str(HERE.parents[3] / "qdonis-core"))
+    core = Path(sys.argv[sys.argv.index("--core") + 1]) if "--core" in sys.argv else HERE.parents[3] / "qdonis-core"
+    sys.path.insert(0, str(core.resolve()))
     import yaml
     from qdonis_backend import topology_improver as ti
     from qdonis_backend.data_utils import list_builtin_topologies, resolve_yaml_path

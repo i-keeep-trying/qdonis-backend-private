@@ -126,6 +126,18 @@ export class ProjectsRepository {
     return db.project.findUnique({ where: { id } });
   }
 
+  /** Raw `data.studio.scope` of each project (the list never loads `data`). */
+  async studioScopes(ids: string[]): Promise<Map<string, unknown>> {
+    if (ids.length === 0) return new Map();
+    const rows = await this.prisma.$queryRaw<
+      Array<{ id: string; scope: unknown }>
+    >`
+      SELECT id::text AS id, data->'studio'->'scope' AS scope
+      FROM projects WHERE id = ANY(${ids}::uuid[])
+    `;
+    return new Map(rows.map((r) => [r.id, r.scope]));
+  }
+
   findListRow(id: string): Promise<ProjectListRow | null> {
     return this.prisma.project.findUnique({
       where: { id },

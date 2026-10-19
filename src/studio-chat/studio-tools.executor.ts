@@ -13,17 +13,39 @@ import {
   updateSpecs,
 } from '../design/studio-specs.logic';
 import { ProjectsService } from '../projects/projects.service';
+import { ErrorCode } from '../common/errors/error-codes';
 import { createBranch } from '../projects/studio/studio-branches';
 import {
   isStageKind,
+  isWorkspaceStage,
+  patchNode,
+  STAGE_LABEL,
+  STAGE_ORDER,
   stageNodeOnBranch,
   type JsonObject,
   type StageKind,
   type StudioProject,
+  type StudioScope,
+  type WorkspaceStage,
 } from '../projects/studio/studio-graph';
+import {
+  allowedStages,
+  downstreamOf,
+  isFullScope,
+  isStageAllowed,
+  lockAfterRun,
+} from '../projects/studio/studio-scope';
+import {
+  checkInputs,
+  EXTRA_STAGE_TOOLS,
+  inputLabel,
+  STAGE_CONTRACTS,
+  stageOfTool,
+  toolRefusal,
+} from '../studio/agent/stage-contracts';
+import { enteredParts } from '../studio-stages/extra-stages';
 import { StudioGraphService } from '../projects/studio/studio-graph.service';
 import { SimulationService } from '../simulation/simulation.service';
-import type { DeviceStressInput } from '../simulation/devices.format';
 import {
   DECK_KINDS,
   type DeckKind,
@@ -31,6 +53,14 @@ import {
 } from '../simulation/simulation.types';
 import { SpecsService } from '../specs/specs.service';
 import type { MagneticPartInput } from '../studio-stages/magnetics.stage';
+import type { BomCategory, LineChoicePatch } from '../studio-stages/bom.stage';
+import {
+  MTBF_METHODS,
+  MTBF_PART_TYPES,
+  type MtbfMethod,
+  type MtbfPartInput,
+  type MtbfPartType,
+} from '../studio-stages/mtbf.stage';
 import { StudioStagesService } from '../studio-stages/studio-stages.service';
 import type { ThermalInputs } from '../studio-stages/thermal.stage';
 import { TopologiesService } from '../topologies/topologies.service';
@@ -70,6 +100,12 @@ export interface ToolContext {
   signal: AbortSignal;
   /** Generates widget ids. */
   newId: (prefix: string) => string;
+  /** The project's entry step; tools outside it are refused (moves when chosen or locked). */
+  scope: StudioScope;
+  /** Steps the user's latest message names (only those may be started without asking). */
+  named: WorkspaceStage[];
+  /** Steps whose inputs were checked in this turn and found runnable (ready / assume). */
+  checked: Set<StageKind>;
 }
 
 /** Chip label and stage of each tool (old frontend `TOOL_STATUS`, shortened). */
@@ -89,11 +125,18 @@ export const TOOL_INFO: Record<
   run_simulation: { label: 'Running ngspice', stage: 'simulation' },
   import_netlist: { label: 'Importing your netlist', stage: 'design' },
   edit_circuit: { label: 'Editing the circuit', stage: 'visualization' },
-  select_devices: { label: 'Selecting devices', stage: 'devices' },
+  select_devices: { label: 'Selecting devices', stage: 'simulation' },
   design_magnetics: { label: 'Designing magnetics', stage: 'magnetics' },
   run_thermal: { label: 'Solving the thermal network', stage: 'thermal' },
+  run_mtbf: { label: 'Predicting the MTBF', stage: 'mtbf' },
+  build_bom: { label: 'Building the BOM', stage: 'bom' },
   open_view: { label: 'Switching view', stage: null },
   manage_branch: { label: 'Updating branches', stage: null },
+  choose_entry_step: { label: 'Choosing where to start', stage: null },
+  offer_entry_steps: { label: 'Offering where to start', stage: null },
+  check_step_inputs: { label: 'Checking the inputs', stage: null },
+  run_emc: { label: 'Scanning conducted emissions', stage: 'emc' },
+  select_components: { label: 'Selecting components', stage: 'components' },
 };
 
 /** How often a queued stage run is checked, and for how long at most. */
@@ -111,6 +154,14 @@ const text = (v: unknown): string =>
       : '';
 const num = (v: unknown): number | undefined =>
   typeof v === 'number' && Number.isFinite(v) ? v : undefined;
+
+/** Inputs the model says it assumed (the `assumed` argument of stage tools). */
+const assumedOf = (input: JsonObject): string[] | undefined => {
+  const names = list(input.assumed)
+    .filter((x): x is string => typeof x === 'string' && Boolean(x.trim()))
+    .map((x) => x.trim().slice(0, 80));
+  return names.length ? [...new Set(names)].slice(0, 50) : undefined;
+};
 
 const fail = (
   summary: string,
@@ -181,8 +232,39 @@ export class StudioToolsExecutor {
     input: JsonObject,
   ): Promise<ToolOutcome> {
     const stage = TOOL_INFO[name]?.stage ?? null;
+    // The prompt says which steps exist; this is what enforces it.
+    const refusal =
+      toolRefusal(ctx.scope, name) ?? this.uncheckedStep(ctx, name);
+    if (refusal) {
+      return this.outcome(
+        ctx,
+        fail(refusal, {
+          allowed_steps: allowedStages(ctx.scope),
+          code: ErrorCode.StageOutOfScope,
+        }),
+        [],
+      );
+    }
     try {
-      return await this.run(ctx, name, input);
+      // No step attached or named: collecting the requirements (value table or
+      // spec table) starts the full design. A plain question keeps the choice open.
+      let scopeChanged = false;
+      const startsFullFlow =
+        name === 'update_specs' ||
+        (name === 'ask_user' && records(input.fields).length > 0);
+      if (ctx.scope.mode === 'undecided' && startsFullFlow) {
+        ctx.scope = await this.graph.chooseEntryStep(
+          ctx.projectId,
+          ctx.user.id,
+          'specs',
+        );
+        scopeChanged = true;
+      }
+      let outcome = await this.run(ctx, name, input);
+      if (outcome.result.ok) {
+        outcome = await this.afterStageRun(ctx, name, input, outcome);
+      }
+      return scopeChanged ? { ...outcome, scopeChanged: true } : outcome;
     } catch (error) {
       if (
         ctx.signal.aborted ||
@@ -248,10 +330,24 @@ export class StudioToolsExecutor {
         return this.designMagnetics(ctx, input);
       case 'run_thermal':
         return this.runThermal(ctx, input);
+      case 'run_mtbf':
+        return this.runMtbf(ctx, input);
+      case 'build_bom':
+        return this.buildBom(ctx, input);
       case 'open_view':
         return Promise.resolve(this.openView(ctx, input));
       case 'manage_branch':
         return this.manageBranch(ctx, input);
+      case 'choose_entry_step':
+        return this.chooseEntryStep(ctx, input);
+      case 'offer_entry_steps':
+        return Promise.resolve(this.offerEntrySteps(ctx, input));
+      case 'check_step_inputs':
+        return this.checkStepInputs(ctx, input);
+      case 'run_emc':
+        return this.runEmc(ctx, input);
+      case 'select_components':
+        return this.selectComponents(ctx, input);
       default:
         return Promise.resolve(
           this.outcome(ctx, fail(`Unknown tool ${name}`), []),
@@ -392,6 +488,21 @@ export class StudioToolsExecutor {
     const hasSpecs = Boolean(
       specsOf(stageNodeOnBranch(studio, 'specs'))?.rows.length,
     );
+    // A single-step project collects step inputs only through
+    // check_step_inputs, so the table always lists the step's real inputs.
+    if (
+      ctx.scope.mode === 'entry' &&
+      !isFullScope(ctx.scope) &&
+      records(input.fields).length
+    ) {
+      return this.outcome(
+        ctx,
+        fail(
+          'Step inputs are collected with check_step_inputs, which shows the value table for the step. Call it with the step and every value the user gave.',
+        ),
+        [],
+      );
+    }
     const fields = hasSpecs
       ? []
       : records(input.fields).filter(
@@ -848,37 +959,13 @@ export class StudioToolsExecutor {
           ...forkNote(started.forked, started.branchName),
         },
       },
-      ['simulation', 'devices'],
+      ['simulation'],
       'simulation',
       started,
     );
   }
 
   private async selectDevices(ctx: ToolContext, input: JsonObject) {
-    const fsw = num(input.fsw_khz);
-    let inputs: DeviceStressInput[] | undefined = records(input.devices).map(
-      (d, i) =>
-        ({
-          ref: str(d.ref) ?? `Q${i + 1}`,
-          kind: d.kind === 'diode' ? 'diode' : 'switch',
-          vBlockV: num(d.v_block_v) ?? null,
-          fswKhz: num(d.fsw_khz) ?? fsw ?? null,
-          iPeakA: num(d.i_peak_a) ?? null,
-          iRmsA: num(d.i_rms_a) ?? null,
-          iAvgA: num(d.i_avg_a) ?? null,
-          duty: num(d.duty) ?? null,
-          zvs: d.zvs === true,
-        }) as unknown as DeviceStressInput,
-    );
-    if (!inputs.length) {
-      // A re-run without devices keeps the entered stresses unless the simulation is asked for.
-      const previous = stageNodeOnBranch(await this.load(ctx), 'devices');
-      const entered = records(previous?.data.inputs);
-      inputs =
-        input.from_simulation !== true && entered.length
-          ? (entered as unknown as DeviceStressInput[])
-          : undefined;
-    }
     const overrides: Record<string, string> = {};
     for (const o of records(input.overrides)) {
       if (str(o.ref) && str(o.part)) overrides[str(o.ref)!] = str(o.part)!;
@@ -893,37 +980,31 @@ export class StudioToolsExecutor {
       ctx.projectId,
       ctx.branchId,
       {
-        inputs,
         preference,
         overrides: Object.keys(overrides).length ? overrides : undefined,
       },
     )) as unknown as Landed;
     this.land(ctx, landed);
     const data = landed.node.data;
-    const devices = describeSelection(data.selection);
-    const { losses, total_semiconductor_loss_w } = deviceLosses(data);
-    const standalone = Boolean(inputs?.length);
+    const devices = describeSelection(data.deviceSelection);
+    const { total_semiconductor_loss_w } = deviceLosses({
+      losses: rec(data.lossAnalysis).components ?? [],
+    });
     return this.outcome(
       ctx,
       {
         ok: true,
         summary: `${devices.filter((d) => d.device !== 'none suitable').length} devices selected · ${total_semiconductor_loss_w.toFixed(2)} W`,
         payload: {
-          mode: standalone
-            ? 'standalone (entered stresses, idealised waveforms)'
-            : 'simulated waveforms of the active branch',
+          mode: 'simulated waveforms of the active branch',
           devices,
-          ...(standalone ? { losses } : {}),
           total_semiconductor_loss_w,
-          junction_temperature_c: rec(data.selection).junctionC,
-          note: standalone
-            ? 'Parts were chosen by evaluating every viable library part with the loss engine on idealised waveforms built from the entered stresses (ramp current while conducting, hard switching unless zvs). Report these exact parts; a simulation of the real circuit would refine the losses. run_thermal can use these losses directly.'
-            : 'Devices were chosen from the library by evaluating every viable part on the simulated waveforms. Report these exact parts and reasons; do not claim any other device technology.',
-          ...forkNote(landed.forked, landed.branchName),
+          junction_temperature_c: rec(data.deviceSelection).junctionC,
+          note: 'Devices were chosen from the library by evaluating every viable part on the simulated waveforms. Report these exact parts and reasons; do not claim any other device technology.',
         },
       },
-      standalone ? ['devices'] : ['devices', 'simulation'],
-      'devices',
+      ['simulation'],
+      'simulation',
       landed,
     );
   }
@@ -992,6 +1073,96 @@ export class StudioToolsExecutor {
     return this.plannedOutcome(ctx, result, 'thermal');
   }
 
+  private async runMtbf(ctx: ToolContext, input: JsonObject) {
+    const parts: MtbfPartInput[] = records(input.parts)
+      .filter(
+        (p) =>
+          str(p.ref) !== undefined &&
+          (MTBF_PART_TYPES as readonly string[]).includes(String(p.type)),
+      )
+      .map((p) => ({
+        ref: str(p.ref)!,
+        type: p.type as MtbfPartType,
+        partNumber: str(p.part_number) ?? null,
+        temperatureC: num(p.temperature_c) ?? null,
+        voltageV: num(p.voltage_v) ?? null,
+        ratedVoltageV: num(p.rated_voltage_v) ?? null,
+      }));
+    const refs = (v: unknown) =>
+      list(v).filter((r): r is string => typeof r === 'string' && r !== '');
+    const method = (MTBF_METHODS as readonly string[]).includes(
+      String(input.prediction_method),
+    )
+      ? (input.prediction_method as MtbfMethod)
+      : undefined;
+    const result = await this.stages.runMtbf(
+      ctx.user,
+      ctx.projectId,
+      {
+        predictionMethod: method,
+        environment: str(input.environment),
+        overrides: {
+          ...Object.fromEntries(refs(input.include).map((r) => [r, true])),
+          ...Object.fromEntries(refs(input.exclude).map((r) => [r, false])),
+        },
+        parts,
+        fromCircuit: input.from_circuit === true,
+      },
+      ctx.branchId,
+    );
+    return this.plannedOutcome(ctx, result, 'mtbf');
+  }
+
+  private async buildBom(ctx: ToolContext, input: JsonObject) {
+    const changes: Record<string, LineChoicePatch> = {};
+    const change = (ref: unknown, patch: LineChoicePatch) => {
+      const key = str(ref);
+      if (key) changes[key] = { ...changes[key], ...patch };
+    };
+    const count = (v: unknown) =>
+      typeof v === 'number' && Number.isInteger(v) && v >= 1 && v <= 1_000_000
+        ? v
+        : undefined;
+    const CATEGORIES: readonly string[] = [
+      'mosfet',
+      'diode',
+      'inductor',
+      'transformer',
+      'capacitor',
+      'resistor',
+      'ic',
+      'heatsink',
+      'other',
+    ];
+    for (const line of records(input.add_lines)) {
+      const description = str(line.description);
+      if (!description) continue;
+      change(line.ref, {
+        extra: {
+          category: (CATEGORIES.includes(String(line.category))
+            ? line.category
+            : 'other') as BomCategory,
+          description: description.slice(0, 200),
+        },
+        ...(count(line.quantity) ? { quantity: count(line.quantity) } : {}),
+      });
+    }
+    for (const q of records(input.quantities)) {
+      const quantity = count(q.quantity);
+      if (quantity) change(q.ref, { quantity });
+    }
+    for (const ref of list(input.include)) change(ref, { included: true });
+    for (const ref of list(input.exclude)) change(ref, { included: false });
+    for (const ref of list(input.remove_lines)) change(ref, { extra: null });
+    const result = await this.stages.runBom(
+      ctx.user,
+      ctx.projectId,
+      changes,
+      ctx.branchId,
+    );
+    return this.plannedOutcome(ctx, result, 'bom');
+  }
+
   private async plannedOutcome(
     ctx: ToolContext,
     result: {
@@ -1001,7 +1172,7 @@ export class StudioToolsExecutor {
       branchId: string;
       forked: boolean;
     },
-    stage: 'magnetics' | 'thermal',
+    stage: StageKind,
   ) {
     const outcome: StageResult = {
       ok: result.ok,
@@ -1020,6 +1191,396 @@ export class StudioToolsExecutor {
       ...this.outcome(ctx, outcome, [stage], stage),
       forked: forked ? { branchId: result.branchId, branchName } : null,
     };
+  }
+
+  // --- EMC / components / BOM / MTBF ------------------------------------------------
+
+  private async runEmc(ctx: ToolContext, input: JsonObject) {
+    const result = await this.stages.runEmc(
+      ctx.user,
+      ctx.projectId,
+      {
+        pfcInductorMH: num(input.pfc_inductor_mh),
+        htRailVoltage: num(input.ht_rail_voltage_v),
+        inputPower: num(input.input_power_w),
+        inputRMSVoltage: num(input.input_rms_voltage_v),
+        firstInputCapNF: num(input.first_input_cap_nf),
+        secondInputCapNF: num(input.second_input_cap_nf),
+        inputFilterInductorMH: num(input.input_filter_inductor_mh),
+        passMarginDB: num(input.pass_margin_db),
+        lisnResistanceOhm: num(input.lisn_resistance_ohm),
+      },
+      ctx.branchId,
+      assumedOf(input),
+    );
+    return this.plannedOutcome(ctx, result, 'emc');
+  }
+
+  private async selectComponents(ctx: ToolContext, input: JsonObject) {
+    const parts = enteredParts(input.parts);
+    const result = await this.stages.runComponents(
+      ctx.user,
+      ctx.projectId,
+      {
+        parts: parts.length ? parts : undefined,
+        searchSupplier: input.search_supplier === true,
+      },
+      ctx.branchId,
+      assumedOf(input),
+    );
+    return this.plannedOutcome(ctx, result, 'components');
+  }
+
+  // --- entry step ------------------------------------------------------------------
+
+  private async chooseEntryStep(ctx: ToolContext, input: JsonObject) {
+    const step = input.step;
+    if (!isWorkspaceStage(step)) {
+      return this.outcome(ctx, fail(`Unknown step ${String(step)}`), []);
+    }
+    // Without a tool attached, only a step the user named may be started
+    // directly; anything else is the user's choice (the either/or question).
+    if (
+      ctx.scope.mode === 'undecided' &&
+      step !== 'specs' &&
+      !ctx.named.includes(step)
+    ) {
+      return this.outcome(
+        ctx,
+        fail(
+          `The user did not name the ${STAGE_LABEL[step]} step or attach its tool, so do not start it yourself. Call offer_entry_steps with step "${step}" so they can choose between it and starting from scratch, and ask for no inputs yet.`,
+          { named_steps: ctx.named },
+        ),
+        [],
+      );
+    }
+    ctx.scope = await this.graph.chooseEntryStep(
+      ctx.projectId,
+      ctx.user.id,
+      step,
+    );
+    const next = downstreamOf(step);
+    if (step !== 'specs') {
+      // The inputs are checked at once, so the step's own contract decides what to ask.
+      const check = await this.checkStepInputs(ctx, {
+        step,
+        values: list(input.values),
+        assume_missing: input.assume_missing === true,
+      });
+      return {
+        ...check,
+        result: {
+          ...check.result,
+          summary: `Starting at ${STAGE_LABEL[step]} · ${check.result.summary}`,
+          payload: {
+            entry_step: step,
+            later_steps: next,
+            input_check: check.result.payload,
+          },
+        },
+        focus: VIEW_OF_STAGE[step],
+        scopeChanged: true,
+      };
+    }
+    return {
+      ...this.outcome(
+        ctx,
+        {
+          ok: true,
+          summary: 'Starting from scratch',
+          payload: {
+            entry_step: 'specs',
+            allowed_steps: allowedStages(ctx.scope),
+            note: 'Full design: follow the full design conversation.',
+          },
+        },
+        [],
+        'specs',
+      ),
+      scopeChanged: true,
+    };
+  }
+
+  /** The either/or question: start at one step, or from scratch. */
+  private offerEntrySteps(ctx: ToolContext, input: JsonObject): ToolOutcome {
+    const step =
+      isWorkspaceStage(input.step) && input.step !== 'specs'
+        ? input.step
+        : null;
+    if (!step) {
+      return this.outcome(
+        ctx,
+        fail('Name the one step to offer next to starting from scratch.', {
+          steps: STAGE_ORDER.filter((s) => s !== 'specs'),
+        }),
+        [],
+      );
+    }
+    const preferStep = input.recommended !== 'scratch';
+    const reason = str(input.reason) ?? '';
+    const widget: ChatWidget = {
+      id: ctx.newId('w'),
+      kind: 'entry_step',
+      prompt: `This looks like a ${STAGE_LABEL[step]} task. Do you want only that step, or a full design?`,
+      options: [
+        {
+          step,
+          title: `Start at ${STAGE_LABEL[step]}`,
+          summary:
+            preferStep && reason ? reason : STAGE_CONTRACTS[step].summary,
+          recommended: preferStep,
+        },
+        {
+          step: 'specs',
+          title: 'Start from scratch',
+          summary:
+            !preferStep && reason
+              ? reason
+              : 'Full design: requirements, topology, design, simulation and every later step.',
+          recommended: !preferStep,
+        },
+      ],
+      resolution: null,
+    };
+    return {
+      ...this.outcome(
+        ctx,
+        {
+          ok: true,
+          summary: 'Options shown',
+          payload: {
+            displayed: [step, 'specs'],
+            note: "Shown to the user. Stop here and wait for the user's choice.",
+          },
+        },
+        [],
+      ),
+      widget,
+    };
+  }
+
+  /**
+   * Decides deterministically what the step still needs: runs straight away,
+   * lets Q assume the rest (only when the user said so), asks with the value
+   * table, or offers to start at an earlier step when an input only an
+   * earlier step (or an attachment) can provide is missing.
+   */
+  private async checkStepInputs(ctx: ToolContext, input: JsonObject) {
+    const step = input.step;
+    if (!isWorkspaceStage(step) || !isStageAllowed(ctx.scope, step)) {
+      return this.outcome(
+        ctx,
+        fail(
+          isWorkspaceStage(step)
+            ? `${STAGE_LABEL[step]} is not a step of this project.`
+            : 'Name the step to check.',
+          { allowed_steps: allowedStages(ctx.scope) },
+        ),
+        [],
+      );
+    }
+    const values = records(input.values)
+      .map((v) => ({ name: text(v.name), value: text(v.value) }))
+      .filter((v) => v.name && v.value);
+    const studio = await this.load(ctx);
+    const ready = (s: StageKind) =>
+      stageNodeOnBranch(studio, s)?.status === 'ready';
+    const hasNetlist = ctx.attachments.some(
+      (a) => a.kind === 'netlist' && Boolean(a.text),
+    );
+    const check = checkInputs(step, values, ready, hasNetlist);
+    const provided = Object.fromEntries(
+      check.provided.map((p) => [p.input.key, p.value]),
+    );
+    const fromResults = check.fromResults.map(
+      (r) => `${r.input.key} (from ${STAGE_LABEL[r.stage]})`,
+    );
+
+    if (check.blocked) {
+      const earlier = check.blocked.redirect;
+      const canMove =
+        earlier !== null &&
+        ctx.scope.mode === 'entry' &&
+        !ctx.scope.locked &&
+        !isStageAllowed(ctx.scope, earlier);
+      const label = inputLabel(step, check.blocked.input);
+      const widget: ChatWidget | undefined = canMove
+        ? {
+            id: ctx.newId('w'),
+            kind: 'question',
+            prompt: `${STAGE_LABEL[step]} needs ${label.toLowerCase()}, which only an earlier step or an attachment can provide.`,
+            options: [
+              { id: 'o1', label: `Start at ${STAGE_LABEL[earlier]} instead` },
+              {
+                id: 'o2',
+                label:
+                  check.blocked.input.artifact === 'netlist'
+                    ? "I'll attach a .cir netlist"
+                    : `I'll provide the ${label.toLowerCase()}`,
+              },
+            ],
+            multiple: false,
+            resolution: null,
+          }
+        : undefined;
+      return {
+        ...this.outcome(
+          ctx,
+          {
+            ok: true,
+            summary: canMove
+              ? `Needs an earlier step (${STAGE_LABEL[earlier]})`
+              : `Missing ${label.toLowerCase()}`,
+            payload: {
+              status: 'needs_earlier_step',
+              missing: check.blocked.input.key,
+              suggested_entry_step: earlier,
+              note: canMove
+                ? `A choice was shown. If the user picks "Start at ${STAGE_LABEL[earlier]}", call choose_entry_step with ${earlier}. Otherwise wait for the attachment and check again.`
+                : `Ask the user for the ${label.toLowerCase()} (e.g. attach a .cir file with the paperclip). An earlier step cannot be started in this project.`,
+            },
+          },
+          [],
+        ),
+        widget,
+      };
+    }
+
+    if (!check.missing.length) {
+      ctx.checked.add(step);
+      return this.outcome(
+        ctx,
+        {
+          ok: true,
+          summary: `${STAGE_LABEL[step]} inputs complete`,
+          payload: {
+            status: 'ready',
+            values: provided,
+            from_results: fromResults,
+            optional_not_given: check.optional.map((i) => i.key),
+            note: `Run ${STAGE_CONTRACTS[step].tools[0]} now with these values.`,
+          },
+        },
+        [],
+      );
+    }
+
+    const missing = check.missing.map((i) => ({
+      key: i.key,
+      label: inputLabel(step, i),
+      unit: i.unit,
+    }));
+    if (input.assume_missing === true) {
+      ctx.checked.add(step);
+      return this.outcome(
+        ctx,
+        {
+          ok: true,
+          summary: `Q assumes ${missing.length} input${missing.length === 1 ? '' : 's'}`,
+          payload: {
+            status: 'assume',
+            values: provided,
+            from_results: fromResults,
+            assume: missing,
+            note: `Assume typical values for these inputs from what the user told you, run ${STAGE_CONTRACTS[step].tools[0]} with \`assumed\` listing them, then show your assumptions in a short table.`,
+          },
+        },
+        [],
+      );
+    }
+
+    const shown = STAGE_CONTRACTS[step].inputs.filter(
+      (i) => !check.fromResults.some((r) => r.input.key === i.key),
+    );
+    const widget: ChatWidget = {
+      id: ctx.newId('w'),
+      kind: 'fields',
+      prompt: `To run ${STAGE_LABEL[step]} I still need ${missing.map((m) => m.label.toLowerCase()).join(', ')}. Fill in what you know; leave the rest blank or let Q fill it in.`,
+      fields: shown.map((i) => ({
+        name: i.label,
+        unit: i.unit,
+        suggestion: i.suggestion ?? null,
+        required:
+          check.missing.some((m) => m.group && m.group === i.group) ||
+          check.missing.some((m) => m.key === i.key),
+        value: provided[i.key] ?? null,
+      })),
+      step,
+      allowAssume: true,
+      resolution: null,
+    };
+    return {
+      ...this.outcome(
+        ctx,
+        {
+          ok: true,
+          summary: `${missing.length} input${missing.length === 1 ? '' : 's'} missing`,
+          payload: {
+            status: 'needs_input',
+            missing,
+            values: provided,
+            note: "A value table was shown in the chat. Stop here and wait for the user's values.",
+          },
+        },
+        [],
+      ),
+      widget,
+    };
+  }
+
+  /**
+   * A single-step project runs a step only after its inputs were checked in
+   * this turn (ready, or the user said to assume the rest). Input-capturing
+   * tools of the entry step (e.g. select_topology for Design) are exempt.
+   */
+  private uncheckedStep(ctx: ToolContext, name: string): string | null {
+    const stage = stageOfTool(name);
+    if (
+      !stage ||
+      ctx.scope.mode !== 'entry' ||
+      isFullScope(ctx.scope) ||
+      !isStageAllowed(ctx.scope, stage) ||
+      ctx.checked.has(stage)
+    ) {
+      return null;
+    }
+    return `Check the ${STAGE_LABEL[stage]} inputs first: call check_step_inputs with step "${stage}" and every value the user gave, then follow its status.`;
+  }
+
+  /**
+   * After a successful tool: the entry step locks when a stage first runs,
+   * and inputs Q assumed are recorded on the stage result.
+   */
+  private async afterStageRun(
+    ctx: ToolContext,
+    name: string,
+    input: JsonObject,
+    outcome: ToolOutcome,
+  ): Promise<ToolOutcome> {
+    const stage = stageOfTool(name);
+    // Input-capturing tools (e.g. select_topology for a Design entry) are not steps.
+    if (!stage || !isStageAllowed(ctx.scope, stage)) return outcome;
+    if (ctx.scope.mode !== 'entry') return outcome;
+    const assumed = assumedOf(input);
+    if (assumed && !EXTRA_STAGE_TOOLS.includes(name as never)) {
+      await this.projects.mutateStudio(
+        ctx.projectId,
+        ctx.user.id,
+        (studio) => {
+          const node = stageNodeOnBranch(studio, stage);
+          return node
+            ? patchNode(studio, node.id, {
+                data: { ...node.data, assumedInputs: assumed },
+              })
+            : studio;
+        },
+        ctx.branchId,
+      );
+    }
+    if (ctx.scope.locked) return outcome;
+    // The graph write that stored the result locked the entry step.
+    ctx.scope = lockAfterRun(ctx.scope, stage);
+    return { ...outcome, scopeChanged: true };
   }
 
   // --- workspace -----------------------------------------------------------------

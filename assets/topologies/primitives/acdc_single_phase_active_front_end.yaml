@@ -69,10 +69,6 @@ components:
     Cjo: 1.0e-10
     Tt: 1.0e-08
     Bv: 800.0
-- ref: B_A_BOT
-  type: b_source
-  params:
-    expression: 7.5 * (1 + tanh((v(n_ctrl) - v(n_tri) - 0.2)*100))
 - ref: R_GA_BOT
   type: resistor
   params:
@@ -115,10 +111,6 @@ components:
     Cjo: 1.0e-10
     Tt: 1.0e-08
     Bv: 800.0
-- ref: B_B_BOT
-  type: b_source
-  params:
-    expression: 7.5 * (1 + tanh((v(n_tri) - v(n_ctrl) - 0.2)*100))
 - ref: R_GB_BOT
   type: resistor
   params:
@@ -145,99 +137,177 @@ components:
 - ref: R_DC
   type: resistor
   params:
-    resistance: 100.0
-- ref: B_ERR
-  type: b_source
+    resistance: 53.33
+
+- ref: n_vref
+  type: node
   params:
-    expression: V_TARGET - v(n_DC_BUS)
-- ref: B_P
-  type: b_source
+    node_type: "label"
+
+- ref: n_pi_sum
+  type: node
   params:
-    expression: v(n_err) * 0.1
-- ref: G_INT
-  type: custom_spice
+    node_type: "label"
+
+- ref: n_vac
+  type: node
   params:
-    spice_line: G_INT 0 n_INT n_err 0 0.002
-- ref: C_INT
-  type: capacitor
+    node_type: "label"
+
+- ref: n_ierr
+  type: node
   params:
-    capacitance: 0.0001
-- ref: R_INT
-  type: resistor
+    node_type: "label"
+
+- ref: n_ierr_k
+  type: node
   params:
-    resistance: 10000000.0
-- ref: B_MAG
-  type: b_source
+    node_type: "label"
+
+# Control (blocks): voltage PI (0.1 * err + 20 * integral) -> clamp 0..40 -> 10 ms filter = current amplitude;
+# current reference = amplitude * v_ac / V_PEAK; current error * 10, clamped +-10, 47 us filter = n_ctrl;
+# bipolar PWM: comparators against a +-10 V 100 kHz triangle with a 0.2 V dead band (15 V gate levels).
+# The high-side drives B_GA_TOP / B_GB_TOP stay B sources (their outputs float on the switch nodes).
+- ref: REF_V
+  type: const
+  role: voltage_reference
   params:
-    expression: min(max(v(n_P) + v(n_INT), 0), 40)
-- ref: R_MAG_FLT
-  type: resistor
+    value: "V_TARGET"
+
+- ref: SUM_V
+  type: sum
+  role: voltage_error
   params:
-    resistance: 1000.0
-- ref: C_MAG_FLT
-  type: capacitor
+    signs: "+-"
+
+- ref: KP_V
+  type: gain
+  role: voltage_p
   params:
-    capacitance: 0.00001
-- ref: R_MAG_DC
-  type: resistor
+    gain: 0.05
+
+- ref: INT_V
+  type: integrator
+  role: voltage_i
   params:
-    resistance: 1000000.0
-- ref: B_REF
-  type: b_source
+    ki: 10
+    ic: 18.44
+
+- ref: SUM_PI
+  type: sum
+  role: voltage_pi_sum
   params:
-    expression: v(n_mag_flt) * v(n_VAC_P, n_VAC_N) / V_PEAK
-- ref: R_REF
-  type: resistor
+    signs: "++"
+
+- ref: LIM_MAG
+  type: limiter
+  role: current_amplitude_clamp
   params:
-    resistance: 1000000.0
-- ref: B_IACT
-  type: b_source
+    lower: 0
+    upper: 40
+
+- ref: LPF_MAG
+  type: lowpass
+  role: current_amplitude_filter
   params:
-    expression: i(VSENSE_AC)
-- ref: R_IACT
-  type: resistor
+    tau: 0.0021978022
+    gain: 0.999001
+    ic: 18.44
+
+- ref: SUM_VAC
+  type: sum
+  role: line_voltage_sense
   params:
-    resistance: 1000000.0
-- ref: B_CERR
-  type: b_source
+    signs: "+-"
+
+- ref: REF_I
+  type: product
+  role: current_reference
   params:
-    expression: max(min((v(n_ref) - v(n_iact)) * 10, 10), -10)
-- ref: R_CERR
-  type: resistor
+    gain: "1/V_PEAK"
+
+- ref: I_SENSE
+  type: function
+  role: line_current_sense
   params:
-    resistance: 1000000.0
-- ref: R_CP
-  type: resistor
+    expression: "i(VSENSE_AC)"
+    inputs: 0
+
+- ref: SUM_I
+  type: sum
+  role: current_error
   params:
-    resistance: 1000.0
-- ref: C_CP
-  type: capacitor
+    signs: "+-"
+
+- ref: K_I
+  type: gain
+  role: current_error_amp
   params:
-    capacitance: 4.7e-08
-- ref: R_DC_C
-  type: resistor
+    gain: 10
+
+- ref: LIM_I
+  type: limiter
+  role: current_error_clamp
   params:
-    resistance: 1000000.0
-- ref: VTRI
-  type: custom_spice
+    lower: -10
+    upper: 10
+
+- ref: LPF_C
+  type: lowpass
+  role: current_compensator
   params:
-    spice_line: V_TRI_src n_tri 0 PULSE(-10 10 0 5u 5u 0 10u)
-- ref: R_TRI
-  type: resistor
+    tau: 4.6953e-05
+    gain: 0.999001
+
+- ref: CAR
+  type: carrier
+  role: pwm_carrier
   params:
-    resistance: 1000000.0
-- ref: B_A_TOP
-  type: b_source
+    frequency: 100000.0
+    low: -10
+    high: 10
+    shape: "triangle"
+
+- ref: CMP_A_TOP
+  type: comparator
+  role: leg_a_top_pwm
   params:
-    expression: 7.5 * (1 + tanh((v(n_tri) - v(n_ctrl) - 0.2)*100))
-- ref: B_B_TOP
-  type: b_source
+    high: 15
+    low: 0
+    threshold: 0.2
+    width: 0.01
+
+- ref: CMP_A_BOT
+  type: comparator
+  role: leg_a_bottom_pwm
   params:
-    expression: 7.5 * (1 + tanh((v(n_ctrl) - v(n_tri) - 0.2)*100))
+    high: 15
+    low: 0
+    threshold: 0.2
+    width: 0.01
+
+- ref: CMP_B_TOP
+  type: comparator
+  role: leg_b_top_pwm
+  params:
+    high: 15
+    low: 0
+    threshold: 0.2
+    width: 0.01
+
+- ref: CMP_B_BOT
+  type: comparator
+  role: leg_b_bottom_pwm
+  params:
+    high: 15
+    low: 0
+    threshold: 0.2
+    width: 0.01
+
 - ref: IC_CMD
   type: custom_spice
   params:
-    spice_line: .ic V(n_DC_BUS)=400 V(n_INT)=29.5 V(n_mag_flt)=29.5
+    spice_line: .ic V(n_DC_BUS)=400 V(n_INT)=18.44 V(n_mag_flt)=18.44
 nets:
 - - - GND
     - pin
@@ -257,46 +327,6 @@ nets:
     - neg
   - - R_DC
     - neg
-  - - B_ERR
-    - '-'
-  - - B_P
-    - '-'
-  - - C_INT
-    - neg
-  - - R_INT
-    - neg
-  - - B_MAG
-    - '-'
-  - - C_MAG_FLT
-    - neg
-  - - R_MAG_DC
-    - neg
-  - - B_REF
-    - '-'
-  - - R_REF
-    - neg
-  - - B_IACT
-    - '-'
-  - - R_IACT
-    - neg
-  - - B_CERR
-    - '-'
-  - - R_CERR
-    - neg
-  - - C_CP
-    - neg
-  - - R_DC_C
-    - neg
-  - - R_TRI
-    - neg
-  - - B_A_TOP
-    - '-'
-  - - B_A_BOT
-    - '-'
-  - - B_B_TOP
-    - '-'
-  - - B_B_BOT
-    - '-'
 - - - VAC
     - +
   - - R_GND_L
@@ -304,6 +334,8 @@ nets:
   - - R_GRID_L
     - pos
   - n_VAC_P
+  - - SUM_VAC
+    - in1
 - - - VAC
     - '-'
   - - R_GND_N
@@ -311,6 +343,8 @@ nets:
   - - R_GRID_N
     - pos
   - n_VAC_N
+  - - SUM_VAC
+    - in2
 - - - R_GRID_L
     - neg
   - - L_BOOST
@@ -358,8 +392,10 @@ nets:
   - - R_DC
     - pos
   - n_DC_BUS
-- - - B_A_TOP
-    - +
+  - - SUM_V
+    - in2
+- - - CMP_A_TOP
+    - out
   - n_duty_A_top
 - - - R_GA_TOP
     - pos
@@ -369,16 +405,16 @@ nets:
     - neg
   - - M_A_TOP
     - gate
-- - - B_A_BOT
-    - +
+- - - CMP_A_BOT
+    - out
   - - R_GA_BOT
     - pos
 - - - R_GA_BOT
     - neg
   - - M_A_BOT
     - gate
-- - - B_B_TOP
-    - +
+- - - CMP_B_TOP
+    - out
   - n_duty_B_top
 - - - R_GB_TOP
     - pos
@@ -388,62 +424,116 @@ nets:
     - neg
   - - M_B_TOP
     - gate
-- - - B_B_BOT
-    - +
+- - - CMP_B_BOT
+    - out
   - - R_GB_BOT
     - pos
 - - - R_GB_BOT
     - neg
   - - M_B_BOT
     - gate
-- - - B_ERR
-    - +
+- - - SUM_V
+    - out
   - n_err
-- - - B_P
-    - +
+  - - KP_V
+    - in
+  - - INT_V
+    - in
+- - - KP_V
+    - out
   - n_P
-- - - C_INT
-    - pos
-  - - R_INT
-    - pos
+  - - SUM_PI
+    - in1
+- - - INT_V
+    - out
   - n_INT
-- - - B_MAG
-    - +
-  - - R_MAG_FLT
-    - pos
-- - - R_MAG_FLT
-    - neg
-  - - C_MAG_FLT
-    - pos
-  - - R_MAG_DC
-    - pos
+  - - SUM_PI
+    - in2
+- - - LIM_MAG
+    - out
+  - - LPF_MAG
+    - in
+- - - LPF_MAG
+    - out
   - n_mag_flt
-- - - B_REF
-    - +
-  - - R_REF
-    - pos
+  - - REF_I
+    - in1
+- - - REF_I
+    - out
   - n_ref
-- - - B_IACT
-    - +
-  - - R_IACT
-    - pos
+  - - SUM_I
+    - in1
+- - - I_SENSE
+    - out
   - n_iact
-- - - B_CERR
-    - +
-  - - R_CP
-    - pos
-  - - R_CERR
-    - pos
-- - - R_CP
-    - neg
-  - - C_CP
-    - pos
-  - - R_DC_C
-    - pos
+  - - SUM_I
+    - in2
+- - - LIM_I
+    - out
+  - - LPF_C
+    - in
+- - - LPF_C
+    - out
   - n_ctrl
-- - - R_TRI
-    - pos
+  - - CMP_A_TOP
+    - inn
+  - - CMP_A_BOT
+    - inp
+  - - CMP_B_TOP
+    - inp
+  - - CMP_B_BOT
+    - inn
+- - - CAR
+    - out
   - n_tri
+  - - CMP_A_TOP
+    - inp
+  - - CMP_A_BOT
+    - inn
+  - - CMP_B_TOP
+    - inn
+  - - CMP_B_BOT
+    - inp
+
+# Voltage reference V_TARGET
+- - - n_vref
+    - pin
+  - - REF_V
+    - out
+  - - SUM_V
+    - in1
+
+# Voltage PI sum (before the 0..40 clamp)
+- - - n_pi_sum
+    - pin
+  - - SUM_PI
+    - out
+  - - LIM_MAG
+    - in
+
+# Line voltage v(n_VAC_P) - v(n_VAC_N)
+- - - n_vac
+    - pin
+  - - SUM_VAC
+    - out
+  - - REF_I
+    - in2
+
+# Current error
+- - - n_ierr
+    - pin
+  - - SUM_I
+    - out
+  - - K_I
+    - in
+
+# Amplified current error (before the +-10 clamp)
+- - - n_ierr_k
+    - pin
+  - - K_I
+    - out
+  - - LIM_I
+    - in
 analysis:
   transient:
     spice_settings:
@@ -459,6 +549,8 @@ analysis:
     requirements:
     - rid: tr_afe_rectifier
       requirement: Verify AFE Rectifier active current shaping and output voltage.
+      criteria:
+        target_vout: 400.0
       measurement:
       - ref: VOUT
         plot:
@@ -515,3 +607,293 @@ metadata:
   - pfc
   - sic
   - acdc
+schematic:
+  tuned: true
+  components:
+    "#current_loop": {x: 540, y: 1920, rotation: 0}
+    "#gate_drive": {x: 1120, y: 1360, rotation: 0}
+    "#modulator": {x: 1100, y: 1940, rotation: 0}
+    "#reference_1": {x: 560, y: 1300, rotation: 0}
+    "#reference_2": {x: 0, y: 1360, rotation: 0}
+    "#spice_directives": {x: 0, y: 1600, rotation: 0}
+    "#voltage_loop": {x: -20, y: 1880, rotation: 0}
+    B_A_BOT: {x: 100, y: 180, rotation: 0}
+    B_A_TOP: {x: 540, y: 180, rotation: 0}
+    B_B_BOT: {x: 320, y: 180, rotation: 0}
+    B_B_TOP: {x: 760, y: 180, rotation: 0}
+    B_CERR: {x: 340, y: 260, rotation: 0}
+    B_ERR: {x: 260, y: 280, rotation: 0}
+    B_GA_TOP: {x: 100, y: 180, rotation: 0}
+    B_GB_TOP: {x: 400, y: 180, rotation: 0}
+    B_IACT: {x: 140, y: 260, rotation: 0}
+    B_MAG: {x: 640, y: 280, rotation: 0}
+    B_P: {x: 440, y: 280, rotation: 0}
+    B_REF: {x: 860, y: 280, rotation: 0}
+    CAR: {x: 340, y: 180, rotation: 0}
+    CMP_A_BOT: {x: 420, y: 320, rotation: 0}
+    CMP_A_TOP: {x: 520, y: 200, rotation: 0}
+    CMP_B_BOT: {x: 180, y: 180, rotation: 0}
+    CMP_B_TOP: {x: 220, y: 320, rotation: 0}
+    C_CP: {x: 220, y: 640, rotation: 0}
+    C_DC: {x: 1180, y: 220, rotation: 0}
+    C_INT: {x: 60, y: 760, rotation: 0}
+    C_MAG_FLT: {x: 60, y: 280, rotation: 0}
+    D_A_BOT: {x: 780, y: 340, rotation: 180}
+    D_A_TOP: {x: 780, y: 100, rotation: 180}
+    D_B_BOT: {x: 1060, y: 340, rotation: 180}
+    D_B_TOP: {x: 1060, y: 100, rotation: 180}
+    GLOBAL_PARAMS: {x: 140, y: 20, rotation: 0}
+    GND: {x: 120, y: 0, rotation: 180}
+    G_INT: {x: 480, y: 20, rotation: 0}
+    IC_CMD: {x: 480, y: 20, rotation: 0}
+    INT_V: {x: 340, y: 320, rotation: 0}
+    I_SENSE: {x: 440, y: 340, rotation: 0}
+    KP_V: {x: 440, y: 200, rotation: 0}
+    K_I: {x: 720, y: 120, rotation: 0}
+    LIM_I: {x: 900, y: 120, rotation: 0}
+    LIM_MAG: {x: 680, y: 420, rotation: 0}
+    LPF_C: {x: 1120, y: 120, rotation: 0}
+    LPF_MAG: {x: 860, y: 420, rotation: 0}
+    L_BOOST: {x: 380, y: 180, rotation: 270}
+    M_A_BOT: {x: 700, y: 340, rotation: 0}
+    M_A_TOP: {x: 700, y: 100, rotation: 0}
+    M_B_BOT: {x: 980, y: 340, rotation: 0}
+    M_B_TOP: {x: 980, y: 100, rotation: 0}
+    REF_I: {x: 360, y: 200, rotation: 0}
+    REF_V: {x: 200, y: 20, rotation: 0}
+    R_CERR: {x: 340, y: 120, rotation: 0}
+    R_CP: {x: 220, y: 500, rotation: 0}
+    R_DC: {x: 1300, y: 220, rotation: 0}
+    R_DC_C: {x: 100, y: 580, rotation: 0}
+    R_GA_BOT: {x: 700, y: 120, rotation: 0}
+    R_GA_TOP: {x: 100, y: 40, rotation: 0}
+    R_GB_BOT: {x: 1020, y: 120, rotation: 0}
+    R_GB_TOP: {x: 460, y: 40, rotation: 0}
+    R_GND_L: {x: 120, y: 100, rotation: 180}
+    R_GND_N: {x: 120, y: 340, rotation: 0}
+    R_GRID_L: {x: 240, y: 180, rotation: 270}
+    R_GRID_N: {x: 240, y: 260, rotation: 270}
+    R_IACT: {x: 140, y: 120, rotation: 0}
+    R_INT: {x: 40, y: 620, rotation: 180}
+    R_MAG_DC: {x: 60, y: 140, rotation: 0}
+    R_MAG_FLT: {x: 340, y: 140, rotation: 90}
+    R_REF: {x: 560, y: 200, rotation: 0}
+    R_TRI: {x: 760, y: 1020, rotation: 0}
+    SUM_I: {x: 540, y: 200, rotation: 0}
+    SUM_PI: {x: 500, y: 340, rotation: 0}
+    SUM_V: {x: 260, y: 200, rotation: 0}
+    SUM_VAC: {x: 260, y: 340, rotation: 0}
+    VAC: {x: 0, y: 220, rotation: 0}
+    VSENSE_AC: {x: 520, y: 180, rotation: 270}
+    VTRI: {x: 840, y: 20, rotation: 0}
+    "^current_loop:n_VAC_N": {x: 80, y: 360, rotation: 0}
+    "^current_loop:n_VAC_P": {x: 80, y: 280, rotation: 0}
+    "^current_loop:n_ctrl": {x: 1220, y: 40, rotation: 0}
+    "^current_loop:n_mag_flt": {x: 300, y: 20, rotation: 0}
+    "^gate_drive:n10": {x: 100, y: 300, rotation: 0}
+    "^gate_drive:n11": {x: 700, y: 20, rotation: 0}
+    "^gate_drive:n12": {x: 700, y: 220, rotation: 0}
+    "^gate_drive:n15": {x: 500, y: 300, rotation: 0}
+    "^gate_drive:n16": {x: 1020, y: 20, rotation: 0}
+    "^gate_drive:n17": {x: 1020, y: 220, rotation: 0}
+    "^gate_drive:n25": {x: 220, y: 400, rotation: 0}
+    "^gate_drive:n_SW_A": {x: 100, y: 360, rotation: 0}
+    "^gate_drive:n_SW_B": {x: 440, y: 360, rotation: 0}
+    "^gate_drive:n_duty_A_top": {x: -140, y: 160, rotation: 0}
+    "^gate_drive:n_duty_B_top": {x: 160, y: 260, rotation: 0}
+    "^gate_drive:n_tri": {x: -100, y: 160, rotation: 0}
+    "^modulator:n11": {x: 640, y: 320, rotation: 0}
+    "^modulator:n16": {x: 280, y: 20, rotation: 0}
+    "^modulator:n_ctrl": {x: 60, y: 440, rotation: 0}
+    "^modulator:n_duty_A_top": {x: 740, y: 140, rotation: 0}
+    "^modulator:n_duty_B_top": {x: 360, y: 560, rotation: 0}
+    "^reference_1:n25": {x: 340, y: 20, rotation: 0}
+    "^reference_1:n_ref": {x: 600, y: 20, rotation: 0}
+    "^reference_2:n_DC_BUS": {x: 40, y: 360, rotation: 0}
+    "^reference_2:n_INT": {x: 440, y: 360, rotation: 0}
+    "^reference_2:n_VAC_N": {x: 640, y: 200, rotation: 0}
+    "^reference_2:n_VAC_P": {x: 640, y: 360, rotation: 0}
+    "^reference_2:n_ref": {x: 860, y: 180, rotation: 0}
+    "^voltage_loop:n_DC_BUS": {x: 80, y: 220, rotation: 0}
+    "^voltage_loop:n_mag_flt": {x: 960, y: 340, rotation: 0}
+    n_DC_BUS: {x: 700, y: -40, rotation: 270}
+    n_INT: {x: 340, y: 420, rotation: 180}
+    n_P: {x: 580, y: 220, rotation: 180}
+    n_SW_A: {x: 640, y: 180, rotation: 0}
+    n_SW_B: {x: 360, y: 260, rotation: 0}
+    n_VAC_N: {x: 0, y: 360, rotation: 90}
+    n_VAC_P: {x: 0, y: 80, rotation: 270}
+    n_ctrl: {x: 240, y: 420, rotation: 0}
+    n_duty_A_top: {x: 620, y: 80, rotation: 180}
+    n_duty_B_top: {x: 320, y: 480, rotation: 180}
+    n_err: {x: 440, y: 120, rotation: 0}
+    n_iact: {x: 480, y: 440, rotation: 180}
+    n_ierr: {x: 720, y: 200, rotation: 180}
+    n_ierr_k: {x: 820, y: 40, rotation: 180}
+    n_mag_flt: {x: 260, y: 100, rotation: 180}
+    n_pi_sum: {x: 680, y: 340, rotation: 180}
+    n_ref: {x: 440, y: 80, rotation: 180}
+    n_tri: {x: 280, y: 80, rotation: 0}
+    n_vac: {x: 180, y: 220, rotation: 180}
+    n_vref: {x: 160, y: 100, rotation: 180}
+    "~CMP_A_BOT.out@#gate_drive.CMP_A_BOT_out": {x: 960, y: 1180, rotation: 180}
+    "~CMP_A_BOT.out@#modulator.CMP_A_BOT_out": {x: 1260, y: 1800, rotation: 0}
+    "~CMP_B_BOT.out@#gate_drive.CMP_B_BOT_out": {x: 880, y: 1300, rotation: 180}
+    "~CMP_B_BOT.out@#modulator.CMP_B_BOT_out": {x: 1340, y: 1920, rotation: 0}
+    "~GND@B_A_BOT.B": {x: 60, y: 360, rotation: 0}
+    "~GND@B_CERR.B": {x: 340, y: 380, rotation: 0}
+    "~GND@B_ERR.B": {x: 260, y: 480, rotation: 0}
+    "~GND@C_CP.B": {x: 220, y: 760, rotation: 0}
+    "~GND@C_DC.B": {x: 1180, y: 340, rotation: 0}
+    "~GND@C_INT.B": {x: 60, y: 880, rotation: 0}
+    "~GND@R_REF.B": {x: 560, y: 320, rotation: 0}
+    "~GND@R_TRI.B": {x: 760, y: 1140, rotation: 0}
+    "~M_A_BOT.gate@#gate_drive.M_A_BOT_gate": {x: 1340, y: 1300, rotation: 0}
+    "~M_A_BOT.gate@M_A_BOT.G": {x: 600, y: 260, rotation: 180}
+    "~M_A_TOP.gate@#gate_drive.M_A_TOP_gate": {x: 1340, y: 1340, rotation: 0}
+    "~M_A_TOP.gate@M_A_TOP.G": {x: 520, y: 100, rotation: 180}
+    "~M_B_BOT.gate@#gate_drive.M_B_BOT_gate": {x: 1340, y: 1380, rotation: 0}
+    "~M_B_BOT.gate@M_B_BOT.G": {x: 880, y: 260, rotation: 180}
+    "~M_B_TOP.gate@#gate_drive.M_B_TOP_gate": {x: 1340, y: 1420, rotation: 0}
+    "~M_B_TOP.gate@M_B_TOP.G": {x: 880, y: 20, rotation: 180}
+    "~n_DC_BUS@#reference_2.n_DC_BUS": {x: -200, y: 1300, rotation: 180}
+    "~n_DC_BUS@#voltage_loop.n_DC_BUS": {x: -220, y: 1880, rotation: 180}
+    "~n_INT@#reference_2.n_INT": {x: -180, y: 1340, rotation: 180}
+    "~n_SW_A@#gate_drive.n_SW_A": {x: 940, y: 1340, rotation: 180}
+    "~n_SW_B@#gate_drive.n_SW_B": {x: 940, y: 1380, rotation: 180}
+    "~n_VAC_N@#current_loop.n_VAC_N": {x: 340, y: 1880, rotation: 180}
+    "~n_VAC_N@#reference_2.n_VAC_N": {x: -200, y: 1380, rotation: 180}
+    "~n_VAC_P@#current_loop.n_VAC_P": {x: 340, y: 1920, rotation: 180}
+    "~n_VAC_P@#reference_2.n_VAC_P": {x: -200, y: 1420, rotation: 180}
+    "~n_duty_A_top@#gate_drive.n_duty_A_top": {x: 900, y: 1420, rotation: 180}
+    "~n_duty_A_top@#modulator.n_duty_A_top": {x: 1320, y: 1960, rotation: 0}
+    "~n_duty_B_top@#gate_drive.n_duty_B_top": {x: 900, y: 1460, rotation: 180}
+    "~n_duty_B_top@#modulator.n_duty_B_top": {x: 1320, y: 2000, rotation: 0}
+    "~n_tri@#gate_drive.n_tri": {x: 940, y: 1420, rotation: 180}
+  wires:
+  - {id: W1, from: D_A_BOT.A, to: M_A_BOT.S}
+  - {id: W2, from: D_B_BOT.A, to: M_B_BOT.S}
+  - {id: W3, from: C_DC.B, to: R_DC.B}
+  - {id: W4, from: D_A_BOT.A, to: M_B_BOT.S}
+  - {id: W5, from: C_DC.B, to: D_B_BOT.A}
+  - {id: W8, from: C_DC.B, to: "~GND@C_DC.B.P"}
+  - {id: W6, from: GND.P, to: R_GND_L.B}
+  - {id: W7, from: GND.P, to: R_GND_N.B}
+  - {id: W9, from: "#gate_drive.M_A_TOP_gate", to: "~M_A_TOP.gate@#gate_drive.M_A_TOP_gate.P"}
+  - {id: W10, from: M_A_TOP.G, to: "~M_A_TOP.gate@M_A_TOP.G.P"}
+  - {id: W11, from: "#gate_drive.CMP_A_BOT_out", to: "~CMP_A_BOT.out@#gate_drive.CMP_A_BOT_out.P"}
+  - {id: W12, from: "#modulator.CMP_A_BOT_out", to: "~CMP_A_BOT.out@#modulator.CMP_A_BOT_out.P"}
+  - {id: W13, from: "#gate_drive.M_A_BOT_gate", to: "~M_A_BOT.gate@#gate_drive.M_A_BOT_gate.P"}
+  - {id: W14, from: M_A_BOT.G, to: "~M_A_BOT.gate@M_A_BOT.G.P"}
+  - {id: W15, from: "#gate_drive.M_B_TOP_gate", to: "~M_B_TOP.gate@#gate_drive.M_B_TOP_gate.P"}
+  - {id: W16, from: M_B_TOP.G, to: "~M_B_TOP.gate@M_B_TOP.G.P"}
+  - {id: W17, from: "#gate_drive.CMP_B_BOT_out", to: "~CMP_B_BOT.out@#gate_drive.CMP_B_BOT_out.P"}
+  - {id: W18, from: "#modulator.CMP_B_BOT_out", to: "~CMP_B_BOT.out@#modulator.CMP_B_BOT_out.P"}
+  - {id: W19, from: "#gate_drive.M_B_BOT_gate", to: "~M_B_BOT.gate@#gate_drive.M_B_BOT_gate.P"}
+  - {id: W20, from: M_B_BOT.G, to: "~M_B_BOT.gate@M_B_BOT.G.P"}
+  - {id: W21, from: L_BOOST.A, to: R_GRID_L.B}
+  - {id: W22, from: L_BOOST.B, to: VSENSE_AC.A}
+  - {id: W23, from: D_A_TOP.B, to: M_A_TOP.D}
+  - {id: W24, from: D_B_TOP.B, to: M_B_TOP.D}
+  - {id: W25, from: C_DC.A, to: R_DC.A}
+  - {id: W26, from: D_A_TOP.B, to: M_B_TOP.D}
+  - {id: W27, from: C_DC.A, to: D_B_TOP.B}
+  - {id: W28, from: M_A_TOP.D, to: n_DC_BUS.P}
+  - {id: W29, from: "#voltage_loop.n_DC_BUS", to: "~n_DC_BUS@#voltage_loop.n_DC_BUS.P"}
+  - {id: W30, from: D_A_BOT.B, to: M_A_BOT.D}
+  - {id: W31, from: D_A_TOP.A, to: M_A_TOP.S}
+  - {id: W32, from: D_A_BOT.B, to: D_A_TOP.A}
+  - {id: W33, from: M_A_TOP.S, to: VSENSE_AC.B}
+  - {id: W34, from: VSENSE_AC.B, to: n_SW_A.P}
+  - {id: W35, from: "#gate_drive.n_SW_A", to: "~n_SW_A@#gate_drive.n_SW_A.P"}
+  - {id: W36, from: D_B_BOT.B, to: M_B_BOT.D}
+  - {id: W37, from: D_B_TOP.A, to: M_B_TOP.S}
+  - {id: W38, from: D_B_BOT.B, to: D_B_TOP.A}
+  - {id: W39, from: M_B_BOT.D, to: R_GRID_N.B}
+  - {id: W40, from: R_GRID_N.B, to: n_SW_B.P}
+  - {id: W41, from: "#gate_drive.n_SW_B", to: "~n_SW_B@#gate_drive.n_SW_B.P"}
+  - {id: W42, from: R_GRID_N.A, to: VAC.B}
+  - {id: W43, from: VAC.B, to: n_VAC_N.P}
+  - {id: W44, from: R_GND_N.A, to: R_GRID_N.A}
+  - {id: W45, from: "#current_loop.n_VAC_N", to: "~n_VAC_N@#current_loop.n_VAC_N.P"}
+  - {id: W46, from: R_GRID_L.A, to: VAC.A}
+  - {id: W47, from: VAC.A, to: n_VAC_P.P}
+  - {id: W48, from: R_GND_L.A, to: R_GRID_L.A}
+  - {id: W49, from: "#current_loop.n_VAC_P", to: "~n_VAC_P@#current_loop.n_VAC_P.P"}
+  - {id: W50, from: "#current_loop.n_ctrl", to: "#modulator.n_ctrl"}
+  - {id: W51, from: "#gate_drive.n_duty_A_top", to: "~n_duty_A_top@#gate_drive.n_duty_A_top.P"}
+  - {id: W52, from: "#modulator.n_duty_A_top", to: "~n_duty_A_top@#modulator.n_duty_A_top.P"}
+  - {id: W53, from: "#gate_drive.n_duty_B_top", to: "~n_duty_B_top@#gate_drive.n_duty_B_top.P"}
+  - {id: W54, from: "#modulator.n_duty_B_top", to: "~n_duty_B_top@#modulator.n_duty_B_top.P"}
+  - {id: W55, from: "#current_loop.n_mag_flt", to: "#voltage_loop.n_mag_flt"}
+  groups:
+    current_loop: {label: "Current loop", members: [SUM_VAC, REF_I, I_SENSE, SUM_I, K_I, LIM_I, LPF_C]}
+    gate_drive: {label: "Gate drive", members: [B_GA_TOP, B_GB_TOP, R_GA_TOP, R_GA_BOT, R_GB_TOP, R_GB_BOT]}
+    modulator: {label: "Modulator", members: [CAR, CMP_A_TOP, CMP_A_BOT, CMP_B_TOP, CMP_B_BOT]}
+    spice_directives: {label: "SPICE directives", members: [GLOBAL_PARAMS, IC_CMD]}
+    voltage_loop: {label: "Voltage loop", members: [REF_V, SUM_V, KP_V, INT_V, SUM_PI, LIM_MAG, LPF_MAG]}
+  sheets:
+    current_loop:
+      wires:
+      - {id: W1, from: LIM_I.out, to: LPF_C.in}
+      - {id: W2, from: SUM_VAC.in2, to: "^current_loop:n_VAC_N.P"}
+      - {id: W3, from: SUM_VAC.in1, to: "^current_loop:n_VAC_P.P"}
+      - {id: W4, from: LPF_C.out, to: "^current_loop:n_ctrl.P"}
+      - {id: W5, from: I_SENSE.out, to: SUM_I.in2}
+      - {id: W6, from: I_SENSE.out, to: n_iact.P}
+      - {id: W7, from: K_I.in, to: SUM_I.out}
+      - {id: W8, from: K_I.in, to: n_ierr.P}
+      - {id: W9, from: K_I.out, to: LIM_I.in}
+      - {id: W10, from: LIM_I.in, to: n_ierr_k.P}
+      - {id: W11, from: REF_I.in1, to: "^current_loop:n_mag_flt.P"}
+      - {id: W12, from: "^current_loop:n_mag_flt.P", to: n_mag_flt.P}
+      - {id: W13, from: REF_I.out, to: SUM_I.in1}
+      - {id: W14, from: SUM_I.in1, to: n_ref.P}
+      - {id: W15, from: REF_I.in2, to: SUM_VAC.out}
+      - {id: W16, from: REF_I.in2, to: n_vac.P}
+    gate_drive:
+      wires:
+      - {id: W1, from: R_GA_TOP.B, to: "^gate_drive:n10.P"}
+      - {id: W2, from: R_GA_BOT.A, to: "^gate_drive:n11.P"}
+      - {id: W3, from: R_GA_BOT.B, to: "^gate_drive:n12.P"}
+      - {id: W4, from: B_GB_TOP.A, to: R_GB_TOP.A}
+      - {id: W5, from: R_GB_TOP.B, to: "^gate_drive:n15.P"}
+      - {id: W6, from: R_GB_BOT.A, to: "^gate_drive:n16.P"}
+      - {id: W7, from: R_GB_BOT.B, to: "^gate_drive:n17.P"}
+      - {id: W8, from: B_GA_TOP.A, to: R_GA_TOP.A}
+      - {id: W9, from: B_GA_TOP.B, to: "^gate_drive:n_SW_A.P"}
+      - {id: W10, from: B_GB_TOP.B, to: "^gate_drive:n_SW_B.P"}
+    modulator:
+      wires:
+      - {id: W1, from: CMP_A_BOT.out, to: "^modulator:n11.P"}
+      - {id: W2, from: CMP_B_BOT.out, to: "^modulator:n16.P"}
+      - {id: W3, from: CMP_B_BOT.inn, to: CMP_B_TOP.inp}
+      - {id: W4, from: CMP_A_BOT.inp, to: CMP_A_TOP.inn}
+      - {id: W5, from: CMP_A_BOT.inp, to: CMP_B_TOP.inp}
+      - {id: W6, from: CMP_B_TOP.inp, to: "^modulator:n_ctrl.P"}
+      - {id: W7, from: CMP_B_TOP.inp, to: n_ctrl.P}
+      - {id: W8, from: CMP_A_TOP.out, to: "^modulator:n_duty_A_top.P"}
+      - {id: W9, from: "^modulator:n_duty_A_top.P", to: n_duty_A_top.P}
+      - {id: W10, from: CMP_B_TOP.out, to: "^modulator:n_duty_B_top.P"}
+      - {id: W11, from: "^modulator:n_duty_B_top.P", to: n_duty_B_top.P}
+      - {id: W12, from: CAR.out, to: CMP_A_TOP.inp}
+      - {id: W13, from: CAR.out, to: CMP_A_BOT.inn}
+      - {id: W14, from: CMP_A_BOT.inn, to: CMP_B_TOP.inn}
+      - {id: W15, from: CMP_B_BOT.inp, to: CMP_B_TOP.inn}
+      - {id: W16, from: CMP_B_BOT.inp, to: n_tri.P}
+    voltage_loop:
+      wires:
+      - {id: W1, from: LIM_MAG.out, to: LPF_MAG.in}
+      - {id: W2, from: SUM_V.in2, to: "^voltage_loop:n_DC_BUS.P"}
+      - {id: W3, from: INT_V.out, to: SUM_PI.in2}
+      - {id: W4, from: INT_V.out, to: n_INT.P}
+      - {id: W5, from: KP_V.out, to: SUM_PI.in1}
+      - {id: W6, from: KP_V.out, to: n_P.P}
+      - {id: W7, from: KP_V.in, to: SUM_V.out}
+      - {id: W8, from: INT_V.in, to: SUM_V.out}
+      - {id: W9, from: KP_V.in, to: n_err.P}
+      - {id: W10, from: LPF_MAG.out, to: "^voltage_loop:n_mag_flt.P"}
+      - {id: W11, from: LIM_MAG.in, to: SUM_PI.out}
+      - {id: W12, from: LIM_MAG.in, to: n_pi_sum.P}
+      - {id: W13, from: REF_V.out, to: SUM_V.in1}
+      - {id: W14, from: SUM_V.in1, to: n_vref.P}

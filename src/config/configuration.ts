@@ -28,6 +28,8 @@ export interface AppConfiguration {
     trustProxyHops: number;
     bodyLimit: string;
     requestTimeoutMs: number;
+    /** DEV-LAYOUT: developer schematic layout tool (development only). */
+    schematicLayoutTool: boolean;
   };
   database: {
     url: string;
@@ -185,6 +187,9 @@ export function configuration(): AppConfiguration {
       trustProxyHops: env.TRUST_PROXY_HOPS,
       bodyLimit: env.BODY_LIMIT,
       requestTimeoutMs: env.REQUEST_TIMEOUT_MS,
+      schematicLayoutTool:
+        env.SCHEMATIC_LAYOUT_TOOL &&
+        env.NODE_ENV !== NodeEnvironment.Production,
     },
     database: {
       url: env.DATABASE_URL,

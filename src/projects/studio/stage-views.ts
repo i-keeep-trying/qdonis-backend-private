@@ -4,6 +4,7 @@ import {
   type SpecRow,
   type TopologyOption,
 } from '../../design/studio-specs.logic';
+import { CORE_GEOMETRY_DATA } from '../../engines/magnetics/data/core-geometry.data';
 import {
   AVAILABLE_CORES,
   AVAILABLE_MATERIALS,
@@ -14,6 +15,7 @@ import type {
   ThermalResult,
 } from '../../engines/thermal/thermal-engine';
 import type { MagneticPartInput } from '../../studio-stages/magnetics.stage';
+import { environmentsOf, MTBF_METHODS } from '../../studio-stages/mtbf.stage';
 import type { ThermalInputs } from '../../studio-stages/thermal.stage';
 import type { JsonObject, StageKind } from './studio-graph';
 
@@ -21,13 +23,25 @@ import type { JsonObject, StageKind } from './studio-graph';
  * Stage data as the Studio client reads it. Specs, magnetics and thermal
  * are stored in the shapes the Studio agent and the stage planners use
  * (`studio-specs.logic`, `magnetics.stage`, `thermal.stage`); this maps
- * them to the qdonis-web contract. Other stages are stored in that shape.
+ * them to the qdonis-web contract. Other stages are stored in that shape
+ * (MTBF gets the methods and environments it can be re-run with).
  */
 export function stageDataView(stage: StageKind, data: JsonObject): JsonObject {
-  if (stage === 'specs') return specsView(data);
-  if (stage === 'magnetics') return magneticsView(data);
-  if (stage === 'thermal') return thermalView(data);
-  return data;
+  const view =
+    stage === 'specs'
+      ? specsView(data)
+      : stage === 'magnetics'
+        ? magneticsView(data)
+        : stage === 'thermal'
+          ? thermalView(data)
+          : stage === 'mtbf'
+            ? { ...data, catalog: MTBF_CATALOG }
+            : data;
+  // Inputs Q assumed (single-step projects) stay visible on every stage.
+  const assumed = strings(data.assumedInputs);
+  return assumed.length && view !== data
+    ? { ...view, assumedInputs: assumed }
+    : view;
 }
 
 const rec = (v: unknown): JsonObject =>
@@ -46,6 +60,11 @@ const num = (v: unknown): number | null =>
   typeof v === 'number' && Number.isFinite(v) ? v : null;
 const strings = (v: unknown): string[] =>
   list(v).filter((x): x is string => typeof x === 'string');
+
+const MTBF_CATALOG = MTBF_METHODS.map((method) => ({
+  method,
+  environments: environmentsOf(method),
+}));
 
 // --- specs -----------------------------------------------------------------------
 
@@ -122,6 +141,8 @@ function specsView(data: JsonObject): JsonObject {
 // --- magnetics ---------------------------------------------------------------------
 
 function magneticDesignView(d: MagneticDesign): JsonObject {
+  const geometry = CORE_GEOMETRY_DATA[d.core] as
+    (typeof CORE_GEOMETRY_DATA)[string] | undefined;
   return {
     ref: d.ref,
     role: d.role ?? null,
@@ -168,6 +189,25 @@ function magneticDesignView(d: MagneticDesign): JsonObject {
     },
     voltSecondsUvs: d.voltSeconds_uVs,
     fswHz: d.fsw,
+    // Library core data the 3D model is drawn from (no drawings in the library).
+    coreGeometry: geometry
+      ? {
+          effectiveAreaMm2: geometry.effectiveArea,
+          windowAreaMm2: geometry.windowArea ?? null,
+        }
+      : null,
+    // The electrical operating point the part was designed for.
+    inputs: d.inputs
+      ? {
+          basis: d.inputs.basis,
+          rows: d.inputs.rows.map((r) => ({
+            label: r.label,
+            value: r.value,
+            note: r.note ?? null,
+          })),
+          assumptions: d.inputs.assumptions ?? [],
+        }
+      : null,
     warnings: d.warnings ?? [],
   };
 }
@@ -226,6 +266,26 @@ function magneticsView(data: JsonObject): JsonObject {
     inputs: (records(data.inputs) as unknown as MagneticPartInput[]).map((p) =>
       magneticPartView(p, fswHz),
     ),
+    // Circuit parts designed from values entered in the workspace.
+    overrides: (
+      Object.values(rec(data.overrides)) as unknown as MagneticPartInput[]
+    ).map((p) => magneticPartView(p, fswHz)),
+    operatingPoint: operatingPointView(data.operatingPoint),
+  };
+}
+
+function operatingPointView(value: unknown): JsonObject | null {
+  const op = rec(value);
+  if (!Array.isArray(op.rows)) return null;
+  return {
+    rows: records(op.rows).map((r) => ({
+      label: str(r.label) ?? '',
+      value: str(r.value) ?? '',
+      note: str(r.note),
+    })),
+    notes: Array.isArray(op.notes)
+      ? op.notes.filter((n): n is string => typeof n === 'string')
+      : [],
   };
 }
 
@@ -249,6 +309,27 @@ function thermalResultView(r: ThermalResult): JsonObject {
     ambientC: r.ambientC,
     strategy: r.strategy,
     heatsink: r.heatsink ?? null,
+    // Results saved before the cooling recommendation have none.
+    cooling: r.cooling
+      ? {
+          method: r.cooling.method,
+          tier: r.cooling.tier,
+          rationale: r.cooling.rationale,
+          heatsink: r.cooling.heatsink
+            ? {
+                rsaMaxCW: r.cooling.heatsink.rsaMaxCW,
+                heatW: r.cooling.heatsink.heatW,
+                sinkTempC: r.cooling.heatsink.sinkTempC,
+                volumeCm3: r.cooling.heatsink.volumeCm3,
+                sizeHint: r.cooling.heatsink.sizeHint,
+                airflow: r.cooling.heatsink.airflow ?? null,
+              }
+            : null,
+          mounting: r.cooling.mounting,
+          alternatives: r.cooling.alternatives,
+          notes: r.cooling.notes,
+        }
+      : null,
     devices: r.devices.map((d) => ({
       ref: d.ref,
       kind: d.kind,

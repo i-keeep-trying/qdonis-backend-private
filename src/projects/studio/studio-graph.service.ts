@@ -26,14 +26,26 @@ import { stageDataView } from './stage-views';
 import {
   type JsonObject,
   type StageKind,
+  type WorkspaceStage,
   type StageNode,
+  STAGE_LABEL,
   stageNodeOnBranch,
   type StudioProject,
+  type StudioScope,
 } from './studio-graph';
 import {
   type GraphRows,
   StudioGraphRepository,
 } from './studio-graph.repository';
+import {
+  allowedStages,
+  applyScopeRules,
+  chooseEntry,
+  isStageAllowed,
+  nextSteps,
+  scopeOf,
+  visibleStages,
+} from './studio-scope';
 import {
   heavyBlobName,
   rawSeriesBlobName,
@@ -53,9 +65,14 @@ const VIEW_OF: Record<StageKind, string> = {
   visualization: 'circuit',
   design: 'design',
   simulation: 'simulation',
-  devices: 'devices',
+  // Former stage: its results open the Simulation view.
+  devices: 'simulation',
   magnetics: 'magnetics',
   thermal: 'thermal',
+  mtbf: 'mtbf',
+  bom: 'bom',
+  emc: 'emc',
+  components: 'components',
 };
 
 export interface MutateOptions {
@@ -119,18 +136,8 @@ export class StudioGraphService {
     const header = await this.rows.header(projectId);
     if (!header) throw this.projectNotFound();
     const active = project.activeBranchId;
-    // Devices count as done when the branch's simulation already chose them.
-    const simNode = stageNodeOnBranch(project, 'devices', active)
-      ? null
-      : stageNodeOnBranch(project, 'simulation', active);
-    const simulation = simNode
-      ? await this.rows.nodeWithData(projectId, simNode.id)
-      : null;
-    const hasSimDevices = Boolean(
-      simulation?.status === 'ready' &&
-      (isObject(simulation.data.device_selection) ||
-        isObject(simulation.data.deviceSelection)),
-    );
+    const stages = stageViews(project, active);
+    const scope = scopeOf(project);
     return {
       projectId,
       name: header.name,
@@ -138,7 +145,14 @@ export class StudioGraphService {
       version: header.revision,
       activeBranchId: active,
       branches: branchViews(project),
-      stages: stageViews(project, active, hasSimDevices),
+      stages,
+      scope,
+      visibleStages: visibleStages(
+        scope,
+        (stage) => stages[stage].status !== 'empty',
+      ),
+      allowedStages: allowedStages(scope),
+      nextSteps: nextSteps(scope, (stage) => stages[stage].status === 'ready'),
       defaultView: this.defaultView(project, active),
       // The dashboard prompt is sent once, as the person's first chat message.
       pendingInitialPrompt:
@@ -313,9 +327,18 @@ export class StudioGraphService {
           'project' in outcome && 'value' in outcome
             ? outcome
             : { project: outcome, value: undefined as T };
-        const after = normalizeForTables(
-          parseStudioProject(serializeProject(changed)),
+        const ruled = applyScopeRules(
+          before,
+          normalizeForTables(parseStudioProject(serializeProject(changed))),
         );
+        if (!ruled.ok) {
+          const scope = scopeOf(before);
+          throw AppError.conflict(
+            ErrorCode.StageOutOfScope,
+            `This project starts at ${scope.mode === 'entry' ? STAGE_LABEL[scope.entry] : 'a later step'}; ${STAGE_LABEL[ruled.stage]} comes before it and cannot run here.`,
+          );
+        }
+        const after = ruled.project;
 
         const base = options.baseData ?? stripStudio(data);
         const nextData = projectDataFor(after, base);
@@ -455,7 +478,11 @@ export class StudioGraphService {
       const header = await this.rows.header(projectId);
       if (!header) throw this.projectNotFound();
       data = {
-        studio: { initialPrompt: header.initialPrompt, focus: header.focus },
+        studio: {
+          initialPrompt: header.initialPrompt,
+          focus: header.focus,
+          scope: header.scope,
+        },
       };
     }
     return this.assemble(projectId, userId, rows, data, options.branchId);
@@ -504,15 +531,46 @@ export class StudioGraphService {
       focus: meta.focus,
       messages: meta.messages,
       ...(meta.initialPrompt ? { initialPrompt: meta.initialPrompt } : {}),
+      ...(meta.scope ? { scope: meta.scope } : {}),
       createdAt: meta.createdAt,
     };
   }
 
   private defaultView(project: StudioProject, branchId: string): string {
-    if (project.focus) return VIEW_OF[project.focus];
+    const scope = scopeOf(project);
+    const allowed = (stage: StageKind) =>
+      scope.mode === 'entry' && isStageAllowed(scope, stage);
+    if (project.focus && allowed(project.focus)) return VIEW_OF[project.focus];
     const branch = project.branches[branchId];
     const head = branch?.headId ? project.nodes[branch.headId] : undefined;
-    return head ? VIEW_OF[head.stage] : 'specs';
+    if (head && allowed(head.stage)) return VIEW_OF[head.stage];
+    return scope.mode === 'entry' ? VIEW_OF[scope.entry] : 'specs';
+  }
+
+  /**
+   * Sets the project's entry step (editors; the caller checked access).
+   * Refused once the entry step has run: the flow only moves forward.
+   */
+  async chooseEntryStep(
+    projectId: string,
+    userId: string,
+    entry: WorkspaceStage,
+  ): Promise<StudioScope> {
+    const result = await this.mutate(projectId, userId, (project) => {
+      const chosen = chooseEntry(scopeOf(project), entry);
+      if (!chosen.ok) {
+        throw AppError.conflict(ErrorCode.EntryStepLocked, chosen.reason);
+      }
+      return {
+        project: {
+          ...project,
+          scope: chosen.scope,
+          focus: entry,
+        },
+        value: chosen.scope,
+      };
+    });
+    return result.value;
   }
 
   private branchView(project: StudioProject, branchId: string) {

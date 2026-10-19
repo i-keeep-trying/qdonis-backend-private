@@ -5,6 +5,7 @@ import { ASSETS_ROOT } from '../../common/assets/assets-root';
 import { parsePyYamlDesign } from '../../topologies/library/pyyaml-schema';
 import { generateAnalysisCirs, generateNetlist } from './netlist-generator';
 import type { Dict } from './py';
+import { sortedSummaryParams as sortedParams } from '../../../test/parity/design-summary';
 
 interface NetlistFixture {
   topology: string;
@@ -76,8 +77,10 @@ describe('netlist generator parity with qdonis-core', () => {
         );
         const same = (actual: string, expected: string) =>
           exact
-            ? expect(actual).toBe(expected)
-            : expect(normalize(actual)).toBe(normalize(expected));
+            ? expect(sortedParams(actual)).toBe(sortedParams(expected))
+            : expect(normalize(sortedParams(actual))).toBe(
+                normalize(sortedParams(expected)),
+              );
         same(result.netlist, fixture.netlist);
         for (const [kind, deck] of Object.entries(fixture.analysis_cirs)) {
           same(result.analysis_cirs[kind as 'dc'] ?? '', deck);

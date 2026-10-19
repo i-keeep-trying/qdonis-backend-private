@@ -591,3 +591,32 @@ analysis:
           - var: il_rms_a
             formula: '[IL_rms]'
             description: RMS inductor current
+schematic:
+  tuned: true
+  components:
+    Ccouple: {x: 380, y: 80, rotation: 270}
+    Cout: {x: 760, y: 200, rotation: 0}
+    D: {x: 500, y: 200, rotation: 0}
+    L1: {x: 140, y: 80, rotation: 270}
+    L2: {x: 620, y: 80, rotation: 270}
+    PWM: {x: 160, y: 200, rotation: 0}
+    R_LOAD: {x: 880, y: 200, rotation: 0}
+    SW: {x: 260, y: 160, rotation: 0}
+    VIN: {x: 0, y: 200, rotation: 0}
+    "~GND@Cout.B": {x: 760, y: 320, rotation: 0}
+  wires:
+  - {id: W1, from: Cout.B, to: R_LOAD.B}
+  - {id: W2, from: PWM.B, to: SW.S}
+  - {id: W3, from: PWM.B, to: VIN.B}
+  - {id: W4, from: D.B, to: SW.S, path: [[500, 240], [500, 260], [300, 260], [300, 260], [260, 260], [260, 200]]}
+  - {id: W5, from: Cout.B, to: D.B}
+  - {id: W6, from: Cout.B, to: "~GND@Cout.B.P"}
+  - {id: W7, from: L1.A, to: VIN.A}
+  - {id: W8, from: Ccouple.A, to: L1.B}
+  - {id: W9, from: Ccouple.A, to: SW.D, path: [[340, 80], [320, 80], [320, 80], [260, 80], [260, 120]]}
+  - {id: W10, from: Ccouple.B, to: D.A}
+  - {id: W11, from: Ccouple.B, to: L2.A}
+  - {id: W12, from: PWM.A, to: SW.G, path: [[160, 160], [160, 160], [220, 160], [220, 160], [240, 160]]}
+  - {id: W13, from: Cout.A, to: R_LOAD.A, path: [[760, 160], [760, 80], [880, 80], [880, 160]]}
+  - {id: W14, from: Cout.A, to: L2.B}
+  groups: {}

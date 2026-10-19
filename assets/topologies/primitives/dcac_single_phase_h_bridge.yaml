@@ -121,14 +121,59 @@ components:
     amplitude: 8
     frequency: 50
     series_resistance: 0
-- ref: B2
-  type: b_source
+
+# Bipolar sine-triangle PWM (blocks): leg B uses the inverted reference; the ground-referenced gate drives
+# (S2, S4) as gain blocks, the high-side ones E1 / E5 (floating on OUT1 / OUT2) stay E sources.
+- ref: INV_B
+  type: gain
+  role: leg_b_reference
   params:
-    expression: -V(ControlA)
-- ref: B1
-  type: b_source
+    gain: -1
+
+- ref: CMP_1
+  type: comparator
+  role: s1_pwm
   params:
-    expression: 0.5 * (1 + tanh((V(ControlA) - V(TRI)) * 1000))
+    high: 1
+    low: 0
+    width: 0.001
+
+- ref: CMP_2
+  type: comparator
+  role: s2_pwm
+  params:
+    high: 1
+    low: 0
+    width: 0.001
+
+- ref: CMP_3
+  type: comparator
+  role: s3_pwm
+  params:
+    high: 1
+    low: 0
+    width: 0.001
+
+- ref: CMP_4
+  type: comparator
+  role: s4_pwm
+  params:
+    high: 1
+    low: 0
+    width: 0.001
+
+- ref: DRV_2
+  type: gain
+  role: s2_gate_drive
+  params:
+    gain: 15
+
+- ref: DRV_4
+  type: gain
+  role: s4_gate_drive
+  params:
+    gain: 15
+
 - ref: E1
   type: e_source
   params:
@@ -154,14 +199,6 @@ components:
   params:
     model: Dmodel
     sense: false
-- ref: B3
-  type: b_source
-  params:
-    expression: 0.5 * (1 + tanh((V(TRI) - V(ControlA)) * 1000))
-- ref: E2
-  type: e_source
-  params:
-    gain: 15
 - ref: R2
   type: resistor
   params:
@@ -183,10 +220,6 @@ components:
   params:
     model: Dmodel
     sense: false
-- ref: B6
-  type: b_source
-  params:
-    expression: 0.5 * (1 + tanh((V(ControlB) - V(TRI)) * 1000))
 - ref: E5
   type: e_source
   params:
@@ -212,14 +245,6 @@ components:
   params:
     model: Dmodel
     sense: false
-- ref: B5
-  type: b_source
-  params:
-    expression: 0.5 * (1 + tanh((V(TRI) - V(ControlB)) * 1000))
-- ref: E4
-  type: e_source
-  params:
-    gain: 15
 - ref: R4
   type: resistor
   params:
@@ -284,17 +309,7 @@ nets:
     - '-'
   - - VREF
     - '-'
-  - - B2
-    - '-'
-  - - B1
-    - '-'
   - - E1
-    - ctrl-
-  - - B3
-    - '-'
-  - - E2
-    - '-'
-  - - E2
     - ctrl-
   - - R9
     - neg
@@ -304,15 +319,7 @@ nets:
     - ctrl-
   - - D2
     - anode
-  - - B6
-    - '-'
   - - E5
-    - ctrl-
-  - - B5
-    - '-'
-  - - E4
-    - '-'
-  - - E4
     - ctrl-
   - - R11
     - neg
@@ -342,18 +349,36 @@ nets:
     - pin
   - - VTRI
     - +
+  - - CMP_1
+    - inn
+  - - CMP_2
+    - inp
+  - - CMP_3
+    - inn
+  - - CMP_4
+    - inp
 - - - ControlA
     - pin
   - - VREF
     - +
+  - - INV_B
+    - in
+  - - CMP_1
+    - inp
+  - - CMP_2
+    - inn
 - - - ControlB
     - pin
-  - - B2
-    - +
+  - - INV_B
+    - out
+  - - CMP_3
+    - inp
+  - - CMP_4
+    - inn
 - - - nb1
     - pin
-  - - B1
-    - +
+  - - CMP_1
+    - out
   - - E1
     - ctrl+
 - - - ne1
@@ -392,14 +417,14 @@ nets:
     - pos
 - - - nb3
     - pin
-  - - B3
-    - +
-  - - E2
-    - ctrl+
+  - - CMP_2
+    - out
+  - - DRV_2
+    - in
 - - - ne2
     - pin
-  - - E2
-    - +
+  - - DRV_2
+    - out
   - - R2
     - pos
 - - - g2
@@ -412,8 +437,8 @@ nets:
     - ctrl+
 - - - nb6
     - pin
-  - - B6
-    - +
+  - - CMP_3
+    - out
   - - E5
     - ctrl+
 - - - ne5
@@ -454,14 +479,14 @@ nets:
     - pos
 - - - nb5
     - pin
-  - - B5
-    - +
-  - - E4
-    - ctrl+
+  - - CMP_4
+    - out
+  - - DRV_4
+    - in
 - - - ne4
     - pin
-  - - E4
-    - +
+  - - DRV_4
+    - out
   - - R4
     - pos
 - - - g4
@@ -625,3 +650,258 @@ metadata:
   - dc-ac
   - single-phase
   - pwm
+schematic:
+  tuned: false
+  components:
+    "#channel_1_control": {x: 600, y: 700, rotation: 0}
+    "#channel_2_control": {x: 600, y: 900, rotation: 0}
+    "#gate_drive": {x: 20, y: 1200, rotation: 0}
+    "#modulator": {x: 40, y: 780, rotation: 0}
+    B1: {x: 100, y: 40, rotation: 0}
+    B2: {x: 380, y: 760, rotation: 0}
+    B3: {x: 720, y: 820, rotation: 0}
+    B5: {x: 680, y: 40, rotation: 0}
+    B6: {x: 100, y: 40, rotation: 0}
+    CMP_1: {x: 440, y: 340, rotation: 0}
+    CMP_2: {x: 280, y: 260, rotation: 0}
+    CMP_3: {x: 440, y: 220, rotation: 0}
+    CMP_4: {x: 280, y: 140, rotation: 0}
+    C_FILT: {x: 1200, y: 100, rotation: 0}
+    ControlA: {x: 20, y: 420, rotation: 270}
+    ControlB: {x: 240, y: 40, rotation: 180}
+    Csnub1: {x: 440, y: 400, rotation: 0}
+    Csnub2: {x: 900, y: 400, rotation: 0}
+    D1: {x: 320, y: 100, rotation: 180}
+    D2: {x: 320, y: 300, rotation: 180}
+    D3: {x: 780, y: 100, rotation: 180}
+    D4: {x: 780, y: 300, rotation: 180}
+    DRV_2: {x: 200, y: 520, rotation: 0}
+    DRV_4: {x: 540, y: 520, rotation: 0}
+    E1: {x: 140, y: 200, rotation: 0}
+    E2: {x: 140, y: 200, rotation: 0}
+    E4: {x: 740, y: 260, rotation: 0}
+    E5: {x: 700, y: 200, rotation: 0}
+    GND: {x: 0, y: 320, rotation: 0}
+    INV_B: {x: 100, y: 240, rotation: 0}
+    L_FILT: {x: 1060, y: -60, rotation: 270}
+    NTOP: {x: 0, y: 80, rotation: 270}
+    OUT1: {x: 140, y: 200, rotation: 90}
+    OUT2: {x: 600, y: 200, rotation: 90}
+    R1: {x: 320, y: 80, rotation: 0}
+    R10: {x: 780, y: 320, rotation: 90}
+    R11: {x: 380, y: 800, rotation: 0}
+    R2: {x: 160, y: 700, rotation: 0}
+    R3: {x: 220, y: 320, rotation: 90}
+    R4: {x: 500, y: 700, rotation: 0}
+    R8: {x: 880, y: 80, rotation: 0}
+    R9: {x: 40, y: 800, rotation: 0}
+    R_LOAD: {x: 1320, y: 100, rotation: 0}
+    Rsnub1: {x: 440, y: 280, rotation: 0}
+    Rsnub2: {x: 900, y: 280, rotation: 0}
+    S1: {x: 240, y: 100, rotation: 0}
+    S2: {x: 240, y: 300, rotation: 0}
+    S3: {x: 700, y: 100, rotation: 0}
+    S4: {x: 700, y: 300, rotation: 0}
+    TRI: {x: 300, y: 360, rotation: 180}
+    VIN: {x: 0, y: 200, rotation: 0}
+    VREF: {x: 140, y: 400, rotation: 270}
+    VTRI: {x: 360, y: 480, rotation: 0}
+    "^channel_1_control:ControlA": {x: -120, y: 20, rotation: 0}
+    "^channel_1_control:OUT1": {x: 80, y: 380, rotation: 0}
+    "^channel_1_control:TRI": {x: -100, y: 60, rotation: 0}
+    "^channel_1_control:g1": {x: 460, y: 360, rotation: 0}
+    "^channel_2_control:g2": {x: 520, y: 80, rotation: 0}
+    "^channel_2_control:nb3": {x: 80, y: 20, rotation: 0}
+    "^gate_drive:OUT1": {x: 60, y: 320, rotation: 0}
+    "^gate_drive:OUT2": {x: 620, y: 320, rotation: 0}
+    "^gate_drive:g1": {x: 440, y: 300, rotation: 0}
+    "^gate_drive:g2": {x: 180, y: 820, rotation: 0}
+    "^gate_drive:g3": {x: 1000, y: 300, rotation: 0}
+    "^gate_drive:g4": {x: 520, y: 820, rotation: 0}
+    "^gate_drive:nb1": {x: 80, y: 20, rotation: 0}
+    "^gate_drive:nb3": {x: 120, y: 440, rotation: 0}
+    "^gate_drive:nb5": {x: 460, y: 440, rotation: 0}
+    "^gate_drive:nb6": {x: 640, y: 20, rotation: 0}
+    "^modulator:ControlA": {x: 60, y: 640, rotation: 0}
+    "^modulator:OUT2": {x: 80, y: 380, rotation: 0}
+    "^modulator:TRI": {x: 1000, y: -80, rotation: 0}
+    "^modulator:g3": {x: 460, y: 360, rotation: 0}
+    "^modulator:g4": {x: 840, y: 460, rotation: 0}
+    "^modulator:nb1": {x: 580, y: 340, rotation: 0}
+    "^modulator:nb3": {x: 420, y: 100, rotation: 0}
+    "^modulator:nb5": {x: 420, y: 20, rotation: 0}
+    "^modulator:nb6": {x: 580, y: 220, rotation: 0}
+    g1: {x: 320, y: 320, rotation: 270}
+    g2: {x: 40, y: 700, rotation: 180}
+    g3: {x: 880, y: 320, rotation: 270}
+    g4: {x: 380, y: 700, rotation: 180}
+    nb1: {x: 40, y: 100, rotation: 180}
+    nb3: {x: 60, y: 520, rotation: 180}
+    nb5: {x: 400, y: 520, rotation: 180}
+    nb6: {x: 600, y: 100, rotation: 180}
+    ne1: {x: 320, y: 200, rotation: 180}
+    ne2: {x: 160, y: 600, rotation: 180}
+    ne4: {x: 500, y: 600, rotation: 180}
+    ne5: {x: 880, y: 200, rotation: 180}
+    nsnub1.pin: {x: 520, y: 380, rotation: 90}
+    nsnub2.pin: {x: 980, y: 380, rotation: 90}
+    out_filt: {x: 1200, y: -60, rotation: 0}
+    "~ControlA@#channel_1_control.ControlA": {x: 400, y: 680, rotation: 180}
+    "~ControlA@#modulator.ControlA": {x: 240, y: 840, rotation: 0}
+    "~GND@B1.B": {x: 180, y: 160, rotation: 0}
+    "~GND@B2.B": {x: 380, y: 940, rotation: 0}
+    "~GND@B3.B": {x: 720, y: 940, rotation: 0}
+    "~GND@B5.B": {x: 760, y: 160, rotation: 0}
+    "~GND@B6.B": {x: 180, y: 160, rotation: 0}
+    "~GND@Csnub2.B": {x: 900, y: 520, rotation: 0}
+    "~GND@E1.CN": {x: 0, y: 260, rotation: 0}
+    "~GND@E2.B": {x: 140, y: 320, rotation: 0}
+    "~GND@E5.CN": {x: 560, y: 260, rotation: 0}
+    "~GND@R11.B": {x: 380, y: 920, rotation: 0}
+    "~GND@R9.B": {x: 40, y: 920, rotation: 0}
+    "~GND@VREF.B": {x: 220, y: 520, rotation: 0}
+    "~GND@VTRI.B": {x: 360, y: 600, rotation: 0}
+    "~OUT1@#channel_1_control.OUT1": {x: 780, y: 680, rotation: 0}
+    "~OUT1@#gate_drive.OUT1": {x: 200, y: 1100, rotation: 0}
+    "~OUT2@#gate_drive.OUT2": {x: 200, y: 1140, rotation: 0}
+    "~OUT2@#modulator.OUT2": {x: 220, y: 680, rotation: 0}
+    "~TRI@#channel_1_control.TRI": {x: 440, y: 720, rotation: 180}
+    "~TRI@#modulator.TRI": {x: 200, y: 880, rotation: 0}
+    "~TRI@^modulator:TRI.P": {x: 420, y: 840, rotation: 180}
+    "~g1@#channel_1_control.g1": {x: 760, y: 720, rotation: 0}
+    "~g1@#gate_drive.g1": {x: 180, y: 1180, rotation: 0}
+    "~g1@S1.CP": {x: 120, y: 80, rotation: 180}
+    "~g2@#channel_2_control.g2": {x: 760, y: 900, rotation: 0}
+    "~g2@#gate_drive.g2": {x: 180, y: 1220, rotation: 0}
+    "~g2@S2.CP": {x: 120, y: 280, rotation: 180}
+    "~g3@#gate_drive.g3": {x: 180, y: 1260, rotation: 0}
+    "~g3@#modulator.g3": {x: 200, y: 720, rotation: 0}
+    "~g3@S3.CP": {x: 580, y: 80, rotation: 180}
+    "~g4@#gate_drive.g4": {x: 180, y: 1300, rotation: 0}
+    "~g4@#modulator.g4": {x: 200, y: 760, rotation: 0}
+    "~g4@S4.CP": {x: 580, y: 280, rotation: 180}
+    "~nb1@#gate_drive.nb1": {x: -140, y: 1140, rotation: 180}
+    "~nb1@#modulator.nb1": {x: 200, y: 720, rotation: 0}
+    "~nb3@#gate_drive.nb3": {x: -140, y: 1180, rotation: 180}
+    "~nb3@#modulator.nb3": {x: 200, y: 760, rotation: 0}
+    "~nb5@#gate_drive.nb5": {x: -140, y: 1220, rotation: 180}
+    "~nb5@#modulator.nb5": {x: 200, y: 800, rotation: 0}
+    "~nb6@#gate_drive.nb6": {x: -140, y: 1260, rotation: 180}
+    "~nb6@#modulator.nb6": {x: 200, y: 840, rotation: 0}
+  wires:
+  - {id: W1, from: GND.P, to: VIN.B}
+  - {id: W2, from: S2.B, to: S2.CN}
+  - {id: W3, from: S4.B, to: S4.CN}
+  - {id: W4, from: D2.A, to: S2.B}
+  - {id: W5, from: D4.A, to: S4.B}
+  - {id: W6, from: Csnub1.B, to: D2.A}
+  - {id: W7, from: Csnub2.B, to: D4.A}
+  - {id: W8, from: GND.P, to: S2.CN}
+  - {id: W9, from: Csnub2.B, to: "~GND@Csnub2.B.P"}
+  - {id: W10, from: D1.B, to: S1.A}
+  - {id: W11, from: D3.B, to: S3.A}
+  - {id: W12, from: S1.A, to: VIN.A}
+  - {id: W13, from: D1.B, to: S3.A}
+  - {id: W14, from: NTOP.P, to: VIN.A}
+  - {id: W15, from: S1.B, to: S1.CN}
+  - {id: W16, from: D1.A, to: S1.B}
+  - {id: W17, from: D2.B, to: S2.A}
+  - {id: W18, from: D1.A, to: D2.B}
+  - {id: W19, from: D2.B, to: Rsnub1.A}
+  - {id: W20, from: L_FILT.A, to: Rsnub1.A}
+  - {id: W21, from: OUT1.P, to: S1.CN}
+  - {id: W22, from: "#gate_drive.OUT1", to: "~OUT1@#gate_drive.OUT1.P"}
+  - {id: W23, from: S3.B, to: S3.CN}
+  - {id: W24, from: D3.A, to: S3.B}
+  - {id: W25, from: D4.B, to: S4.A}
+  - {id: W26, from: C_FILT.B, to: R_LOAD.B}
+  - {id: W27, from: D3.A, to: D4.B}
+  - {id: W28, from: D4.B, to: Rsnub2.A}
+  - {id: W29, from: C_FILT.B, to: Rsnub2.A}
+  - {id: W30, from: OUT2.P, to: S3.CN}
+  - {id: W31, from: "#gate_drive.OUT2", to: "~OUT2@#gate_drive.OUT2.P"}
+  - {id: W32, from: "#gate_drive.g1", to: "~g1@#gate_drive.g1.P"}
+  - {id: W33, from: S1.CP, to: "~g1@S1.CP.P"}
+  - {id: W34, from: "#gate_drive.g2", to: "~g2@#gate_drive.g2.P"}
+  - {id: W35, from: S2.CP, to: "~g2@S2.CP.P"}
+  - {id: W36, from: "#gate_drive.g3", to: "~g3@#gate_drive.g3.P"}
+  - {id: W37, from: S3.CP, to: "~g3@S3.CP.P"}
+  - {id: W38, from: "#gate_drive.g4", to: "~g4@#gate_drive.g4.P"}
+  - {id: W39, from: S4.CP, to: "~g4@S4.CP.P"}
+  - {id: W40, from: "#gate_drive.nb1", to: "~nb1@#gate_drive.nb1.P"}
+  - {id: W41, from: "#modulator.nb1", to: "~nb1@#modulator.nb1.P"}
+  - {id: W42, from: "#gate_drive.nb3", to: "~nb3@#gate_drive.nb3.P"}
+  - {id: W43, from: "#modulator.nb3", to: "~nb3@#modulator.nb3.P"}
+  - {id: W44, from: "#gate_drive.nb5", to: "~nb5@#gate_drive.nb5.P"}
+  - {id: W45, from: "#modulator.nb5", to: "~nb5@#modulator.nb5.P"}
+  - {id: W46, from: "#gate_drive.nb6", to: "~nb6@#gate_drive.nb6.P"}
+  - {id: W47, from: "#modulator.nb6", to: "~nb6@#modulator.nb6.P"}
+  - {id: W48, from: Csnub1.A, to: Rsnub1.B}
+  - {id: W49, from: Csnub1.A, to: nsnub1.pin.P}
+  - {id: W50, from: Csnub2.A, to: Rsnub2.B}
+  - {id: W51, from: Csnub2.A, to: nsnub2.pin.P}
+  - {id: W52, from: C_FILT.A, to: R_LOAD.A}
+  - {id: W53, from: C_FILT.A, to: L_FILT.B}
+  - {id: W54, from: L_FILT.B, to: out_filt.P}
+  groups:
+    modulator: {label: "Bipolar PWM", members: [VREF, VTRI, INV_B, CMP_1, CMP_2, CMP_3, CMP_4]}
+    gate_drive: {label: "Gate drive", members: [E1, DRV_2, DRV_4, E5, R1, R2, R4, R8, R3, R9, R10, R11]}
+  sheets:
+    gate_drive:
+      wires:
+      - {id: W1, from: E1.CN, to: "~GND@E1.CN.P"}
+      - {id: W2, from: E5.CN, to: "~GND@E5.CN.P"}
+      - {id: W3, from: R11.B, to: "~GND@R11.B.P"}
+      - {id: W4, from: R9.B, to: "~GND@R9.B.P"}
+      - {id: W5, from: E1.B, to: R3.B}
+      - {id: W6, from: R3.B, to: "^gate_drive:OUT1.P"}
+      - {id: W7, from: E5.B, to: R10.B}
+      - {id: W8, from: R10.B, to: "^gate_drive:OUT2.P"}
+      - {id: W9, from: R3.A, to: "^gate_drive:g1.P"}
+      - {id: W10, from: R1.B, to: R3.A}
+      - {id: W11, from: R3.A, to: g1.P}
+      - {id: W12, from: R2.B, to: "^gate_drive:g2.P"}
+      - {id: W13, from: R2.B, to: R9.A}
+      - {id: W14, from: R9.A, to: g2.P}
+      - {id: W15, from: R10.A, to: "^gate_drive:g3.P"}
+      - {id: W16, from: R10.A, to: R8.B}
+      - {id: W17, from: R10.A, to: g3.P}
+      - {id: W18, from: R4.B, to: "^gate_drive:g4.P"}
+      - {id: W19, from: R11.A, to: R4.B}
+      - {id: W20, from: R11.A, to: g4.P}
+      - {id: W21, from: E1.CP, to: "^gate_drive:nb1.P"}
+      - {id: W22, from: "^gate_drive:nb1.P", to: nb1.P}
+      - {id: W23, from: DRV_2.in, to: "^gate_drive:nb3.P"}
+      - {id: W24, from: DRV_2.in, to: nb3.P}
+      - {id: W25, from: DRV_4.in, to: "^gate_drive:nb5.P"}
+      - {id: W26, from: DRV_4.in, to: nb5.P}
+      - {id: W27, from: E5.CP, to: "^gate_drive:nb6.P"}
+      - {id: W28, from: "^gate_drive:nb6.P", to: nb6.P}
+      - {id: W29, from: E1.A, to: R1.A}
+      - {id: W30, from: E1.A, to: ne1.P}
+      - {id: W31, from: DRV_2.out, to: R2.A}
+      - {id: W32, from: R2.A, to: ne2.P}
+      - {id: W33, from: DRV_4.out, to: R4.A}
+      - {id: W34, from: R4.A, to: ne4.P}
+      - {id: W35, from: E5.A, to: R8.A}
+      - {id: W36, from: E5.A, to: ne5.P}
+    modulator:
+      wires:
+      - {id: W1, from: VREF.B, to: "~GND@VREF.B.P"}
+      - {id: W2, from: VTRI.B, to: "~GND@VTRI.B.P"}
+      - {id: W3, from: CMP_1.inp, to: CMP_2.inn}
+      - {id: W4, from: INV_B.in, to: VREF.A}
+      - {id: W5, from: CMP_2.inn, to: INV_B.in}
+      - {id: W6, from: ControlA.P, to: VREF.A}
+      - {id: W7, from: CMP_4.inn, to: INV_B.out}
+      - {id: W8, from: CMP_3.inp, to: CMP_4.inn}
+      - {id: W9, from: CMP_4.inn, to: ControlB.P}
+      - {id: W10, from: CMP_1.inn, to: CMP_3.inn}
+      - {id: W11, from: CMP_1.inn, to: VTRI.A}
+      - {id: W12, from: CMP_2.inp, to: CMP_4.inp}
+      - {id: W13, from: CMP_2.inp, to: CMP_3.inn}
+      - {id: W14, from: CMP_1.inn, to: TRI.P}
+      - {id: W15, from: CMP_1.out, to: "^modulator:nb1.P"}
+      - {id: W16, from: CMP_2.out, to: "^modulator:nb3.P"}
+      - {id: W17, from: CMP_4.out, to: "^modulator:nb5.P"}
+      - {id: W18, from: CMP_3.out, to: "^modulator:nb6.P"}

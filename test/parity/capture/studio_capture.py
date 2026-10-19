@@ -6,6 +6,8 @@ Writes test/parity/fixtures/studio/<id>.json and test/parity/fixtures/studio/_ca
 
 Each fixture holds the sliced time-series ZIP (base64, as the rerun returns it)
 and core's outputs computed from it, so the TS port is checked on identical input.
+Afterwards run studio_derived_capture.py (waveform stats from the reference core,
+loss vs temperature, circuit inventory).
 """
 import argparse, base64, contextlib, io, json, os, shutil, subprocess, sys, tempfile, zipfile
 from pathlib import Path
@@ -14,12 +16,6 @@ HERE = Path(__file__).resolve().parent
 OUT_DIR = HERE.parent / "fixtures" / "studio"
 # Small archives only (dcdc_full_bridge_centertapped also matched, but its fixture is 56 MB).
 DEFAULT_IDS = ["dcdc_buck", "dcdc_flyback", "dcac_single_phase_h_bridge"]
-STRESSES = [
-    {"ref": "Q1", "kind": "switch", "v_block_v": 400, "fsw_khz": 100, "i_peak_a": 12, "i_rms_a": 6, "duty": 0.4},
-    {"ref": "Q2", "kind": "switch", "v_block_v": 400, "fsw_khz": 100, "i_peak_a": 12, "i_rms_a": 6, "duty": 0.4, "zvs": True},
-    {"ref": "D1", "kind": "diode", "v_block_v": 60, "fsw_khz": 100, "i_avg_a": 3, "duty": 0.5},
-    {"ref": "Q9", "kind": "switch", "v_block_v": 800, "fsw_khz": 20, "i_peak_a": 150, "i_rms_a": 80},
-]
 
 
 def main() -> int:
@@ -39,21 +35,12 @@ def main() -> int:
     from qdonis_backend.simulator.measure_and_plot import NgspiceMeasurePlotter
     from qdonis_backend.simulator.time_series_utils import slice_steady_state
     from qdonis_backend.simulator.loss_engine import calculate_losses
-    from qdonis_backend.simulator.device_selection import catalogue, select_devices, select_devices_from_stresses
+    from qdonis_backend.simulator.device_selection import catalogue, select_devices
     from qdonis_backend.studio_waveforms import waveform_stats
 
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     with contextlib.redirect_stdout(io.StringIO()):
         (OUT_DIR / "_catalogue.json").write_text(json.dumps(catalogue(), indent=1) + "\n", encoding="utf-8", newline="\n")
-        standalone = {
-            "auto": select_devices_from_stresses(STRESSES[:3], tj=100.0),
-            "igbt": select_devices_from_stresses(STRESSES, tj=125.0, preference="igbt"),
-            "missing": select_devices_from_stresses([{"ref": "Q1", "kind": "switch"}], tj=100.0),
-        }
-    (OUT_DIR / "_standalone.json").write_text(
-        json.dumps({"stresses": STRESSES, "results": standalone}, indent=1, sort_keys=True, default=str) + "\n",
-        encoding="utf-8", newline="\n")
-
     for topology in args.only or DEFAULT_IDS:
         out = tempfile.mkdtemp(prefix=f"qstudio_{topology}_")
         record = {"topology": topology}

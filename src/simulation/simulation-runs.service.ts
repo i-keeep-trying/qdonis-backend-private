@@ -38,6 +38,7 @@ import {
   type ClaimedRun,
 } from './simulation-runs.repository';
 import type { DeckKind, SimulationData, WaveformSet } from './simulation.types';
+import { branchCircuit } from '../schematic/library/stored-circuit';
 
 /** What a run needs; stored as `simulation_runs.input`. */
 export interface SimulationRunInput {
@@ -50,6 +51,8 @@ export interface SimulationRunInput {
   /** Device selection after the run (kept from the branch's previous one). */
   devicePreference?: Preference;
   deviceOverrides?: Overrides | null;
+  /** The branch's edited circuit (absent: the library topology). */
+  circuit?: Record<string, unknown>;
 }
 
 /** Constraints generation of a specs node; stored as `simulation_runs.input`. */
@@ -233,7 +236,10 @@ export class SimulationRunsService
     const started = Date.now();
     try {
       const input = run.input as SimulationRunInput;
-      const yamlData = this.topologies.design(input.topologyId);
+      const yamlData = branchCircuit(
+        input.circuit,
+        this.topologies.design(input.topologyId),
+      );
       const result = await this.simulate({
         topologyId: input.topologyId,
         yamlData,

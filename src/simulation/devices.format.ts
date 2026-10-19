@@ -1,6 +1,6 @@
 /**
  * Device selection: qdonis-core result -> qdonis-web `DeviceSelection`
- * (`src/features/studio/types/devices.ts`), and entered stresses -> core input.
+ * (`src/features/studio/types/devices.ts`).
  */
 
 import {
@@ -10,18 +10,6 @@ import {
   type SelectionResult,
 } from './loss/device-selection';
 import type { Dict } from './netlist/py';
-
-export interface DeviceStressInput {
-  ref: string;
-  kind: 'switch' | 'diode';
-  vBlockV: number;
-  fswKhz: number;
-  iPeakA: number;
-  iRmsA: number;
-  iAvgA: number | null;
-  duty: number | null;
-  zvs: boolean;
-}
 
 export interface DevicePart {
   part: string;
@@ -122,20 +110,6 @@ export function deviceSelectionView(result: SelectionResult): DeviceSelection {
     }),
   };
 }
-
-/** Core `devices` entries from entered stresses. */
-export const stressEntries = (inputs: DeviceStressInput[]): Dict[] =>
-  inputs.map((d) => ({
-    ref: d.ref,
-    kind: d.kind,
-    v_block_v: d.vBlockV,
-    fsw_khz: d.fswKhz,
-    i_peak_a: d.iPeakA,
-    i_rms_a: d.iRmsA,
-    i_avg_a: d.iAvgA,
-    duty: d.duty,
-    zvs: d.zvs,
-  }));
 
 /**
  * Forced choices of an earlier selection, so a re-selection keeps them

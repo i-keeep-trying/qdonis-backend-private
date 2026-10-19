@@ -20,6 +20,9 @@ export interface ThermalProperties {
   totalLoss?: string;
   peakVoltage?: string;
   ratedVoltage?: string;
+  /** RMS current through the part and its current rating, A (current stress). */
+  rmsCurrent?: string;
+  ratedCurrent?: string;
   temperatureMargin?: string;
   voltageMargin?: string;
   thermalStatus?: ThermalStatus;
@@ -66,6 +69,8 @@ export interface ComponentOption {
   leadTime?: string;
   lifecycleStatus?: string;
   rohsStatus?: string;
+  /** Price currency of `pricingTiers` (Mouser: the account's currency). */
+  currency?: string;
 }
 
 export interface SelectedPart extends ComponentOption {

@@ -1,6 +1,11 @@
 ## Topology-Specific Rules: Zeta Converter
-- **Duty Cycle**: Regulate output voltage using `duty_cycle = Vout / (Vin + Vout)`.
+- **OPEN-LOOP DROP COMPENSATION (CRITICAL)**: This template runs open loop, so the duty cycle alone sets Vout. The ideal formula undershoots by the output diode drop and the switch conduction drop, which matter a lot at low Vin / high current (e.g. 5 V in, several amps). Compensate for both:
+  - Output diode forward drop `Vf = 0.7 V` (use 0.5 V for a Schottky-class diode model).
+  - Switch drop `V_sw = I_L1 * R_on`, where `I_L1 = Iout * Vout / Vin` and `R_on` is the selected switch on-resistance (high-side NMOS with a floating gate drive; keep `vlow = 0`, `vhigh = 15`).
+  - `V_target = Vout + Vf`, `Vin_eff = Vin - V_sw`.
+- **Duty Cycle**: Regulate output voltage using `duty_cycle = V_target / (Vin_eff + V_target)` (NOT the ideal `Vout / (Vin + Vout)`). Cap `duty_cycle` at 0.85.
 - **Inductor Sizing**:
   - Average current L1 `I_L1 = Iout * Vout / Vin`. Average current L2 `I_L2 = Iout`.
   - ON-time volt-seconds for both: `L = Vin * duty_cycle / (Delta_I_L * fsw)`.
   - Check if CCM (`I_L > Delta_I_L / 2`). Size both inductors!
+- **Series resistances**: Keep inductor ESR / DCR at or below `1e-3` Ohm when `I_L1 > 2 A`, so winding drops do not pull Vout below target.

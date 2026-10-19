@@ -525,3 +525,42 @@ metadata:
     - FSBB
     - step-up-step-down
     - automotive
+schematic:
+  tuned: true
+  components:
+    Cout: {x: 700, y: 200, rotation: 0}
+    L1: {x: 380, y: 80, rotation: 270}
+    PWM1: {x: 180, y: 20, rotation: 180}
+    PWM2: {x: 100, y: 260, rotation: 0}
+    PWM3: {x: 620, y: 20, rotation: 180}
+    PWM4: {x: 420, y: 260, rotation: 0}
+    R_LOAD: {x: 780, y: 200, rotation: 0}
+    SW1: {x: 180, y: 80, rotation: 90, mirrorY: true}
+    SW2: {x: 260, y: 200, rotation: 0}
+    SW3: {x: 620, y: 80, rotation: 90}
+    SW4: {x: 540, y: 200, rotation: 0}
+    VIN: {x: 0, y: 200, rotation: 0}
+    "~GND@Cout.B": {x: 860, y: 320, rotation: 0}
+    "~GND@PWM2.B": {x: 100, y: 380, rotation: 0}
+  wires:
+  - {id: W1, from: Cout.B, to: R_LOAD.B, path: [[700, 240], [700, 320], [780, 320], [780, 240]]}
+  - {id: W2, from: PWM2.B, to: VIN.B}
+  - {id: W3, from: PWM2.B, to: SW2.S}
+  - {id: W4, from: PWM4.B, to: SW4.S}
+  - {id: W5, from: PWM4.B, to: SW2.S, path: [[420, 300], [420, 320], [280, 320], [280, 320], [260, 320], [260, 240]]}
+  - {id: W7, from: PWM2.B, to: "~GND@PWM2.B.P"}
+  - {id: W8, from: SW1.D, to: VIN.A}
+  - {id: W9, from: PWM1.A, to: SW1.G}
+  - {id: W10, from: SW1.S, to: SW2.D}
+  - {id: W11, from: L1.A, to: SW1.S}
+  - {id: W12, from: PWM1.B, to: SW1.S}
+  - {id: W13, from: PWM2.A, to: SW2.G}
+  - {id: W14, from: PWM3.B, to: SW3.S, path: [[620, -20], [620, -40], [560, -40], [560, 60], [560, 60], [560, 80], [580, 80]]}
+  - {id: W15, from: L1.B, to: SW4.D}
+  - {id: W16, from: SW3.S, to: SW4.D, path: [[580, 80], [560, 80], [560, 80], [540, 80], [540, 160]]}
+  - {id: W17, from: Cout.A, to: R_LOAD.A, path: [[700, 160], [700, 80], [780, 80], [780, 160]]}
+  - {id: W18, from: Cout.A, to: SW3.D}
+  - {id: W19, from: PWM3.A, to: SW3.G}
+  - {id: W20, from: PWM4.A, to: SW4.G}
+  - {id: W21, from: Cout.B, to: PWM4.B, path: [[700, 240], [700, 320], [420, 320], [420, 300]]}
+  groups: {}

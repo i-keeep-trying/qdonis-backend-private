@@ -54,7 +54,14 @@ import {
   truthy,
   type Dict,
 } from './py';
+import {
+  CONTROL_BLOCK_TYPES,
+  emitControlBlock,
+  isControlBlock,
+} from './signal-blocks';
+import { designSummaryLine } from './design-summary';
 import { requirementsOf } from './spice-command';
+import { detectPwmPeriod } from './timing';
 
 export type AnalysisKind = 'dc' | 'ac' | 'transient';
 export const ANALYSIS_KINDS: readonly AnalysisKind[] = [
@@ -79,6 +86,99 @@ function clampCapacitorEsl(design: Dict): void {
       if (toFloat(esl) > MAX_CAP_ESL) params.esl = MAX_CAP_ESL;
     } catch {
       // TypeError / ValueError: leave it
+    }
+  }
+}
+
+const DIODE_BRIDGE_IDS = [
+  'acdc_single_phase_diode_bridge',
+  'single_phase_diode_bridge',
+];
+const C_OUT_DEFAULT = (): Dict => ({
+  type: 'capacitor',
+  role: 'output_filter',
+  params: {
+    capacitance: 0.0022,
+    voltage_rating: 400.0,
+    std_voltage_rating: 400.0,
+  },
+});
+
+/** `[ref, pin]` of a net member (`[ref, pin]` list or `{ref, pin}` object). */
+function netMember(entry: unknown): [unknown, unknown] {
+  if (Array.isArray(entry)) return [entry[0] ?? '', entry[1] ?? ''];
+  if (isDict(entry)) return [get(entry, 'ref'), get(entry, 'pin')];
+  return ['', ''];
+}
+
+/**
+ * The single-phase diode bridge always gets an output filter capacitor C_OUT
+ * (in place), tied to the DC rails when the design lists explicit `nets`.
+ */
+function ensureDiodeBridgeFilterCapacitor(design: Dict): void {
+  const topId = pyStr(
+    has(design, 'id') ? get(design, 'id') : get(design, 'topology', ''),
+  ).toLowerCase();
+  if (!DIODE_BRIDGE_IDS.includes(topId)) return;
+
+  if (!has(design, 'components')) design.components = [];
+  const components = design.components;
+  if (Array.isArray(components)) {
+    const hasCout = components.some(
+      (c) =>
+        isDict(c) &&
+        (c.ref === 'C_OUT' || c.id === 'C_OUT' || c.type === 'capacitor'),
+    );
+    if (!hasCout) components.push({ ref: 'C_OUT', ...C_OUT_DEFAULT() });
+  } else if (isDict(components)) {
+    const hasCout = Object.entries(components).some(
+      ([key, c]) =>
+        key === 'C_OUT' ||
+        (isDict(c) && (c.type === 'capacitor' || c.role === 'output_filter')),
+    );
+    if (!hasCout) components.C_OUT = C_OUT_DEFAULT();
+  }
+
+  if (!has(design, 'nets')) design.nets = [];
+  const nets = iter(design.nets).filter((net): net is unknown[] =>
+    Array.isArray(net),
+  );
+  let posConnected = false;
+  let negConnected = false;
+  for (const net of nets) {
+    for (const entry of net) {
+      const [ref, pin] = netMember(entry);
+      if (ref !== 'C_OUT') continue;
+      if (pin === 'pos' || pin === '+' || pin === 'pin1') posConnected = true;
+      else if (pin === 'neg' || pin === '-' || pin === 'pin2')
+        negConnected = true;
+    }
+  }
+  for (const net of nets) {
+    let posRail = false;
+    let negRail = false;
+    for (const entry of net) {
+      const [ref, pin] = netMember(entry);
+      if (
+        (ref === 'R_LOAD' &&
+          (pin === 'pos' || pin === '+' || pin === 'pin1')) ||
+        ((ref === 'D3' || ref === 'D4') && pin === 'cathode')
+      )
+        posRail = true;
+      if (
+        (ref === 'R_LOAD' &&
+          (pin === 'neg' || pin === '-' || pin === 'pin2')) ||
+        ((ref === 'D1' || ref === 'D2') && pin === 'anode')
+      )
+        negRail = true;
+    }
+    if (posRail && !posConnected) {
+      net.push(['C_OUT', 'pos']);
+      posConnected = true;
+    }
+    if (negRail && !negConnected) {
+      net.push(['C_OUT', 'neg']);
+      negConnected = true;
     }
   }
 }
@@ -177,30 +277,80 @@ function transistorTypeForPwm(design: Dict, pwmRef: unknown): string | null {
 const invertPwmPulse = (design: Dict, pwmRef: unknown) =>
   ['pnp', 'p'].includes(transistorTypeForPwm(design, pwmRef) ?? '');
 
-const optionLines = (design: Dict): string[] => {
-  const analysisData = get(design, 'analysis', {});
-  const spice = get(analysisData, 'spice_settings', {});
-  const sim = get(get(design, 'simulation', {}), 'spice_options', {});
-  const setting = (key: string, dflt: unknown) =>
-    get(spice, key, get(sim, key, dflt));
-  const rshunt = setting('rshunt', 1e12);
-  const cshunt = setting('cshunt', 1e-12);
-  const reltol = setting('reltol', RELTOL_DEFAULT);
-  const abstol = setting('abstol', ABSTOL_DEFAULT);
-  const vntol = setting('vntol', VNTOL_DEFAULT);
-  const chgtol = setting('chgtol', CHGTOL_DEFAULT);
-  const gmin = setting('gmin', GMIN_DEFAULT);
-  const method = setting('method', METHOD_DEFAULT);
-  const maxord = setting('maxord', MAXORD_DEFAULT);
-  const trtol = setting('trtol', TRTOL_DEFAULT);
-  let itl4 = get(spice, 'itl4', get(sim, 'itl4'));
-  const transientSpice = get(
-    get(get(design, 'analysis', {}), 'transient', {}),
-    'spice_settings',
-    {},
-  );
-  if (!truthy(itl4) && isDict(transientSpice))
-    itl4 = get(transientSpice, 'itl4');
+/** Solver option keys taken from the settings layers (`solver_options` in the core). */
+const SOLVER_KEYS = [
+  'rshunt',
+  'cshunt',
+  'reltol',
+  'abstol',
+  'vntol',
+  'chgtol',
+  'gmin',
+  'method',
+  'maxord',
+  'trtol',
+  'itl4',
+] as const;
+
+/**
+ * Solver options, lowest precedence first: the defaults,
+ * `simulation.spice_options`, `analysis.spice_settings`, then the analysis's
+ * own `analysis.<type>.spice_settings` (where most library topologies put
+ * them).
+ */
+export function solverOptions(
+  design: Dict,
+  analysisType: AnalysisKind | null,
+): Record<(typeof SOLVER_KEYS)[number], unknown> {
+  const out: Record<(typeof SOLVER_KEYS)[number], unknown> = {
+    rshunt: 1e12,
+    cshunt: 1e-12,
+    reltol: RELTOL_DEFAULT,
+    abstol: ABSTOL_DEFAULT,
+    vntol: VNTOL_DEFAULT,
+    chgtol: CHGTOL_DEFAULT,
+    gmin: GMIN_DEFAULT,
+    method: METHOD_DEFAULT,
+    maxord: MAXORD_DEFAULT,
+    trtol: TRTOL_DEFAULT,
+    itl4: null,
+  };
+  const analysis = or(get(design, 'analysis'), {});
+  const own = analysisType ? or(get(analysis, analysisType), {}) : {};
+  const layers = [
+    get(or(get(design, 'simulation'), {}), 'spice_options'),
+    get(analysis, 'spice_settings'),
+    isDict(own) ? get(own, 'spice_settings') : null,
+  ];
+  for (const layer of layers) {
+    if (!isDict(layer)) continue;
+    for (const key of SOLVER_KEYS) {
+      const value = get(layer, key);
+      if (value !== null && value !== undefined) out[key] = value;
+    }
+  }
+  return out;
+}
+
+const optionLines = (
+  design: Dict,
+  analysisType: AnalysisKind | null,
+): string[] => {
+  const spice = get(get(design, 'analysis', {}), 'spice_settings', {});
+  const transientSpice = transientSpiceSettings(design);
+  const {
+    rshunt,
+    cshunt,
+    reltol,
+    abstol,
+    vntol,
+    chgtol,
+    gmin,
+    method,
+    maxord,
+    trtol,
+    itl4,
+  } = solverOptions(design, analysisType);
 
   const lines = [
     `.options rshunt=${fmt(rshunt)} cshunt=${fmt(cshunt)} reltol=${pyStr(reltol)} abstol=${pyStr(abstol)} vntol=${pyStr(vntol)} chgtol=${pyStr(chgtol)} gmin=${pyStr(gmin)}`,
@@ -769,6 +919,8 @@ function emitElements(
       lines.push(
         `${spiceDevName('S', refValue)} ${pins.get('pos')} ${pins.get('neg')} ${pins.get('ctrl+')} ${pins.get('ctrl-')} ${model}`,
       );
+    } else if (isControlBlock(ctype)) {
+      lines.push(...emitControlBlock(ref, ctype, params, nets));
     } else if (ctype === 'custom_spice') {
       const raw = p('spice_line', `* Empty custom spice for ${ref}`);
       if (typeof raw !== 'string') {
@@ -783,7 +935,8 @@ function emitElements(
       throw new PyError(
         'ValueError',
         `Unknown component type '${pyStr(ctype)}' for component ${ref}. ` +
-          'Valid types: node, resistor, capacitor, inductor, diode, led, transistor, transformer, ct_transformer, dual_ct_transformer, b_source, e_source, g_source, custom_spice, switch. ' +
+          'Valid types: node, resistor, capacitor, inductor, diode, transistor, transformer, ct_transformer, dual_ct_transformer, b_source, e_source, g_source, custom_spice, switch, ' +
+          `and control blocks: ${Object.keys(CONTROL_BLOCK_TYPES).join(', ')}. ` +
           'Check circuit.yaml and Pydantic schema for supported component types.',
       );
     }
@@ -949,10 +1102,20 @@ export function generateNetlist(
   design: Dict,
   analysisFilter: readonly string[] | null = null,
 ): GeneratedNetlist {
+  ensureDiodeBridgeFilterCapacitor(design);
   clampCapacitorEsl(design);
   const [compNets, notes] = buildCompNets(design);
   buildComponentsIndex(design);
-  const lines = [...header(design, notes), ...optionLines(design)];
+  // The combined netlist takes the transient settings when there is a
+  // transient analysis (the usual run).
+  const analyses = get(design, 'analysis', {});
+  const primary =
+    (['transient', 'dc', 'ac'] as const).find(
+      (kind) =>
+        has(analyses, kind) &&
+        (!analysisFilter?.length || analysisFilter.includes(kind)),
+    ) ?? null;
+  const lines = [...header(design, notes), ...optionLines(design, primary)];
 
   const transientSpice = transientSpiceSettings(design);
   const spice = get(get(design, 'analysis', {}), 'spice_settings', {});
@@ -994,8 +1157,10 @@ export function generateNetlist(
   const subckts = subcktTemplatesNeeded(design);
   if (subckts.trim()) lines.push(subckts);
 
-  let pwmPeriod = emitElements(design, compNets, lines, 'base', new Set());
-  if (pwmPeriod === null) pwmPeriod = 1e-5;
+  const pwmPeriod =
+    emitElements(design, compNets, lines, 'base', new Set()) ??
+    detectPwmPeriod(design) ??
+    1e-5;
 
   const wanted =
     analysisFilter === null ? null : analysisFilter.map((a) => a.toLowerCase());
@@ -1027,6 +1192,7 @@ export function generateNetlistForAnalysis(
   design: Dict,
   kind: AnalysisKind,
 ): string {
+  ensureDiodeBridgeFilterCapacitor(design);
   clampCapacitorEsl(design);
   const [compNets, notes] = buildCompNets(design);
   buildComponentsIndex(design);
@@ -1152,7 +1318,7 @@ export function generateNetlistForAnalysis(
     }
   }
 
-  const lines = [...header(design, notes), ...optionLines(design)];
+  const lines = [...header(design, notes), ...optionLines(design, kind)];
   const models = generateComponentModels(design);
   if (models.trim()) lines.push(models);
   const subckts = subcktTemplatesNeeded(design);
@@ -1269,11 +1435,21 @@ export function generateAnalysisCirs(
   const { netlist, controls } = generateNetlist(design, null);
   const wanted: readonly AnalysisKind[] =
     analysisType === 'all' ? ANALYSIS_KINDS : [analysisType];
+  const designLine = designSummaryLine(design);
   const decks: Partial<Record<AnalysisKind, string>> = {};
   for (const kind of wanted) {
     const control = controls[kind] ?? '';
     if (!control || !control.trim()) continue;
-    decks[kind] = `${generateNetlistForAnalysis(design, kind)}\n\n${control}`;
+    let body = generateNetlistForAnalysis(design, kind);
+    if (designLine) {
+      // Keep the SPICE title as the first line; the summary is a plain comment.
+      const cut = body.indexOf('\n');
+      body =
+        cut < 0
+          ? `${body}\n${designLine}\n`
+          : `${body.slice(0, cut)}\n${designLine}\n${body.slice(cut + 1)}`;
+    }
+    decks[kind] = `${body}\n\n${control}`;
   }
   return { netlist, analysis_cirs: decks };
 }

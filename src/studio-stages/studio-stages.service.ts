@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 
 import type { AuthenticatedUser } from '../auth/auth.types';
 import { AppError, ErrorCode } from '../common/errors/error-codes';
@@ -31,6 +31,7 @@ import {
 } from '../projects/studio/studio-graph';
 import { StudioGraphService } from '../projects/studio/studio-graph.service';
 import { SimulationArtifactsService } from '../simulation/simulation-artifacts.service';
+import { SourcingService } from '../sourcing/sourcing.service';
 import {
   CIRCUIT_DATA_PROVIDER,
   type CircuitDataProvider,
@@ -42,17 +43,41 @@ import type {
   RunThermalDto,
 } from './dto/stages.dto';
 import type {
+  MagneticPartStageDto,
+  RunBomStageDto,
   RunMagneticsStageDto,
+  RunMtbfStageDto,
   RunThermalStageDto,
 } from './dto/stage-runs.dto';
 import {
+  type MagneticPartInput,
   type MagneticsOptions,
   planMagnetics,
   type StagePlan,
 } from './magnetics.stage';
+import {
+  type BomLine,
+  type LineChoicePatch,
+  type PartLookup,
+  partKey,
+  partsToLookUp,
+  planBom,
+  sourcedPart,
+} from './bom.stage';
+import { type MtbfOptions, planMtbf } from './mtbf.stage';
 import { planThermal } from './thermal.stage';
+import {
+  branchParts,
+  type ComponentPart,
+  type EmcInput,
+  planComponents,
+  planEmc,
+} from './extra-stages';
 
 type Actor = Pick<AuthenticatedUser, 'id' | 'role'>;
+
+/** Supplier lookups per component-selection run (each is a paced API call). */
+const SOURCED_PARTS = 15;
 
 const rec = (v: unknown): Record<string, unknown> =>
   typeof v === 'object' && v !== null && !Array.isArray(v)
@@ -65,6 +90,24 @@ const rec = (v: unknown): Record<string, unknown> =>
  * `ok: false` and a payload explaining what is needed, which is what the
  * Studio agent relays to the user; HTTP errors are for auth and validation.
  */
+/** A part of the web's magnetics form -> the stage's (core-style) part input. */
+const magneticPart = (p: MagneticPartStageDto): MagneticPartInput => ({
+  ref: p.ref,
+  kind: p.kind,
+  role: p.role ?? undefined,
+  inductance_uh: p.inductanceUh ?? undefined,
+  turns_ratio: p.turnsRatio ?? undefined,
+  fsw_khz: p.fswKhz,
+  duty: p.duty ?? undefined,
+  i_dc_a: p.iDcA ?? undefined,
+  i_ripple_pp_a: p.iRipplePpA ?? undefined,
+  i_peak_a: p.iPeakA ?? undefined,
+  i_rms_a: p.iRmsA ?? undefined,
+  v_primary_v: p.vPrimaryV ?? undefined,
+  power_w: p.powerW ?? undefined,
+  unipolar: p.unipolar,
+});
+
 @Injectable()
 export class StudioStagesService {
   constructor(
@@ -75,7 +118,53 @@ export class StudioStagesService {
     private readonly circuit: CircuitDataProvider,
     private readonly artifacts: SimulationArtifactsService,
     private readonly graph: StudioGraphService,
+    private readonly sourcing: SourcingService,
   ) {}
+
+  private readonly logger = new Logger(StudioStagesService.name);
+
+  /**
+   * BOM plan with the selected devices looked up on Mouser by exact part
+   * number. Best effort: without Mouser (not configured, rate limited,
+   * failing) the lines stay unpriced and are looked up on the next run.
+   * Parts not listed are retried on a plain rebuild (no line changes).
+   */
+  private async planBomSourced(
+    user: Actor,
+    projectId: string,
+    studio: Awaited<ReturnType<ProjectsService['loadStudio']>>,
+    changes: Record<string, LineChoicePatch>,
+  ) {
+    const plan = await planBom(studio, changes, this.circuit);
+    if (!plan.ok) return plan;
+    const needed = partsToLookUp(
+      plan.data.lines as BomLine[],
+      plan.data.lookups as Record<string, PartLookup>,
+      Object.keys(changes).length === 0,
+    );
+    if (!needed.length) return plan;
+    const fresh: Record<string, PartLookup> = {};
+    for (const partNumber of needed) {
+      try {
+        const found = await this.sourcing.exactPart(
+          { userId: user.id, projectId },
+          partNumber,
+        );
+        fresh[partKey(partNumber)] = {
+          part: found ? sourcedPart(found) : null,
+          checkedAt: new Date().toISOString(),
+        };
+      } catch (error) {
+        this.logger.warn(
+          `BOM lookup of ${partNumber} stopped: ${error instanceof Error ? error.message : String(error)}`,
+        );
+        break;
+      }
+    }
+    return Object.keys(fresh).length
+      ? planBom(studio, changes, this.circuit, fresh)
+      : plan;
+  }
 
   /** `branchId` defaults to the caller's branch (the Studio chat passes its own). */
   async runMagnetics(
@@ -111,6 +200,42 @@ export class StudioStagesService {
       studio.activeBranchId,
       'thermal',
       await planThermal(studio, dto, this.circuit),
+    );
+  }
+
+  /** MTBF of the branch parts, or of entered parts (Studio agent). */
+  async runMtbf(
+    user: Actor,
+    projectId: string,
+    options: MtbfOptions,
+    branchId?: string,
+  ) {
+    await this.access.require(user, projectId, 'canEdit');
+    const studio = await this.projects.loadStudio(projectId, user.id, branchId);
+    return this.commit(
+      projectId,
+      user.id,
+      studio.activeBranchId,
+      'mtbf',
+      await planMtbf(studio, options, this.circuit),
+    );
+  }
+
+  /** BOM of the branch parts with line changes (Studio agent). */
+  async runBom(
+    user: Actor,
+    projectId: string,
+    changes: Record<string, LineChoicePatch>,
+    branchId?: string,
+  ) {
+    await this.access.require(user, projectId, 'canEdit');
+    const studio = await this.projects.loadStudio(projectId, user.id, branchId);
+    return this.commit(
+      projectId,
+      user.id,
+      studio.activeBranchId,
+      'bom',
+      await this.planBomSourced(user, projectId, studio, changes),
     );
   }
 
@@ -163,22 +288,9 @@ export class StudioStagesService {
         ambientC: s.ambientC,
         coreOverrides: dto.coreOverrides,
         fromCircuit: dto.origin === 'circuit',
-        parts: parts.map((p) => ({
-          ref: p.ref,
-          kind: p.kind,
-          role: p.role ?? undefined,
-          inductance_uh: p.inductanceUh ?? undefined,
-          turns_ratio: p.turnsRatio ?? undefined,
-          fsw_khz: p.fswKhz,
-          duty: p.duty ?? undefined,
-          i_dc_a: p.iDcA ?? undefined,
-          i_ripple_pp_a: p.iRipplePpA ?? undefined,
-          i_peak_a: p.iPeakA ?? undefined,
-          i_rms_a: p.iRmsA ?? undefined,
-          v_primary_v: p.vPrimaryV ?? undefined,
-          power_w: p.powerW ?? undefined,
-          unipolar: p.unipolar,
-        })),
+        parts: parts.map(magneticPart),
+        partOverrides: dto.partOverrides?.map(magneticPart),
+        clearOverrides: dto.clearAllOverrides ? true : dto.clearOverrides,
       },
       this.circuit,
     );
@@ -204,23 +316,14 @@ export class StudioStagesService {
       );
     }
     const studio = await this.projects.loadStudio(projectId, user.id, branchId);
-    const needs =
-      dto.origin === 'simulation'
-        ? {
-            stage: 'simulation' as const,
-            message: 'Run a simulation first, or enter the losses.',
-          }
-        : dto.origin === 'devices'
-          ? {
-              stage: 'devices' as const,
-              message: 'Select devices first, or enter the losses.',
-            }
-          : null;
     if (
-      needs &&
-      stageNodeOnBranch(studio, needs.stage, branchId)?.status !== 'ready'
+      dto.origin === 'simulation' &&
+      stageNodeOnBranch(studio, 'simulation', branchId)?.status !== 'ready'
     ) {
-      throw AppError.conflict(ErrorCode.StageInputMissing, needs.message);
+      throw AppError.conflict(
+        ErrorCode.StageInputMissing,
+        'Run a simulation first, or enter the losses.',
+      );
     }
     await this.artifacts.hydrate(projectId, studio);
     const s = dto.settings;
@@ -234,7 +337,6 @@ export class StudioStagesService {
         strategy: s.strategy,
         outputPowerW: s.outputPowerW ?? undefined,
         fromSimulation: dto.origin === 'simulation',
-        fromDevices: dto.origin === 'devices',
         inputs: inputs
           ? {
               devices: inputs.devices.map((d) => ({
@@ -266,12 +368,79 @@ export class StudioStagesService {
     return this.commitStageRun(user, projectId, branchId, 'thermal', plan);
   }
 
+  /** MTBF stage of a branch: its circuit's parts, or entered parts. */
+  async runMtbfStage(
+    user: Actor,
+    projectId: string,
+    branchId: string,
+    dto: RunMtbfStageDto,
+  ) {
+    await this.access.require(user, projectId, 'canEdit');
+    const parts = dto.origin === 'input' ? (dto.inputs ?? []) : [];
+    if (dto.origin === 'input' && parts.length === 0) {
+      throw AppError.badRequest(
+        ErrorCode.ValidationFailed,
+        'Add at least one part.',
+      );
+    }
+    const studio = await this.projects.loadStudio(projectId, user.id, branchId);
+    const s = dto.settings;
+    const previous = rec(
+      rec(stageNodeOnBranch(studio, 'mtbf', branchId)?.data).settings,
+    ).overrides;
+    // The form sends the full set: drop the overrides it no longer has.
+    const overrides: Record<string, boolean | null> = Object.fromEntries(
+      Object.keys(rec(previous)).map((ref) => [ref, null]),
+    );
+    Object.assign(overrides, s.overrides);
+    const plan = await planMtbf(
+      studio,
+      {
+        predictionMethod: s.predictionMethod,
+        environment: s.environment,
+        overrides,
+        parts: parts,
+        fromCircuit: dto.origin === 'circuit',
+      },
+      this.circuit,
+    );
+    return this.commitStageRun(user, projectId, branchId, 'mtbf', plan);
+  }
+
+  /** BOM stage of a branch: rebuilt from the branch, with the line changes applied. */
+  async runBomStage(
+    user: Actor,
+    projectId: string,
+    branchId: string,
+    dto: RunBomStageDto,
+  ) {
+    await this.access.require(user, projectId, 'canEdit');
+    const changes: Record<string, LineChoicePatch> = {};
+    for (const { ref, ...change } of dto.changes ?? []) {
+      if (ref in changes) {
+        throw AppError.badRequest(
+          ErrorCode.ValidationFailed,
+          `${ref} is changed twice.`,
+        );
+      }
+      changes[ref] = change.part
+        ? {
+            ...change,
+            part: { ...change.part, currency: change.part.currency ?? null },
+          }
+        : (change as LineChoicePatch);
+    }
+    const studio = await this.projects.loadStudio(projectId, user.id, branchId);
+    const plan = await this.planBomSourced(user, projectId, studio, changes);
+    return this.commitStageRun(user, projectId, branchId, 'bom', plan);
+  }
+
   /** Commits a stage plan on `branchId` and answers the Studio stage-action shape. */
   private async commitStageRun(
     user: Actor,
     projectId: string,
     branchId: string,
-    stage: 'magnetics' | 'thermal',
+    stage: 'magnetics' | 'thermal' | 'mtbf' | 'bom',
     plan: StagePlan,
   ) {
     if (!plan.ok) {
@@ -336,6 +505,107 @@ export class StudioStagesService {
       branchId,
     );
     return { ...result, revision: meta.revision, branchId: landed, forked };
+  }
+
+  // --- EMC / components / BOM / MTBF as branch stages (Studio agent) --------------
+
+  async runEmc(
+    user: Actor,
+    projectId: string,
+    input: EmcInput,
+    branchId?: string,
+    assumed?: string[],
+  ) {
+    await this.access.require(user, projectId, 'canEdit');
+    const studio = await this.projects.loadStudio(projectId, user.id, branchId);
+    return this.commit(
+      projectId,
+      user.id,
+      studio.activeBranchId,
+      'emc',
+      planEmc(input, assumed),
+    );
+  }
+
+  /** Parts list of the branch (or entered), with supplier parts when asked and configured. */
+  async runComponents(
+    user: Actor,
+    projectId: string,
+    options: { parts?: ComponentPart[]; searchSupplier?: boolean },
+    branchId?: string,
+    assumed?: string[],
+  ) {
+    await this.access.require(user, projectId, 'canEdit');
+    const studio = await this.projects.loadStudio(projectId, user.id, branchId);
+    const entered = options.parts?.length ? options.parts : null;
+    const parts = entered ?? branchParts(studio);
+    const notes: string[] = [];
+    if (options.searchSupplier && parts.length) {
+      notes.push(...(await this.sourceParts(user.id, projectId, parts)));
+    }
+    return this.commit(
+      projectId,
+      user.id,
+      studio.activeBranchId,
+      'components',
+      planComponents(parts, entered ? 'input' : 'branch', notes, assumed),
+    );
+  }
+
+  /**
+   * Fills supplier parts for the parts without a part number (at most
+   * {@link SOURCED_PARTS}, paced by the sourcing service). Failures become
+   * notes: the stage still lists the parts.
+   */
+  private async sourceParts(
+    userId: string,
+    projectId: string,
+    parts: ComponentPart[],
+  ): Promise<string[]> {
+    try {
+      this.sourcing.assertConfigured();
+    } catch {
+      return [
+        'Supplier search is not configured on this server; part numbers were not looked up.',
+      ];
+    }
+    const notes: string[] = [];
+    const open = parts.filter((p) => !p.partNumber).slice(0, SOURCED_PARTS);
+    for (const part of open) {
+      const keyword = [part.value, part.type, part.rating]
+        .filter(Boolean)
+        .join(' ');
+      if (!keyword.trim()) continue;
+      try {
+        const [hit] = await this.sourcing.keywordSearch(
+          { userId, projectId },
+          { keyword, records: 1, startingRecord: 0 },
+        );
+        if (!hit) {
+          notes.push(`${part.ref}: no supplier match for "${keyword}".`);
+          continue;
+        }
+        part.manufacturer = hit.manufacturer;
+        part.partNumber = hit.partNumber;
+        part.mouserPartNumber = hit.mouserPartNumber;
+        part.description = hit.description || part.description;
+        part.unitPrice = hit.pricingTiers[0]?.price;
+        part.availability = hit.availability;
+        part.datasheetUrl = hit.datasheetLink;
+        part.source = 'supplier';
+      } catch (error) {
+        notes.push(
+          `${part.ref}: supplier search failed (${error instanceof Error ? error.message : String(error)}).`,
+        );
+        break;
+      }
+    }
+    if (parts.filter((p) => !p.partNumber).length > open.length) {
+      notes.push(
+        `Only the first ${SOURCED_PARTS} parts without a part number were looked up.`,
+      );
+    }
+    return notes;
   }
 
   // --- MTBF ----------------------------------------------------------------------

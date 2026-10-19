@@ -12,11 +12,40 @@ export const STAGE_ORDER = [
   'visualization',
   'design',
   'simulation',
-  'devices',
   'magnetics',
   'thermal',
+  'mtbf',
+  'bom',
+  'emc',
+  'components',
 ] as const;
-export type StageKind = (typeof STAGE_ORDER)[number];
+/**
+ * Stages a stored node can have: the workspace stages plus `devices`, a
+ * former stage (device selection now lives on the simulation node). Old
+ * `devices` nodes stay in the history; nothing creates new ones.
+ */
+export const STAGE_KINDS = [...STAGE_ORDER, 'devices'] as const;
+export type WorkspaceStage = (typeof STAGE_ORDER)[number];
+export type StageKind = (typeof STAGE_KINDS)[number];
+
+/** The stages of the full-design flow (always shown for full projects). */
+export const CORE_STAGES = [
+  'specs',
+  'visualization',
+  'design',
+  'simulation',
+  'magnetics',
+  'thermal',
+  'mtbf',
+  'bom',
+] as const satisfies readonly WorkspaceStage[];
+
+export function isWorkspaceStage(value: unknown): value is WorkspaceStage {
+  return (
+    typeof value === 'string' &&
+    (STAGE_ORDER as readonly string[]).includes(value)
+  );
+}
 
 export const STAGE_LABEL: Record<StageKind, string> = {
   specs: 'Specs',
@@ -26,6 +55,10 @@ export const STAGE_LABEL: Record<StageKind, string> = {
   devices: 'Devices',
   magnetics: 'Magnetics',
   thermal: 'Thermal',
+  mtbf: 'MTBF',
+  bom: 'BOM',
+  emc: 'EMC',
+  components: 'Components',
 };
 
 export type NodeStatus = 'running' | 'ready' | 'error';
@@ -65,8 +98,21 @@ export interface StudioProject {
   focus: StageKind | null;
   messages: JsonObject[];
   initialPrompt?: string;
+  /** Entry step of the project; absent on projects made before it existed (= full). */
+  scope?: StudioScope;
   createdAt: string;
 }
+
+/**
+ * Which part of the flow a project covers. `undecided`: a new project whose
+ * first step is not chosen yet. `entry`: the project starts at `entry` and
+ * may only continue downstream of it; `entry: 'specs'` is the full flow.
+ * `locked` turns true when the entry step first runs: until then the user
+ * may still pick another entry step.
+ */
+export type StudioScope =
+  | { mode: 'undecided' }
+  | { mode: 'entry'; entry: WorkspaceStage; locked: boolean };
 
 export const newId = (prefix = ''): string =>
   prefix ? `${prefix}_${randomUUID()}` : randomUUID();
@@ -76,11 +122,14 @@ const now = (): string => new Date().toISOString();
 export function isStageKind(value: unknown): value is StageKind {
   return (
     typeof value === 'string' &&
-    (STAGE_ORDER as readonly string[]).includes(value)
+    (STAGE_KINDS as readonly string[]).includes(value)
   );
 }
 
-export function createEmptyProject(initialPrompt?: string): StudioProject {
+export function createEmptyProject(
+  initialPrompt?: string,
+  scope?: StudioScope,
+): StudioProject {
   const main: Branch = {
     id: newId('br'),
     name: 'main',
@@ -97,6 +146,7 @@ export function createEmptyProject(initialPrompt?: string): StudioProject {
     focus: null,
     messages: [],
     ...(initialPrompt ? { initialPrompt } : {}),
+    ...(scope ? { scope } : {}),
     createdAt: now(),
   };
 }

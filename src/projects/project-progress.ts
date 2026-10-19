@@ -1,8 +1,9 @@
 import {
-  STAGE_ORDER,
+  type StageKind,
   stageNodeOnBranch,
   type StudioProject,
 } from './studio/studio-graph';
+import { scopeOf, visibleStages } from './studio/studio-scope';
 
 export interface Progress {
   completed: number;
@@ -45,10 +46,20 @@ export function legacyProgress(data: Data): Progress {
   return { completed, total: 10 };
 }
 
-/** Studio projects: READY stages on the active branch, out of 7. */
+/**
+ * Studio projects: READY stages on the active branch, out of the stages the
+ * project shows (the rail stages for a full project, the entry step and the
+ * later steps it has started for an entry-step project).
+ */
 export function studioProgress(project: StudioProject): Progress {
-  const completed = STAGE_ORDER.filter(
-    (stage) => stageNodeOnBranch(project, stage)?.status === 'ready',
+  const node = (stage: StageKind) => stageNodeOnBranch(project, stage);
+  const shown = visibleStages(scopeOf(project), (stage) =>
+    Boolean(node(stage)),
+  );
+  const completed = shown.filter(
+    (stage) => node(stage)?.status === 'ready',
   ).length;
-  return { completed, total: STAGE_ORDER.length };
+  // Undecided projects show no stage yet: 0 of 1 (the step still to choose);
+  // `progress_total` must stay positive.
+  return { completed, total: Math.max(shown.length, 1) };
 }

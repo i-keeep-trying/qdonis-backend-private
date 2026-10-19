@@ -13,10 +13,10 @@ import {
   rec,
   records,
   scalar,
-  selectionJunctionC,
   selectionLines,
   summarizeSimulation,
 } from './agent-results';
+import { money } from '../studio-stages/bom.stage';
 import type { AttachmentRef } from './studio-chat.types';
 
 const str = (v: unknown): string | undefined =>
@@ -38,9 +38,10 @@ export function buildAgentSnapshot(
   const vis = stageNodeOnBranch(project, 'visualization');
   const design = stageNodeOnBranch(project, 'design');
   const sim = stageNodeOnBranch(project, 'simulation');
-  const devices = stageNodeOnBranch(project, 'devices');
   const magnetics = stageNodeOnBranch(project, 'magnetics');
   const thermal = stageNodeOnBranch(project, 'thermal');
+  const mtbf = stageNodeOnBranch(project, 'mtbf');
+  const bom = stageNodeOnBranch(project, 'bom');
 
   const inventory = rec(vis?.data.inventory);
   const thermalResult = rec(thermal?.data.result);
@@ -106,16 +107,6 @@ export function buildAgentSnapshot(
           ...(sim.status === 'ready' ? summarizeSimulation(sim.data, 40) : {}),
         }
       : null,
-    devices: devices
-      ? {
-          origin: records(devices.data.inputs).length
-            ? 'entered stresses (standalone, idealised waveforms)'
-            : 'simulated waveforms of this branch',
-          entered: devices.data.inputs,
-          selected: selectionLines(devices.data.selection) ?? [],
-          junction_temperature_c: selectionJunctionC(devices.data.selection),
-        }
-      : null,
     magnetics: magnetics
       ? {
           origin:
@@ -154,6 +145,36 @@ export function buildAgentSnapshot(
           ),
           totals: thermalResult.totals,
           warnings: thermalResult.warnings,
+        }
+      : null,
+    mtbf: mtbf
+      ? {
+          origin:
+            mtbf.data.origin === 'input'
+              ? 'entered parts (standalone)'
+              : 'circuit on this branch',
+          ...rec(mtbf.data.settings),
+          mtbf_hours: rec(mtbf.data.result).mtbfHours,
+          failure_rate_fit: rec(mtbf.data.result).failureRateFit,
+          top_contributors: [...records(rec(mtbf.data.result).components)]
+            .sort((a, b) => Number(b.contribution) - Number(a.contribution))
+            .slice(0, 5)
+            .map(
+              (c) =>
+                `${String(c.designator)}: ${fixed(c.lambda, 1)} FIT (${fixed(c.contribution, 1)} %)`,
+            ),
+          issues: rec(mtbf.data.result).issues,
+        }
+      : null,
+    bom: bom
+      ? {
+          totals: bom.data.totals,
+          lines: records(bom.data.lines)
+            .filter((l) => l.included === true)
+            .map(
+              (l) =>
+                `${(Array.isArray(l.refs) ? l.refs : [l.ref]).map(String).join(', ')} ×${String(l.quantity)}: ${String(l.partNumber ?? l.description)}${typeof l.unitPrice === 'number' ? ` (${money(l.unitPrice, typeof l.currency === 'string' ? l.currency : null)} each)` : ''}`,
+            ),
         }
       : null,
     other_branches: project.branchOrder

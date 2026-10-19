@@ -21,6 +21,7 @@ import { TrimmedString } from '../../common/validation/field-rules';
 import { ProjectActivityType } from '../../generated/prisma/enums';
 import { STAGE_BLOB_CONTENT_TYPES } from '../../storage/storage.constants';
 import type { ProjectScope } from '../projects.repository';
+import { STAGE_ORDER, type WorkspaceStage } from '../studio/studio-graph';
 
 export const DEFAULT_PROJECT_NAME = 'My Project';
 
@@ -49,6 +50,15 @@ export class CreateProjectDto {
   @IsOptional()
   @TrimmedString(1, 20_000)
   prompt?: string;
+
+  @ApiPropertyOptional({
+    enum: STAGE_ORDER,
+    description:
+      'The step the project starts at (`specs` = the full design flow). Omitted: the agent helps choose it.',
+  })
+  @IsOptional()
+  @IsIn(STAGE_ORDER)
+  entryStep?: WorkspaceStage;
 }
 
 export class UpdateProjectDto {

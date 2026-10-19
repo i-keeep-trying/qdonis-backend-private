@@ -468,3 +468,44 @@ metadata:
     - ZVS
     - GaN
     - USB-PD
+schematic:
+  tuned: true
+  components:
+    CSN: {x: 400, y: 400, rotation: 0}
+    C_CLAMP: {x: 180, y: 100, rotation: 0}
+    Cout: {x: 660, y: 140, rotation: 0}
+    D_SEC: {x: 500, y: 40, rotation: 270}
+    PWM_AUX: {x: 100, y: 240, rotation: 0}
+    PWM_MAIN: {x: 200, y: 400, rotation: 0}
+    RSN: {x: 400, y: 300, rotation: 0}
+    R_ISO: {x: 560, y: 520, rotation: 90}
+    R_LOAD: {x: 780, y: 140, rotation: 0}
+    SW_CLAMP: {x: 180, y: 220, rotation: 0}
+    SW_MAIN: {x: 300, y: 340, rotation: 0}
+    T1: {x: 320, y: 120, rotation: 0}
+    VIN: {x: 0, y: 240, rotation: 0}
+    "~GND@CSN.B": {x: 400, y: 520, rotation: 0}
+    "~GND@VIN.B": {x: 0, y: 400, rotation: 0}
+  wires:
+  - {id: W1, from: CSN.B, to: SW_MAIN.S, path: [[400, 440], [400, 480], [300, 480], [300, 380]]}
+  - {id: W2, from: CSN.B, to: R_ISO.B}
+  - {id: W3, from: PWM_MAIN.B, to: SW_MAIN.S, path: [[200, 440], [200, 480], [280, 480], [280, 480], [300, 480], [300, 380]]}
+  - {id: W4, from: CSN.B, to: "~GND@CSN.B.P"}
+  - {id: W6, from: C_CLAMP.A, to: T1.P1}
+  - {id: W7, from: C_CLAMP.A, to: VIN.A}
+  - {id: W8, from: RSN.A, to: SW_MAIN.D}
+  - {id: W9, from: SW_MAIN.D, to: T1.P2}
+  - {id: W10, from: SW_CLAMP.S, to: SW_MAIN.D}
+  - {id: W11, from: PWM_AUX.B, to: SW_CLAMP.S, path: [[100, 280], [100, 280], [180, 280], [180, 260]]}
+  - {id: W12, from: C_CLAMP.B, to: SW_CLAMP.D}
+  - {id: W13, from: PWM_MAIN.A, to: SW_MAIN.G}
+  - {id: W14, from: PWM_AUX.A, to: SW_CLAMP.G, path: [[100, 200], [100, 200], [140, 200], [140, 220], [160, 220]]}
+  - {id: W15, from: D_SEC.A, to: T1.S1}
+  - {id: W16, from: Cout.A, to: R_LOAD.A, path: [[660, 100], [660, 40], [780, 40], [780, 100]]}
+  - {id: W17, from: Cout.A, to: D_SEC.B}
+  - {id: W18, from: Cout.B, to: R_LOAD.B}
+  - {id: W19, from: Cout.B, to: R_ISO.A}
+  - {id: W20, from: Cout.B, to: T1.S2}
+  - {id: W21, from: CSN.A, to: RSN.B}
+  - {id: W22, from: VIN.B, to: CSN.B, path: [[0, 280], [0, 300], [0, 300], [0, 480], [400, 480], [400, 440]]}
+  groups: {}

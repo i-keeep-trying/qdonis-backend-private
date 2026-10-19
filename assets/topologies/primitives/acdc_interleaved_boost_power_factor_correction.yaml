@@ -93,6 +93,26 @@ components:
     params:
       node_type: label
 
+  - ref: V_ERR
+    type: node
+    params:
+      node_type: "label"
+
+  - ref: V_AC_ABS
+    type: node
+    params:
+      node_type: "label"
+
+  - ref: C_ERR1
+    type: node
+    params:
+      node_type: "label"
+
+  - ref: C_ERR2
+    type: node
+    params:
+      node_type: "label"
+
   - ref: V_CLAMP
     type: node
     params:
@@ -369,105 +389,120 @@ components:
       resistance: 10000.0
       sense: false
 
-  # Control Loop 2: Voltage Error Amp & Filter
-  - ref: VREF
-    type: node
-    role: voltage_source
+  # Control Loop 2: Voltage loop (control blocks): 5V reference - VFB -> gain 100 -> clamp 0..5V -> 10ms lag
+  # Control Loop 3: Multiplier: current reference = 0.0015 * |v_ac| * voltage-loop output
+  - ref: REF_V
+    type: const
+    role: voltage_reference
     params:
-      node_type: voltage_source
-      source: dc
-      voltage: 5.0
-      series_resistance: 0
+      value: 5.0
 
-  - ref: E_V
-    type: e_source
+  - ref: SUM_V
+    type: sum
+    role: voltage_error
+    params:
+      signs: "+-"
+
+  - ref: K_V
+    type: gain
+    role: voltage_error_amp
     params:
       gain: 100.0
 
-  - ref: B_V_CLAMP
-    type: b_source
+  - ref: LIM_V
+    type: limiter
+    role: voltage_error_clamp
     params:
-      expression: "max(min(V(V_RAW), 5), 0)"
+      lower: 0
+      upper: 5
 
-  - ref: R_V
-    type: resistor
+  - ref: LPF_V
+    type: lowpass
+    role: voltage_compensator
     params:
-      resistance: 10000.0
-      sense: false
+      tau: 0.01
+      ic: 2.5
 
-  - ref: C_V
-    type: capacitor
+  - ref: ABS_VIN
+    type: function
+    role: rectified_line_voltage
     params:
-      capacitance: 1.0e-06
-      sense: false
+      expression: "abs(in1-in2)"
+      inputs: 2
 
-  # Control Loop 3: Multiplier
-  - ref: B_MULT
-    type: b_source
+  - ref: MULT
+    type: product
+    role: current_reference_multiplier
     params:
-      expression: "abs(V(a,b)) * V(V_COMP) * 0.0015"
+      gain: 0.0015
 
-  - ref: R_DUMMY
-    type: resistor
-    params:
-      resistance: 1000000000.0
-      sense: false
-
-  # Control Loop 4: Phase 1 Current Error Amp
-  - ref: B_I_ACT1
-    type: b_source
+  # Control Loop 4: Phase 1 current loop: reference - sensed current -> gain 100 -> clamp 0.1..4.8V -> 22us lag
+  - ref: I_SENSE1
+    type: function
+    role: phase1_current_sense
     params:
       expression: "I(VSENSE1)"
+      inputs: 0
 
-  - ref: E_C1
-    type: e_source
+  - ref: SUM_C1
+    type: sum
+    role: phase1_current_error
+    params:
+      signs: "+-"
+
+  - ref: K_C1
+    type: gain
+    role: phase1_current_error_amp
     params:
       gain: 100.0
 
-  - ref: B_C_CLAMP1
-    type: b_source
+  - ref: LIM_C1
+    type: limiter
+    role: phase1_current_error_clamp
     params:
-      expression: "max(min(V(C_RAW1), 4.8), 0.1)"
+      lower: 0.1
+      upper: 4.8
 
-  - ref: R_C1
-    type: resistor
+  - ref: LPF_C1
+    type: lowpass
+    role: phase1_current_compensator
     params:
-      resistance: 1000.0
-      sense: false
+      tau: 2.2e-05
+      ic: 2.5
 
-  - ref: C_C1
-    type: capacitor
-    params:
-      capacitance: 2.2e-08
-      sense: false
-
-  # Control Loop 4: Phase 2 Current Error Amp
-  - ref: B_I_ACT2
-    type: b_source
+  # Control Loop 4: Phase 2 current loop: reference - sensed current -> gain 100 -> clamp 0.1..4.8V -> 22us lag
+  - ref: I_SENSE2
+    type: function
+    role: phase2_current_sense
     params:
       expression: "I(VSENSE2)"
+      inputs: 0
 
-  - ref: E_C2
-    type: e_source
+  - ref: SUM_C2
+    type: sum
+    role: phase2_current_error
+    params:
+      signs: "+-"
+
+  - ref: K_C2
+    type: gain
+    role: phase2_current_error_amp
     params:
       gain: 100.0
 
-  - ref: B_C_CLAMP2
-    type: b_source
+  - ref: LIM_C2
+    type: limiter
+    role: phase2_current_error_clamp
     params:
-      expression: "max(min(V(C_RAW2), 4.8), 0.1)"
+      lower: 0.1
+      upper: 4.8
 
-  - ref: R_C2
-    type: resistor
+  - ref: LPF_C2
+    type: lowpass
+    role: phase2_current_compensator
     params:
-      resistance: 1000.0
-      sense: false
-
-  - ref: C_C2
-    type: capacitor
-    params:
-      capacitance: 2.2e-08
-      sense: false
+      tau: 2.2e-05
+      ic: 2.5
 
   # Control Loop 5: Interleaved 100kHz PWM (Carrier 1: 0 delay, Carrier 2: 5µs delay = 180 deg)
   - ref: V_TRI1
@@ -500,15 +535,23 @@ components:
       per: 1.0e-05
       series_resistance: 0
 
-  - ref: B_PWM1
-    type: b_source
+  - ref: CMP1
+    type: comparator
+    role: phase1_pwm_comparator
     params:
-      expression: "V(C_COMP1) > V(VTRI1) ? 15 : 0"
+      high: 15
+      low: 0
+      width: 1.0e-06  # hard switching, like the original V(a) > V(b) ? high : low
 
-  - ref: B_PWM2
-    type: b_source
+  - ref: CMP2
+    type: comparator
+    role: phase2_pwm_comparator
     params:
-      expression: "V(C_COMP2) > V(VTRI2) ? 15 : 0"
+      high: 15
+      low: 0
+      width: 1.0e-06  # hard switching, like the original V(a) > V(b) ? high : low
+
+
 
 nets:
   # Ground reference net (0)
@@ -548,41 +591,9 @@ nets:
       - neg
     - - R3
       - neg
-    - - VREF
-      - '-'
-    - - E_V
-      - '-'
-    - - B_V_CLAMP
-      - '-'
-    - - C_V
-      - neg
-    - - B_MULT
-      - '-'
-    - - R_DUMMY
-      - neg
-    - - B_I_ACT1
-      - '-'
-    - - E_C1
-      - '-'
-    - - B_C_CLAMP1
-      - '-'
-    - - C_C1
-      - neg
-    - - B_I_ACT2
-      - '-'
-    - - E_C2
-      - '-'
-    - - B_C_CLAMP2
-      - '-'
-    - - C_C2
-      - neg
     - - V_TRI1
       - '-'
     - - V_TRI2
-      - '-'
-    - - B_PWM1
-      - '-'
-    - - B_PWM2
       - '-'
 
   # Net a (AC input L before filter)
@@ -594,6 +605,8 @@ nets:
       - pos
     - - L_EMI
       - pos
+    - - ABS_VIN
+      - in1
 
   # Net b (AC input N)
   - - - b
@@ -608,6 +621,8 @@ nets:
       - cathode
     - - D4
       - anode
+    - - ABS_VIN
+      - in2
 
   # Net a_filt (Filtered AC input L)
   - - - a_filt
@@ -674,8 +689,8 @@ nets:
       - pin
     - - R_gate1
       - pos
-    - - B_PWM1
-      - +
+    - - CMP1
+      - out
 
   # Net L2_node (Phase 2 inductor to sense)
   - - - L2_node
@@ -714,8 +729,8 @@ nets:
       - pin
     - - R_gate2
       - pos
-    - - B_PWM2
-      - +
+    - - CMP2
+      - out
 
   # Net VOUT (Regulated 385V DC output)
   - - - VOUT
@@ -738,128 +753,162 @@ nets:
       - neg
     - - R3
       - pos
-    - - E_V
-      - ctrl-
+    - - SUM_V
+      - in2
 
   # Net VREF_NODE (Reference 5V)
   - - - VREF_NODE
       - pin
-    - - VREF
-      - +
-    - - E_V
-      - ctrl+
+    - - REF_V
+      - out
+    - - SUM_V
+      - in1
 
   # Net V_RAW (Voltage error amp unconstrained output)
   - - - V_RAW
       - pin
-    - - E_V
-      - +
-    - - B_V_CLAMP
-      - ctrl+
+    - - K_V
+      - out
+    - - LIM_V
+      - in
 
   # Net V_CLAMP (Voltage error amp clamped output)
   - - - V_CLAMP
       - pin
-    - - B_V_CLAMP
-      - +
-    - - R_V
-      - pos
+    - - LIM_V
+      - out
+    - - LPF_V
+      - in
 
   # Net V_COMP (Voltage error compensation filtered output)
   - - - V_COMP
       - pin
-    - - R_V
-      - neg
-    - - C_V
-      - pos
+    - - LPF_V
+      - out
+    - - MULT
+      - in2
 
   # Net I_TARGET (Multiplier current demand reference)
   - - - I_TARGET
       - pin
-    - - B_MULT
-      - +
-    - - R_DUMMY
-      - pos
-    - - E_C1
-      - ctrl+
-    - - E_C2
-      - ctrl+
+    - - MULT
+      - out
+    - - SUM_C1
+      - in1
+    - - SUM_C2
+      - in1
 
   # Net I_ACT1 (Phase 1 sensed current signal)
   - - - I_ACT1
       - pin
-    - - B_I_ACT1
-      - +
-    - - E_C1
-      - ctrl-
+    - - I_SENSE1
+      - out
+    - - SUM_C1
+      - in2
 
   # Net C_RAW1 (Phase 1 current error amp unconstrained output)
   - - - C_RAW1
       - pin
-    - - E_C1
-      - +
-    - - B_C_CLAMP1
-      - ctrl+
+    - - K_C1
+      - out
+    - - LIM_C1
+      - in
 
   # Net C_CLAMP1 (Phase 1 current error amp clamped output)
   - - - C_CLAMP1
       - pin
-    - - B_C_CLAMP1
-      - +
-    - - R_C1
-      - pos
+    - - LIM_C1
+      - out
+    - - LPF_C1
+      - in
 
   # Net C_COMP1 (Phase 1 current error compensation filtered output)
   - - - C_COMP1
       - pin
-    - - R_C1
-      - neg
-    - - C_C1
-      - pos
+    - - LPF_C1
+      - out
+    - - CMP1
+      - inp
 
   # Net I_ACT2 (Phase 2 sensed current signal)
   - - - I_ACT2
       - pin
-    - - B_I_ACT2
-      - +
-    - - E_C2
-      - ctrl-
+    - - I_SENSE2
+      - out
+    - - SUM_C2
+      - in2
 
   # Net C_RAW2 (Phase 2 current error amp unconstrained output)
   - - - C_RAW2
       - pin
-    - - E_C2
-      - +
-    - - B_C_CLAMP2
-      - ctrl+
+    - - K_C2
+      - out
+    - - LIM_C2
+      - in
 
   # Net C_CLAMP2 (Phase 2 current error amp clamped output)
   - - - C_CLAMP2
       - pin
-    - - B_C_CLAMP2
-      - +
-    - - R_C2
-      - pos
+    - - LIM_C2
+      - out
+    - - LPF_C2
+      - in
 
   # Net C_COMP2 (Phase 2 current error compensation filtered output)
   - - - C_COMP2
       - pin
-    - - R_C2
-      - neg
-    - - C_C2
-      - pos
+    - - LPF_C2
+      - out
+    - - CMP2
+      - inp
 
   # Net VTRI1 (Phase 1 PWM carrier)
   - - - VTRI1
       - pin
     - - V_TRI1
       - +
+    - - CMP1
+      - inn
 
   # Net VTRI2 (Phase 2 PWM carrier, 180 deg out of phase)
   - - - VTRI2
       - pin
     - - V_TRI2
       - +
+    - - CMP2
+      - inn
+
+  # Net C_ERR1 (Phase 1 current error)
+  - - - C_ERR1
+      - pin
+    - - SUM_C1
+      - out
+    - - K_C1
+      - in
+
+  # Net C_ERR2 (Phase 2 current error)
+  - - - C_ERR2
+      - pin
+    - - SUM_C2
+      - out
+    - - K_C2
+      - in
+
+  # Net V_ERR (Voltage error VREF - VFB)
+  - - - V_ERR
+      - pin
+    - - SUM_V
+      - out
+    - - K_V
+      - in
+
+  # Net V_AC_ABS (Rectified line voltage |v_ac|)
+  - - - V_AC_ABS
+      - pin
+    - - ABS_VIN
+      - out
+    - - MULT
+      - in1
 
 analysis:
   spice_settings:
@@ -870,6 +919,8 @@ analysis:
     requirements:
       - rid: tr_interleaved_pfc
         requirement: Verify 385V DC output and interleaved dual-phase PFC boosting operation
+        criteria:
+          target_vout: 385.0
         environment:
           - ref: time_domain
             t_step: 1.0e-06
@@ -922,3 +973,276 @@ analysis:
           - var: vout_ripple_vpp
             formula: '[Vout_ripple_vpp]'
             description: Output Voltage Ripple peak-to-peak
+schematic:
+  tuned: false
+  components:
+    "#channel_1_control": {x: 580, y: 820, rotation: 0}
+    "#channel_2_control": {x: 580, y: 1020, rotation: 0}
+    "#voltage_loop": {x: 20, y: 860, rotation: 0}
+    ABS_VIN: {x: 920, y: 300, rotation: 0}
+    B_C_CLAMP1: {x: 340, y: 220, rotation: 0}
+    B_C_CLAMP2: {x: 340, y: 220, rotation: 0}
+    B_I_ACT1: {x: 140, y: 480, rotation: 0}
+    B_I_ACT2: {x: 140, y: 480, rotation: 0}
+    B_MULT: {x: 960, y: 260, rotation: 0}
+    B_PWM1: {x: 400, y: 840, rotation: 0}
+    B_PWM2: {x: 400, y: 840, rotation: 0}
+    B_V_CLAMP: {x: 400, y: 220, rotation: 0}
+    C1: {x: 1640, y: 200, rotation: 0}
+    CMP1: {x: 960, y: 240, rotation: 0}
+    CMP2: {x: 400, y: 760, rotation: 0}
+    C_BYPASS: {x: 860, y: 200, rotation: 0}
+    C_C1: {x: 500, y: 340, rotation: 0}
+    C_C2: {x: 500, y: 340, rotation: 0}
+    C_CLAMP1: {x: 700, y: 280, rotation: 180}
+    C_CLAMP2: {x: 300, y: 500, rotation: 180}
+    C_COMP1: {x: 960, y: 360, rotation: 180}
+    C_COMP2: {x: 420, y: 660, rotation: 180}
+    C_EMI: {x: 300, y: 200, rotation: 0}
+    C_ERR1: {x: 420, y: 440, rotation: 180}
+    C_ERR2: {x: 180, y: 180, rotation: 180}
+    C_RAW1: {x: 520, y: 280, rotation: 180}
+    C_RAW2: {x: 240, y: 340, rotation: 180}
+    C_S1: {x: 1300, y: 200, rotation: 0}
+    C_S2: {x: 1300, y: 540, rotation: 0}
+    C_V: {x: 600, y: 220, rotation: 0}
+    D1: {x: 520, y: 280, rotation: 180}
+    D2: {x: 520, y: 120, rotation: 180}
+    D3: {x: 680, y: 280, rotation: 180}
+    D4: {x: 680, y: 120, rotation: 180}
+    D5: {x: 1480, y: 40, rotation: 270}
+    D6: {x: 1480, y: 380, rotation: 270}
+    E_C1: {x: 240, y: 340, rotation: 0}
+    E_C2: {x: 240, y: 340, rotation: 0}
+    E_V: {x: 180, y: 220, rotation: 0}
+    GND: {x: 100, y: 440, rotation: 0}
+    I_ACT1: {x: 60, y: 460, rotation: 180}
+    I_ACT2: {x: 160, y: 120, rotation: 180}
+    I_SENSE1: {x: 60, y: 540, rotation: 0}
+    I_SENSE2: {x: 240, y: 20, rotation: 0}
+    I_TARGET: {x: 140, y: 340, rotation: 180}
+    K_C1: {x: 420, y: 360, rotation: 0}
+    K_C2: {x: 280, y: 260, rotation: 0}
+    K_V: {x: 360, y: 120, rotation: 0}
+    L1: {x: 980, y: 40, rotation: 270}
+    L1_node: {x: 1100, y: -40, rotation: 0}
+    L2: {x: 980, y: 380, rotation: 270}
+    L2_node: {x: 1100, y: 300, rotation: 0}
+    LIM_C1: {x: 600, y: 360, rotation: 0}
+    LIM_C2: {x: 340, y: 420, rotation: 0}
+    LIM_V: {x: 540, y: 120, rotation: 0}
+    LPF_C1: {x: 780, y: 360, rotation: 0}
+    LPF_C2: {x: 400, y: 580, rotation: 0}
+    LPF_V: {x: 720, y: 120, rotation: 0}
+    L_EMI: {x: 200, y: 120, rotation: 270}
+    M1: {x: 1220, y: 200, rotation: 0}
+    M2: {x: 1220, y: 540, rotation: 0}
+    MULT: {x: 900, y: 160, rotation: 0}
+    R1: {x: 1740, y: 200, rotation: 0}
+    R2: {x: 1860, y: 120, rotation: 0}
+    R3: {x: 1860, y: 280, rotation: 0}
+    REF_V: {x: 120, y: 20, rotation: 0}
+    R_C1: {x: 460, y: 100, rotation: 270}
+    R_C2: {x: 460, y: 100, rotation: 270}
+    R_DUMMY: {x: 960, y: 120, rotation: 0}
+    R_GS1: {x: 1260, y: 140, rotation: 0}
+    R_GS2: {x: 700, y: 660, rotation: 0}
+    R_S1: {x: 1380, y: 200, rotation: 0}
+    R_S2: {x: 1380, y: 540, rotation: 0}
+    R_V: {x: 500, y: 80, rotation: 270}
+    R_filt: {x: 400, y: 320, rotation: 0}
+    R_gate1: {x: 1140, y: 120, rotation: 0}
+    R_gate2: {x: 580, y: 640, rotation: 0}
+    Ra: {x: 100, y: 320, rotation: 0}
+    Rb: {x: 780, y: 320, rotation: 0}
+    SUM_C1: {x: 240, y: 440, rotation: 0}
+    SUM_C2: {x: 340, y: 140, rotation: 0}
+    SUM_V: {x: 180, y: 200, rotation: 0}
+    VAC: {x: 0, y: 200, rotation: 0}
+    VFB: {x: 1800, y: 220, rotation: 90}
+    VOUT: {x: 1600, y: 40, rotation: 0}
+    VREF: {x: 40, y: 240, rotation: 0}
+    VREF_NODE: {x: 80, y: 100, rotation: 180}
+    VSENSE1: {x: 1100, y: 40, rotation: 270}
+    VSENSE2: {x: 1100, y: 380, rotation: 270}
+    VTRI1: {x: 920, y: 80, rotation: 270}
+    VTRI2: {x: 280, y: 640, rotation: 270}
+    V_AC_ABS: {x: 720, y: 220, rotation: 180}
+    V_CLAMP: {x: 640, y: 40, rotation: 180}
+    V_COMP: {x: 820, y: 40, rotation: 180}
+    V_ERR: {x: 360, y: 200, rotation: 180}
+    V_RAW: {x: 460, y: 40, rotation: 180}
+    V_TRI1: {x: 820, y: 180, rotation: 0}
+    V_TRI2: {x: 260, y: 780, rotation: 0}
+    "^channel_1_control:I_TARGET": {x: 180, y: 260, rotation: 0}
+    "^channel_1_control:ctrl_gate1": {x: 1200, y: 20, rotation: 0}
+    "^channel_2_control:I_TARGET": {x: 80, y: 240, rotation: 0}
+    "^channel_2_control:ctrl_gate2": {x: 640, y: 540, rotation: 0}
+    "^voltage_loop:I_TARGET": {x: 1080, y: 160, rotation: 0}
+    "^voltage_loop:VFB": {x: 40, y: 220, rotation: 0}
+    "^voltage_loop:a": {x: 780, y: 280, rotation: 0}
+    "^voltage_loop:b": {x: 780, y: 360, rotation: 0}
+    a: {x: 0, y: 100, rotation: 270}
+    a_filt: {x: 320, y: 120, rotation: 0}
+    b: {x: 0, y: 300, rotation: 90}
+    ctrl1: {x: 1140, y: 240, rotation: 180}
+    ctrl2: {x: 580, y: 760, rotation: 180}
+    ctrl_gate1: {x: 1140, y: 300, rotation: 180}
+    ctrl_gate2: {x: 580, y: 820, rotation: 180}
+    d: {x: 520, y: 20, rotation: 270}
+    e1: {x: 1220, y: 40, rotation: 0}
+    e2: {x: 1220, y: 380, rotation: 0}
+    "~GND@B_C_CLAMP1.B": {x: 340, y: 440, rotation: 0}
+    "~GND@B_C_CLAMP2.B": {x: 340, y: 440, rotation: 0}
+    "~GND@B_MULT.B": {x: 960, y: 380, rotation: 0}
+    "~GND@B_PWM1.B": {x: 400, y: 960, rotation: 0}
+    "~GND@B_PWM2.B": {x: 400, y: 960, rotation: 0}
+    "~GND@B_V_CLAMP.B": {x: 400, y: 340, rotation: 0}
+    "~GND@C1.B": {x: 1640, y: 320, rotation: 0}
+    "~GND@C_S2.B": {x: 1300, y: 660, rotation: 0}
+    "~GND@R_GS1.B": {x: 1280, y: 240, rotation: 0}
+    "~GND@R_GS2.B": {x: 720, y: 760, rotation: 0}
+    "~GND@V_TRI1.B": {x: 700, y: 220, rotation: 0}
+    "~GND@V_TRI2.B": {x: 260, y: 900, rotation: 0}
+    "~I_TARGET@#channel_1_control.I_TARGET": {x: 380, y: 820, rotation: 180}
+    "~I_TARGET@#channel_2_control.I_TARGET": {x: 380, y: 1020, rotation: 180}
+    "~VFB@#voltage_loop.VFB": {x: -140, y: 820, rotation: 180}
+    "~a@#voltage_loop.a": {x: -140, y: 860, rotation: 180}
+    "~b@#voltage_loop.b": {x: -140, y: 900, rotation: 180}
+    "~ctrl_gate1@#channel_1_control.ctrl_gate1": {x: 800, y: 820, rotation: 0}
+    "~ctrl_gate1@M1.G": {x: 1060, y: 200, rotation: 180}
+    "~ctrl_gate2@#channel_2_control.ctrl_gate2": {x: 800, y: 1020, rotation: 0}
+    "~ctrl_gate2@M2.G": {x: 1060, y: 540, rotation: 180}
+  wires:
+  - {id: W1, from: C_S1.B, to: M1.S}
+  - {id: W2, from: C_S2.B, to: M2.S}
+  - {id: W3, from: C1.B, to: R1.B}
+  - {id: W4, from: D1.A, to: D3.A}
+  - {id: W5, from: R1.B, to: R3.B}
+  - {id: W6, from: C_BYPASS.B, to: D3.A}
+  - {id: W7, from: D1.A, to: GND.P}
+  - {id: W8, from: GND.P, to: Ra.B}
+  - {id: W9, from: C_S1.B, to: R_S1.B}
+  - {id: W10, from: C_S2.B, to: R_S2.B}
+  - {id: W11, from: D3.A, to: Rb.B}
+  - {id: W12, from: D1.A, to: R_filt.B}
+  - {id: W13, from: C1.B, to: R_S1.B}
+  - {id: W14, from: C1.B, to: "~GND@C1.B.P"}
+  - {id: W15, from: C_S2.B, to: "~GND@C_S2.B.P"}
+  - {id: W16, from: "#channel_1_control.I_TARGET", to: "#voltage_loop.I_TARGET"}
+  - {id: W17, from: "#channel_2_control.I_TARGET", to: "~I_TARGET@#channel_2_control.I_TARGET.P"}
+  - {id: W18, from: "#channel_1_control.I_TARGET", to: "~I_TARGET@#channel_1_control.I_TARGET.P"}
+  - {id: W19, from: L1.B, to: VSENSE1.A}
+  - {id: W20, from: L1_node.P, to: VSENSE1.A}
+  - {id: W21, from: L2.B, to: VSENSE2.A}
+  - {id: W22, from: L2_node.P, to: VSENSE2.A}
+  - {id: W23, from: R2.B, to: R3.A}
+  - {id: W24, from: R2.B, to: VFB.P}
+  - {id: W25, from: "#voltage_loop.VFB", to: "~VFB@#voltage_loop.VFB.P"}
+  - {id: W26, from: C1.A, to: R1.A}
+  - {id: W27, from: R1.A, to: R2.A}
+  - {id: W28, from: C1.A, to: D5.B}
+  - {id: W29, from: C1.A, to: D6.B}
+  - {id: W30, from: D5.B, to: VOUT.P}
+  - {id: W31, from: L_EMI.A, to: VAC.A}
+  - {id: W32, from: VAC.A, to: a.P}
+  - {id: W33, from: L_EMI.A, to: Ra.A}
+  - {id: W34, from: "#voltage_loop.a", to: "~a@#voltage_loop.a.P"}
+  - {id: W35, from: D1.B, to: D2.A}
+  - {id: W36, from: C_EMI.A, to: L_EMI.B}
+  - {id: W37, from: C_EMI.A, to: D2.A}
+  - {id: W38, from: C_EMI.A, to: a_filt.P}
+  - {id: W39, from: D1.B, to: R_filt.A}
+  - {id: W40, from: D3.B, to: D4.A}
+  - {id: W41, from: C_EMI.B, to: VAC.B}
+  - {id: W42, from: C_EMI.B, to: D3.B}
+  - {id: W43, from: VAC.B, to: b.P}
+  - {id: W44, from: D3.B, to: Rb.A}
+  - {id: W45, from: "#voltage_loop.b", to: "~b@#voltage_loop.b.P"}
+  - {id: W46, from: "#channel_1_control.ctrl_gate1", to: "~ctrl_gate1@#channel_1_control.ctrl_gate1.P"}
+  - {id: W47, from: M1.G, to: "~ctrl_gate1@M1.G.P"}
+  - {id: W48, from: "#channel_2_control.ctrl_gate2", to: "~ctrl_gate2@#channel_2_control.ctrl_gate2.P"}
+  - {id: W49, from: M2.G, to: "~ctrl_gate2@M2.G.P"}
+  - {id: W50, from: D2.B, to: D4.B}
+  - {id: W51, from: C_BYPASS.A, to: L1.A}
+  - {id: W52, from: C_BYPASS.A, to: D4.B}
+  - {id: W53, from: C_BYPASS.A, to: L2.A}
+  - {id: W54, from: D2.B, to: d.P}
+  - {id: W55, from: C_S1.A, to: M1.D}
+  - {id: W56, from: M1.D, to: VSENSE1.B}
+  - {id: W57, from: C_S1.A, to: D5.A}
+  - {id: W58, from: VSENSE1.B, to: e1.P}
+  - {id: W59, from: C_S1.A, to: R_S1.A}
+  - {id: W60, from: C_S2.A, to: M2.D}
+  - {id: W61, from: M2.D, to: VSENSE2.B}
+  - {id: W62, from: C_S2.A, to: D6.A}
+  - {id: W63, from: VSENSE2.B, to: e2.P}
+  - {id: W64, from: C_S2.A, to: R_S2.A}
+  groups:
+    channel_1_control: {label: "Channel 1 control", members: [I_SENSE1, SUM_C1, K_C1, LIM_C1, LPF_C1, V_TRI1, CMP1, R_GS1, R_gate1]}
+    channel_2_control: {label: "Channel 2 control", members: [I_SENSE2, SUM_C2, K_C2, LIM_C2, LPF_C2, V_TRI2, CMP2, R_GS2, R_gate2]}
+    voltage_loop: {label: "Voltage loop", members: [REF_V, SUM_V, K_V, LIM_V, LPF_V, ABS_VIN, MULT]}
+  sheets:
+    channel_1_control:
+      wires:
+      - {id: W1, from: R_GS1.B, to: "~GND@R_GS1.B.P"}
+      - {id: W2, from: V_TRI1.B, to: "~GND@V_TRI1.B.P"}
+      - {id: W3, from: LIM_C1.out, to: LPF_C1.in}
+      - {id: W4, from: C_CLAMP1.P, to: LPF_C1.in}
+      - {id: W5, from: CMP1.inp, to: LPF_C1.out}
+      - {id: W6, from: C_COMP1.P, to: LPF_C1.out}
+      - {id: W7, from: K_C1.in, to: SUM_C1.out}
+      - {id: W8, from: C_ERR1.P, to: K_C1.in}
+      - {id: W9, from: K_C1.out, to: LIM_C1.in}
+      - {id: W10, from: C_RAW1.P, to: LIM_C1.in}
+      - {id: W11, from: I_SENSE1.out, to: SUM_C1.in2}
+      - {id: W12, from: I_ACT1.P, to: I_SENSE1.out}
+      - {id: W13, from: SUM_C1.in1, to: "^channel_1_control:I_TARGET.P"}
+      - {id: W14, from: I_TARGET.P, to: "^channel_1_control:I_TARGET.P"}
+      - {id: W15, from: CMP1.inn, to: V_TRI1.A}
+      - {id: W16, from: VTRI1.P, to: V_TRI1.A}
+      - {id: W17, from: CMP1.out, to: R_gate1.A}
+      - {id: W18, from: CMP1.out, to: ctrl1.P}
+      - {id: W19, from: R_GS1.A, to: "^channel_1_control:ctrl_gate1.P"}
+      - {id: W20, from: R_GS1.A, to: R_gate1.B}
+      - {id: W21, from: R_gate1.B, to: ctrl_gate1.P}
+    channel_2_control:
+      wires:
+      - {id: W1, from: R_GS2.B, to: "~GND@R_GS2.B.P"}
+      - {id: W2, from: V_TRI2.B, to: "~GND@V_TRI2.B.P"}
+      - {id: W3, from: LIM_C2.out, to: LPF_C2.in}
+      - {id: W4, from: C_CLAMP2.P, to: LPF_C2.in}
+      - {id: W5, from: CMP2.inp, to: LPF_C2.out}
+      - {id: W6, from: C_COMP2.P, to: LPF_C2.out}
+      - {id: W7, from: K_C2.in, to: SUM_C2.out}
+      - {id: W8, from: C_ERR2.P, to: K_C2.in}
+      - {id: W9, from: K_C2.out, to: LIM_C2.in}
+      - {id: W10, from: C_RAW2.P, to: LIM_C2.in}
+      - {id: W11, from: I_SENSE2.out, to: SUM_C2.in2}
+      - {id: W12, from: I_ACT2.P, to: SUM_C2.in2}
+      - {id: W13, from: SUM_C2.in1, to: "^channel_2_control:I_TARGET.P"}
+      - {id: W14, from: CMP2.inn, to: V_TRI2.A}
+      - {id: W15, from: VTRI2.P, to: V_TRI2.A}
+      - {id: W16, from: CMP2.out, to: R_gate2.A}
+      - {id: W17, from: CMP2.out, to: ctrl2.P}
+      - {id: W18, from: R_GS2.A, to: "^channel_2_control:ctrl_gate2.P"}
+      - {id: W19, from: R_GS2.A, to: R_gate2.B}
+      - {id: W20, from: R_gate2.B, to: ctrl_gate2.P}
+    voltage_loop:
+      wires:
+      - {id: W1, from: MULT.out, to: "^voltage_loop:I_TARGET.P"}
+      - {id: W2, from: SUM_V.in2, to: "^voltage_loop:VFB.P"}
+      - {id: W3, from: REF_V.out, to: SUM_V.in1}
+      - {id: W4, from: SUM_V.in1, to: VREF_NODE.P}
+      - {id: W5, from: ABS_VIN.out, to: MULT.in1}
+      - {id: W6, from: MULT.in1, to: V_AC_ABS.P}
+      - {id: W7, from: LIM_V.out, to: LPF_V.in}
+      - {id: W8, from: LPF_V.in, to: V_CLAMP.P}
+      - {id: W9, from: LPF_V.out, to: MULT.in2}
+      - {id: W10, from: LPF_V.out, to: V_COMP.P}
+      - {id: W11, from: K_V.in, to: SUM_V.out}
+      - {id: W12, from: K_V.in, to: V_ERR.P}
+      - {id: W13, from: K_V.out, to: LIM_V.in}
+      - {id: W14, from: LIM_V.in, to: V_RAW.P}
+      - {id: W15, from: ABS_VIN.in1, to: "^voltage_loop:a.P"}
+      - {id: W16, from: ABS_VIN.in2, to: "^voltage_loop:b.P"}

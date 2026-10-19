@@ -213,6 +213,54 @@ export class SourcingService {
     return options;
   }
 
+  /**
+   * The part with this manufacturer part number (the BOM's selected devices),
+   * or null when Mouser does not list it. Mouser lists some parts only in a
+   * reel packaging (E4M0045075J2 as E4M0045075J2-TR), which also counts. Exact
+   * number first, then a priced, in-stock one. Throws when the search is not
+   * configured, rate limited or failing.
+   */
+  async exactPart(ctx: SearchContext, manufacturerPartNumber: string): Promise<ComponentOption | null> {
+    this.assertConfigured();
+    let call: MouserCall;
+    try {
+      call = await this.call(
+        ctx,
+        () =>
+          this.api.partNumber(
+            { SearchByPartRequest: { mouserPartNumber: manufacturerPartNumber, partSearchOptions: 'BeginsWith' } },
+            15_000,
+          ),
+        manufacturerPartNumber,
+      );
+    } catch (error) {
+      if (error instanceof RateLimited) this.rateLimited();
+      throw error;
+    }
+    if (!call.response) this.raise(call, manufacturerPartNumber);
+    if (call.response.Errors?.length) return null;
+    const key = (pn: string) => pn.toUpperCase().replace(/[^A-Z0-9]/g, '');
+    const wanted = key(manufacturerPartNumber);
+    const exact = (part: MouserPart) =>
+      key(part.ManufacturerPartNumber ?? '') === wanted;
+    const prefix = manufacturerPartNumber.toUpperCase();
+    const reel = (part: MouserPart) => {
+      const mpn = (part.ManufacturerPartNumber ?? '').toUpperCase();
+      return (
+        mpn.startsWith(prefix) &&
+        /^-?(TR|T&R|TRL|TRR|REEL)$/.test(mpn.slice(prefix.length))
+      );
+    };
+    const score = (part: MouserPart) =>
+      (exact(part) ? 4 : 0) +
+      (part.PriceBreaks?.some((b) => parseFloat(b.Price.replace(/[^0-9.]+/g, '')) > 0) ? 2 : 0) +
+      (/in stock/i.test(part.Availability ?? '') ? 1 : 0);
+    const matches = (call.response.SearchResults?.Parts ?? [])
+      .filter((part) => exact(part) || reel(part))
+      .sort((a, b) => score(b) - score(a));
+    return matches[0] ? transformMouserPartToComponentOption(matches[0], 0, manufacturerPartNumber) : null;
+  }
+
   async partDetails(ctx: SearchContext, mouserPartNumber: string): Promise<ComponentOption | null> {
     this.assertConfigured();
     const part = await this.partByNumber(ctx, mouserPartNumber);

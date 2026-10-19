@@ -707,7 +707,7 @@
   "kind": "diode",
   "family": "SiC Schottky diode",
   "v_rating": 1200.0,
-  "i_rating": 1200.0,
+  "i_rating": 600.0,
   "i_lut": 1200.0
  },
  {
@@ -716,7 +716,7 @@
   "kind": "diode",
   "family": "SiC Schottky diode",
   "v_rating": 1200.0,
-  "i_rating": 1200.0,
+  "i_rating": 600.0,
   "i_lut": 1200.0
  },
  {
@@ -725,7 +725,7 @@
   "kind": "diode",
   "family": "SiC Schottky diode",
   "v_rating": 1700.0,
-  "i_rating": 1200.0,
+  "i_rating": 600.0,
   "i_lut": 1200.0
  },
  {
@@ -734,7 +734,7 @@
   "kind": "diode",
   "family": "SiC Schottky diode",
   "v_rating": 1700.0,
-  "i_rating": 1200.0,
+  "i_rating": 600.0,
   "i_lut": 1200.0
  },
  {
@@ -743,7 +743,7 @@
   "kind": "diode",
   "family": "SiC Schottky diode",
   "v_rating": 1200.0,
-  "i_rating": 360.0,
+  "i_rating": 120.0,
   "i_lut": 360.0
  },
  {
@@ -752,7 +752,7 @@
   "kind": "diode",
   "family": "SiC Schottky diode",
   "v_rating": 1200.0,
-  "i_rating": 350.0,
+  "i_rating": 175.0,
   "i_lut": 350.0
  },
  {
@@ -761,7 +761,7 @@
   "kind": "diode",
   "family": "SiC Schottky diode",
   "v_rating": 1200.0,
-  "i_rating": 600.0,
+  "i_rating": 300.0,
   "i_lut": 600.0
  },
  {
@@ -770,7 +770,7 @@
   "kind": "diode",
   "family": "SiC Schottky diode",
   "v_rating": 1700.0,
-  "i_rating": 600.2,
+  "i_rating": 300.0,
   "i_lut": 600.2
  },
  {
@@ -779,7 +779,7 @@
   "kind": "diode",
   "family": "SiC Schottky diode",
   "v_rating": 1700.0,
-  "i_rating": 600.0,
+  "i_rating": 310.0,
   "i_lut": 600.0
  },
  {
@@ -788,7 +788,7 @@
   "kind": "diode",
   "family": "SiC Schottky diode",
   "v_rating": 1200.0,
-  "i_rating": 700.0,
+  "i_rating": 350.0,
   "i_lut": 700.0
  },
  {
@@ -797,7 +797,7 @@
   "kind": "diode",
   "family": "SiC Schottky diode",
   "v_rating": 1700.0,
-  "i_rating": 750.0,
+  "i_rating": 380.0,
   "i_lut": 750.0
  },
  {
@@ -806,7 +806,7 @@
   "kind": "diode",
   "family": "SiC Schottky diode",
   "v_rating": 1200.0,
-  "i_rating": 800.0,
+  "i_rating": 480.0,
   "i_lut": 800.0
  },
  {
@@ -815,7 +815,7 @@
   "kind": "diode",
   "family": "SiC Schottky diode",
   "v_rating": 1200.0,
-  "i_rating": 1000.0,
+  "i_rating": 530.0,
   "i_lut": 1000.0
  },
  {
@@ -4341,7 +4341,7 @@
   "part": "CAB004A12GM4",
   "type": "MOSFET with Diode",
   "kind": "switch",
-  "family": "SiC MOSFET",
+  "family": "SiC MOSFET module",
   "v_rating": 1200.0,
   "i_rating": 400.0,
   "i_lut": 400.0
@@ -4359,7 +4359,7 @@
   "part": "CAB006A12GM3",
   "type": "MOSFET with Diode",
   "kind": "switch",
-  "family": "SiC MOSFET",
+  "family": "SiC MOSFET module",
   "v_rating": 1200.0,
   "i_rating": 400.0,
   "i_lut": 400.0
@@ -4368,7 +4368,7 @@
   "part": "CAB006A12GM4",
   "type": "MOSFET with Diode",
   "kind": "switch",
-  "family": "SiC MOSFET",
+  "family": "SiC MOSFET module",
   "v_rating": 1200.0,
   "i_rating": 400.0,
   "i_lut": 400.0
@@ -4386,7 +4386,7 @@
   "part": "CAB008A12GM3",
   "type": "MOSFET with Diode",
   "kind": "switch",
-  "family": "SiC MOSFET",
+  "family": "SiC MOSFET module",
   "v_rating": 1200.0,
   "i_rating": 300.0,
   "i_lut": 300.0
@@ -4404,7 +4404,7 @@
   "part": "CAB011A12GM3",
   "type": "MOSFET with Diode",
   "kind": "switch",
-  "family": "SiC MOSFET",
+  "family": "SiC MOSFET module",
   "v_rating": 1200.0,
   "i_rating": 300.0,
   "i_lut": 300.0
@@ -4433,7 +4433,7 @@
   "kind": "switch",
   "family": "SiC MOSFET module",
   "v_rating": 1700.0,
-  "i_rating": 650.0,
+  "i_rating": 320.0,
   "i_lut": 650.0
  },
  {
@@ -4451,7 +4451,7 @@
   "kind": "switch",
   "family": "SiC MOSFET module",
   "v_rating": 1200.0,
-  "i_rating": 800.0,
+  "i_rating": 400.0,
   "i_lut": 800.0
  },
  {
@@ -4460,7 +4460,7 @@
   "kind": "switch",
   "family": "SiC MOSFET module",
   "v_rating": 1200.0,
-  "i_rating": 850.0,
+  "i_rating": 425.0,
   "i_lut": 850.0
  },
  {
@@ -4469,7 +4469,7 @@
   "kind": "switch",
   "family": "SiC MOSFET module",
   "v_rating": 1200.0,
-  "i_rating": 900.0,
+  "i_rating": 450.0,
   "i_lut": 900.0
  },
  {
@@ -4478,16 +4478,16 @@
   "kind": "switch",
   "family": "SiC MOSFET module",
   "v_rating": 1700.0,
-  "i_rating": 1000.0,
+  "i_rating": 500.0,
   "i_lut": 1000.0
  },
  {
   "part": "CAB525F12XM3",
   "type": "MOSFET with Diode",
   "kind": "switch",
-  "family": "SiC MOSFET",
-  "v_rating": 800.0,
-  "i_rating": 1100.0,
+  "family": "SiC MOSFET module",
+  "v_rating": 1200.0,
+  "i_rating": 525.0,
   "i_lut": 1100.0
  },
  {
@@ -4496,14 +4496,14 @@
   "kind": "switch",
   "family": "SiC MOSFET module",
   "v_rating": 1200.0,
-  "i_rating": 1100.0,
+  "i_rating": 530.0,
   "i_lut": 1100.0
  },
  {
   "part": "CAB5R0A23GM4",
   "type": "MOSFET with Diode",
   "kind": "switch",
-  "family": "SiC MOSFET",
+  "family": "SiC MOSFET module",
   "v_rating": 2300.0,
   "i_rating": 500.0,
   "i_lut": 500.0
@@ -4514,7 +4514,7 @@
   "kind": "switch",
   "family": "SiC MOSFET module",
   "v_rating": 3300.0,
-  "i_rating": 1200.0,
+  "i_rating": 600.0,
   "i_lut": 1200.0
  },
  {
@@ -4523,14 +4523,14 @@
   "kind": "switch",
   "family": "SiC MOSFET module",
   "v_rating": 1700.0,
-  "i_rating": 1300.0,
+  "i_rating": 650.0,
   "i_lut": 1300.0
  },
  {
   "part": "CAB6R0A23GM4",
   "type": "MOSFET with Diode",
   "kind": "switch",
-  "family": "SiC MOSFET",
+  "family": "SiC MOSFET module",
   "v_rating": 2300.0,
   "i_rating": 400.0,
   "i_lut": 400.0
@@ -4541,14 +4541,14 @@
   "kind": "switch",
   "family": "SiC MOSFET module",
   "v_rating": 1200.0,
-  "i_rating": 1600.0,
+  "i_rating": 760.0,
   "i_lut": 1600.0
  },
  {
   "part": "CAB7R5A23GM4",
   "type": "MOSFET with Diode",
   "kind": "switch",
-  "family": "SiC MOSFET",
+  "family": "SiC MOSFET module",
   "v_rating": 2300.0,
   "i_rating": 320.0,
   "i_lut": 320.0
@@ -4557,7 +4557,7 @@
   "part": "CBB010A12FM4",
   "type": "MOSFET with Diode",
   "kind": "switch",
-  "family": "SiC MOSFET",
+  "family": "SiC MOSFET module",
   "v_rating": 1200.0,
   "i_rating": 200.0,
   "i_lut": 200.0
@@ -4566,7 +4566,7 @@
   "part": "CBB010A23GM4",
   "type": "MOSFET with Diode",
   "kind": "switch",
-  "family": "SiC MOSFET",
+  "family": "SiC MOSFET module",
   "v_rating": 2300.0,
   "i_rating": 250.0,
   "i_lut": 250.0
@@ -4584,7 +4584,7 @@
   "part": "CBB014A12FM4",
   "type": "MOSFET with Diode",
   "kind": "switch",
-  "family": "SiC MOSFET",
+  "family": "SiC MOSFET module",
   "v_rating": 1200.0,
   "i_rating": 160.0,
   "i_lut": 160.0
@@ -4611,7 +4611,7 @@
   "part": "CBB030A23FM4",
   "type": "MOSFET with Diode",
   "kind": "switch",
-  "family": "SiC MOSFET",
+  "family": "SiC MOSFET module",
   "v_rating": 2300.0,
   "i_rating": 100.0,
   "i_lut": 100.0
@@ -4665,7 +4665,7 @@
   "part": "CHB7R5A23GM4_M11",
   "type": "MOSFET with Diode",
   "kind": "switch",
-  "family": "SiC MOSFET",
+  "family": "SiC MOSFET module",
   "v_rating": 2300.0,
   "i_rating": 320.0,
   "i_lut": 320.0
@@ -4674,7 +4674,7 @@
   "part": "CHB7R5A23GM4_M13",
   "type": "MOSFET with Diode",
   "kind": "switch",
-  "family": "SiC MOSFET",
+  "family": "SiC MOSFET module",
   "v_rating": 2300.0,
   "i_rating": 250.0,
   "i_lut": 250.0
@@ -4685,7 +4685,7 @@
   "kind": "switch",
   "family": "SiC MOSFET module",
   "v_rating": 1700.0,
-  "i_rating": 1300.0,
+  "i_rating": 650.0,
   "i_lut": 1300.0
  },
  {
@@ -4694,7 +4694,7 @@
   "kind": "switch",
   "family": "SiC MOSFET module",
   "v_rating": 1200.0,
-  "i_rating": 1600.0,
+  "i_rating": 800.0,
   "i_lut": 1600.0
  },
  {
@@ -5351,7 +5351,7 @@
   "kind": "switch",
   "family": "SiC MOSFET module",
   "v_rating": 1200.0,
-  "i_rating": 600.0,
+  "i_rating": 300.0,
   "i_lut": 600.0
  },
  {
@@ -5360,7 +5360,7 @@
   "kind": "switch",
   "family": "SiC MOSFET module",
   "v_rating": 1200.0,
-  "i_rating": 800.0,
+  "i_rating": 400.0,
   "i_lut": 800.0
  }
 ]

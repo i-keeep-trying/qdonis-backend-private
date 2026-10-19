@@ -12,6 +12,7 @@ import { ASSETS_ROOT } from '../../common/assets/assets-root';
 import { parsePyYamlDesign } from '../../topologies/library/pyyaml-schema';
 import { generateAnalysisCirs } from '../netlist/netlist-generator';
 import type { Dict } from '../netlist/py';
+import { sortedSummaryParams } from '../../../test/parity/design-summary';
 import {
   buildChangeList,
   buildQuickParamsLine,
@@ -131,13 +132,17 @@ describe('sizing parity with qdonis-core', () => {
         : [];
       expect(diff(changes, c.changes)).toEqual([]);
       expect(buildQuickParamsLine(c.topology, c.params, changes)).toBe(c.quick);
-      // Which ground member names an auto-grounded net depends on Python's
-      // hash seed for two topologies (see netlist.parity.spec.ts).
+      // Which ground member names an auto-grounded net, and the order of the
+      // design summary's parameters, depend on Python's hash seed (see
+      // netlist.parity.spec.ts).
       const normalize = (decks: Record<string, string>) =>
         Object.fromEntries(
           Object.entries(decks).map(([k, v]) => [
             k,
-            v.replace(/^(\* Auto-grounded net \d+) due to .*$/gm, '$1'),
+            sortedSummaryParams(v).replace(
+              /^(\* Auto-grounded net \d+) due to .*$/gm,
+              '$1',
+            ),
           ]),
         );
       expect(

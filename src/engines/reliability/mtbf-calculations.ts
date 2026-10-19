@@ -897,6 +897,16 @@ export function calculateMTBFComponents(
         ? parseFloat(thermalComp.thermalProperties.ratedVoltage)
         : appliedVoltage * 1.5; // Assume 50% derating if unknown
 
+      // Real current stress when the part's RMS current and rating are known;
+      // otherwise the old placeholder (applied / rated = 2/3, no effect).
+      const rmsCurrent = parseFloat(
+        thermalComp?.thermalProperties.rmsCurrent ?? '',
+      );
+      const ratedCurrent = parseFloat(
+        thermalComp?.thermalProperties.ratedCurrent ?? '',
+      );
+      const currentKnown = rmsCurrent >= 0 && ratedCurrent > 0;
+
       const powerLoss = thermalComp?.thermalProperties.totalLoss
         ? parseFloat(thermalComp.thermalProperties.totalLoss.split(' ')[0])
         : undefined;
@@ -912,8 +922,8 @@ export function calculateMTBFComponents(
         temperature,
         appliedVoltage,
         ratedVoltage,
-        appliedCurrent: defaultCurrent,
-        ratedCurrent: defaultCurrent * 1.5,
+        appliedCurrent: currentKnown ? rmsCurrent : defaultCurrent,
+        ratedCurrent: currentKnown ? ratedCurrent : defaultCurrent * 1.5,
         isSwitching,
         switchingFrequency: isSwitching ? switchingFrequency : undefined,
         environment,

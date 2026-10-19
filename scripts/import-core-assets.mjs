@@ -25,8 +25,8 @@ import {
 import { dirname, join, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const COMMIT = '239d79a29c6fc6e97b2038aded19e5a71dbf1081';
-const BRANCH = 'feature/chat-first';
+const COMMIT = '0054f7202abd61e503dbac26ac676431698e66ea';
+const BRANCH = 'feature/synced-schematic';
 const ROOT = 'qdonis_backend/data';
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const ASSETS = join(REPO_ROOT, 'assets');

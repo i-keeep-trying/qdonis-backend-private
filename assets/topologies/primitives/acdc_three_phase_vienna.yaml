@@ -1,7 +1,7 @@
 id: acdc_three_phase_vienna
 name: Three-Phase Vienna Rectifier
-description: Three-phase Vienna rectifier with fully corrected and filtered control
-  loop
+description: Three-phase Vienna rectifier, 120 Vrms / 50 Hz phase voltage to an 800 V split DC bus, 15 kW,
+  unity power factor (PI voltage loop, per-phase current loop with bus-voltage duty feed-forward)
 components:
 - ref: GND
   type: node
@@ -89,7 +89,7 @@ components:
   type: capacitor
   params:
     capacitance: 0.0022
-    ic: -400
+    ic: 400  # pos = midpoint, neg = -DC rail: +400 puts the rail at -400 V (was -400: bus started at 0 V)
 - ref: R_LOAD
   type: resistor
   params:
@@ -130,134 +130,359 @@ components:
   type: switch
   params:
     model: sw_mod
-- ref: B_VA_grid
-  type: b_source
+
+- ref: n_vref
+  type: node
   params:
-    expression: V(n_A_raw) - V(n_neutral)
-- ref: B_VB_grid
-  type: b_source
+    node_type: "label"
+
+- ref: n_pi_sum
+  type: node
   params:
-    expression: V(n_B_raw) - V(n_neutral)
-- ref: B_VC_grid
-  type: b_source
+    node_type: "label"
+
+- ref: n_tri
+  type: node
   params:
-    expression: V(n_C_raw) - V(n_neutral)
-- ref: B_Iact_A_raw
-  type: b_source
+    node_type: "label"
+
+- ref: v_a_abs
+  type: node
   params:
-    expression: abs(I(V_SENSE_A))
-- ref: R_fA
-  type: resistor
+    node_type: "label"
+
+- ref: n_ff_A
+  type: node
   params:
-    resistance: 10000.0
-- ref: C_fA
-  type: capacitor
+    node_type: "label"
+
+- ref: n_ierr_A
+  type: node
   params:
-    capacitance: 1.0e-07
-- ref: B_Iact_B_raw
-  type: b_source
+    node_type: "label"
+
+- ref: n_dfb_A
+  type: node
   params:
-    expression: abs(I(V_SENSE_B))
-- ref: R_fB
-  type: resistor
+    node_type: "label"
+
+- ref: v_b_abs
+  type: node
   params:
-    resistance: 10000.0
-- ref: C_fB
-  type: capacitor
+    node_type: "label"
+
+- ref: n_ff_B
+  type: node
   params:
-    capacitance: 1.0e-07
-- ref: B_Iact_C_raw
-  type: b_source
+    node_type: "label"
+
+- ref: n_ierr_B
+  type: node
   params:
-    expression: abs(I(V_SENSE_C))
-- ref: R_fC
-  type: resistor
+    node_type: "label"
+
+- ref: n_dfb_B
+  type: node
   params:
-    resistance: 10000.0
-- ref: C_fC
-  type: capacitor
+    node_type: "label"
+
+- ref: v_c_abs
+  type: node
   params:
-    capacitance: 1.0e-07
-- ref: B_VDC_TOTAL
-  type: b_source
+    node_type: "label"
+
+- ref: n_ff_C
+  type: node
   params:
-    expression: V(n_DC_POS) - V(n_DC_NEG)
-- ref: B_VERR
-  type: b_source
+    node_type: "label"
+
+- ref: n_ierr_C
+  type: node
   params:
-    expression: 800 - V(v_dc_tot)
-- ref: B_VP
-  type: b_source
+    node_type: "label"
+
+- ref: n_dfb_C
+  type: node
   params:
-    expression: V(v_err) * 0.1
-- ref: G_VINT
-  type: custom_spice
+    node_type: "label"
+
+# Control (blocks): voltage PI 0.3 * err + 20 * integral, clamped 0..80 = current amplitude (15 kW needs ~62 A);
+# per phase: reference = amplitude * |v_grid| / 170, duty = 1 - |v_grid| / (Vdc / 2) + 0.01 * current error, clamped
+# 0.02..0.98, PWM against a 0..1 V 20 kHz triangle (smooth 20 V switch drive). Sensed currents |i| through a 20 us
+# filter (switching ripple only).
+# Until 2026-10-11: ki 0.05 (effectively P-only), clamp 50 A, a fixed 400 V half-bus in the feed-forward and a 1 ms
+# current filter (18 deg lag at 50 Hz): the bus settled at 617 V.
+- ref: SUM_VDC
+  type: sum
+  role: dc_bus_voltage_sense
   params:
-    spice_line: G_VINT 0 v_int v_err 0 0.05
-- ref: C_VINT
-  type: capacitor
+    signs: "+-"
+
+- ref: REF_V
+  type: const
+  role: voltage_reference
   params:
-    capacitance: 1
-- ref: R_VINT
-  type: resistor
+    value: 800
+
+- ref: SUM_V
+  type: sum
+  role: voltage_error
   params:
-    resistance: 100000000.0
-- ref: B_IMAG
-  type: b_source
+    signs: "+-"
+
+- ref: KP_V
+  type: gain
+  role: voltage_p
   params:
-    expression: max(0, min(50, V(v_p) + V(v_int)))
-- ref: B_Iref_A
-  type: b_source
+    gain: 0.3
+
+- ref: INT_V
+  type: integrator
+  role: voltage_i
   params:
-    expression: V(i_mag) * abs(V(v_a_grid)) / 170.0
-- ref: B_Iref_B
-  type: b_source
+    ki: 20
+    ic: 62  # steady-state current amplitude at 15 kW
+    lower: 0
+    upper: 80
+
+- ref: SUM_PI
+  type: sum
+  role: voltage_pi_sum
   params:
-    expression: V(i_mag) * abs(V(v_b_grid)) / 170.0
-- ref: B_Iref_C
-  type: b_source
+    signs: "++"
+
+- ref: LIM_PI
+  type: limiter
+  role: current_amplitude_clamp
   params:
-    expression: V(i_mag) * abs(V(v_c_grid)) / 170.0
-- ref: B_Duty_A
-  type: b_source
+    lower: 0
+    upper: 80
+
+- ref: CAR
+  type: carrier
+  role: pwm_carrier
   params:
-    expression: 1 - (abs(V(v_a_grid))/400) + 0.01*(V(i_ref_A) - V(i_act_A))
-- ref: B_Duty_B
-  type: b_source
+    frequency: 20000.0
+    low: 0
+    high: 1
+    shape: "triangle"
+
+- ref: SUM_VA
+  type: sum
+  role: phase_a_voltage_sense
   params:
-    expression: 1 - (abs(V(v_b_grid))/400) + 0.01*(V(i_ref_B) - V(i_act_B))
-- ref: B_Duty_C
-  type: b_source
+    signs: "+-"
+
+- ref: ABS_A
+  type: function
+  role: phase_a_rectified_voltage
   params:
-    expression: 1 - (abs(V(v_c_grid))/400) + 0.01*(V(i_ref_C) - V(i_act_C))
-- ref: B_Clamp_A
-  type: b_source
+    expression: "abs(in1)"
+    inputs: 1
+
+- ref: I_SENSE_A
+  type: function
+  role: phase_a_current_sense
   params:
-    expression: max(0.02, min(0.98, V(n_duty_A)))
-- ref: B_Clamp_B
-  type: b_source
+    expression: "abs(I(V_SENSE_A))"
+    inputs: 0
+
+- ref: LPF_IA
+  type: lowpass
+  role: phase_a_current_filter
   params:
-    expression: max(0.02, min(0.98, V(n_duty_B)))
-- ref: B_Clamp_C
-  type: b_source
+    tau: 2.0e-05
+
+- ref: REF_A
+  type: product
+  role: phase_a_current_reference
   params:
-    expression: max(0.02, min(0.98, V(n_duty_C)))
-- ref: V_TRI
-  type: custom_spice
+    gain: "1/170.0"
+
+- ref: FF_A
+  type: function
+  role: phase_a_duty_feedforward
   params:
-    spice_line: V_TRI n_tri 0 PULSE(0 1 0 25u 25u 0 50u)
-- ref: B_PWM_A
-  type: b_source
+    expression: "1-2*in1/max(in2,100)"
+    inputs: 2
+
+- ref: SUM_IA
+  type: sum
+  role: phase_a_current_error
   params:
-    expression: 10 * (1 + tanh((V(n_d_A) - V(n_tri))*1000))
-- ref: B_PWM_B
-  type: b_source
+    signs: "+-"
+
+- ref: KP_IA
+  type: gain
+  role: phase_a_current_p
   params:
-    expression: 10 * (1 + tanh((V(n_d_B) - V(n_tri))*1000))
-- ref: B_PWM_C
-  type: b_source
+    gain: 0.01
+
+- ref: SUM_DA
+  type: sum
+  role: phase_a_duty
   params:
-    expression: 10 * (1 + tanh((V(n_d_C) - V(n_tri))*1000))
+    signs: "++"
+
+- ref: LIM_DA
+  type: limiter
+  role: phase_a_duty_clamp
+  params:
+    lower: 0.02
+    upper: 0.98
+
+- ref: CMP_A
+  type: comparator
+  role: phase_a_pwm
+  params:
+    high: 20
+    low: 0
+    width: 0.001
+
+- ref: SUM_VB
+  type: sum
+  role: phase_b_voltage_sense
+  params:
+    signs: "+-"
+
+- ref: ABS_B
+  type: function
+  role: phase_b_rectified_voltage
+  params:
+    expression: "abs(in1)"
+    inputs: 1
+
+- ref: I_SENSE_B
+  type: function
+  role: phase_b_current_sense
+  params:
+    expression: "abs(I(V_SENSE_B))"
+    inputs: 0
+
+- ref: LPF_IB
+  type: lowpass
+  role: phase_b_current_filter
+  params:
+    tau: 2.0e-05
+
+- ref: REF_B
+  type: product
+  role: phase_b_current_reference
+  params:
+    gain: "1/170.0"
+
+- ref: FF_B
+  type: function
+  role: phase_b_duty_feedforward
+  params:
+    expression: "1-2*in1/max(in2,100)"
+    inputs: 2
+
+- ref: SUM_IB
+  type: sum
+  role: phase_b_current_error
+  params:
+    signs: "+-"
+
+- ref: KP_IB
+  type: gain
+  role: phase_b_current_p
+  params:
+    gain: 0.01
+
+- ref: SUM_DB
+  type: sum
+  role: phase_b_duty
+  params:
+    signs: "++"
+
+- ref: LIM_DB
+  type: limiter
+  role: phase_b_duty_clamp
+  params:
+    lower: 0.02
+    upper: 0.98
+
+- ref: CMP_B
+  type: comparator
+  role: phase_b_pwm
+  params:
+    high: 20
+    low: 0
+    width: 0.001
+
+- ref: SUM_VC
+  type: sum
+  role: phase_c_voltage_sense
+  params:
+    signs: "+-"
+
+- ref: ABS_C
+  type: function
+  role: phase_c_rectified_voltage
+  params:
+    expression: "abs(in1)"
+    inputs: 1
+
+- ref: I_SENSE_C
+  type: function
+  role: phase_c_current_sense
+  params:
+    expression: "abs(I(V_SENSE_C))"
+    inputs: 0
+
+- ref: LPF_IC
+  type: lowpass
+  role: phase_c_current_filter
+  params:
+    tau: 2.0e-05
+
+- ref: REF_C
+  type: product
+  role: phase_c_current_reference
+  params:
+    gain: "1/170.0"
+
+- ref: FF_C
+  type: function
+  role: phase_c_duty_feedforward
+  params:
+    expression: "1-2*in1/max(in2,100)"
+    inputs: 2
+
+- ref: SUM_IC
+  type: sum
+  role: phase_c_current_error
+  params:
+    signs: "+-"
+
+- ref: KP_IC
+  type: gain
+  role: phase_c_current_p
+  params:
+    gain: 0.01
+
+- ref: SUM_DC
+  type: sum
+  role: phase_c_duty
+  params:
+    signs: "++"
+
+- ref: LIM_DC
+  type: limiter
+  role: phase_c_duty_clamp
+  params:
+    lower: 0.02
+    upper: 0.98
+
+- ref: CMP_C
+  type: comparator
+  role: phase_c_pwm
+  params:
+    high: 20
+    low: 0
+    width: 0.001
+
 nets:
 - - - GND
     - pin
@@ -267,60 +492,6 @@ nets:
     - neg
   - - C_DC_BOT
     - pos
-  - - B_VA_grid
-    - '-'
-  - - B_VB_grid
-    - '-'
-  - - B_VC_grid
-    - '-'
-  - - B_Iact_A_raw
-    - '-'
-  - - C_fA
-    - neg
-  - - B_Iact_B_raw
-    - '-'
-  - - C_fB
-    - neg
-  - - B_Iact_C_raw
-    - '-'
-  - - C_fC
-    - neg
-  - - B_VDC_TOTAL
-    - '-'
-  - - B_VERR
-    - '-'
-  - - B_VP
-    - '-'
-  - - C_VINT
-    - neg
-  - - R_VINT
-    - neg
-  - - B_IMAG
-    - '-'
-  - - B_Iref_A
-    - '-'
-  - - B_Iref_B
-    - '-'
-  - - B_Iref_C
-    - '-'
-  - - B_Duty_A
-    - '-'
-  - - B_Duty_B
-    - '-'
-  - - B_Duty_C
-    - '-'
-  - - B_Clamp_A
-    - '-'
-  - - B_Clamp_B
-    - '-'
-  - - B_Clamp_C
-    - '-'
-  - - B_PWM_A
-    - '-'
-  - - B_PWM_B
-    - '-'
-  - - B_PWM_C
-    - '-'
   - - S_A
     - neg
   - - S_B
@@ -339,18 +510,24 @@ nets:
     - plus
   - - R_grid_A
     - pos
+  - - SUM_VA
+    - in1
 - - - n_B_raw
     - NET
   - - V_AC_B
     - plus
   - - R_grid_B
     - pos
+  - - SUM_VB
+    - in1
 - - - n_C_raw
     - NET
   - - V_AC_C
     - plus
   - - R_grid_C
     - pos
+  - - SUM_VC
+    - in1
 - - - n_neutral
     - NET
   - - V_AC_A
@@ -361,6 +538,12 @@ nets:
     - minus
   - - R_neutral
     - pos
+  - - SUM_VA
+    - in2
+  - - SUM_VB
+    - in2
+  - - SUM_VC
+    - in2
 - - - R_grid_A
     - neg
   - - V_SENSE_A
@@ -420,6 +603,8 @@ nets:
   - - R_LOAD
     - pos
   - n_DC_POS
+  - - SUM_VDC
+    - in1
 - - - D_A_BOT
     - anode
   - - D_B_BOT
@@ -431,104 +616,266 @@ nets:
   - - R_LOAD
     - neg
   - n_DC_NEG
-- - - B_VA_grid
-    - +
+  - - SUM_VDC
+    - in2
+- - - SUM_VA
+    - out
   - v_a_grid
-- - - B_VB_grid
-    - +
+  - - ABS_A
+    - in1
+- - - SUM_VB
+    - out
   - v_b_grid
-- - - B_VC_grid
-    - +
+  - - ABS_B
+    - in1
+- - - SUM_VC
+    - out
   - v_c_grid
-- - - B_Iact_A_raw
-    - +
-  - - R_fA
-    - pos
-- - - R_fA
-    - neg
-  - - C_fA
-    - pos
+  - - ABS_C
+    - in1
+- - - I_SENSE_A
+    - out
+  - - LPF_IA
+    - in
+- - - LPF_IA
+    - out
   - i_act_A
-- - - B_Iact_B_raw
-    - +
-  - - R_fB
-    - pos
-- - - R_fB
-    - neg
-  - - C_fB
-    - pos
+  - - SUM_IA
+    - in2
+- - - I_SENSE_B
+    - out
+  - - LPF_IB
+    - in
+- - - LPF_IB
+    - out
   - i_act_B
-- - - B_Iact_C_raw
-    - +
-  - - R_fC
-    - pos
-- - - R_fC
-    - neg
-  - - C_fC
-    - pos
+  - - SUM_IB
+    - in2
+- - - I_SENSE_C
+    - out
+  - - LPF_IC
+    - in
+- - - LPF_IC
+    - out
   - i_act_C
-- - - B_VDC_TOTAL
-    - +
+  - - SUM_IC
+    - in2
+- - - SUM_VDC
+    - out
   - v_dc_tot
-- - - B_VERR
-    - +
+  - - SUM_V
+    - in2
+  - - FF_A
+    - in2
+  - - FF_B
+    - in2
+  - - FF_C
+    - in2
+- - - SUM_V
+    - out
   - v_err
-- - - B_VP
-    - +
+  - - KP_V
+    - in
+  - - INT_V
+    - in
+- - - KP_V
+    - out
   - v_p
-- - - C_VINT
-    - pos
-  - - R_VINT
-    - pos
+  - - SUM_PI
+    - in1
+- - - INT_V
+    - out
   - v_int
-- - - B_IMAG
-    - +
+  - - SUM_PI
+    - in2
+- - - LIM_PI
+    - out
   - i_mag
-- - - B_Iref_A
-    - +
+  - - REF_A
+    - in1
+  - - REF_B
+    - in1
+  - - REF_C
+    - in1
+- - - REF_A
+    - out
   - i_ref_A
-- - - B_Iref_B
-    - +
+  - - SUM_IA
+    - in1
+- - - REF_B
+    - out
   - i_ref_B
-- - - B_Iref_C
-    - +
+  - - SUM_IB
+    - in1
+- - - REF_C
+    - out
   - i_ref_C
-- - - B_Duty_A
-    - +
+  - - SUM_IC
+    - in1
+- - - SUM_DA
+    - out
   - n_duty_A
-- - - B_Duty_B
-    - +
+  - - LIM_DA
+    - in
+- - - SUM_DB
+    - out
   - n_duty_B
-- - - B_Duty_C
-    - +
+  - - LIM_DB
+    - in
+- - - SUM_DC
+    - out
   - n_duty_C
-- - - B_Clamp_A
-    - +
+  - - LIM_DC
+    - in
+- - - LIM_DA
+    - out
   - n_d_A
-- - - B_Clamp_B
-    - +
+  - - CMP_A
+    - inp
+- - - LIM_DB
+    - out
   - n_d_B
-- - - B_Clamp_C
-    - +
+  - - CMP_B
+    - inp
+- - - LIM_DC
+    - out
   - n_d_C
-- - - B_PWM_A
-    - +
-- - - B_PWM_B
-    - +
-- - - B_PWM_C
-    - +
-- - - B_PWM_A
-    - +
+  - - CMP_C
+    - inp
+- - - CMP_A
+    - out
+- - - CMP_B
+    - out
+- - - CMP_C
+    - out
+- - - CMP_A
+    - out
   - - S_A
     - ctrl+
-- - - B_PWM_B
-    - +
+- - - CMP_B
+    - out
   - - S_B
     - ctrl+
-- - - B_PWM_C
-    - +
+- - - CMP_C
+    - out
   - - S_C
     - ctrl+
+
+- - - n_vref
+    - pin
+  - - REF_V
+    - out
+  - - SUM_V
+    - in1
+
+- - - n_pi_sum
+    - pin
+  - - SUM_PI
+    - out
+  - - LIM_PI
+    - in
+
+# PWM carrier (0..1 V, 20 kHz triangle)
+- - - n_tri
+    - pin
+  - - CAR
+    - out
+  - - CMP_A
+    - inn
+  - - CMP_B
+    - inn
+  - - CMP_C
+    - inn
+
+- - - v_a_abs
+    - pin
+  - - ABS_A
+    - out
+  - - REF_A
+    - in2
+  - - FF_A
+    - in1
+
+- - - n_ff_A
+    - pin
+  - - FF_A
+    - out
+  - - SUM_DA
+    - in1
+
+- - - n_ierr_A
+    - pin
+  - - SUM_IA
+    - out
+  - - KP_IA
+    - in
+
+- - - n_dfb_A
+    - pin
+  - - KP_IA
+    - out
+  - - SUM_DA
+    - in2
+
+- - - v_b_abs
+    - pin
+  - - ABS_B
+    - out
+  - - REF_B
+    - in2
+  - - FF_B
+    - in1
+
+- - - n_ff_B
+    - pin
+  - - FF_B
+    - out
+  - - SUM_DB
+    - in1
+
+- - - n_ierr_B
+    - pin
+  - - SUM_IB
+    - out
+  - - KP_IB
+    - in
+
+- - - n_dfb_B
+    - pin
+  - - KP_IB
+    - out
+  - - SUM_DB
+    - in2
+
+- - - v_c_abs
+    - pin
+  - - ABS_C
+    - out
+  - - REF_C
+    - in2
+  - - FF_C
+    - in1
+
+- - - n_ff_C
+    - pin
+  - - FF_C
+    - out
+  - - SUM_DC
+    - in1
+
+- - - n_ierr_C
+    - pin
+  - - SUM_IC
+    - out
+  - - KP_IC
+    - in
+
+- - - n_dfb_C
+    - pin
+  - - KP_IC
+    - out
+  - - SUM_DC
+    - in2
 analysis:
   transient:
     spice_settings:
@@ -544,6 +891,16 @@ analysis:
     requirements:
     - rid: tr_vienna_rectifier
       requirement: Verify Vienna Rectifier active current shaping and output voltage.
+      criteria:
+        target_vout: 800.0
+      # A 0.2 us maximum step is needed for a correct energy balance: at 1 us (the default here) the ideal switches
+      # gain or lose up to 15 % of the power numerically (efficiency read 87 %, or 115 % without the diode Cjo);
+      # 0.2 us and 0.1 us agree to 0.01 V and give 97.4 %.
+      environment:
+      - ref: time_domain
+        t_step: 4.0e-07
+        t_stop: 0.06
+        t_max_step: 2.0e-07
       measurement:
       - ref: VOUT_TOT
         plot:
@@ -578,3 +935,398 @@ metadata:
 models:
 - .model D_SiC D(Is=1e-12 Rs=0.01 N=1.2 Cjo=150p tt=5n)
 - .model sw_mod SW(Ron=0.02 Roff=1Meg Vt=5 Vh=1)
+schematic:
+  tuned: false
+  components:
+    "#modulator": {x: -180, y: 2200, rotation: 0}
+    "#phase_a_control": {x: 400, y: 1320, rotation: 0}
+    "#phase_b_control": {x: 400, y: 1580, rotation: 0}
+    "#phase_c_control": {x: 400, y: 1840, rotation: 0}
+    "#spice_directives": {x: -160, y: 1280, rotation: 0}
+    "#voltage_loop": {x: -160, y: 1520, rotation: 0}
+    ABS_A: {x: 440, y: 140, rotation: 0}
+    ABS_B: {x: 440, y: 140, rotation: 0}
+    ABS_C: {x: 440, y: 140, rotation: 0}
+    B_Clamp_A: {x: 1100, y: 240, rotation: 0}
+    B_Clamp_B: {x: 1100, y: 240, rotation: 0}
+    B_Clamp_C: {x: 1100, y: 240, rotation: 0}
+    B_Duty_A: {x: 880, y: 240, rotation: 0}
+    B_Duty_B: {x: 880, y: 240, rotation: 0}
+    B_Duty_C: {x: 880, y: 240, rotation: 0}
+    B_IMAG: {x: 80, y: 200, rotation: 0}
+    B_Iact_A_raw: {x: 440, y: 240, rotation: 0}
+    B_Iact_B_raw: {x: 440, y: 240, rotation: 0}
+    B_Iact_C_raw: {x: 440, y: 240, rotation: 0}
+    B_Iref_A: {x: 660, y: 240, rotation: 0}
+    B_Iref_B: {x: 660, y: 240, rotation: 0}
+    B_Iref_C: {x: 660, y: 240, rotation: 0}
+    B_PWM_A: {x: 880, y: 100, rotation: 0}
+    B_PWM_B: {x: 1360, y: 400, rotation: 0}
+    B_PWM_C: {x: 1840, y: 700, rotation: 0}
+    B_VA_grid: {x: 220, y: 240, rotation: 0}
+    B_VB_grid: {x: 220, y: 240, rotation: 0}
+    B_VC_grid: {x: 220, y: 240, rotation: 0}
+    B_VDC_TOTAL: {x: 300, y: 200, rotation: 0}
+    B_VERR: {x: 520, y: 200, rotation: 0}
+    B_VP: {x: 700, y: 200, rotation: 0}
+    CAR: {x: 260, y: 140, rotation: 0}
+    CMP_A: {x: 440, y: 200, rotation: 0}
+    CMP_B: {x: 340, y: 320, rotation: 0}
+    CMP_C: {x: 160, y: 320, rotation: 0}
+    C_DC_BOT: {x: 1960, y: 440, rotation: 0}
+    C_DC_TOP: {x: 1960, y: 160, rotation: 0}
+    C_VINT: {x: 200, y: 1000, rotation: 0}
+    C_fA: {x: 40, y: 240, rotation: 0}
+    C_fB: {x: 40, y: 240, rotation: 0}
+    C_fC: {x: 40, y: 240, rotation: 0}
+    D_A_BOT: {x: 700, y: 720, rotation: 180}
+    D_A_TOP: {x: 700, y: -120, rotation: 180}
+    D_B_BOT: {x: 1180, y: 720, rotation: 180}
+    D_B_TOP: {x: 1180, y: -120, rotation: 180}
+    D_C_BOT: {x: 1660, y: 720, rotation: 180}
+    D_C_TOP: {x: 1660, y: -120, rotation: 180}
+    FF_A: {x: 520, y: 320, rotation: 0}
+    FF_B: {x: 520, y: 320, rotation: 0}
+    FF_C: {x: 520, y: 320, rotation: 0}
+    GND: {x: 1960, y: 280, rotation: 0}
+    G_VINT: {x: 140, y: 20, rotation: 0}
+    INT_V: {x: 560, y: 200, rotation: 0}
+    I_SENSE_A: {x: 220, y: 660, rotation: 0}
+    I_SENSE_B: {x: 220, y: 660, rotation: 0}
+    I_SENSE_C: {x: 220, y: 660, rotation: 0}
+    KP_IA: {x: 520, y: 540, rotation: 0}
+    KP_IB: {x: 520, y: 540, rotation: 0}
+    KP_IC: {x: 520, y: 540, rotation: 0}
+    KP_V: {x: 620, y: 320, rotation: 0}
+    LIM_DA: {x: 880, y: 520, rotation: 0}
+    LIM_DB: {x: 880, y: 520, rotation: 0}
+    LIM_DC: {x: 880, y: 520, rotation: 0}
+    LIM_PI: {x: 900, y: 100, rotation: 0}
+    LPF_IA: {x: 440, y: 660, rotation: 0}
+    LPF_IB: {x: 440, y: 660, rotation: 0}
+    LPF_IC: {x: 440, y: 660, rotation: 0}
+    L_A: {x: 400, y: 0, rotation: 270}
+    L_B: {x: 400, y: 300, rotation: 270}
+    L_C: {x: 400, y: 600, rotation: 270}
+    REF_A: {x: 620, y: 200, rotation: 0}
+    REF_B: {x: 620, y: 200, rotation: 0}
+    REF_C: {x: 620, y: 200, rotation: 0}
+    REF_V: {x: 380, y: 140, rotation: 0}
+    R_LOAD: {x: 2100, y: 300, rotation: 0}
+    R_VINT: {x: 300, y: 1000, rotation: 0}
+    R_fA: {x: 240, y: 100, rotation: 90}
+    R_fB: {x: 240, y: 100, rotation: 90}
+    R_fC: {x: 240, y: 100, rotation: 90}
+    R_grid_A: {x: 140, y: 0, rotation: 270}
+    R_grid_B: {x: 140, y: 300, rotation: 270}
+    R_grid_C: {x: 140, y: 600, rotation: 270}
+    R_neutral: {x: -120, y: 760, rotation: 0}
+    SUM_DA: {x: 700, y: 440, rotation: 0}
+    SUM_DB: {x: 700, y: 440, rotation: 0}
+    SUM_DC: {x: 700, y: 440, rotation: 0}
+    SUM_IA: {x: 700, y: 560, rotation: 0}
+    SUM_IB: {x: 700, y: 560, rotation: 0}
+    SUM_IC: {x: 700, y: 560, rotation: 0}
+    SUM_PI: {x: 720, y: 180, rotation: 0}
+    SUM_V: {x: 440, y: 320, rotation: 0}
+    SUM_VA: {x: 260, y: 140, rotation: 0}
+    SUM_VB: {x: 260, y: 140, rotation: 0}
+    SUM_VC: {x: 260, y: 140, rotation: 0}
+    SUM_VDC: {x: 260, y: 340, rotation: 0}
+    S_A: {x: 760, y: 100, rotation: 0, mirrorX: true}
+    S_B: {x: 1240, y: 400, rotation: 0, mirrorX: true}
+    S_C: {x: 1720, y: 700, rotation: 0, mirrorX: true}
+    V_AC_A: {x: 0, y: 0, rotation: 90}
+    V_AC_B: {x: 0, y: 300, rotation: 90}
+    V_AC_C: {x: 0, y: 600, rotation: 90}
+    V_SENSE_A: {x: 260, y: 0, rotation: 270}
+    V_SENSE_B: {x: 260, y: 300, rotation: 270}
+    V_SENSE_C: {x: 260, y: 600, rotation: 270}
+    V_TRI: {x: 480, y: 20, rotation: 0}
+    "^modulator:n39": {x: 620, y: 200, rotation: 0}
+    "^modulator:n40": {x: 520, y: 320, rotation: 0}
+    "^modulator:n41": {x: 100, y: 480, rotation: 0}
+    "^modulator:n_d_A": {x: 420, y: 20, rotation: 0}
+    "^modulator:n_d_B": {x: 280, y: 480, rotation: 0}
+    "^modulator:n_d_C": {x: 100, y: 140, rotation: 0}
+    "^phase_a_control:i_mag": {x: 600, y: 20, rotation: 0}
+    "^phase_a_control:n_A_raw": {x: 80, y: 120, rotation: 0}
+    "^phase_a_control:n_d_A": {x: 980, y: 440, rotation: 0}
+    "^phase_a_control:n_neutral": {x: 160, y: 240, rotation: 0}
+    "^phase_b_control:i_mag": {x: 600, y: 100, rotation: 0}
+    "^phase_b_control:n_B_raw": {x: 80, y: 120, rotation: 0}
+    "^phase_b_control:n_d_B": {x: 980, y: 440, rotation: 0}
+    "^phase_b_control:n_neutral": {x: 160, y: 240, rotation: 0}
+    "^phase_c_control:i_mag": {x: 600, y: 100, rotation: 0}
+    "^phase_c_control:n_C_raw": {x: 80, y: 120, rotation: 0}
+    "^phase_c_control:n_d_C": {x: 980, y: 440, rotation: 0}
+    "^phase_c_control:n_neutral": {x: 160, y: 240, rotation: 0}
+    "^voltage_loop:i_mag": {x: 1000, y: 20, rotation: 0}
+    "^voltage_loop:n_DC_NEG": {x: 80, y: 360, rotation: 0}
+    "^voltage_loop:n_DC_POS": {x: 160, y: 240, rotation: 0}
+    "^voltage_loop:v_int": {x: -120, y: 180, rotation: 0}
+    i_act_A: {x: 580, y: 740, rotation: 0}
+    i_act_B: {x: 580, y: 740, rotation: 0}
+    i_act_C: {x: 580, y: 740, rotation: 0}
+    i_mag: {x: 600, y: 100, rotation: 180}
+    i_ref_A: {x: 820, y: 360, rotation: 270}
+    i_ref_B: {x: 820, y: 360, rotation: 270}
+    i_ref_C: {x: 820, y: 360, rotation: 270}
+    n_A_raw.NET: {x: 200, y: 1320, rotation: 180}
+    n_B_raw.NET: {x: 200, y: 1580, rotation: 180}
+    n_C_raw.NET: {x: 200, y: 1840, rotation: 180}
+    n_DC_NEG: {x: 1960, y: 580, rotation: 90}
+    n_DC_POS: {x: 1960, y: 20, rotation: 270}
+    n_d_A: {x: 420, y: 100, rotation: 180}
+    n_d_B: {x: 240, y: 420, rotation: 180}
+    n_d_C: {x: 60, y: 220, rotation: 180}
+    n_dfb_A: {x: 520, y: 460, rotation: 180}
+    n_dfb_B: {x: 520, y: 460, rotation: 180}
+    n_dfb_C: {x: 520, y: 460, rotation: 180}
+    n_duty_A: {x: 900, y: 600, rotation: 180}
+    n_duty_B: {x: 900, y: 600, rotation: 180}
+    n_duty_C: {x: 900, y: 600, rotation: 180}
+    n_ff_A: {x: 700, y: 320, rotation: 180}
+    n_ff_B: {x: 700, y: 320, rotation: 180}
+    n_ff_C: {x: 700, y: 320, rotation: 180}
+    n_ierr_A: {x: 620, y: 680, rotation: 0}
+    n_ierr_B: {x: 620, y: 680, rotation: 0}
+    n_ierr_C: {x: 620, y: 680, rotation: 0}
+    n_neutral.NET: {x: -160, y: 0, rotation: 180}
+    n_pi_sum: {x: 900, y: 180, rotation: 180}
+    n_tri: {x: 260, y: 220, rotation: 180}
+    n_vref: {x: 340, y: 220, rotation: 180}
+    v_a_abs: {x: 440, y: 220, rotation: 180}
+    v_a_grid: {x: 340, y: 20, rotation: 180}
+    v_b_abs: {x: 440, y: 220, rotation: 180}
+    v_b_grid: {x: 340, y: 20, rotation: 180}
+    v_c_abs: {x: 440, y: 220, rotation: 180}
+    v_c_grid: {x: 340, y: 20, rotation: 180}
+    v_dc_tot: {x: 440, y: 420, rotation: 0}
+    v_err: {x: 620, y: 400, rotation: 180}
+    v_int: {x: 560, y: 120, rotation: 180}
+    v_p: {x: 760, y: 280, rotation: 0}
+    "~CMP_A.out@#modulator.CMP_A_out": {x: 20, y: 2160, rotation: 0}
+    "~CMP_A.out@S_A.CP": {x: 920, y: 80, rotation: 0}
+    "~CMP_B.out@#modulator.CMP_B_out": {x: 20, y: 2200, rotation: 0}
+    "~CMP_B.out@S_B.CP": {x: 1400, y: 380, rotation: 0}
+    "~CMP_C.out@#modulator.CMP_C_out": {x: 20, y: 2240, rotation: 0}
+    "~CMP_C.out@S_C.CP": {x: 1880, y: 700, rotation: 0}
+    "~D_C_BOT.cathode@D_C_BOT.B": {x: 1580, y: 620, rotation: 270}
+    "~D_C_BOT.cathode@L_C.B": {x: 520, y: 520, rotation: 0}
+    "~GND@B_Clamp_A.B": {x: 1100, y: 360, rotation: 0}
+    "~GND@B_Clamp_B.B": {x: 1100, y: 360, rotation: 0}
+    "~GND@B_Clamp_C.B": {x: 1100, y: 360, rotation: 0}
+    "~GND@B_IMAG.B": {x: 80, y: 380, rotation: 0}
+    "~GND@B_PWM_A.B": {x: 880, y: 220, rotation: 0}
+    "~GND@B_PWM_B.B": {x: 1360, y: 520, rotation: 0}
+    "~GND@B_PWM_C.B": {x: 1840, y: 820, rotation: 0}
+    "~GND@C_VINT.B": {x: 200, y: 1120, rotation: 0}
+    "~GND@R_neutral.B": {x: -120, y: 880, rotation: 0}
+    "~GND@S_A.B": {x: 760, y: 220, rotation: 0}
+    "~GND@S_B.B": {x: 1240, y: 520, rotation: 0}
+    "~GND@S_C.B": {x: 1720, y: 820, rotation: 0}
+    "~i_mag@#phase_a_control.i_mag": {x: 220, y: 1280, rotation: 180}
+    "~i_mag@#phase_b_control.i_mag": {x: 220, y: 1540, rotation: 180}
+    "~i_mag@#phase_c_control.i_mag": {x: 220, y: 1800, rotation: 180}
+    "~n_A_raw@R_grid_A.A": {x: 20, y: -100, rotation: 180}
+    "~n_A_raw@V_AC_A.A": {x: 140, y: 80, rotation: 0}
+    "~n_B_raw@R_grid_B.A": {x: 20, y: 200, rotation: 180}
+    "~n_B_raw@V_AC_B.A": {x: 140, y: 380, rotation: 0}
+    "~n_C_raw@R_grid_C.A": {x: 20, y: 500, rotation: 180}
+    "~n_C_raw@V_AC_C.A": {x: 140, y: 680, rotation: 0}
+    "~n_DC_NEG@#voltage_loop.n_DC_NEG": {x: -360, y: 1500, rotation: 180}
+    "~n_DC_POS@#voltage_loop.n_DC_POS": {x: -360, y: 1540, rotation: 180}
+    "~n_d_A@#modulator.n_d_A": {x: -360, y: 2160, rotation: 180}
+    "~n_d_A@#phase_a_control.n_d_A": {x: 580, y: 1320, rotation: 0}
+    "~n_d_B@#modulator.n_d_B": {x: -360, y: 2200, rotation: 180}
+    "~n_d_B@#phase_b_control.n_d_B": {x: 580, y: 1580, rotation: 0}
+    "~n_d_C@#modulator.n_d_C": {x: -360, y: 2240, rotation: 180}
+    "~n_d_C@#phase_c_control.n_d_C": {x: 580, y: 1840, rotation: 0}
+    "~n_neutral@#phase_a_control.n_neutral": {x: 200, y: 1360, rotation: 180}
+    "~n_neutral@#phase_b_control.n_neutral": {x: 200, y: 1620, rotation: 180}
+    "~n_neutral@#phase_c_control.n_neutral": {x: 200, y: 1880, rotation: 180}
+    "~v_int@#voltage_loop.v_int": {x: -340, y: 1560, rotation: 180}
+  wires:
+  - {id: W1, from: C_DC_TOP.B, to: GND.P}
+  - {id: W2, from: S_A.B, to: S_A.CN}
+  - {id: W3, from: S_B.B, to: S_B.CN}
+  - {id: W4, from: S_C.B, to: S_C.CN}
+  - {id: W5, from: C_DC_BOT.A, to: GND.P}
+  - {id: W6, from: R_neutral.B, to: "~GND@R_neutral.B.P"}
+  - {id: W7, from: S_A.B, to: "~GND@S_A.B.P"}
+  - {id: W8, from: S_B.B, to: "~GND@S_B.B.P"}
+  - {id: W9, from: S_C.B, to: "~GND@S_C.B.P"}
+  - {id: W10, from: "#phase_b_control.i_mag", to: "#voltage_loop.i_mag"}
+  - {id: W11, from: "#phase_a_control.i_mag", to: "~i_mag@#phase_a_control.i_mag.P"}
+  - {id: W12, from: "#phase_c_control.i_mag", to: "~i_mag@#phase_c_control.i_mag.P"}
+  - {id: W13, from: "#phase_b_control.i_mag", to: "~i_mag@#phase_b_control.i_mag.P"}
+  - {id: W14, from: L_C.A, to: V_SENSE_C.B}
+  - {id: W15, from: D_A_TOP.A, to: S_A.A}
+  - {id: W16, from: D_A_TOP.A, to: L_A.B}
+  - {id: W17, from: D_A_BOT.B, to: S_A.A}
+  - {id: W18, from: D_B_BOT.B, to: S_B.A}
+  - {id: W19, from: D_B_TOP.A, to: S_B.A}
+  - {id: W20, from: L_B.B, to: S_B.A}
+  - {id: W21, from: D_C_BOT.B, to: S_C.A}
+  - {id: W22, from: D_C_BOT.B, to: D_C_TOP.A}
+  - {id: W23, from: D_C_BOT.B, to: "~D_C_BOT.cathode@D_C_BOT.B.P"}
+  - {id: W24, from: L_C.B, to: "~D_C_BOT.cathode@L_C.B.P"}
+  - {id: W25, from: "#modulator.CMP_A_out", to: "~CMP_A.out@#modulator.CMP_A_out.P"}
+  - {id: W26, from: S_A.CP, to: "~CMP_A.out@S_A.CP.P"}
+  - {id: W27, from: "#modulator.CMP_B_out", to: "~CMP_B.out@#modulator.CMP_B_out.P"}
+  - {id: W28, from: S_B.CP, to: "~CMP_B.out@S_B.CP.P"}
+  - {id: W29, from: "#modulator.CMP_C_out", to: "~CMP_C.out@#modulator.CMP_C_out.P"}
+  - {id: W30, from: S_C.CP, to: "~CMP_C.out@S_C.CP.P"}
+  - {id: W31, from: R_grid_A.B, to: V_SENSE_A.A}
+  - {id: W32, from: R_grid_B.B, to: V_SENSE_B.A}
+  - {id: W33, from: R_grid_C.B, to: V_SENSE_C.A}
+  - {id: W34, from: L_A.A, to: V_SENSE_A.B}
+  - {id: W35, from: L_B.A, to: V_SENSE_B.B}
+  - {id: W36, from: "#phase_a_control.n_A_raw", to: n_A_raw.NET.P}
+  - {id: W37, from: R_grid_A.A, to: "~n_A_raw@R_grid_A.A.P"}
+  - {id: W38, from: V_AC_A.A, to: "~n_A_raw@V_AC_A.A.P"}
+  - {id: W39, from: "#phase_b_control.n_B_raw", to: n_B_raw.NET.P}
+  - {id: W40, from: R_grid_B.A, to: "~n_B_raw@R_grid_B.A.P"}
+  - {id: W41, from: V_AC_B.A, to: "~n_B_raw@V_AC_B.A.P"}
+  - {id: W42, from: "#phase_c_control.n_C_raw", to: n_C_raw.NET.P}
+  - {id: W43, from: R_grid_C.A, to: "~n_C_raw@R_grid_C.A.P"}
+  - {id: W44, from: V_AC_C.A, to: "~n_C_raw@V_AC_C.A.P"}
+  - {id: W45, from: C_DC_BOT.B, to: R_LOAD.B}
+  - {id: W46, from: D_A_BOT.A, to: D_B_BOT.A}
+  - {id: W47, from: D_B_BOT.A, to: D_C_BOT.A}
+  - {id: W48, from: C_DC_BOT.B, to: D_C_BOT.A}
+  - {id: W49, from: C_DC_BOT.B, to: n_DC_NEG.P}
+  - {id: W50, from: "#voltage_loop.n_DC_NEG", to: "~n_DC_NEG@#voltage_loop.n_DC_NEG.P"}
+  - {id: W51, from: C_DC_TOP.A, to: R_LOAD.A}
+  - {id: W52, from: D_A_TOP.B, to: D_B_TOP.B}
+  - {id: W53, from: D_B_TOP.B, to: D_C_TOP.B}
+  - {id: W54, from: C_DC_TOP.A, to: D_C_TOP.B}
+  - {id: W55, from: C_DC_TOP.A, to: n_DC_POS.P}
+  - {id: W56, from: "#voltage_loop.n_DC_POS", to: "~n_DC_POS@#voltage_loop.n_DC_POS.P"}
+  - {id: W57, from: "#modulator.n_d_A", to: "~n_d_A@#modulator.n_d_A.P"}
+  - {id: W58, from: "#phase_a_control.n_d_A", to: "~n_d_A@#phase_a_control.n_d_A.P"}
+  - {id: W59, from: "#modulator.n_d_B", to: "~n_d_B@#modulator.n_d_B.P"}
+  - {id: W60, from: "#phase_b_control.n_d_B", to: "~n_d_B@#phase_b_control.n_d_B.P"}
+  - {id: W61, from: "#modulator.n_d_C", to: "~n_d_C@#modulator.n_d_C.P"}
+  - {id: W62, from: "#phase_c_control.n_d_C", to: "~n_d_C@#phase_c_control.n_d_C.P"}
+  - {id: W63, from: V_AC_A.B, to: V_AC_B.B}
+  - {id: W64, from: V_AC_B.B, to: V_AC_C.B}
+  - {id: W65, from: V_AC_A.B, to: n_neutral.NET.P}
+  - {id: W66, from: R_neutral.A, to: V_AC_C.B}
+  - {id: W67, from: "#phase_a_control.n_neutral", to: "~n_neutral@#phase_a_control.n_neutral.P"}
+  - {id: W68, from: "#phase_b_control.n_neutral", to: "~n_neutral@#phase_b_control.n_neutral.P"}
+  - {id: W69, from: "#phase_c_control.n_neutral", to: "~n_neutral@#phase_c_control.n_neutral.P"}
+  groups:
+    voltage_loop: {label: "Voltage loop", members: [SUM_VDC, REF_V, SUM_V, KP_V, INT_V, SUM_PI, LIM_PI]}
+    modulator: {label: "Modulator", members: [CAR, CMP_A, CMP_B, CMP_C]}
+    phase_a_control: {label: "Phase A control", members: [SUM_VA, ABS_A, I_SENSE_A, LPF_IA, REF_A, FF_A, SUM_IA, KP_IA, SUM_DA, LIM_DA]}
+    phase_b_control: {label: "Phase B control", members: [SUM_VB, ABS_B, I_SENSE_B, LPF_IB, REF_B, FF_B, SUM_IB, KP_IB, SUM_DB, LIM_DB]}
+    phase_c_control: {label: "Phase C control", members: [SUM_VC, ABS_C, I_SENSE_C, LPF_IC, REF_C, FF_C, SUM_IC, KP_IC, SUM_DC, LIM_DC]}
+  sheets:
+    modulator:
+      wires:
+      - {id: W1, from: CMP_A.out, to: "^modulator:n39.P"}
+      - {id: W2, from: CMP_B.out, to: "^modulator:n40.P"}
+      - {id: W3, from: CMP_C.out, to: "^modulator:n41.P"}
+      - {id: W4, from: CMP_A.inp, to: "^modulator:n_d_A.P"}
+      - {id: W5, from: CMP_A.inp, to: n_d_A.P}
+      - {id: W6, from: CMP_B.inp, to: "^modulator:n_d_B.P"}
+      - {id: W7, from: "^modulator:n_d_B.P", to: n_d_B.P}
+      - {id: W8, from: CMP_C.inp, to: "^modulator:n_d_C.P"}
+      - {id: W9, from: "^modulator:n_d_C.P", to: n_d_C.P}
+      - {id: W10, from: CAR.out, to: CMP_A.inn}
+      - {id: W11, from: CMP_B.inn, to: CMP_C.inn}
+      - {id: W12, from: CAR.out, to: CMP_B.inn}
+      - {id: W13, from: CAR.out, to: n_tri.P}
+    phase_a_control:
+      wires:
+      - {id: W1, from: LPF_IA.out, to: SUM_IA.in2}
+      - {id: W2, from: LPF_IA.out, to: i_act_A.P}
+      - {id: W3, from: REF_A.in1, to: "^phase_a_control:i_mag.P"}
+      - {id: W4, from: REF_A.in1, to: i_mag.P}
+      - {id: W5, from: REF_A.out, to: SUM_IA.in1}
+      - {id: W6, from: SUM_IA.in1, to: i_ref_A.P}
+      - {id: W7, from: I_SENSE_A.out, to: LPF_IA.in}
+      - {id: W8, from: SUM_VA.in1, to: "^phase_a_control:n_A_raw.P"}
+      - {id: W9, from: LIM_DA.out, to: "^phase_a_control:n_d_A.P"}
+      - {id: W10, from: KP_IA.out, to: SUM_DA.in2}
+      - {id: W11, from: KP_IA.out, to: n_dfb_A.P}
+      - {id: W12, from: LIM_DA.in, to: SUM_DA.out}
+      - {id: W13, from: LIM_DA.in, to: n_duty_A.P}
+      - {id: W14, from: FF_A.out, to: SUM_DA.in1}
+      - {id: W15, from: FF_A.out, to: n_ff_A.P}
+      - {id: W16, from: KP_IA.in, to: SUM_IA.out}
+      - {id: W17, from: KP_IA.in, to: n_ierr_A.P}
+      - {id: W18, from: SUM_VA.in2, to: "^phase_a_control:n_neutral.P"}
+      - {id: W19, from: ABS_A.out, to: FF_A.in1}
+      - {id: W20, from: ABS_A.out, to: REF_A.in2}
+      - {id: W21, from: ABS_A.out, to: v_a_abs.P}
+      - {id: W22, from: ABS_A.in1, to: SUM_VA.out}
+      - {id: W23, from: ABS_A.in1, to: v_a_grid.P}
+    phase_b_control:
+      wires:
+      - {id: W1, from: LPF_IB.out, to: SUM_IB.in2}
+      - {id: W2, from: LPF_IB.out, to: i_act_B.P}
+      - {id: W3, from: REF_B.in1, to: "^phase_b_control:i_mag.P"}
+      - {id: W4, from: REF_B.out, to: SUM_IB.in1}
+      - {id: W5, from: SUM_IB.in1, to: i_ref_B.P}
+      - {id: W6, from: I_SENSE_B.out, to: LPF_IB.in}
+      - {id: W7, from: SUM_VB.in1, to: "^phase_b_control:n_B_raw.P"}
+      - {id: W8, from: LIM_DB.out, to: "^phase_b_control:n_d_B.P"}
+      - {id: W9, from: KP_IB.out, to: SUM_DB.in2}
+      - {id: W10, from: KP_IB.out, to: n_dfb_B.P}
+      - {id: W11, from: LIM_DB.in, to: SUM_DB.out}
+      - {id: W12, from: LIM_DB.in, to: n_duty_B.P}
+      - {id: W13, from: FF_B.out, to: SUM_DB.in1}
+      - {id: W14, from: FF_B.out, to: n_ff_B.P}
+      - {id: W15, from: KP_IB.in, to: SUM_IB.out}
+      - {id: W16, from: KP_IB.in, to: n_ierr_B.P}
+      - {id: W17, from: SUM_VB.in2, to: "^phase_b_control:n_neutral.P"}
+      - {id: W18, from: ABS_B.out, to: FF_B.in1}
+      - {id: W19, from: ABS_B.out, to: REF_B.in2}
+      - {id: W20, from: ABS_B.out, to: v_b_abs.P}
+      - {id: W21, from: ABS_B.in1, to: SUM_VB.out}
+      - {id: W22, from: ABS_B.in1, to: v_b_grid.P}
+    phase_c_control:
+      wires:
+      - {id: W1, from: LPF_IC.out, to: SUM_IC.in2}
+      - {id: W2, from: LPF_IC.out, to: i_act_C.P}
+      - {id: W3, from: REF_C.in1, to: "^phase_c_control:i_mag.P"}
+      - {id: W4, from: REF_C.out, to: SUM_IC.in1}
+      - {id: W5, from: SUM_IC.in1, to: i_ref_C.P}
+      - {id: W6, from: I_SENSE_C.out, to: LPF_IC.in}
+      - {id: W7, from: SUM_VC.in1, to: "^phase_c_control:n_C_raw.P"}
+      - {id: W8, from: LIM_DC.out, to: "^phase_c_control:n_d_C.P"}
+      - {id: W9, from: KP_IC.out, to: SUM_DC.in2}
+      - {id: W10, from: KP_IC.out, to: n_dfb_C.P}
+      - {id: W11, from: LIM_DC.in, to: SUM_DC.out}
+      - {id: W12, from: LIM_DC.in, to: n_duty_C.P}
+      - {id: W13, from: FF_C.out, to: SUM_DC.in1}
+      - {id: W14, from: FF_C.out, to: n_ff_C.P}
+      - {id: W15, from: KP_IC.in, to: SUM_IC.out}
+      - {id: W16, from: KP_IC.in, to: n_ierr_C.P}
+      - {id: W17, from: SUM_VC.in2, to: "^phase_c_control:n_neutral.P"}
+      - {id: W18, from: ABS_C.out, to: FF_C.in1}
+      - {id: W19, from: ABS_C.out, to: REF_C.in2}
+      - {id: W20, from: ABS_C.out, to: v_c_abs.P}
+      - {id: W21, from: ABS_C.in1, to: SUM_VC.out}
+      - {id: W22, from: ABS_C.in1, to: v_c_grid.P}
+    voltage_loop:
+      wires:
+      - {id: W1, from: LIM_PI.out, to: "^voltage_loop:i_mag.P"}
+      - {id: W2, from: SUM_VDC.in2, to: "^voltage_loop:n_DC_NEG.P"}
+      - {id: W3, from: SUM_VDC.in1, to: "^voltage_loop:n_DC_POS.P"}
+      - {id: W4, from: LIM_PI.in, to: SUM_PI.out}
+      - {id: W5, from: LIM_PI.in, to: n_pi_sum.P}
+      - {id: W6, from: REF_V.out, to: SUM_V.in1}
+      - {id: W7, from: SUM_V.in1, to: n_vref.P}
+      - {id: W8, from: SUM_V.in2, to: SUM_VDC.out}
+      - {id: W9, from: SUM_V.in2, to: v_dc_tot.P}
+      - {id: W10, from: KP_V.in, to: SUM_V.out}
+      - {id: W11, from: INT_V.in, to: SUM_V.out}
+      - {id: W12, from: KP_V.in, to: v_err.P}
+      - {id: W13, from: INT_V.out, to: SUM_PI.in2}
+      - {id: W14, from: INT_V.out, to: v_int.P}
+      - {id: W15, from: KP_V.out, to: SUM_PI.in1}
+      - {id: W16, from: KP_V.out, to: v_p.P}

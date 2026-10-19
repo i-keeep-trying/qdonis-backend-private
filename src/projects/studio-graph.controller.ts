@@ -28,6 +28,7 @@ import {
   ParseStagePipe,
   RenameBranchDto,
   SetActiveBranchDto,
+  SetEntryStepDto,
   WorkspaceQueryDto,
 } from './dto/studio-graph.dto';
 import { ProjectAccessService } from './project-access.service';
@@ -79,6 +80,22 @@ export class StudioGraphController {
       user.id,
       !access.permissions.canEdit,
     );
+  }
+
+  @Put('studio/entry-step')
+  @ApiOperation({
+    summary:
+      'Choose the step the project starts at (editors; `specs` = full design). Refused once that step ran.',
+  })
+  @ApiConflictResponse({ description: 'ENTRY_STEP_LOCKED' })
+  async setEntryStep(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('projectId', ParseUUIDPipe) projectId: string,
+    @Body() dto: SetEntryStepDto,
+  ) {
+    await this.access.require(user, projectId, 'canEdit');
+    await this.graph.chooseEntryStep(projectId, user.id, dto.step);
+    return this.graph.workspace(projectId, user.id, false);
   }
 
   @Get('branches/:branchId/stages/:stage')

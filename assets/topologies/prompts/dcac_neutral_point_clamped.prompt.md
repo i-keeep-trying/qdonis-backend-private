@@ -1,6 +1,6 @@
 ## Topology-Specific Rules: Neutral-Point Clamped (NPC) Inverter
-- **RMS Output Voltage**: Note that the AC output voltage requested by the user is the **RMS** value, NOT the peak value. You must calculate the peak value (`V_peak = V_rms * sqrt(2)`) when sizing components, calculating the modulation index, or setting the reference sine wave amplitude.
-- **Modulation**: CCM/DCM calculations do not apply.
-- Ensure the modulation index and carrier/switching frequency are consistent with the target output voltage relative to the DC-link/input voltage.
-- `modulation_index ≈ Vout_peak / (Vin / 2)`.
-- Keep the output L-C filter consistent with the switching frequency.
+- **Output voltage convention**: The netlist simulates a three-phase 3L-NPC inverter with three phase legs (Phase A, B, C). The AC output voltage requested by the user is the **line-to-line RMS** value ($V_{LL}$); each phase leg regulates the phase voltage `V_ph,rms = V_LL / sqrt(3)` (peak `V_LL * sqrt(2/3)`).
+- **Control scaling is automatic**: The split DC rails (VDC_TOP, VDC_BOT = Vdc/2), the voltage references (V_ref_a, V_ref_b, V_ref_c with 0°, -120°, -240° phase shifts), the controller feed-forward normalisation and the per-phase loads (R_LOAD_a, R_LOAD_b, R_LOAD_c = V_ph,rms^2 / (P/3)) are set by the application. Do NOT emit them, and do NOT edit any behavioural (B_*/E_*/G_*) source or control block (gain, integrator, comparator, ...).
+- **Modulation**: CCM/DCM calculations do not apply. The phase peak must stay below `Vdc / 2` (linear modulation).
+- **Output filter**: Keep the per-phase L-C filters (L_FILT_a/b/c, C_FILT_a/b/c) consistent with the 10 kHz carrier: resonance `1 / (2*pi*sqrt(L*C))` between 10x the output frequency and 1/5 of the carrier frequency, and `2*pi*f_out*L` well below `R_LOAD`.
+- **Semiconductors**: Outer switches and clamp diodes block `Vdc / 2`; size `Bv` / voltage ratings for `1.5 * Vdc / 2`.

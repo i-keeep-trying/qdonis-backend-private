@@ -429,3 +429,31 @@ metadata:
     - synchronous-buck
     - step-down
     - synchronous-rectification
+schematic:
+  tuned: true
+  components:
+    Cout: {x: 560, y: 200, rotation: 0}
+    L1: {x: 420, y: 80, rotation: 270}
+    PWM1: {x: 180, y: 20, rotation: 180}
+    PWM2: {x: 160, y: 280, rotation: 0}
+    R_LOAD: {x: 680, y: 200, rotation: 0}
+    SW1: {x: 180, y: 80, rotation: 90, mirrorY: true}
+    SW2: {x: 240, y: 260, rotation: 0}
+    VIN: {x: 80, y: 200, rotation: 0}
+    "~GND@Cout.B": {x: 560, y: 320, rotation: 0}
+    "~GND@PWM2.B": {x: 160, y: 380, rotation: 0}
+  wires:
+  - {id: W1, from: Cout.B, to: R_LOAD.B, path: [[560, 240], [560, 340], [680, 340], [680, 240]]}
+  - {id: W2, from: PWM2.B, to: VIN.B}
+  - {id: W3, from: PWM2.B, to: SW2.S}
+  - {id: W5, from: PWM2.B, to: "~GND@PWM2.B.P"}
+  - {id: W6, from: SW1.D, to: VIN.A}
+  - {id: W7, from: PWM1.A, to: SW1.G}
+  - {id: W8, from: SW1.S, to: SW2.D}
+  - {id: W9, from: L1.A, to: SW1.S}
+  - {id: W10, from: PWM1.B, to: SW1.S, path: [[180, -20], [180, -20], [240, -20], [240, 80], [220, 80]]}
+  - {id: W11, from: PWM2.A, to: SW2.G, path: [[160, 240], [160, 240], [200, 240], [200, 260], [220, 260]]}
+  - {id: W12, from: Cout.A, to: R_LOAD.A, path: [[560, 160], [560, 80], [680, 80], [680, 160]]}
+  - {id: W13, from: Cout.A, to: L1.B, path: [[560, 160], [560, 80], [540, 80], [540, 80], [460, 80]]}
+  - {id: W14, from: PWM2.B, to: Cout.B, path: [[160, 320], [160, 340], [180, 340], [180, 340], [540, 340], [540, 340], [560, 340], [560, 240]]}
+  groups: {}

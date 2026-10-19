@@ -10,9 +10,12 @@ To ensure a single-phase Active Front End (AFE) rectifier simulates correctly, s
 ### 2. Control Loop Tuning & Filters
 
 * **Prevent Leaky PI Integrators**: SPICE requires a DC path to ground, often forcing you to place a dummy resistor in parallel with the PI controller's integration capacitor. This resistor must be strictly parasitic (1 MΩ to 10 MΩ). A low value (e.g., 150 Ω) bleeds off the charge, destroying the controller's DC gain and causing a permanent steady-state voltage error.
-* **Block 100Hz Feedback (Magnitude Filter)**: The DC bus will always have some 100Hz/120Hz ripple. If the low-pass filter on the voltage PI output is too fast, this ripple passes into the magnitude command. Multiplying a 50Hz grid reference by a 100Hz ripple generates 3rd harmonic distortion (a "double-hump" M-shape in the AC current). Set this filter's cutoff below 5Hz (e.g., 10µF to 100µF with a 1 kΩ resistor).
+* **Magnitude Filter Phase Margin (C_MAG_FLT)**: The low-pass filter capacitor (`C_MAG_FLT`) at the PI controller output must NOT be oversized. An oversized capacitor (e.g., 10 µF to 47 µF, cutoff ~3.38 Hz to 15.9 Hz) introduces severe delay and phase lag into the outer loop, destroying the phase margin and causing severe hunting, low-frequency cyclical drift (e.g., DC bus oscillating continuously between 375 V and 385 V), and AC current envelope distortion. Sizing `C_MAG_FLT` to **2.2 µF** (with $R_{MAG\_FLT} = 1\,\text{k}\Omega$) (block `LPF_MAG` `tau: 0.0021978`) shifts the pole to approximately **72 Hz**, removing it from the critical instability region and restoring full phase margin.
 * **Block Switching Noise (PWM Filter)**: The current control signal must pass the 50Hz grid dynamics but completely block high-frequency (e.g., 100kHz) switching noise. Size this RC filter for a 3kHz–5kHz cutoff (e.g., 47nF and 1 kΩ).
-* **Power-Level Specific PI Tuning**: Your voltage loop proportional ($K_p$) and integral ($K_i$) gains must be scaled based on the load power ("plant"). For example, a 5kW 450V system might use $K_i = 0.002$ and $K_p = 0.1$, while a 3kW 400V system requires drastically slashed integral gain (e.g., $K_i = 0.0005$) and increased proportional gain (e.g., $K_p = 0.25$) to prevent control loop hunting. Carefully tune these parameters based on your specific input/output voltages and power levels.
+* **Softened PI Tuning for Critical Damping**: To eliminate outer-loop hunting and lock steady-state voltage regulation without over-correction, soften the voltage loop PI controller gains:
+  - Proportional gain: set $K_p = 0.05$ (block `KP_V` `gain: 0.05`; hand-written: `B_P: v(n_err) * 0.05`).
+  - Integral gain: set $K_i = 10$ /s (block `INT_V` `ki: 10`; hand-written: `G_INT 0 n_INT n_err 0 0.001` into `C_INT` = 100 µF).
+  This critically damps the loop response, holding a stable 400 V (or 380 V) bus across operating conditions.
 
 ### 3. SPICE Syntax & Solver Stability
 

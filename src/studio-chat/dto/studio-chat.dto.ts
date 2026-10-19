@@ -15,6 +15,11 @@ import {
   ValidateNested,
 } from 'class-validator';
 
+import {
+  STAGE_ORDER,
+  type WorkspaceStage,
+} from '../../projects/studio/studio-graph';
+
 export const CHAT_MESSAGE_MAX = 8_000;
 export const ATTACHMENTS_PER_MESSAGE = 5;
 
@@ -45,9 +50,24 @@ export class SendChatMessageDto {
   @IsString()
   @MaxLength(100)
   initialPromptId?: string;
+
+  @ApiPropertyOptional({
+    enum: STAGE_ORDER,
+    description:
+      'Step picked in the tool selector (`specs` = start from scratch). Sets the entry step before Q answers.',
+  })
+  @IsOptional()
+  @IsIn(STAGE_ORDER)
+  requestedStep?: WorkspaceStage;
 }
 
-const KINDS = ['question', 'fields', 'topologies', 'spec_approval'] as const;
+const KINDS = [
+  'question',
+  'fields',
+  'topologies',
+  'spec_approval',
+  'entry_step',
+] as const;
 
 /** `{ name: value }` with short keys and values (at most 40 entries). */
 function IsValueMap(): PropertyDecorator {
@@ -88,6 +108,18 @@ export class WidgetAnswerDto {
   @IsObject()
   @IsValueMap()
   values?: Record<string, string>;
+
+  @ApiPropertyOptional({
+    description: 'fields: Q assumes the values left blank',
+  })
+  @IsOptional()
+  @IsBoolean()
+  assumeRest?: boolean;
+
+  @ApiPropertyOptional({ enum: STAGE_ORDER, description: 'entry_step' })
+  @IsOptional()
+  @IsIn(STAGE_ORDER)
+  step?: WorkspaceStage;
 
   @ApiPropertyOptional({ description: 'topologies' })
   @IsOptional()

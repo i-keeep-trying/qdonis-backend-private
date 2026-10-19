@@ -7,6 +7,10 @@ enum StudioStage {
   devices
   magnetics
   thermal
+  mtbf
+  bom
+  emc
+  components
 
   @@map("studio_stage")
 }

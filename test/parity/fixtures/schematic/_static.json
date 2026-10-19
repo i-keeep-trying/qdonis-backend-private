@@ -1,0 +1,1236 @@
+{
+ "palette": [
+  {
+   "type": "R",
+   "label": "Resistor",
+   "prefix": "R",
+   "parameters": {
+    "resistance": "10"
+   }
+  },
+  {
+   "type": "C",
+   "label": "Capacitor",
+   "prefix": "C",
+   "parameters": {
+    "capacitance": "1u",
+    "esr": "10m"
+   }
+  },
+  {
+   "type": "L",
+   "label": "Inductor",
+   "prefix": "L",
+   "parameters": {
+    "inductance": "100u",
+    "series_resistance": "10m"
+   }
+  },
+  {
+   "type": "D",
+   "label": "Diode",
+   "prefix": "D",
+   "parameters": {
+    "Is": "1p",
+    "n": "1.1",
+    "Rs": "50m",
+    "Cjo": "10p",
+    "Tt": "20n",
+    "Bv": "600"
+   }
+  },
+  {
+   "type": "MOSFET",
+   "label": "N-MOSFET",
+   "prefix": "Q",
+   "parameters": {
+    "family": "mosfet",
+    "type": "nmos",
+    "mode": "enhancement",
+    "voltage_rating": "100",
+    "current_rating": "10"
+   }
+  },
+  {
+   "type": "PMOS",
+   "label": "P-MOSFET",
+   "prefix": "Q",
+   "parameters": {
+    "family": "mosfet",
+    "type": "pmos",
+    "mode": "enhancement",
+    "voltage_rating": "100",
+    "current_rating": "10"
+   }
+  },
+  {
+   "type": "IGBT",
+   "label": "IGBT",
+   "prefix": "Q",
+   "parameters": {
+    "family": "igbt",
+    "voltage_rating": "600",
+    "current_rating": "20"
+   }
+  },
+  {
+   "type": "NJFET",
+   "label": "N-JFET",
+   "prefix": "J",
+   "parameters": {
+    "family": "jfet",
+    "polarity": "n"
+   }
+  },
+  {
+   "type": "PJFET",
+   "label": "P-JFET",
+   "prefix": "J",
+   "parameters": {
+    "family": "jfet",
+    "polarity": "p"
+   }
+  },
+  {
+   "type": "NPN",
+   "label": "NPN transistor",
+   "prefix": "Q",
+   "parameters": {
+    "family": "bjt",
+    "type": "npn"
+   }
+  },
+  {
+   "type": "PNP",
+   "label": "PNP transistor",
+   "prefix": "Q",
+   "parameters": {
+    "family": "bjt",
+    "type": "pnp"
+   }
+  },
+  {
+   "type": "VSW",
+   "label": "Controlled switch",
+   "prefix": "S",
+   "parameters": {
+    "model": "sw_ctrl"
+   }
+  },
+  {
+   "type": "V",
+   "label": "DC source",
+   "prefix": "V",
+   "parameters": {
+    "voltage": "12",
+    "source": "dc"
+   }
+  },
+  {
+   "type": "AC_V",
+   "label": "AC source",
+   "prefix": "VAC",
+   "parameters": {
+    "source": "sine",
+    "amplitude": "325",
+    "frequency": "50"
+   }
+  },
+  {
+   "type": "VPULSE",
+   "label": "PWM source",
+   "prefix": "PWM",
+   "parameters": {
+    "frequency": "100k",
+    "duty_cycle": "0.5",
+    "vhigh": "12",
+    "vlow": "0",
+    "trise": "100n",
+    "tfall": "100n",
+    "tdelay": "0",
+    "drive_resistance": "10"
+   }
+  },
+  {
+   "type": "XFMR",
+   "label": "Transformer",
+   "prefix": "T",
+   "parameters": {
+    "Lm_primary": "1m",
+    "turns_ratio": "1",
+    "k_coupling": "0.99",
+    "phase": "same"
+   }
+  },
+  {
+   "type": "XFMR_CT",
+   "label": "Centre-tap transformer",
+   "prefix": "T",
+   "parameters": {
+    "Lm_primary": "1m",
+    "turns_ratio": "1",
+    "k_coupling": "0.99",
+    "phase_s1": "same",
+    "phase_s2": "opposite"
+   }
+  },
+  {
+   "type": "XFMR_DCT",
+   "label": "Dual centre-tap transformer",
+   "prefix": "T",
+   "parameters": {
+    "Lm_primary": "1m",
+    "turns_ratio": "1",
+    "k_coupling": "0.99",
+    "phase_s1": "same",
+    "phase_s2": "opposite"
+   }
+  },
+  {
+   "type": "BSRC",
+   "label": "Behavioural source",
+   "prefix": "B",
+   "parameters": {
+    "expression": "0"
+   }
+  },
+  {
+   "type": "EAMP",
+   "label": "VCVS / amplifier (E)",
+   "prefix": "E",
+   "parameters": {
+    "gain": "1"
+   }
+  },
+  {
+   "type": "ESRC",
+   "label": "Expression source (E)",
+   "prefix": "E",
+   "parameters": {
+    "expression": "0"
+   }
+  },
+  {
+   "type": "GSRC",
+   "label": "VCCS (G)",
+   "prefix": "G",
+   "parameters": {
+    "gain": "1m"
+   }
+  },
+  {
+   "type": "SPICE",
+   "label": "SPICE directive",
+   "prefix": "SPICE",
+   "parameters": {
+    "spice_line": "* comment"
+   }
+  },
+  {
+   "type": "LABEL",
+   "label": "Net label",
+   "prefix": "NET",
+   "parameters": {
+    "net_name": "NET"
+   }
+  },
+  {
+   "type": "GND",
+   "label": "Ground",
+   "prefix": "GND",
+   "parameters": {}
+  },
+  {
+   "type": "CB_gain",
+   "label": "Gain",
+   "prefix": "K",
+   "parameters": {
+    "gain": "1"
+   },
+   "group": "Control blocks",
+   "pinsGeom": {
+    "in": {
+     "x": -40,
+     "y": 0,
+     "dx": -1,
+     "dy": 0
+    },
+    "out": {
+     "x": 40,
+     "y": 0,
+     "dx": 1,
+     "dy": 0
+    }
+   },
+   "glyph": "K"
+  },
+  {
+   "type": "CB_sum",
+   "label": "Sum",
+   "prefix": "SUM",
+   "parameters": {
+    "signs": "+-"
+   },
+   "group": "Control blocks",
+   "pinsGeom": {
+    "in1": {
+     "x": -40,
+     "y": -20,
+     "dx": -1,
+     "dy": 0
+    },
+    "in2": {
+     "x": -40,
+     "y": 20,
+     "dx": -1,
+     "dy": 0
+    },
+    "out": {
+     "x": 40,
+     "y": 0,
+     "dx": 1,
+     "dy": 0
+    }
+   },
+   "glyph": "Σ"
+  },
+  {
+   "type": "CB_product",
+   "label": "Product",
+   "prefix": "MUL",
+   "parameters": {
+    "gain": "1"
+   },
+   "group": "Control blocks",
+   "pinsGeom": {
+    "in1": {
+     "x": -40,
+     "y": -20,
+     "dx": -1,
+     "dy": 0
+    },
+    "in2": {
+     "x": -40,
+     "y": 20,
+     "dx": -1,
+     "dy": 0
+    },
+    "out": {
+     "x": 40,
+     "y": 0,
+     "dx": 1,
+     "dy": 0
+    }
+   },
+   "glyph": "×"
+  },
+  {
+   "type": "CB_const",
+   "label": "Constant",
+   "prefix": "CONST",
+   "parameters": {
+    "value": "1"
+   },
+   "group": "Control blocks",
+   "pinsGeom": {
+    "out": {
+     "x": 40,
+     "y": 0,
+     "dx": 1,
+     "dy": 0
+    }
+   },
+   "glyph": "C"
+  },
+  {
+   "type": "CB_function",
+   "label": "Function",
+   "prefix": "FN",
+   "parameters": {
+    "expression": "in1",
+    "inputs": "1"
+   },
+   "group": "Control blocks",
+   "pinsGeom": {
+    "in1": {
+     "x": -40,
+     "y": 0,
+     "dx": -1,
+     "dy": 0
+    },
+    "out": {
+     "x": 40,
+     "y": 0,
+     "dx": 1,
+     "dy": 0
+    }
+   },
+   "glyph": "f(u)"
+  },
+  {
+   "type": "CB_limiter",
+   "label": "Limiter",
+   "prefix": "LIM",
+   "parameters": {
+    "lower": "0",
+    "upper": "1"
+   },
+   "group": "Control blocks",
+   "pinsGeom": {
+    "in": {
+     "x": -40,
+     "y": 0,
+     "dx": -1,
+     "dy": 0
+    },
+    "out": {
+     "x": 40,
+     "y": 0,
+     "dx": 1,
+     "dy": 0
+    }
+   },
+   "glyph": "⊐⊏"
+  },
+  {
+   "type": "CB_comparator",
+   "label": "Comparator",
+   "prefix": "CMP",
+   "parameters": {
+    "high": "1",
+    "low": "0",
+    "threshold": "0",
+    "width": "0.001"
+   },
+   "group": "Control blocks",
+   "pinsGeom": {
+    "inp": {
+     "x": -40,
+     "y": -20,
+     "dx": -1,
+     "dy": 0
+    },
+    "inn": {
+     "x": -40,
+     "y": 20,
+     "dx": -1,
+     "dy": 0
+    },
+    "out": {
+     "x": 40,
+     "y": 0,
+     "dx": 1,
+     "dy": 0
+    }
+   },
+   "glyph": "≥"
+  },
+  {
+   "type": "CB_integrator",
+   "label": "Integrator",
+   "prefix": "INT",
+   "parameters": {
+    "ki": "1",
+    "ic": "0"
+   },
+   "group": "Control blocks",
+   "pinsGeom": {
+    "in": {
+     "x": -40,
+     "y": 0,
+     "dx": -1,
+     "dy": 0
+    },
+    "out": {
+     "x": 40,
+     "y": 0,
+     "dx": 1,
+     "dy": 0
+    }
+   },
+   "glyph": "∫"
+  },
+  {
+   "type": "CB_lowpass",
+   "label": "Low-pass filter (first order)",
+   "prefix": "LPF",
+   "parameters": {
+    "tau": "0.001",
+    "gain": "1",
+    "ic": "0"
+   },
+   "group": "Control blocks",
+   "pinsGeom": {
+    "in": {
+     "x": -40,
+     "y": 0,
+     "dx": -1,
+     "dy": 0
+    },
+    "out": {
+     "x": 40,
+     "y": 0,
+     "dx": 1,
+     "dy": 0
+    }
+   },
+   "glyph": "1/(1+sτ)"
+  },
+  {
+   "type": "CB_pi",
+   "label": "PI controller",
+   "prefix": "PI",
+   "parameters": {
+    "kp": "1",
+    "ki": "100",
+    "lower": "-1000.0",
+    "upper": "1000.0",
+    "ic": "0"
+   },
+   "group": "Control blocks",
+   "pinsGeom": {
+    "in": {
+     "x": -40,
+     "y": 0,
+     "dx": -1,
+     "dy": 0
+    },
+    "out": {
+     "x": 40,
+     "y": 0,
+     "dx": 1,
+     "dy": 0
+    }
+   },
+   "glyph": "PI"
+  },
+  {
+   "type": "CB_pid",
+   "label": "PID controller",
+   "prefix": "PID",
+   "parameters": {
+    "kp": "1",
+    "ki": "100",
+    "kd": "0",
+    "tf": "1e-05",
+    "lower": "-1000.0",
+    "upper": "1000.0",
+    "ic": "0"
+   },
+   "group": "Control blocks",
+   "pinsGeom": {
+    "in": {
+     "x": -40,
+     "y": 0,
+     "dx": -1,
+     "dy": 0
+    },
+    "out": {
+     "x": 40,
+     "y": 0,
+     "dx": 1,
+     "dy": 0
+    }
+   },
+   "glyph": "PID"
+  },
+  {
+   "type": "CB_carrier",
+   "label": "Carrier (triangle / sawtooth)",
+   "prefix": "CAR",
+   "parameters": {
+    "frequency": "100000.0",
+    "low": "0",
+    "high": "1",
+    "phase": "0",
+    "shape": "triangle"
+   },
+   "group": "Control blocks",
+   "pinsGeom": {
+    "out": {
+     "x": 40,
+     "y": 0,
+     "dx": 1,
+     "dy": 0
+    }
+   },
+   "glyph": "△"
+  },
+  {
+   "type": "CB_pwm",
+   "label": "PWM modulator",
+   "prefix": "PWM",
+   "parameters": {
+    "frequency": "100000.0",
+    "low": "0",
+    "high": "1",
+    "phase": "0",
+    "carrier": "triangle",
+    "width": "0.001"
+   },
+   "group": "Control blocks",
+   "pinsGeom": {
+    "in": {
+     "x": -40,
+     "y": 0,
+     "dx": -1,
+     "dy": 0
+    },
+    "out": {
+     "x": 40,
+     "y": 0,
+     "dx": 1,
+     "dy": 0
+    }
+   },
+   "glyph": "PWM"
+  },
+  {
+   "type": "CB_gate_driver",
+   "label": "Gate driver",
+   "prefix": "DRV",
+   "parameters": {
+    "von": "15",
+    "voff": "0",
+    "rg": "10",
+    "threshold": "0.5",
+    "width": "0.001"
+   },
+   "group": "Control blocks",
+   "pinsGeom": {
+    "in": {
+     "x": -40,
+     "y": 0,
+     "dx": -1,
+     "dy": 0
+    },
+    "g": {
+     "x": 40,
+     "y": -20,
+     "dx": 1,
+     "dy": 0
+    },
+    "s": {
+     "x": 40,
+     "y": 20,
+     "dx": 1,
+     "dy": 0
+    }
+   },
+   "glyph": "DRV"
+  },
+  {
+   "type": "CB_and",
+   "label": "AND",
+   "prefix": "AND",
+   "parameters": {
+    "high": "1",
+    "threshold": "0.5",
+    "width": "0.001"
+   },
+   "group": "Control blocks",
+   "pinsGeom": {
+    "in1": {
+     "x": -40,
+     "y": -20,
+     "dx": -1,
+     "dy": 0
+    },
+    "in2": {
+     "x": -40,
+     "y": 20,
+     "dx": -1,
+     "dy": 0
+    },
+    "out": {
+     "x": 40,
+     "y": 0,
+     "dx": 1,
+     "dy": 0
+    }
+   },
+   "glyph": "&"
+  },
+  {
+   "type": "CB_or",
+   "label": "OR",
+   "prefix": "OR",
+   "parameters": {
+    "high": "1",
+    "threshold": "0.5",
+    "width": "0.001"
+   },
+   "group": "Control blocks",
+   "pinsGeom": {
+    "in1": {
+     "x": -40,
+     "y": -20,
+     "dx": -1,
+     "dy": 0
+    },
+    "in2": {
+     "x": -40,
+     "y": 20,
+     "dx": -1,
+     "dy": 0
+    },
+    "out": {
+     "x": 40,
+     "y": 0,
+     "dx": 1,
+     "dy": 0
+    }
+   },
+   "glyph": "≥1"
+  },
+  {
+   "type": "CB_not",
+   "label": "NOT",
+   "prefix": "NOT",
+   "parameters": {
+    "high": "1",
+    "threshold": "0.5",
+    "width": "0.001"
+   },
+   "group": "Control blocks",
+   "pinsGeom": {
+    "in": {
+     "x": -40,
+     "y": 0,
+     "dx": -1,
+     "dy": 0
+    },
+    "out": {
+     "x": 40,
+     "y": 0,
+     "dx": 1,
+     "dy": 0
+    }
+   },
+   "glyph": "¬"
+  },
+  {
+   "type": "CB_xor",
+   "label": "XOR",
+   "prefix": "XOR",
+   "parameters": {
+    "high": "1",
+    "threshold": "0.5",
+    "width": "0.001"
+   },
+   "group": "Control blocks",
+   "pinsGeom": {
+    "in1": {
+     "x": -40,
+     "y": -20,
+     "dx": -1,
+     "dy": 0
+    },
+    "in2": {
+     "x": -40,
+     "y": 20,
+     "dx": -1,
+     "dy": 0
+    },
+    "out": {
+     "x": 40,
+     "y": 0,
+     "dx": 1,
+     "dy": 0
+    }
+   },
+   "glyph": "=1"
+  }
+ ],
+ "symbols": {
+  "R": {
+   "A": {
+    "x": 0,
+    "y": -40,
+    "dx": 0,
+    "dy": -1
+   },
+   "B": {
+    "x": 0,
+    "y": 40,
+    "dx": 0,
+    "dy": 1
+   }
+  },
+  "L": {
+   "A": {
+    "x": 0,
+    "y": -40,
+    "dx": 0,
+    "dy": -1
+   },
+   "B": {
+    "x": 0,
+    "y": 40,
+    "dx": 0,
+    "dy": 1
+   }
+  },
+  "C": {
+   "A": {
+    "x": 0,
+    "y": -40,
+    "dx": 0,
+    "dy": -1
+   },
+   "B": {
+    "x": 0,
+    "y": 40,
+    "dx": 0,
+    "dy": 1
+   }
+  },
+  "D": {
+   "A": {
+    "x": 0,
+    "y": -40,
+    "dx": 0,
+    "dy": -1
+   },
+   "B": {
+    "x": 0,
+    "y": 40,
+    "dx": 0,
+    "dy": 1
+   }
+  },
+  "V": {
+   "A": {
+    "x": 0,
+    "y": -40,
+    "dx": 0,
+    "dy": -1
+   },
+   "B": {
+    "x": 0,
+    "y": 40,
+    "dx": 0,
+    "dy": 1
+   }
+  },
+  "AC_V": {
+   "A": {
+    "x": 0,
+    "y": -40,
+    "dx": 0,
+    "dy": -1
+   },
+   "B": {
+    "x": 0,
+    "y": 40,
+    "dx": 0,
+    "dy": 1
+   }
+  },
+  "VPULSE": {
+   "A": {
+    "x": 0,
+    "y": -40,
+    "dx": 0,
+    "dy": -1
+   },
+   "B": {
+    "x": 0,
+    "y": 40,
+    "dx": 0,
+    "dy": 1
+   }
+  },
+  "MOSFET": {
+   "D": {
+    "x": 0,
+    "y": -40,
+    "dx": 0,
+    "dy": -1
+   },
+   "S": {
+    "x": 0,
+    "y": 40,
+    "dx": 0,
+    "dy": 1
+   },
+   "G": {
+    "x": -20,
+    "y": 0,
+    "dx": -1,
+    "dy": 0
+   }
+  },
+  "PMOS": {
+   "D": {
+    "x": 0,
+    "y": -40,
+    "dx": 0,
+    "dy": -1
+   },
+   "S": {
+    "x": 0,
+    "y": 40,
+    "dx": 0,
+    "dy": 1
+   },
+   "G": {
+    "x": -20,
+    "y": 0,
+    "dx": -1,
+    "dy": 0
+   }
+  },
+  "IGBT": {
+   "D": {
+    "x": 0,
+    "y": -40,
+    "dx": 0,
+    "dy": -1
+   },
+   "S": {
+    "x": 0,
+    "y": 40,
+    "dx": 0,
+    "dy": 1
+   },
+   "G": {
+    "x": -20,
+    "y": 0,
+    "dx": -1,
+    "dy": 0
+   }
+  },
+  "NJFET": {
+   "D": {
+    "x": 0,
+    "y": -40,
+    "dx": 0,
+    "dy": -1
+   },
+   "S": {
+    "x": 0,
+    "y": 40,
+    "dx": 0,
+    "dy": 1
+   },
+   "G": {
+    "x": -20,
+    "y": 0,
+    "dx": -1,
+    "dy": 0
+   }
+  },
+  "PJFET": {
+   "D": {
+    "x": 0,
+    "y": -40,
+    "dx": 0,
+    "dy": -1
+   },
+   "S": {
+    "x": 0,
+    "y": 40,
+    "dx": 0,
+    "dy": 1
+   },
+   "G": {
+    "x": -20,
+    "y": 0,
+    "dx": -1,
+    "dy": 0
+   }
+  },
+  "NPN": {
+   "D": {
+    "x": 0,
+    "y": -40,
+    "dx": 0,
+    "dy": -1
+   },
+   "S": {
+    "x": 0,
+    "y": 40,
+    "dx": 0,
+    "dy": 1
+   },
+   "G": {
+    "x": -20,
+    "y": 0,
+    "dx": -1,
+    "dy": 0
+   }
+  },
+  "PNP": {
+   "D": {
+    "x": 0,
+    "y": -40,
+    "dx": 0,
+    "dy": -1
+   },
+   "S": {
+    "x": 0,
+    "y": 40,
+    "dx": 0,
+    "dy": 1
+   },
+   "G": {
+    "x": -20,
+    "y": 0,
+    "dx": -1,
+    "dy": 0
+   }
+  },
+  "VSW": {
+   "A": {
+    "x": 0,
+    "y": -40,
+    "dx": 0,
+    "dy": -1
+   },
+   "B": {
+    "x": 0,
+    "y": 40,
+    "dx": 0,
+    "dy": 1
+   },
+   "CP": {
+    "x": -40,
+    "y": -20,
+    "dx": -1,
+    "dy": 0
+   },
+   "CN": {
+    "x": -40,
+    "y": 20,
+    "dx": -1,
+    "dy": 0
+   }
+  },
+  "ESRC": {
+   "A": {
+    "x": 0,
+    "y": -40,
+    "dx": 0,
+    "dy": -1
+   },
+   "B": {
+    "x": 0,
+    "y": 40,
+    "dx": 0,
+    "dy": 1
+   },
+   "CP": {
+    "x": -40,
+    "y": -20,
+    "dx": -1,
+    "dy": 0
+   },
+   "CN": {
+    "x": -40,
+    "y": 20,
+    "dx": -1,
+    "dy": 0
+   }
+  },
+  "GSRC": {
+   "A": {
+    "x": 0,
+    "y": -40,
+    "dx": 0,
+    "dy": -1
+   },
+   "B": {
+    "x": 0,
+    "y": 40,
+    "dx": 0,
+    "dy": 1
+   },
+   "CP": {
+    "x": -40,
+    "y": -20,
+    "dx": -1,
+    "dy": 0
+   },
+   "CN": {
+    "x": -40,
+    "y": 20,
+    "dx": -1,
+    "dy": 0
+   }
+  },
+  "BSRC": {
+   "A": {
+    "x": 0,
+    "y": -40,
+    "dx": 0,
+    "dy": -1
+   },
+   "B": {
+    "x": 0,
+    "y": 40,
+    "dx": 0,
+    "dy": 1
+   },
+   "CP": {
+    "x": -40,
+    "y": -20,
+    "dx": -1,
+    "dy": 0
+   },
+   "CN": {
+    "x": -40,
+    "y": 20,
+    "dx": -1,
+    "dy": 0
+   }
+  },
+  "EAMP": {
+   "CP": {
+    "x": -40,
+    "y": -20,
+    "dx": -1,
+    "dy": 0
+   },
+   "CN": {
+    "x": -40,
+    "y": 20,
+    "dx": -1,
+    "dy": 0
+   },
+   "A": {
+    "x": 40,
+    "y": 0,
+    "dx": 1,
+    "dy": 0
+   },
+   "B": {
+    "x": 0,
+    "y": 40,
+    "dx": 0,
+    "dy": 1
+   }
+  },
+  "XFMR": {
+   "P1": {
+    "x": -20,
+    "y": -40,
+    "dx": 0,
+    "dy": -1
+   },
+   "P2": {
+    "x": -20,
+    "y": 40,
+    "dx": 0,
+    "dy": 1
+   },
+   "S1": {
+    "x": 20,
+    "y": -40,
+    "dx": 0,
+    "dy": -1
+   },
+   "S2": {
+    "x": 20,
+    "y": 40,
+    "dx": 0,
+    "dy": 1
+   }
+  },
+  "XFMR_CT": {
+   "P1": {
+    "x": -20,
+    "y": -40,
+    "dx": 0,
+    "dy": -1
+   },
+   "P2": {
+    "x": -20,
+    "y": 40,
+    "dx": 0,
+    "dy": 1
+   },
+   "S1": {
+    "x": 20,
+    "y": -40,
+    "dx": 0,
+    "dy": -1
+   },
+   "SCT": {
+    "x": 20,
+    "y": 0,
+    "dx": 1,
+    "dy": 0
+   },
+   "S2": {
+    "x": 20,
+    "y": 40,
+    "dx": 0,
+    "dy": 1
+   }
+  },
+  "XFMR_DCT": {
+   "P1": {
+    "x": -20,
+    "y": -40,
+    "dx": 0,
+    "dy": -1
+   },
+   "PCT": {
+    "x": -20,
+    "y": 0,
+    "dx": -1,
+    "dy": 0
+   },
+   "P2": {
+    "x": -20,
+    "y": 40,
+    "dx": 0,
+    "dy": 1
+   },
+   "S1": {
+    "x": 20,
+    "y": -40,
+    "dx": 0,
+    "dy": -1
+   },
+   "SCT": {
+    "x": 20,
+    "y": 0,
+    "dx": 1,
+    "dy": 0
+   },
+   "S2": {
+    "x": 20,
+    "y": 40,
+    "dx": 0,
+    "dy": 1
+   }
+  },
+  "LABEL": {
+   "P": {
+    "x": -20,
+    "y": 0,
+    "dx": -1,
+    "dy": 0
+   }
+  },
+  "PORT": {
+   "P": {
+    "x": -20,
+    "y": 0,
+    "dx": -1,
+    "dy": 0
+   }
+  },
+  "GND": {
+   "P": {
+    "x": 0,
+    "y": -20,
+    "dx": 0,
+    "dy": -1
+   }
+  },
+  "SPICE": {}
+ }
+}

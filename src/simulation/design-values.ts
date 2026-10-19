@@ -152,3 +152,47 @@ export function currentValue(
   const params = paramsOf({ ...comp });
   return param in params ? fmt(params[param]) : null;
 }
+
+/** Rows whose value differs from the template's, as `{ref: {param: after}}`. */
+export function rowUpdates(
+  rows: readonly RecalculatedParameter[],
+): Map<string, Map<string, string>> {
+  // Only changed rows: the table shows rounded values (6 digits).
+  const updates = new Map<string, Map<string, string>>();
+  for (const row of rows) {
+    if (row.after === row.before) continue;
+    const params = updates.get(row.ref) ?? new Map<string, string>();
+    params.set(row.param, row.after);
+    updates.set(row.ref, params);
+  }
+  return updates;
+}
+
+/**
+ * A design brought over to an edited circuit: its values are kept (with the
+ * values edited in the schematic), rows of removed parts dropped, and the
+ * decks regenerated from the edited circuit, so the next simulation runs
+ * exactly the circuit that is drawn.
+ */
+export function carriedDesignValues(
+  rows: readonly RecalculatedParameter[],
+  circuit: Dict,
+  edits: ReadonlyArray<{ ref: string; param: string; value: string }>,
+): {
+  recalculatedParameters: RecalculatedParameter[];
+  decks: Partial<Record<DeckKind, string>>;
+} {
+  const kept = rows
+    .filter((row) => hasComponent(circuit, row.ref))
+    .map((row) => {
+      const edit = edits.find(
+        (e) => e.ref === row.ref && e.param === row.param,
+      );
+      return edit
+        ? { ...row, before: row.after, after: edit.value }
+        : { ...row };
+    });
+  const design = structuredClone(circuit);
+  applyParameterUpdates(design, rowUpdates(kept));
+  return { recalculatedParameters: kept, decks: syncedDecks(design) };
+}

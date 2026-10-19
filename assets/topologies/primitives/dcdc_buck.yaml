@@ -544,3 +544,28 @@ metadata:
   tags:
     - buck
     - step-down
+schematic:
+  tuned: true
+  components:
+    Cout: {x: 560, y: 200, rotation: 0}
+    D: {x: 240, y: 200, rotation: 180}
+    L1: {x: 420, y: 80, rotation: 270}
+    PWM: {x: 180, y: 20, rotation: 180}
+    R_LOAD: {x: 680, y: 200, rotation: 0}
+    SW: {x: 180, y: 80, rotation: 90, mirrorY: true}
+    VIN: {x: 0, y: 200, rotation: 0}
+    "~GND@Cout.B": {x: 560, y: 320, rotation: 0}
+    "~GND@D.A": {x: 240, y: 320, rotation: 0}
+  wires:
+  - {id: W1, from: Cout.B, to: R_LOAD.B}
+  - {id: W2, from: D.A, to: VIN.B}
+  - {id: W4, from: D.A, to: "~GND@D.A.P"}
+  - {id: W5, from: SW.D, to: VIN.A}
+  - {id: W6, from: PWM.A, to: SW.G}
+  - {id: W7, from: D.B, to: SW.S}
+  - {id: W8, from: L1.A, to: SW.S}
+  - {id: W9, from: PWM.B, to: SW.S, path: [[180, -20], [180, -20], [240, -20], [240, 80], [220, 80]]}
+  - {id: W10, from: Cout.A, to: R_LOAD.A, path: [[560, 160], [560, 80], [680, 80], [680, 160]]}
+  - {id: W11, from: Cout.A, to: L1.B}
+  - {id: W12, from: D.A, to: Cout.B}
+  groups: {}
