@@ -6,6 +6,7 @@ import {
   IsArray,
   IsBoolean,
   IsIn,
+  IsInt,
   IsNumber,
   IsObject,
   IsOptional,
@@ -19,9 +20,18 @@ import {
   ValidateNested,
 } from 'class-validator';
 
+import { BOM_CATEGORIES, type BomCategory } from '../bom.stage';
+import {
+  MTBF_METHODS,
+  MTBF_PART_TYPES,
+  type MtbfMethod,
+  type MtbfPartType,
+} from '../mtbf.stage';
+
 /**
- * Bodies of the branch stage runs of magnetics and thermal, in the
- * qdonis-web contract (`RunMagneticsInput`, `RunThermalInput`).
+ * Bodies of the branch stage runs of magnetics, thermal, MTBF and BOM, in
+ * the qdonis-web contract (`RunMagneticsInput`, `RunThermalInput`,
+ * `RunMtbfInput`, `RunBomInput`).
  */
 
 const Num = (min: number, max: number) =>
@@ -145,6 +155,35 @@ export class RunMagneticsStageDto {
   @IsObject()
   @IsCoreMap()
   coreOverrides?: Record<string, string>;
+
+  @ApiPropertyOptional({
+    type: [MagneticPartStageDto],
+    description:
+      "Circuit parts designed from these values instead of their simulated waveforms (by ref); kept across re-designs. With origin 'input' they replace the entered parts.",
+  })
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(16)
+  @ValidateNested({ each: true })
+  @Type(() => MagneticPartStageDto)
+  partOverrides?: MagneticPartStageDto[];
+
+  @ApiPropertyOptional({
+    type: [String],
+    description:
+      'Refs whose entered values are dropped (back to the circuit waveforms)',
+  })
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(16)
+  @IsString({ each: true })
+  @MaxLength(32, { each: true })
+  clearOverrides?: string[];
+
+  @ApiPropertyOptional({ description: 'Drop every entered value' })
+  @IsOptional()
+  @IsBoolean()
+  clearAllOverrides?: boolean;
 }
 
 // --- thermal ---------------------------------------------------------------------
@@ -217,9 +256,9 @@ export class ThermalInputsStageDto {
 
 /** Body of `POST /projects/:projectId/branches/:branchId/stages/thermal/run`. */
 export class RunThermalStageDto {
-  @ApiProperty({ enum: ['simulation', 'devices', 'input'] })
-  @IsIn(['simulation', 'devices', 'input'])
-  origin!: 'simulation' | 'devices' | 'input';
+  @ApiProperty({ enum: ['simulation', 'input'] })
+  @IsIn(['simulation', 'input'])
+  origin!: 'simulation' | 'input';
 
   @ApiPropertyOptional({ type: ThermalInputsStageDto })
   @IsOptional()
@@ -233,4 +272,194 @@ export class RunThermalStageDto {
   @ValidateNested()
   @Type(() => ThermalSettingsDto)
   settings!: ThermalSettingsDto;
+}
+
+// --- MTBF ------------------------------------------------------------------------
+
+/** `{ref: include}` for at most 200 parts. */
+function IsIncludeMap(): PropertyDecorator {
+  return ValidateBy({
+    name: 'isIncludeMap',
+    validator: {
+      validate: (value: unknown) =>
+        typeof value === 'object' &&
+        value !== null &&
+        !Array.isArray(value) &&
+        Object.keys(value).length <= 200 &&
+        Object.entries(value).every(
+          ([ref, include]) =>
+            /^[A-Za-z]\w{0,39}$/.test(ref) && typeof include === 'boolean',
+        ),
+      defaultMessage: () => 'overrides must map part refs to true / false',
+    },
+  });
+}
+
+export class MtbfSettingsDto {
+  @ApiProperty({ enum: MTBF_METHODS })
+  @IsIn(MTBF_METHODS)
+  predictionMethod!: MtbfMethod;
+
+  @ApiProperty({ description: "One of the method's environments" })
+  @IsString()
+  @MaxLength(120)
+  environment!: string;
+
+  @ApiProperty({
+    description: 'Parts included (true) or left out (false) by the user',
+    example: { R_LOAD: false },
+  })
+  @IsIncludeMap()
+  overrides!: Record<string, boolean>;
+}
+
+export class MtbfPartStageDto {
+  @Ref() ref!: string;
+  @ApiProperty({ enum: MTBF_PART_TYPES })
+  @IsIn(MTBF_PART_TYPES)
+  type!: MtbfPartType;
+  @ApiProperty({ nullable: true, maxLength: 60 })
+  @ValidateIf((_, v) => v !== null)
+  @IsString()
+  @MaxLength(60)
+  partNumber!: string | null;
+  @NullableNum(-55, 250) temperatureC!: number | null;
+  @NullableNum(0, 100_000) voltageV!: number | null;
+  @NullableNum(0.1, 100_000) ratedVoltageV!: number | null;
+}
+
+/** Body of `POST /projects/:projectId/branches/:branchId/stages/mtbf/run`. */
+export class RunMtbfStageDto {
+  @ApiProperty({ enum: ['circuit', 'input'] })
+  @IsIn(['circuit', 'input'])
+  origin!: 'circuit' | 'input';
+
+  @ApiPropertyOptional({ type: [MtbfPartStageDto] })
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(64)
+  @ValidateNested({ each: true })
+  @Type(() => MtbfPartStageDto)
+  inputs?: MtbfPartStageDto[];
+
+  @ApiProperty({ type: MtbfSettingsDto })
+  @IsObject()
+  @ValidateNested()
+  @Type(() => MtbfSettingsDto)
+  settings!: MtbfSettingsDto;
+}
+
+// --- BOM -------------------------------------------------------------------------
+
+const Text = (max: number) =>
+  applyDecorators(
+    ApiProperty({ nullable: true, maxLength: max }),
+    ValidateIf((_, v) => v !== null),
+    IsString(),
+    MaxLength(max),
+  );
+
+export class PriceTierDto {
+  @ApiProperty() @IsInt() @Min(1) @Max(10_000_000) quantity!: number;
+  @ApiProperty() @Num(0, 1_000_000) price!: number;
+}
+
+/** A distributor part picked for a line (a Mouser search result). */
+export class SourcedPartDto {
+  @ApiProperty({ maxLength: 120 })
+  @IsString()
+  @MaxLength(120)
+  manufacturer!: string;
+  @ApiProperty({ maxLength: 120 })
+  @IsString()
+  @MaxLength(120)
+  partNumber!: string;
+  @Text(120) mouserPartNumber!: string | null;
+  @Text(500) description!: string | null;
+  @Text(120) packageType!: string | null;
+  @ApiProperty({ type: [PriceTierDto] })
+  @IsArray()
+  @ArrayMaxSize(20)
+  @ValidateNested({ each: true })
+  @Type(() => PriceTierDto)
+  pricingTiers!: PriceTierDto[];
+  /** ISO currency of the prices (older clients: absent, read as USD). */
+  @ApiPropertyOptional({ nullable: true, example: 'GBP' })
+  @IsOptional()
+  @ValidateIf((_, v) => v !== null)
+  @Matches(/^[A-Z]{3}$/, { message: 'currency must be an ISO code like USD' })
+  currency?: string | null;
+  @Text(200) availability!: string | null;
+  @Text(120) leadTime!: string | null;
+  @Text(120) rohsStatus!: string | null;
+  @Text(120) lifecycleStatus!: string | null;
+  @ApiProperty({ nullable: true, maxLength: 1000 })
+  @ValidateIf((_, v) => v !== null)
+  @IsString()
+  @MaxLength(1000)
+  @Matches(/^https?:\/\//, { message: 'datasheetUrl must be an http(s) URL' })
+  datasheetUrl!: string | null;
+}
+
+export class BomExtraLineDto {
+  @ApiProperty({ enum: BOM_CATEGORIES })
+  @IsIn(BOM_CATEGORIES)
+  category!: BomCategory;
+  @ApiProperty({ maxLength: 200 })
+  @IsString()
+  @MaxLength(200)
+  @Matches(/\S/, { message: 'description must not be empty' })
+  description!: string;
+}
+
+/** A change to one line; `null` resets the field (or removes an added line). */
+export class BomLinePatchDto {
+  @ApiPropertyOptional({ nullable: true })
+  @IsOptional()
+  @ValidateIf((_, v) => v !== null)
+  @IsBoolean()
+  included?: boolean | null;
+
+  @ApiPropertyOptional({ nullable: true, minimum: 1, maximum: 1_000_000 })
+  @IsOptional()
+  @ValidateIf((_, v) => v !== null)
+  @IsInt()
+  @Min(1)
+  @Max(1_000_000)
+  quantity?: number | null;
+
+  @ApiPropertyOptional({ type: SourcedPartDto, nullable: true })
+  @IsOptional()
+  @ValidateIf((_, v) => v !== null)
+  @IsObject()
+  @ValidateNested()
+  @Type(() => SourcedPartDto)
+  part?: SourcedPartDto | null;
+
+  @ApiPropertyOptional({ type: BomExtraLineDto, nullable: true })
+  @IsOptional()
+  @ValidateIf((_, v) => v !== null)
+  @IsObject()
+  @ValidateNested()
+  @Type(() => BomExtraLineDto)
+  extra?: BomExtraLineDto | null;
+}
+
+export class BomLineChangeDto extends BomLinePatchDto {
+  @Ref() ref!: string;
+}
+
+/** Body of `POST /projects/:projectId/branches/:branchId/stages/bom/run`. */
+export class RunBomStageDto {
+  @ApiPropertyOptional({
+    type: [BomLineChangeDto],
+    description:
+      'Line changes; omit to rebuild from the branch keeping the stored choices',
+  })
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(200)
+  @ValidateNested({ each: true })
+  @Type(() => BomLineChangeDto)
+  changes?: BomLineChangeDto[];
 }

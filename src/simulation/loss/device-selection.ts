@@ -3,7 +3,8 @@
  * qdonis-core `simulator/device_selection.py`: shortlist library parts by
  * voltage class and current fit, evaluate each with the loss engine on the
  * device's waveforms and pick the lowest loss (lightly penalising
- * over-sizing).
+ * over-sizing). Beyond the core: a power module is only a candidate when no
+ * discrete part of the voltage class carries the current.
  */
 
 import { readdirSync, readFileSync, statSync } from 'node:fs';
@@ -11,10 +12,11 @@ import { join } from 'node:path';
 
 import {
   currentFromPart,
+  isModulePart,
   partFamily,
   voltageFromPart,
 } from '../../devices/library/part-ratings';
-import { formatFixed, isDict, pyStr, toFloat, type Dict } from '../netlist/py';
+import { formatFixed, isDict, toFloat, type Dict } from '../netlist/py';
 import { max, mean, pyRound, pySum } from '../numeric/numpy';
 import {
   LIBRARY_DIR,
@@ -192,7 +194,11 @@ function shortlist(
     .sort((a, b) => a - b)
     .slice(0, 2);
   pool = pool.filter((p) => classes.includes(p.v_rating));
-  const adequate = pool.filter((p) => p.i_lut >= iReq);
+  let adequate = pool.filter((p) => p.i_lut >= iReq);
+  // Discrete parts first: a module's lower loss never justifies its size and
+  // price when a discrete part carries the current.
+  const discrete = adequate.filter((p) => !isModulePart(p.part));
+  if (discrete.length) adequate = discrete;
   if (adequate.length === 0) {
     return [...pool].sort((a, b) => b.i_lut - a.i_lut).slice(0, MAX_CANDIDATES);
   }
@@ -331,7 +337,19 @@ function select(
           out.push({ ...p, diode: null });
         }
       }
-      if (preference === 'auto' || preference === 'igbt' || out.length === 0) {
+      // The library's IGBTs are all modules: in `auto` they only compete
+      // when no discrete MOSFET is adequate.
+      const discreteMosfet =
+        preference === 'auto' &&
+        out.some(
+          (p) =>
+            !isModulePart(p.part) &&
+            p.i_lut >= Math.max(stress.i_peak * CURRENT_MARGIN, 0.5),
+        );
+      if (
+        !discreteMosfet &&
+        (preference === 'auto' || preference === 'igbt' || out.length === 0)
+      ) {
         let igbts = shortlist('switch', (x) => x.type === 'IGBT', stress);
         if (preference === 'auto' && out.length) {
           igbts = igbts.filter((p) => p.i_rating <= currentBandLimit(stress));
@@ -529,216 +547,4 @@ export function selectDevices(
     devices.set(ref, { kind, series: s, stress: deviceStress(...s) });
   }
   return select(devices, tj, preference, overrides, 'simulated waveforms');
-}
-
-// ---------------------------------------------------------------------------
-// Standalone selection: idealised waveforms from entered stresses
-// ---------------------------------------------------------------------------
-
-const PERIODS = 4;
-const SAMPLES_PER_PERIOD = 200;
-const GATE_ON_V = 15.0;
-const DIODE_FORWARD_V = 0.8;
-const SWITCH_ON_V = 0.5;
-
-/** `_num`: `float(value)` when finite, else null. */
-function num(value: unknown): number | null {
-  if (value === null || value === undefined) return null;
-  try {
-    const out = toFloat(value);
-    return Number.isFinite(out) ? out : null;
-  } catch {
-    return null;
-  }
-}
-
-/** Python truthiness of an optional float. */
-const truthyNum = (x: number | null): x is number => x !== null && x !== 0;
-
-function onCurrent(
-  duty: number,
-  iPeak: number | null,
-  iRms: number | null,
-  iAvg: number | null,
-): [number | null, number | null] {
-  if (truthyNum(iPeak) && truthyNum(iRms)) {
-    const rOnSq = iRms ** 2 / duty;
-    if (rOnSq >= iPeak ** 2) return [iPeak, iPeak];
-    const disc = 12 * rOnSq - 3 * iPeak ** 2;
-    const start = disc > 0 ? (-iPeak + Math.sqrt(disc)) / 2 : 0.0;
-    return [Math.max(0.0, Math.min(start, iPeak)), iPeak];
-  }
-  if (truthyNum(iRms)) {
-    const level = iRms / Math.sqrt(duty);
-    return [level, level];
-  }
-  if (truthyNum(iAvg)) {
-    const level = iAvg / duty;
-    return [level, level];
-  }
-  return [iPeak, iPeak];
-}
-
-/** `synthetic_series`: a few periods in the loss engine's conventions. */
-export function syntheticSeries(
-  kind: Kind,
-  vBlock: number,
-  fsw: number,
-  duty: number,
-  start: number,
-  end: number,
-  zvs = false,
-): Series {
-  const spp = SAMPLES_PER_PERIOD;
-  const n = PERIODS * spp + 1;
-  const denom = spp * fsw;
-  const t: number[] = [];
-  const on: boolean[] = [];
-  const progress: number[] = [];
-  for (let k = 0; k < n; k += 1) {
-    t.push(k / denom);
-    const phase = (k % spp) / spp;
-    if (kind === 'switch') {
-      on.push(phase >= 1.0 - duty);
-      progress.push((phase - (1.0 - duty)) / Math.max(duty, 1e-9));
-    } else {
-      on.push(phase < duty);
-      progress.push(phase / Math.max(duty, 1e-9));
-    }
-  }
-  const i = progress.map((p, k) =>
-    on[k] ? start + (end - start) * Math.min(Math.max(p, 0.0), 1.0) : 0.0,
-  );
-  if (kind === 'switch') {
-    const gate = on.map((x) => (x ? GATE_ON_V : 0.0));
-    const v = on.map((x) => (x ? SWITCH_ON_V : vBlock));
-    for (let k = 0; k < n; k += 1) {
-      const prev = on[(k - 1 + n) % n];
-      if (on[k] && !prev) v[k] = zvs ? 0.0 : vBlock;
-    }
-    return [t, v, i, gate];
-  }
-  const v = on.map((x) => (x ? DIODE_FORWARD_V : -vBlock));
-  return [t, v, i, null];
-}
-
-/** Device table from entered stresses, plus the inputs missing per ref. */
-function standaloneDevices(
-  entries: Dict[],
-): [Map<string, Device>, Record<string, string[]>] {
-  const devices = new Map<string, Device>();
-  const missing: Record<string, string[]> = {};
-  entries.forEach((entry, idx) => {
-    const rawRef = entry.ref;
-    const ref =
-      rawRef === undefined || rawRef === null || rawRef === '' || rawRef === 0
-        ? `Q${idx + 1}`
-        : pyStr(rawRef);
-    const kind: Kind =
-      pyStr(entry.kind ?? 'switch').toLowerCase() === 'diode'
-        ? 'diode'
-        : 'switch';
-    const vBlock = num(entry.v_block_v);
-    const fswKhz = num(entry.fsw_khz);
-    const iPeak = num(entry.i_peak_a);
-    const iRms = num(entry.i_rms_a);
-    const iAvg = num(entry.i_avg_a);
-    const dutyIn = num(entry.duty);
-    const need: string[] = [];
-    if (!truthyNum(vBlock) || vBlock <= 0) need.push('v_block_v');
-    if (!truthyNum(fswKhz) || fswKhz <= 0) need.push('fsw_khz');
-    if (!(truthyNum(iPeak) || truthyNum(iRms) || truthyNum(iAvg))) {
-      need.push('i_peak_a, i_rms_a or i_avg_a');
-    }
-    if (need.length) {
-      missing[ref] = need;
-      return;
-    }
-    const duty = Math.min(0.95, Math.max(0.05, dutyIn ?? 0.5));
-    const [start, end] = onCurrent(duty, iPeak, iRms, iAvg);
-    const fsw = (fswKhz as number) * 1e3;
-    const s = syntheticSeries(
-      kind,
-      vBlock as number,
-      fsw,
-      duty,
-      start ?? 0,
-      end ?? 0,
-      Boolean(entry.zvs),
-    );
-    const stress = deviceStress(...s);
-    stress.fsw = fsw;
-    devices.set(ref, { kind, series: s, stress });
-  });
-  return [devices, missing];
-}
-
-export type StandaloneResult =
-  | { success: false; missing_inputs: Record<string, string[]> }
-  | (SelectionResult & {
-      success: true;
-      loss_analysis: {
-        assumptions: { junction_temperature_c: number; waveforms: string };
-        components: Dict[];
-      };
-    });
-
-/** `select_devices_from_stresses(entries, tj, preference, overrides)`. */
-export function selectDevicesFromStresses(
-  entries: Dict[],
-  tj = 100.0,
-  preference: Preference = 'auto',
-  overrides: Overrides | null = null,
-): StandaloneResult {
-  const [devices, missing] = standaloneDevices(entries);
-  if (Object.keys(missing).length)
-    return { success: false, missing_inputs: missing };
-  if (devices.size === 0) {
-    return {
-      success: false,
-      missing_inputs: { devices: ['at least one switch or diode'] },
-    };
-  }
-  const selection = select(
-    devices,
-    tj,
-    preference,
-    overrides,
-    'idealised waveforms from the entered stresses',
-  );
-  const components: Dict[] = [];
-  for (const sel of selection.selections) {
-    const chosen = sel.selected as Dict | null;
-    if (!chosen) continue;
-    const [t, v, i, gate] = devices.get(sel.ref as string)!.series;
-    const model = loadModel(chosen.part as string);
-    if (!model) continue;
-    const res = componentLosses(
-      t,
-      v,
-      i,
-      gate,
-      model,
-      tj,
-      sel.kind === 'switch',
-      chosen.diode ? loadModel(chosen.diode as string) : null,
-    );
-    if (res) components.push({ component: sel.ref, ...res });
-  }
-  const total = (c: Dict) => c.total_loss_w as number;
-  components.sort((a, b) =>
-    total(a) < total(b) ? 1 : total(a) > total(b) ? -1 : 0,
-  );
-  return {
-    success: true,
-    ...selection,
-    loss_analysis: {
-      assumptions: {
-        junction_temperature_c: tj,
-        waveforms:
-          'idealised (ramp current while conducting, hard switching unless zvs) from the entered stresses',
-      },
-      components,
-    },
-  };
 }

@@ -48,8 +48,8 @@ export function legacyProgress(data: Data): Progress {
 
 /**
  * Studio projects: READY stages on the active branch, out of the stages the
- * project shows (the 7 core stages for a full project, the entry step and
- * the later steps it has started for an entry-step project).
+ * project shows (the rail stages for a full project, the entry step and the
+ * later steps it has started for an entry-step project).
  */
 export function studioProgress(project: StudioProject): Progress {
   const node = (stage: StageKind) => stageNodeOnBranch(project, stage);

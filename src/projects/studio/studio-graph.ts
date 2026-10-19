@@ -12,26 +12,40 @@ export const STAGE_ORDER = [
   'visualization',
   'design',
   'simulation',
-  'devices',
   'magnetics',
   'thermal',
+  'mtbf',
+  'bom',
   'emc',
   'components',
-  'bom',
-  'mtbf',
 ] as const;
-export type StageKind = (typeof STAGE_ORDER)[number];
+/**
+ * Stages a stored node can have: the workspace stages plus `devices`, a
+ * former stage (device selection now lives on the simulation node). Old
+ * `devices` nodes stay in the history; nothing creates new ones.
+ */
+export const STAGE_KINDS = [...STAGE_ORDER, 'devices'] as const;
+export type WorkspaceStage = (typeof STAGE_ORDER)[number];
+export type StageKind = (typeof STAGE_KINDS)[number];
 
-/** The stages of the original full-design flow (always shown for full projects). */
+/** The stages of the full-design flow (always shown for full projects). */
 export const CORE_STAGES = [
   'specs',
   'visualization',
   'design',
   'simulation',
-  'devices',
   'magnetics',
   'thermal',
-] as const satisfies readonly StageKind[];
+  'mtbf',
+  'bom',
+] as const satisfies readonly WorkspaceStage[];
+
+export function isWorkspaceStage(value: unknown): value is WorkspaceStage {
+  return (
+    typeof value === 'string' &&
+    (STAGE_ORDER as readonly string[]).includes(value)
+  );
+}
 
 export const STAGE_LABEL: Record<StageKind, string> = {
   specs: 'Specs',
@@ -41,10 +55,10 @@ export const STAGE_LABEL: Record<StageKind, string> = {
   devices: 'Devices',
   magnetics: 'Magnetics',
   thermal: 'Thermal',
+  mtbf: 'MTBF',
+  bom: 'BOM',
   emc: 'EMC',
   components: 'Components',
-  bom: 'BOM',
-  mtbf: 'MTBF',
 };
 
 export type NodeStatus = 'running' | 'ready' | 'error';
@@ -97,7 +111,8 @@ export interface StudioProject {
  * may still pick another entry step.
  */
 export type StudioScope =
-  { mode: 'undecided' } | { mode: 'entry'; entry: StageKind; locked: boolean };
+  | { mode: 'undecided' }
+  | { mode: 'entry'; entry: WorkspaceStage; locked: boolean };
 
 export const newId = (prefix = ''): string =>
   prefix ? `${prefix}_${randomUUID()}` : randomUUID();
@@ -107,7 +122,7 @@ const now = (): string => new Date().toISOString();
 export function isStageKind(value: unknown): value is StageKind {
   return (
     typeof value === 'string' &&
-    (STAGE_ORDER as readonly string[]).includes(value)
+    (STAGE_KINDS as readonly string[]).includes(value)
   );
 }
 

@@ -47,16 +47,29 @@ describe('stage contracts', () => {
 
   it('needs only one input of an alternative group', () => {
     const check = checkInputs(
-      'devices',
+      'magnetics',
       [
-        { name: 'kind', value: 'switch' },
-        { name: 'v_block', value: '400' },
+        { name: 'kind', value: 'inductor' },
+        { name: 'inductance', value: '47' },
         { name: 'fsw', value: '100' },
       ],
       none,
       false,
     );
-    expect(check.missing.map((i) => i.key)).toEqual(['i_peak']);
+    expect(check.missing.map((i) => i.key)).toEqual(['i_dc']);
+    expect(
+      checkInputs(
+        'magnetics',
+        [
+          { name: 'kind', value: 'inductor' },
+          { name: 'inductance', value: '47' },
+          { name: 'fsw', value: '100' },
+          { name: 'RMS current', value: '9' },
+        ],
+        none,
+        false,
+      ).missing,
+    ).toEqual([]);
   });
 
   it('takes inputs from ready results on the branch', () => {
@@ -65,6 +78,15 @@ describe('stage contracts', () => {
     expect(check.fromResults.map((r) => r.input.key)).toContain(
       'device_losses',
     );
+  });
+
+  it('blocks a BOM without a circuit, pointing at Circuit', () => {
+    expect(checkInputs('bom', [], none, false).blocked).toMatchObject({
+      redirect: 'visualization',
+    });
+    expect(
+      checkInputs('bom', [], (s) => s === 'visualization', false).blocked,
+    ).toBeNull();
   });
 
   it('blocks a simulation without a design or a netlist, pointing at Design', () => {
@@ -88,8 +110,8 @@ describe('steps named in a message', () => {
     ['Run the thermal analysis: Q1 loses 6 W', ['thermal']],
     ['Check the thermals: D1 1.2 W', ['thermal']],
     ['Simulate this netlist.', ['simulation']],
-    ['Do the device selection for a 400 V boost', ['devices']],
-    ['Estimate the MTBF and build the BOM', ['bom', 'mtbf']],
+    ['Do the device selection for a 400 V boost', ['simulation']],
+    ['Estimate the MTBF and build the BOM', ['mtbf', 'bom']],
     ['Check conducted EMI of my PFC filter', ['emc']],
     ['Select parts for these components: C1 47 µF', ['components']],
     ['Show me the schematic of a flyback', ['visualization']],
@@ -164,7 +186,7 @@ describe('scoped request', () => {
   it('is unchanged without a scope', () => {
     const plain = buildStudioRequest(base);
     expect(plain.system?.[0]).not.toContain('## Entry steps');
-    expect(plain.toolConfig?.tools).toHaveLength(17);
+    expect(plain.toolConfig?.tools).toHaveLength(buildStudioTools([]).length);
   });
 
   it('offers only the tools of the scope', () => {

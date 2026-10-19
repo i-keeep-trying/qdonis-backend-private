@@ -46,6 +46,8 @@ export class VisualizationService {
       inventory: toDisplayInventory(this.circuits.inventory({ topologyId })),
       edits: [],
       customStructure: false,
+      customCircuit: null,
+      layout: null,
     };
   }
 

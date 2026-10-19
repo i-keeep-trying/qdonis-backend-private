@@ -6,8 +6,9 @@ import type {
 /**
  * Studio agent tool registry: exact port of qdonis-core
  * `studio_agent.build_tools` (same names, descriptions, JSON schemas,
- * property order). Exactness is enforced by the parity fixtures under
- * test/parity/fixtures/studio-agent.
+ * property order), plus the MTBF and BOM stages (`run_mtbf`, `build_bom`,
+ * and `mtbf` / `bom` in the stage enums), which the core never had. Exactness is enforced by the
+ * parity fixtures under test/parity/fixtures/studio-agent.
  */
 
 /** Workspace stages, in display order (`STAGES` in the core). */
@@ -16,9 +17,10 @@ export const STUDIO_STAGES = [
   'visualization',
   'design',
   'simulation',
-  'devices',
   'magnetics',
   'thermal',
+  'mtbf',
+  'bom',
 ] as const;
 
 /** Tools whose result is the user's next message (the client stops the loop). */
@@ -355,53 +357,8 @@ export function buildStudioTools(
     ),
     fn(
       'select_devices',
-      "DEVICES tool, usable on its own: choose the power semiconductors from the device library and evaluate their losses. Two input modes:\n- STANDALONE: pass `devices` with each device's stresses. Nothing else is needed: no specs, design or simulation. Use this whenever the user asks for device / MOSFET / diode selection directly or there is no simulation on the branch. Required per device: ref, kind (switch | diode), v_block_v (peak blocking voltage), fsw_khz, and i_peak_a / i_rms_a / i_avg_a (one or more; peak + RMS gives the best current shape); optional duty (conduction fraction, default 0.5) and zvs (soft turn-on). Parts are evaluated on idealised waveforms built from those stresses; the result appears in the Devices tab and run_thermal uses its losses when there is no simulation.\n- SIMULATION: omit `devices` to choose from the SIMULATED waveforms of the branch (peak voltage, peak/RMS current, switching events) and redo the simulation's loss analysis with the parts. Runs automatically after the first simulation.\nBoth: every viable part is evaluated at the junction temperature; the lowest-loss part with an adequate voltage class (>= 1.3x peak) and a sensible current size wins, and devices in the same circuit position share a part. Allowed kinds: switch = MOSFET with built-in diode, or IGBT + external antiparallel diode; diode = discrete diode. Call it again to change the technology preference or to force specific parts; a re-run without `devices` keeps the previously entered stresses unless from_simulation is true.",
+      "Part of the SIMULATION stage (there is no separate devices stage): choose the power semiconductors from the device library using the SIMULATED waveforms of the branch (peak voltage, peak/RMS current, switching events) and redo the simulation's loss analysis with the parts. Runs automatically after the first simulation; needs a successful simulation on the branch. Every viable part is evaluated at the junction temperature; the lowest-loss part with an adequate voltage class (>= 1.3x peak) and a sensible current size wins, and devices in the same circuit position share a part. Allowed kinds: switch = MOSFET with built-in diode, or IGBT + external antiparallel diode; diode = discrete diode. Call it again to change the technology preference or to force specific parts.",
       {
-        devices: {
-          type: 'array',
-          description:
-            'Standalone mode: the switches / diodes and their stresses.',
-          items: {
-            type: 'object',
-            properties: {
-              ref: { type: 'string', description: "Name, e.g. 'Q1', 'D1'." },
-              kind: { type: 'string', enum: ['switch', 'diode'] },
-              v_block_v: {
-                type: 'number',
-                description: 'Peak blocking voltage, V.',
-              },
-              fsw_khz: { type: 'number' },
-              i_peak_a: { type: 'number' },
-              i_rms_a: { type: 'number' },
-              i_avg_a: { type: 'number' },
-              duty: {
-                type: 'number',
-                description: 'Conduction fraction, 0..1 (default 0.5).',
-              },
-              zvs: {
-                type: 'boolean',
-                description:
-                  'Zero-voltage (soft) turn-on, e.g. resonant / phase-shifted bridges.',
-              },
-            },
-            required: ['ref', 'kind'],
-          },
-        },
-        fsw_khz: {
-          type: 'number',
-          description:
-            'Switching frequency for every entered device that does not set its own.',
-        },
-        junction_temperature_c: {
-          type: 'number',
-          description:
-            "Tj for the loss evaluation (default: the specs' value, else 100 C).",
-        },
-        from_simulation: {
-          type: 'boolean',
-          description:
-            'Select from the branch simulation instead of previously entered stresses.',
-        },
         preference: {
           type: 'string',
           enum: ['auto', 'mosfet', 'igbt'],
@@ -614,6 +571,142 @@ export function buildStudioTools(
       },
     ),
     fn(
+      'run_mtbf',
+      'MTBF / RELIABILITY tool, usable on its own. Predicts the failure rate (FIT) and MTBF of the converter with MIL-HDBK-217F, Telcordia SR-332, IEC TR 62380 or FIDES 2022. Two input modes:\n- STANDALONE: pass `parts` (ref + type, optionally part number, temperature, voltage stress and rating). No design or simulation is needed.\n- CIRCUIT: omit them to evaluate every part of the branch circuit. Loads, source/line impedances and simulation helpers are left out by default (use `include` / `exclude`). Switch and diode part numbers and voltage stress come from the Simulation device selection, junction and hotspot temperatures from the Thermal stage (magnetics hotspots from the Magnetics stage), other parts run at the ambient. Run Thermal first for realistic temperatures.\nA re-run without inputs keeps the previously entered parts, the method, the environment and the include/exclude choices unless changed.',
+      {
+        prediction_method: {
+          type: 'string',
+          enum: [
+            'MIL-HDBK-217F',
+            'Telcordia SR-332',
+            'IEC TR 62380',
+            'FIDES 2022',
+          ],
+          description: 'Default MIL-HDBK-217F (or the previous run).',
+        },
+        environment: {
+          type: 'string',
+          description:
+            "Exact environment label of the method, e.g. 'GF - Ground, Fixed (πE=2.0)' (MIL-HDBK-217F), 'Partially Controlled (πE=2.0)' (Telcordia), 'Automotive (πE=30.0)' (IEC), 'Ground, Mobile (γE=3.0)' (FIDES). Default: the method's most benign environment. An unknown label returns the valid list.",
+        },
+        parts: {
+          type: 'array',
+          description: 'Standalone mode: the parts to evaluate.',
+          items: {
+            type: 'object',
+            properties: {
+              ref: { type: 'string' },
+              type: {
+                type: 'string',
+                enum: [
+                  'mosfet',
+                  'diode',
+                  'inductor',
+                  'transformer',
+                  'capacitor',
+                  'resistor',
+                  'ic',
+                ],
+                description: 'IGBTs and other switches count as mosfet.',
+              },
+              part_number: { type: 'string' },
+              temperature_c: {
+                type: 'number',
+                description:
+                  'Operating (junction / hotspot) temperature; default the Thermal result or the ambient.',
+              },
+              voltage_v: {
+                type: 'number',
+                description: 'Peak applied voltage.',
+              },
+              rated_voltage_v: { type: 'number' },
+            },
+            required: ['ref', 'type'],
+          },
+        },
+        include: {
+          type: 'array',
+          items: { type: 'string' },
+          description: 'Circuit parts to count that are left out by default.',
+        },
+        exclude: {
+          type: 'array',
+          items: { type: 'string' },
+          description: 'Circuit parts to leave out of the estimate.',
+        },
+        from_circuit: {
+          type: 'boolean',
+          description:
+            'Use the branch circuit instead of previously entered parts.',
+        },
+      },
+    ),
+    fn(
+      'build_bom',
+      "BOM tool: builds the bill of materials of the branch circuit. One line per physical part (loads, line-impedance models and simulation helpers are left out unless included), with the Simulation device selection's part numbers, the custom-wound magnetics of the Magnetics stage, and a heatsink line from the Thermal stage's cooling recommendation. Needs a circuit (a topology or an imported netlist). Distributor parts and prices are picked by the user per line in the BOM view (Mouser search), which also exports XLSX / CSV; never invent prices or distributor part numbers. A re-run keeps the user's per-line choices.",
+      {
+        quantities: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              ref: { type: 'string' },
+              quantity: { type: 'integer', minimum: 1 },
+            },
+            required: ['ref', 'quantity'],
+          },
+          description: 'Quantity per board of a line (default 1).',
+        },
+        include: {
+          type: 'array',
+          items: { type: 'string' },
+          description: 'Lines to list that are left out by default.',
+        },
+        exclude: {
+          type: 'array',
+          items: { type: 'string' },
+          description: 'Lines to leave out of the BOM.',
+        },
+        add_lines: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              ref: { type: 'string', description: 'e.g. U1, J1, F1' },
+              category: {
+                type: 'string',
+                enum: [
+                  'mosfet',
+                  'diode',
+                  'inductor',
+                  'transformer',
+                  'capacitor',
+                  'resistor',
+                  'ic',
+                  'heatsink',
+                  'other',
+                ],
+              },
+              description: {
+                type: 'string',
+                description:
+                  "What the part is, e.g. 'PWM controller', 'Input fuse 5 A'.",
+              },
+              quantity: { type: 'integer', minimum: 1 },
+            },
+            required: ['ref', 'category', 'description'],
+          },
+          description:
+            'Parts that are not in the circuit (controller, connectors, fuse, ...).',
+        },
+        remove_lines: {
+          type: 'array',
+          items: { type: 'string' },
+          description: 'Refs of lines added earlier to remove.',
+        },
+      },
+    ),
+    fn(
       'open_view',
       'Focus a stage view in the workspace without changing anything.',
       {
@@ -624,9 +717,10 @@ export function buildStudioTools(
             'visualization',
             'design',
             'simulation',
-            'devices',
             'magnetics',
             'thermal',
+            'mtbf',
+            'bom',
           ],
         },
       },
@@ -648,9 +742,10 @@ export function buildStudioTools(
             'visualization',
             'design',
             'simulation',
-            'devices',
             'magnetics',
             'thermal',
+            'mtbf',
+            'bom',
           ],
           description:
             "For 'create': the new branch keeps everything BEFORE this stage.",

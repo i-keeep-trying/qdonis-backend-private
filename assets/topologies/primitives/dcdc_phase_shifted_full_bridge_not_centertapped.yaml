@@ -594,3 +594,65 @@ metadata:
     - ZVS
     - server
     - EV-charger
+schematic:
+  tuned: true
+  components:
+    Cout: {x: 1380, y: 240, rotation: 0}
+    D1: {x: 960, y: 120, rotation: 180}
+    D2: {x: 1100, y: 120, rotation: 180}
+    D3: {x: 960, y: 340, rotation: 180}
+    D4: {x: 1100, y: 340, rotation: 180}
+    L_OUT: {x: 1240, y: 40, rotation: 270}
+    L_R: {x: 640, y: 180, rotation: 270}
+    PWM1: {x: 140, y: 120, rotation: 0}
+    PWM2: {x: 140, y: 380, rotation: 0}
+    PWM3: {x: 420, y: 120, rotation: 0}
+    PWM4: {x: 420, y: 380, rotation: 0}
+    R_ISO: {x: 800, y: 420, rotation: 0}
+    R_ISO_S1: {x: 900, y: 420, rotation: 0}
+    R_LOAD: {x: 1500, y: 240, rotation: 0}
+    SW1: {x: 240, y: 80, rotation: 0}
+    SW2: {x: 240, y: 320, rotation: 0}
+    SW3: {x: 520, y: 80, rotation: 0}
+    SW4: {x: 520, y: 320, rotation: 0}
+    T1: {x: 780, y: 240, rotation: 0}
+    VIN: {x: 40, y: 200, rotation: 0}
+    "~GND@PWM2.B": {x: 140, y: 500, rotation: 0}
+    "~GND@R_ISO.B": {x: 800, y: 540, rotation: 0}
+    "~GND@R_ISO_S1.B": {x: 940, y: 540, rotation: 0}
+    "~GND@VIN.B": {x: 0, y: 320, rotation: 0}
+  wires:
+  - {id: W2, from: PWM2.B, to: SW2.S}
+  - {id: W3, from: PWM4.B, to: SW4.S}
+  - {id: W4, from: PWM4.B, to: SW2.S, path: [[420, 420], [420, 440], [260, 440], [260, 440], [250, 440], [250, 440], [240, 440], [240, 380], [240, 360]]}
+  - {id: W6, from: PWM2.B, to: "~GND@PWM2.B.P"}
+  - {id: W8, from: SW1.D, to: SW3.D}
+  - {id: W9, from: SW1.D, to: VIN.A}
+  - {id: W10, from: PWM1.A, to: SW1.G, path: [[140, 80], [140, 80], [200, 80], [200, 80], [220, 80]]}
+  - {id: W12, from: D2.A, to: D4.B}
+  - {id: W13, from: D4.B, to: T1.S2}
+  - {id: W11, from: R_ISO.A, to: T1.S2}
+  - {id: W14, from: D1.B, to: D2.B, path: [[960, 80], [960, 40], [1100, 40], [1100, 80]]}
+  - {id: W15, from: D2.B, to: L_OUT.A}
+  - {id: W16, from: Cout.A, to: R_LOAD.A, path: [[1380, 200], [1380, 40], [1500, 40], [1500, 200]]}
+  - {id: W17, from: Cout.A, to: L_OUT.B}
+  - {id: W18, from: Cout.B, to: R_LOAD.B, path: [[1380, 280], [1380, 420], [1500, 420], [1500, 280]]}
+  - {id: W19, from: D3.A, to: D4.A, path: [[960, 380], [960, 420], [1100, 420], [1100, 380]]}
+  - {id: W20, from: Cout.B, to: D4.A, path: [[1380, 280], [1380, 420], [1100, 420], [1100, 380]]}
+  - {id: W21, from: PWM1.B, to: SW1.S, path: [[140, 160], [140, 160], [240, 160], [240, 120]]}
+  - {id: W22, from: SW1.S, to: SW2.D}
+  - {id: W23, from: L_R.A, to: SW1.S}
+  - {id: W24, from: L_R.B, to: T1.P1}
+  - {id: W25, from: PWM2.A, to: SW2.G}
+  - {id: W26, from: PWM3.A, to: SW3.G, path: [[420, 80], [420, 80], [480, 80], [480, 80], [500, 80]]}
+  - {id: W27, from: PWM3.B, to: SW3.S, path: [[420, 160], [420, 160], [520, 160], [520, 120]]}
+  - {id: W28, from: SW3.S, to: SW4.D}
+  - {id: W29, from: SW4.D, to: T1.P2}
+  - {id: W30, from: PWM4.A, to: SW4.G}
+  - {id: W31, from: D1.A, to: D3.B}
+  - {id: W32, from: D3.B, to: R_ISO_S1.A}
+  - {id: W33, from: D1.A, to: T1.S1}
+  - {id: W1, from: R_ISO.B, to: "~GND@R_ISO.B.P"}
+  - {id: W5, from: R_ISO_S1.B, to: "~GND@R_ISO_S1.B.P"}
+  - {id: W34, from: VIN.B, to: PWM2.B}
+  groups: {}

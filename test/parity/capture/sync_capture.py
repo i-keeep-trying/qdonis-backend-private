@@ -21,8 +21,8 @@ def main() -> int:
     if os.environ.get("PYTHONHASHSEED") != "0":
         env = {**os.environ, "PYTHONHASHSEED": "0", "PYTHONDONTWRITEBYTECODE": "1"}
         return subprocess.call([sys.executable, "-B", *sys.argv], env=env)
-    core = HERE.parents[3] / "qdonis-core"
-    sys.path.insert(0, str(core))
+    core = Path(sys.argv[sys.argv.index("--core") + 1]) if "--core" in sys.argv else HERE.parents[3] / "qdonis-core"
+    sys.path.insert(0, str(core.resolve()))
     import yaml
     from qdonis_backend.api_server import resolve_yaml_path
     from qdonis_backend.topology_improver import apply_parameter_updates_to_yaml

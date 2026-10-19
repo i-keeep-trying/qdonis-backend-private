@@ -2,6 +2,7 @@ import { specsOf } from '../design/studio-specs.logic';
 import type { MagneticDesign } from '../engines/magnetics/magnetics-engine';
 import {
   analyzeThermal,
+  type CoolingRecommendation,
   type LossItem,
   type ThermalDeviceInput,
   type ThermalMagneticInput,
@@ -14,6 +15,7 @@ import {
 } from '../projects/studio/studio-graph';
 import type {
   CircuitDataProvider,
+  ComponentWaveStats,
   LossComponent,
   WaveformStats,
 } from './circuit-data.provider';
@@ -57,8 +59,6 @@ export interface ThermalOptions {
   marginC?: number;
   inputs?: ThermalInputs;
   fromSimulation?: boolean;
-  /** Use the Devices-stage losses even when the branch has a simulation. */
-  fromDevices?: boolean;
   /** Output power set by the user, W (overrides the load / specs). */
   outputPowerW?: number;
 }
@@ -143,38 +143,6 @@ const lossRows = (value: unknown): LossComponent[] =>
     )
     .map((c) => c as unknown as LossComponent);
 
-/** Semiconductor heat sources from a standalone Devices stage. */
-function devicesStageInputs(
-  data: Record<string, unknown>,
-): Pick<ThermalInputs, 'devices' | 'other_losses'> {
-  const method =
-    'Devices stage: library part on idealised waveforms from the entered stresses';
-  const comps = lossRows(data.loss_analysis);
-  const selection = rec(data.selection) as DeviceSelection;
-  return {
-    devices: comps.map((c) => ({
-      ref: String(c.component),
-      kind: c.device_type === 'diode' ? 'diode' : 'switch',
-      loss_w: Math.max(
-        0,
-        (Number(c.total_loss_w) || 0) - (Number(c.gate_drive_loss_w) || 0),
-      ),
-      conduction_loss_w: Number(c.conduction_loss_w) || 0,
-      switching_loss_w: Number(c.switching_loss_w) || 0,
-      technology: deviceTechnology(String(c.component), undefined, selection),
-      method,
-    })),
-    other_losses: comps
-      .filter((c) => Number(c.gate_drive_loss_w) > 0)
-      .map((c) => ({
-        ref: `${c.component} gate drive`,
-        category: 'gate_drive' as const,
-        loss_w: Number(c.gate_drive_loss_w),
-        method: 'Qg·Vdrv·fsw from the device model',
-      })),
-  };
-}
-
 /** Losses of every passive part from the simulated waveforms (old `passiveLosses`). */
 export function passiveLosses(
   stats: WaveformStats,
@@ -184,11 +152,14 @@ export function passiveLosses(
   passives: LossItem[];
   magnetics: ThermalMagneticInput[];
   notEvaluated: Array<{ ref: string; reason: string }>;
+  /** Simulation-only parts left out of the budget (R_ISO ground anchors). */
+  excluded: string[];
   loadW: number | null;
 } {
   const passives: LossItem[] = [];
   const magnetics: ThermalMagneticInput[] = [];
   const notEvaluated: Array<{ ref: string; reason: string }> = [];
+  const excluded: string[] = [];
   let loadW: number | null = null;
   const entries = Object.entries(stats.components);
 
@@ -223,6 +194,14 @@ export function passiveLosses(
 
     if (type === 'resistor') {
       const R = p.resistance;
+      // Ground anchors (R_ISO, ~100 MΩ from an isolated side to the input return) only
+      // give ngspice a DC reference for the floating secondary; not a physical part.
+      if (/anchor/.test(role) || /^R_?ISO/i.test(ref)) {
+        excluded.push(
+          `${ref} (${R ? `${(R / 1e6).toPrecision(3)} MΩ ` : ''}simulation-only ground anchor for the isolated side, not a real part)`,
+        );
+        continue;
+      }
       let loss: number | null = null;
       let method = '';
       if (c.v && c.i && c.p_avg !== undefined) {
@@ -235,20 +214,16 @@ export function passiveLosses(
         loss = c.i.rms * c.i.rms * R;
         method = 'I_rms²·R from the simulated current';
       } else if (c.parent && fsw) {
-        const cap = entries.find(
-          ([, o]) =>
-            o.parent === c.parent &&
-            String(o.type).toLowerCase() === 'capacitor' &&
-            o.params?.capacitance,
-        );
-        const host = stats.components[c.parent];
-        if (cap && host?.v) {
-          loss = cap[1].params.capacitance * host.v.pp * host.v.pp * fsw;
-          method = `RC snubber estimate C·ΔV²·fsw (C = ${cap[0]}, ΔV = ${host.v.pp.toFixed(0)} V across ${c.parent})`;
-        }
+        const estimate = nestedResistorEstimate(ref, c, entries, stats, fsw);
+        if (estimate) ({ loss, method } = estimate);
       }
       if (loss === null) {
-        notEvaluated.push({ ref, reason: 'no simulated voltage or current' });
+        notEvaluated.push({
+          ref,
+          reason: c.parent
+            ? 'no waveform for this nested part — re-run the design and simulation to export it'
+            : 'no simulated voltage or current',
+        });
         continue;
       }
       if (/load/.test(role)) {
@@ -310,7 +285,105 @@ export function passiveLosses(
       });
     }
   }
-  return { passives, magnetics, notEvaluated, loadW };
+  return { passives, magnetics, notEvaluated, excluded, loadW };
+}
+
+/** The cooling recommendation as the agent reads it (`cooling_recommendation`). */
+function coolingPayload(c: CoolingRecommendation | undefined) {
+  if (!c) return undefined;
+  return {
+    method: c.method,
+    why: c.rationale,
+    ...(c.heatsink
+      ? {
+          heatsink: {
+            rsa_max_c_per_w: round(c.heatsink.rsaMaxCW, 2),
+            heat_w: round(c.heatsink.heatW, 2),
+            sink_temp_c: Math.round(c.heatsink.sinkTempC),
+            approx_volume_cm3: c.heatsink.volumeCm3 || undefined,
+            approx_size: c.heatsink.sizeHint,
+            airflow: c.heatsink.airflow,
+          },
+        }
+      : {}),
+    mounting: c.mounting,
+    alternatives: c.alternatives,
+    notes: c.notes,
+  };
+}
+
+/**
+ * Loss of a nested resistor (RC snubber, damping) from a run without its own
+ * telemetry (decks generated before nested parts were probed). The branch sits
+ * across two pins of its parent; a square-wave step ΔV across a series RC
+ * dissipates C·ΔV²·fsw·tanh(T/4RC) in R (→ C·ΔV²·fsw when RC ≪ T, i.e. ½CΔV²
+ * per edge). A transformer secondary's swing is n·ΔV_pri (only the primary
+ * voltage is probed). Null when the branch cannot be resolved.
+ */
+function nestedResistorEstimate(
+  ref: string,
+  c: ComponentWaveStats,
+  entries: Array<[string, ComponentWaveStats]>,
+  stats: WaveformStats,
+  fsw: number,
+): { loss: number; method: string } | null {
+  const host = c.parent ? stats.components[c.parent] : undefined;
+  const links = c.links;
+  if (!host?.v || !links) return null;
+  const R = c.params?.resistance;
+  // The capacitor in series with this resistor (linked to it, same parent).
+  const cap = entries.find(
+    ([oref, o]) =>
+      o.parent === c.parent &&
+      String(o.type).toLowerCase() === 'capacitor' &&
+      o.params?.capacitance &&
+      ((o.links ?? []).some(([r]) => r === ref) ||
+        links.some(([r]) => r === oref)),
+  );
+  const pins = [...links, ...(cap?.[1].links ?? [])]
+    .filter(([r]) => r === c.parent)
+    .map(([, pin]) => pin.toUpperCase());
+  if (pins.length !== 2) return null;
+  const magnetic = MAGNETIC_TYPE.test(String(host.type || '').toLowerCase());
+  let dv = host.v.pp;
+  let across = `${c.parent}`;
+  let vrms = magnetic ? host.v.ac_rms : host.v.rms;
+  if (magnetic) {
+    const side = pins.every((x) => x.startsWith('P'))
+      ? 'P'
+      : pins.every((x) => x.startsWith('S'))
+        ? 'S'
+        : null;
+    if (!side) return null;
+    if (side === 'S') {
+      const n = host.params?.turns_ratio;
+      if (!n) return null;
+      dv *= n;
+      vrms *= n;
+      across = `${c.parent} secondary (n·ΔV_pri, n = ${n})`;
+    } else {
+      across = `${c.parent} primary`;
+    }
+  }
+  if (!cap) {
+    if (!R) return null;
+    return {
+      loss: (vrms * vrms) / R,
+      method: `V²/R with the AC voltage across ${across} (${vrms.toFixed(0)} V rms)`,
+    };
+  }
+  const C = cap[1].params.capacitance;
+  const factor = R ? Math.tanh(1 / (4 * fsw * R * C)) : 1;
+  const cText =
+    C >= 1e-6
+      ? `${(C * 1e6).toPrecision(3)} µF`
+      : C >= 1e-9
+        ? `${(C * 1e9).toPrecision(3)} nF`
+        : `${(C * 1e12).toPrecision(3)} pF`;
+  return {
+    loss: C * dv * dv * fsw * factor,
+    method: `RC snubber estimate C·ΔV²·fsw·tanh(T/4RC) (${cap[0]} = ${cText}, ΔV = ${dv.toFixed(0)} V across ${across})`,
+  };
 }
 
 export async function planThermal(
@@ -321,7 +394,6 @@ export async function planThermal(
   const {
     inputs: inputsIn,
     fromSimulation,
-    fromDevices,
     outputPowerW: userPout,
     ...settingOptions
   } = options;
@@ -339,38 +411,13 @@ export async function planThermal(
   const entered: ThermalInputs | null = hasThermalInputs(inputsIn)
     ? inputsIn
     : !fromSimulation &&
-        !fromDevices &&
         previousData.origin === 'input' &&
         hasThermalInputs(previousInputs)
       ? previousInputs
       : null;
 
   const simReady = sim?.status === 'ready' ? sim : null;
-  const devicesNode = stageNodeOnBranch(project, 'devices');
-  const stageDevices =
-    devicesNode?.status === 'ready' &&
-    lossRows(devicesNode.data.loss_analysis).length > 0 &&
-    (!simReady || entered || fromDevices)
-      ? devicesStageInputs(devicesNode.data)
-      : null;
-  if (fromDevices && !stageDevices) {
-    return fail(
-      'There are no device losses on this branch. Select the devices first, or enter the losses.',
-      { missing: 'devices' },
-    );
-  }
-  let inputs = entered;
-  if (stageDevices && !entered?.devices?.length) {
-    inputs = {
-      ...(entered || {}),
-      devices: stageDevices.devices,
-      other_losses: [
-        ...(entered?.other_losses || []),
-        ...(stageDevices.other_losses || []),
-      ],
-    };
-  }
-  const fromDevicesStage = !!stageDevices && inputs !== entered;
+  const inputs = entered;
   if (!inputs && !simReady) {
     return fail(
       'There is no simulation on this branch, so give the heat sources directly: call run_thermal with `devices` ' +
@@ -538,6 +585,7 @@ export async function planThermal(
                 'raw waveforms of this run are not available — re-run the simulation',
             },
           ],
+          excluded: [] as string[],
           loadW: null,
         };
     const simSettings: ThermalSettings = {
@@ -587,13 +635,19 @@ export async function planThermal(
           lossW: Number(c.gate_drive_loss_w),
           method: 'Qg·Vdrv·fsw from the device model',
         }));
-      return analyzeThermal(
+      const out = analyzeThermal(
         devices,
         [...designedMags, ...passive.magnetics],
         [...passive.passives, ...gateItems],
         passive.notEvaluated,
         simSettings,
       );
+      if (passive.excluded.length) {
+        out.assumptions.push(
+          `Excluded from the budget: ${passive.excluded.join('; ')}.`,
+        );
+      }
+      return out;
     };
 
     result = evaluate(comps);
@@ -613,6 +667,7 @@ export async function planThermal(
             break;
           const updated = await provider.recalculateLosses({
             topologyId: topologyId || '',
+            circuit: vis?.data.customCircuit,
             componentModels: selection.component_models || {},
             rawTimeSeriesZip: zip,
             junctionC: hottest,
@@ -647,7 +702,7 @@ export async function planThermal(
       result: finalResult,
       settings,
       electroThermal,
-      origin: entered ? 'input' : fromDevicesStage ? 'devices' : 'simulation',
+      origin: entered ? 'input' : 'simulation',
       ...(entered
         ? {
             inputs: {
@@ -673,7 +728,7 @@ export async function planThermal(
       payload: {
         mode: !inputs
           ? 'simulation on the active branch'
-          : `standalone (${[entered && 'entered losses', fromDevicesStage && 'device losses from the Devices stage'].filter(Boolean).join(' + ')}; no electro-thermal re-evaluation)`,
+          : 'standalone (entered losses; no electro-thermal re-evaluation)',
         ambient_c: ambientC,
         ...(ambientAssumed
           ? {
@@ -702,6 +757,7 @@ export async function planThermal(
         waveform_window: waveformWindow,
         strategy: finalResult.strategy,
         heatsink: finalResult.heatsink,
+        cooling_recommendation: coolingPayload(finalResult.cooling),
         devices: finalResult.devices.map((d) => ({
           ref: d.ref,
           tech: d.technology,

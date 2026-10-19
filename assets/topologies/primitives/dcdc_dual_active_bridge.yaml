@@ -515,57 +515,6 @@ components:
       pwl: "0 0 5m 60 40m 60"
       series_resistance: 0.0
 
-  - ref: R_ref
-    type: resistor
-    params:
-      resistance: 1000.0
-      sense: false
-
-  - ref: C_ref
-    type: capacitor
-    params:
-      capacitance: 2.0e-06
-      esr: 0.0
-      esl: 0.0
-
-  - ref: B_err
-    type: b_source
-    params:
-      expression: "V(n_ref) - (v(n_out) - v(n_sec_gnd))"
-
-  - ref: B_P
-    type: b_source
-    params:
-      expression: "V(err) * 0.002"
-
-  - ref: G_INT
-    type: g_source
-    params:
-      gain: 3.4e-07
-
-  - ref: C_INT
-    type: capacitor
-    params:
-      capacitance: 1.0e-06
-      esr: 0.0
-      esl: 0.0
-
-  - ref: R_INT
-    type: resistor
-    params:
-      resistance: 10000000.0
-      sense: false
-
-  - ref: B_ctrl_raw
-    type: b_source
-    params:
-      expression: "V(P_term) + V(I_term)"
-
-  - ref: B_ctrl
-    type: b_source
-    params:
-      expression: "min(max(V(ctrl_raw), 0.001), 0.25)"
-
   # ==========================================
   # PHASE SHIFT MODULATION (20kHz)
   # ==========================================
@@ -584,10 +533,67 @@ components:
       per: 5.0e-05
       series_resistance: 0.0
 
-  - ref: B_sec_ramp
-    type: b_source
+  # Control (blocks): error = reference (2 ms soft start) - (v_out - v_sec_gnd); phase shift = clamp(0.002 * err +
+  # 0.34 * integral(err), 0.001..0.25); the secondary ramp is the primary ramp delayed by the phase shift.
+  # Gate signals: S2 / S4 (ground-referenced) as blocks; S1, S3, S5..S8 stay B sources (floating on switch nodes
+  # or on the isolated secondary ground).
+  - ref: LPF_REF
+    type: lowpass
+    role: reference_soft_start
     params:
-      expression: "V(ramp) - V(ctrl) + (V(ramp) < V(ctrl))"
+      tau: 0.002
+
+  - ref: SUM_E
+    type: sum
+    role: voltage_error
+    params:
+      signs: "+-+"
+
+  - ref: KP
+    type: gain
+    role: voltage_p
+    params:
+      gain: 0.002
+
+  - ref: INT
+    type: integrator
+    role: voltage_i
+    params:
+      ki: 0.34
+
+  - ref: SUM_C
+    type: sum
+    role: phase_shift_sum
+    params:
+      signs: "++"
+
+  - ref: LIM_C
+    type: limiter
+    role: phase_shift_clamp
+    params:
+      lower: 0.001
+      upper: 0.25
+
+  - ref: SEC_RAMP
+    type: function
+    role: secondary_ramp
+    params:
+      expression: "in1-in2+(in1<in2)"
+      inputs: 2
+
+  - ref: GATE_S2
+    type: function
+    role: s2_gate_signal
+    params:
+      expression: "15*((in1>0.50)*(in1<0.98))"
+      inputs: 1
+
+  - ref: GATE_S4
+    type: function
+    role: s4_gate_signal
+    params:
+      expression: "15*(in1<0.48)"
+      inputs: 1
 
   # ==========================================
   # GATE DRIVE SIGNALS
@@ -602,11 +608,6 @@ components:
     params:
       resistance: 10.0
       sense: false
-
-  - ref: B_S2
-    type: b_source
-    params:
-      expression: "15 * ((V(ramp) > 0.50) * (V(ramp) < 0.98))"
 
   - ref: RPWM2_drive
     type: resistor
@@ -624,11 +625,6 @@ components:
     params:
       resistance: 10.0
       sense: false
-
-  - ref: B_S4
-    type: b_source
-    params:
-      expression: "15 * (V(ramp) < 0.48)"
 
   - ref: RPWM4_drive
     type: resistor
@@ -698,31 +694,7 @@ nets:
       - neg
     - - V_ref_raw
       - '-'
-    - - C_ref
-      - neg
-    - - B_err
-      - '-'
-    - - B_P
-      - '-'
-    - - G_INT
-      - +
-    - - G_INT
-      - ctrl-
-    - - C_INT
-      - neg
-    - - R_INT
-      - neg
-    - - B_ctrl_raw
-      - '-'
-    - - B_ctrl
-      - '-'
     - - Vramp
-      - '-'
-    - - B_sec_ramp
-      - '-'
-    - - B_S2
-      - '-'
-    - - B_S4
       - '-'
 
   # Primary DC Rail
@@ -920,6 +892,8 @@ nets:
       - '-'
     - - B_S8
       - '-'
+    - - SUM_E
+      - in3
 
   # Secondary Positive Output
   - - - n_out
@@ -932,63 +906,77 @@ nets:
       - pos
     - - C_OUT
       - pos
+    - - SUM_E
+      - in2
 
   # Reference Ramp Nodes
   - - - n_ref_raw
       - pin
     - - V_ref_raw
       - +
-    - - R_ref
-      - pos
+    - - LPF_REF
+      - in
 
   - - - n_ref
       - pin
-    - - R_ref
-      - neg
-    - - C_ref
-      - pos
+    - - LPF_REF
+      - out
+    - - SUM_E
+      - in1
 
   # Controller Internal Nodes
   - - - err
       - pin
-    - - B_err
-      - +
-    - - G_INT
-      - ctrl+
+    - - SUM_E
+      - out
+    - - KP
+      - in
+    - - INT
+      - in
 
   - - - P_term
       - pin
-    - - B_P
-      - +
+    - - KP
+      - out
+    - - SUM_C
+      - in1
 
   - - - I_term
       - pin
-    - - G_INT
-      - '-'
-    - - C_INT
-      - pos
-    - - R_INT
-      - pos
+    - - INT
+      - out
+    - - SUM_C
+      - in2
 
   - - - ctrl_raw
       - pin
-    - - B_ctrl_raw
-      - +
+    - - SUM_C
+      - out
+    - - LIM_C
+      - in
 
   - - - ctrl
       - pin
-    - - B_ctrl
-      - +
+    - - LIM_C
+      - out
+    - - SEC_RAMP
+      - in2
 
   - - - ramp
       - pin
     - - Vramp
       - +
+    - - SEC_RAMP
+      - in1
+    - - GATE_S2
+      - in1
+    - - GATE_S4
+      - in1
 
   - - - sec_ramp
       - pin
-    - - B_sec_ramp
-      - +
+    - - SEC_RAMP
+      - out
 
   # Gate Drivers
   - - - n_PWM1_int
@@ -1007,8 +995,8 @@ nets:
 
   - - - n_PWM2_int
       - pin
-    - - B_S2
-      - +
+    - - GATE_S2
+      - out
     - - RPWM2_drive
       - pos
 
@@ -1035,8 +1023,8 @@ nets:
 
   - - - n_PWM4_int
       - pin
-    - - B_S4
-      - +
+    - - GATE_S4
+      - out
     - - RPWM4_drive
       - pos
 
@@ -1119,6 +1107,8 @@ analysis:
     requirements:
       - rid: tr_dab_power_transfer
         requirement: Verify DAB closed-loop voltage regulation to 60V and power transfer into 1.25 Ohm RC load via active phase-shift modulation
+        criteria:
+          target_vout: 60.0
         environment:
           - ref: time_domain
             t_step: 2.0e-07
@@ -1166,7 +1156,7 @@ analysis:
             formula: abs([ILk_rms])
             description: RMS Tank Current
           - var: pout_avg_w
-            formula: (abs([Vout_avg])**2) / 1.25
+            formula: (abs([Vout_avg])**2) / {components.R_LOAD.resistance}
             description: Delivered Output Power
 metadata:
   stage:
@@ -1183,3 +1173,358 @@ metadata:
     - isolated
     - dcdc
     - closed-loop
+schematic:
+  tuned: false
+  components:
+    "#control": {x: 1160, y: 880, rotation: 0}
+    "#modulator_1": {x: 40, y: 960, rotation: 0}
+    "#modulator_2": {x: 600, y: 980, rotation: 0}
+    "#primary_gates": {x: 40, y: 1600, rotation: 0}
+    "#secondary_gates": {x: 600, y: 1380, rotation: 0}
+    "#voltage_loop": {x: 40, y: 1320, rotation: 0}
+    B_P: {x: 440, y: 200, rotation: 0}
+    B_S1: {x: 740, y: 260, rotation: 0}
+    B_S2: {x: 220, y: 260, rotation: 0}
+    B_S3: {x: 100, y: 900, rotation: 0}
+    B_S4: {x: 440, y: 260, rotation: 0}
+    B_S5: {x: 680, y: 260, rotation: 0}
+    B_S6: {x: 260, y: 260, rotation: 0}
+    B_S7: {x: 100, y: 860, rotation: 0}
+    B_S8: {x: 260, y: 400, rotation: 0}
+    B_ctrl: {x: 560, y: 340, rotation: 0}
+    B_ctrl_raw: {x: 640, y: 200, rotation: 0}
+    B_err: {x: 340, y: 340, rotation: 0}
+    B_sec_ramp: {x: 780, y: 340, rotation: 0}
+    C_INT: {x: 300, y: 300, rotation: 0}
+    C_OUT: {x: 1880, y: 240, rotation: 0}
+    C_ref: {x: 240, y: 220, rotation: 0}
+    DSW1: {x: 380, y: 140, rotation: 180}
+    DSW2: {x: 380, y: 420, rotation: 180}
+    DSW3: {x: 700, y: 140, rotation: 180}
+    DSW4: {x: 700, y: 420, rotation: 180}
+    DSW5: {x: 1440, y: 140, rotation: 180}
+    DSW6: {x: 1440, y: 420, rotation: 180}
+    DSW7: {x: 1760, y: 140, rotation: 180}
+    DSW8: {x: 1760, y: 420, rotation: 180}
+    GATE_S2: {x: 300, y: 400, rotation: 0}
+    GATE_S4: {x: 200, y: 240, rotation: 0}
+    GND_PRI: {x: 0, y: 360, rotation: 0}
+    G_INT: {x: 140, y: 200, rotation: 0}
+    INT: {x: 400, y: 540, rotation: 0}
+    I_term: {x: 560, y: 540, rotation: 180}
+    KP: {x: 400, y: 360, rotation: 0}
+    LIM_C: {x: 760, y: 360, rotation: 0}
+    LLk: {x: 1020, y: 200, rotation: 270}
+    LPF_REF: {x: 180, y: 240, rotation: 0}
+    P_term: {x: 560, y: 320, rotation: 180}
+    RLk_ESR: {x: 900, y: 200, rotation: 270}
+    RPWM1_drive: {x: 780, y: 40, rotation: 0}
+    RPWM2_drive: {x: 520, y: 440, rotation: 0}
+    RPWM3_drive: {x: 140, y: 680, rotation: 0}
+    RPWM4_drive: {x: 340, y: 40, rotation: 0}
+    RPWM5_drive: {x: 720, y: 40, rotation: 0}
+    RPWM6_drive: {x: 300, y: 40, rotation: 0}
+    RPWM7_drive: {x: 140, y: 640, rotation: 0}
+    RPWM8_drive: {x: 60, y: 200, rotation: 0}
+    RR_ISO: {x: 1260, y: 580, rotation: 90}
+    R_INT: {x: 300, y: 180, rotation: 180}
+    R_LOAD: {x: 2000, y: 240, rotation: 0}
+    R_damp: {x: 1020, y: 120, rotation: 270}
+    R_ref: {x: 120, y: 120, rotation: 0}
+    SEC_RAMP: {x: 660, y: 720, rotation: 0}
+    SUM_C: {x: 580, y: 440, rotation: 0}
+    SUM_E: {x: 240, y: 440, rotation: 0}
+    SW1: {x: 300, y: 140, rotation: 0}
+    SW2: {x: 300, y: 420, rotation: 0}
+    SW3: {x: 620, y: 140, rotation: 0}
+    SW4: {x: 620, y: 420, rotation: 0}
+    SW5: {x: 1360, y: 140, rotation: 0}
+    SW6: {x: 1360, y: 420, rotation: 0}
+    SW7: {x: 1680, y: 140, rotation: 0}
+    SW8: {x: 1680, y: 420, rotation: 0}
+    T1: {x: 1160, y: 240, rotation: 0}
+    VIN: {x: 0, y: 240, rotation: 0}
+    VLk_SENSE: {x: 780, y: 200, rotation: 270}
+    VSW1_SENSE: {x: 300, y: 0, rotation: 0}
+    VSW2_SENSE: {x: 300, y: 280, rotation: 0}
+    VSW3_SENSE: {x: 620, y: 0, rotation: 0}
+    VSW4_SENSE: {x: 620, y: 280, rotation: 0}
+    VSW5_SENSE: {x: 1360, y: 0, rotation: 0}
+    VSW6_SENSE: {x: 1360, y: 280, rotation: 0}
+    VSW7_SENSE: {x: 1680, y: 0, rotation: 0}
+    VSW8_SENSE: {x: 1680, y: 280, rotation: 0}
+    V_ref_raw: {x: 120, y: 40, rotation: 0}
+    Vramp: {x: 120, y: 440, rotation: 0}
+    "^control:ctrl_raw": {x: 680, y: 20, rotation: 0}
+    "^control:err": {x: 80, y: 20, rotation: 0}
+    "^modulator_1:n_g1": {x: 1040, y: 140, rotation: 0}
+    "^modulator_1:n_g2": {x: 120, y: 20, rotation: 0}
+    "^modulator_1:n_g3": {x: 300, y: 600, rotation: 0}
+    "^modulator_1:n_g4": {x: 620, y: 220, rotation: 0}
+    "^modulator_1:n_pA": {x: 840, y: 360, rotation: 0}
+    "^modulator_1:n_pB": {x: 100, y: 820, rotation: 0}
+    "^modulator_1:ramp": {x: 100, y: 80, rotation: 0}
+    "^modulator_2:ctrl_raw": {x: 340, y: 420, rotation: 0}
+    "^modulator_2:err": {x: 380, y: 240, rotation: 0}
+    "^modulator_2:n_g5": {x: 880, y: 600, rotation: 0}
+    "^modulator_2:n_g6": {x: 460, y: 600, rotation: 0}
+    "^modulator_2:n_g7": {x: 300, y: 1200, rotation: 0}
+    "^modulator_2:n_g8": {x: 60, y: 760, rotation: 0}
+    "^modulator_2:n_out": {x: 140, y: 420, rotation: 0}
+    "^modulator_2:n_sA": {x: 680, y: 820, rotation: 0}
+    "^modulator_2:n_sB": {x: 100, y: 1420, rotation: 0}
+    "^modulator_2:n_sec_gnd": {x: 260, y: 960, rotation: 0}
+    "^modulator_2:ramp": {x: 580, y: 420, rotation: 0}
+    "^primary_gates:n_g1": {x: 940, y: 140, rotation: 0}
+    "^primary_gates:n_g2": {x: 520, y: 540, rotation: 0}
+    "^primary_gates:n_g3": {x: 300, y: 780, rotation: 0}
+    "^primary_gates:n_g4": {x: 380, y: 220, rotation: 0}
+    "^primary_gates:n_pA": {x: 740, y: 360, rotation: 0}
+    "^primary_gates:n_pB": {x: 100, y: 1000, rotation: 0}
+    "^primary_gates:ramp": {x: 60, y: 320, rotation: 0}
+    "^secondary_gates:ctrl": {x: 560, y: 820, rotation: 0}
+    "^secondary_gates:n_g5": {x: 880, y: 140, rotation: 0}
+    "^secondary_gates:n_g6": {x: 460, y: 140, rotation: 0}
+    "^secondary_gates:n_g7": {x: 300, y: 740, rotation: 0}
+    "^secondary_gates:n_g8": {x: 60, y: 300, rotation: 0}
+    "^secondary_gates:n_sA": {x: 680, y: 360, rotation: 0}
+    "^secondary_gates:n_sB": {x: 100, y: 960, rotation: 0}
+    "^secondary_gates:n_sec_gnd": {x: 260, y: 500, rotation: 0}
+    "^secondary_gates:ramp": {x: 560, y: 620, rotation: 0}
+    "^voltage_loop:ctrl": {x: 860, y: 280, rotation: 0}
+    "^voltage_loop:n_out": {x: 60, y: 440, rotation: 0}
+    "^voltage_loop:n_sec_gnd": {x: 140, y: 560, rotation: 0}
+    ctrl: {x: 480, y: 740, rotation: 180}
+    ctrl_raw: {x: 760, y: 440, rotation: 180}
+    err: {x: 380, y: 440, rotation: 180}
+    n0: {x: 0, y: 140, rotation: 270}
+    n_Lk_sense: {x: 840, y: 260, rotation: 90}
+    n_Lk_ser: {x: 960, y: 260, rotation: 90}
+    n_PWM1_int: {x: 740, y: 160, rotation: 180}
+    n_PWM2_int: {x: 400, y: 320, rotation: 180}
+    n_PWM3_int: {x: 100, y: 800, rotation: 180}
+    n_PWM4_int: {x: 300, y: 160, rotation: 180}
+    n_PWM5_int: {x: 680, y: 160, rotation: 180}
+    n_PWM6_int: {x: 260, y: 160, rotation: 180}
+    n_PWM7_int: {x: 100, y: 760, rotation: 180}
+    n_PWM8_int: {x: 100, y: 100, rotation: 180}
+    n_SW1_dsense: {x: 340, y: 60, rotation: 0}
+    n_SW2_dsense: {x: 340, y: 340, rotation: 0}
+    n_SW3_dsense: {x: 660, y: 60, rotation: 0}
+    n_SW4_dsense: {x: 660, y: 340, rotation: 0}
+    n_SW5_dsense: {x: 1400, y: 60, rotation: 0}
+    n_SW6_dsense: {x: 1400, y: 340, rotation: 0}
+    n_SW7_dsense: {x: 1720, y: 60, rotation: 0}
+    n_SW8_dsense: {x: 1720, y: 340, rotation: 0}
+    n_g1: {x: 220, y: 1520, rotation: 0}
+    n_g2: {x: 220, y: 1560, rotation: 0}
+    n_g3: {x: 220, y: 1600, rotation: 0}
+    n_g4: {x: 220, y: 1640, rotation: 0}
+    n_g5: {x: 780, y: 1320, rotation: 0}
+    n_g6: {x: 780, y: 1360, rotation: 0}
+    n_g7: {x: 780, y: 1400, rotation: 0}
+    n_g8: {x: 780, y: 1440, rotation: 0}
+    n_out: {x: 1360, y: -120, rotation: 270}
+    n_pA: {x: 260, y: 200, rotation: 180}
+    n_pA_tx: {x: 1100, y: 160, rotation: 270}
+    n_pB: {x: 580, y: 200, rotation: 180}
+    n_ref: {x: 140, y: 320, rotation: 180}
+    n_ref_raw: {x: 80, y: 160, rotation: 180}
+    n_sA: {x: 1320, y: 200, rotation: 180}
+    n_sB: {x: 1640, y: 200, rotation: 180}
+    n_sec_gnd: {x: 1360, y: 580, rotation: 90}
+    ramp: {x: 200, y: 320, rotation: 180}
+    sec_ramp: {x: 760, y: 600, rotation: 180}
+    "~GND@B_P.B": {x: 440, y: 320, rotation: 0}
+    "~GND@B_S2.B": {x: 220, y: 380, rotation: 0}
+    "~GND@B_ctrl.B": {x: 560, y: 460, rotation: 0}
+    "~GND@RR_ISO.B": {x: 1140, y: 620, rotation: 0}
+    "~GND@V_ref_raw.B": {x: 20, y: 220, rotation: 0}
+    "~GND@Vramp.B": {x: 120, y: 560, rotation: 0}
+    "~ctrl_raw@#control.ctrl_raw": {x: 1360, y: 880, rotation: 0}
+    "~ctrl_raw@#modulator_2.ctrl_raw": {x: 400, y: 1000, rotation: 180}
+    "~n_g1@SW1.G": {x: 180, y: 140, rotation: 180}
+    "~n_g2@SW2.G": {x: 180, y: 420, rotation: 180}
+    "~n_g3@SW3.G": {x: 500, y: 140, rotation: 180}
+    "~n_g4@SW4.G": {x: 500, y: 420, rotation: 180}
+    "~n_g5@SW5.G": {x: 1240, y: 140, rotation: 180}
+    "~n_g6@SW6.G": {x: 1240, y: 420, rotation: 180}
+    "~n_g7@SW7.G": {x: 1560, y: 140, rotation: 180}
+    "~n_g8@SW8.G": {x: 1560, y: 420, rotation: 180}
+    "~n_out@#modulator_2.n_out": {x: 420, y: 1040, rotation: 180}
+    "~n_out@#voltage_loop.n_out": {x: -140, y: 1300, rotation: 180}
+    "~n_pA@#modulator_1.n_pA": {x: -140, y: 940, rotation: 180}
+    "~n_pA@#primary_gates.n_pA": {x: -140, y: 1580, rotation: 180}
+    "~n_pB@#modulator_1.n_pB": {x: -140, y: 980, rotation: 180}
+    "~n_pB@#primary_gates.n_pB": {x: -140, y: 1620, rotation: 180}
+    "~n_sA@#modulator_2.n_sA": {x: 420, y: 880, rotation: 180}
+    "~n_sA@#secondary_gates.n_sA": {x: 420, y: 1340, rotation: 180}
+    "~n_sB@#modulator_2.n_sB": {x: 420, y: 920, rotation: 180}
+    "~n_sB@#secondary_gates.n_sB": {x: 420, y: 1380, rotation: 180}
+    "~n_sec_gnd@#modulator_2.n_sec_gnd": {x: 400, y: 960, rotation: 180}
+    "~n_sec_gnd@#secondary_gates.n_sec_gnd": {x: 400, y: 1420, rotation: 180}
+    "~n_sec_gnd@#voltage_loop.n_sec_gnd": {x: -160, y: 1340, rotation: 180}
+    "~ramp@#primary_gates.ramp": {x: 220, y: 1680, rotation: 0}
+    "~ramp@#secondary_gates.ramp": {x: 420, y: 1460, rotation: 180}
+  wires:
+  - {id: W1, from: GND_PRI.P, to: VIN.B}
+  - {id: W2, from: DSW2.A, to: SW2.S}
+  - {id: W3, from: DSW4.A, to: SW4.S}
+  - {id: W4, from: DSW2.A, to: SW4.S}
+  - {id: W5, from: GND_PRI.P, to: SW2.S}
+  - {id: W6, from: RR_ISO.B, to: "~GND@RR_ISO.B.P"}
+  - {id: W7, from: "#secondary_gates.ctrl", to: "#voltage_loop.ctrl"}
+  - {id: W8, from: VSW1_SENSE.A, to: VSW3_SENSE.A}
+  - {id: W9, from: VIN.A, to: VSW1_SENSE.A}
+  - {id: W10, from: VIN.A, to: n0.P}
+  - {id: W11, from: RLk_ESR.A, to: VLk_SENSE.B}
+  - {id: W12, from: RLk_ESR.A, to: n_Lk_sense.P}
+  - {id: W13, from: LLk.A, to: RLk_ESR.B}
+  - {id: W14, from: LLk.A, to: R_damp.A}
+  - {id: W15, from: LLk.A, to: n_Lk_ser.P}
+  - {id: W16, from: SW1.D, to: VSW1_SENSE.B}
+  - {id: W17, from: DSW1.B, to: SW1.D}
+  - {id: W18, from: VSW1_SENSE.B, to: n_SW1_dsense.P}
+  - {id: W19, from: SW2.D, to: VSW2_SENSE.B}
+  - {id: W20, from: DSW2.B, to: SW2.D}
+  - {id: W21, from: VSW2_SENSE.B, to: n_SW2_dsense.P}
+  - {id: W22, from: SW3.D, to: VSW3_SENSE.B}
+  - {id: W23, from: DSW3.B, to: SW3.D}
+  - {id: W24, from: VSW3_SENSE.B, to: n_SW3_dsense.P}
+  - {id: W25, from: SW4.D, to: VSW4_SENSE.B}
+  - {id: W26, from: DSW4.B, to: SW4.D}
+  - {id: W27, from: VSW4_SENSE.B, to: n_SW4_dsense.P}
+  - {id: W28, from: SW5.D, to: VSW5_SENSE.B}
+  - {id: W29, from: DSW5.B, to: SW5.D}
+  - {id: W30, from: VSW5_SENSE.B, to: n_SW5_dsense.P}
+  - {id: W31, from: SW6.D, to: VSW6_SENSE.B}
+  - {id: W32, from: DSW6.B, to: SW6.D}
+  - {id: W33, from: VSW6_SENSE.B, to: n_SW6_dsense.P}
+  - {id: W34, from: SW7.D, to: VSW7_SENSE.B}
+  - {id: W35, from: DSW7.B, to: SW7.D}
+  - {id: W36, from: VSW7_SENSE.B, to: n_SW7_dsense.P}
+  - {id: W37, from: SW8.D, to: VSW8_SENSE.B}
+  - {id: W38, from: DSW8.B, to: SW8.D}
+  - {id: W39, from: VSW8_SENSE.B, to: n_SW8_dsense.P}
+  - {id: W40, from: "#primary_gates.n_g1", to: n_g1.P}
+  - {id: W41, from: SW1.G, to: "~n_g1@SW1.G.P"}
+  - {id: W42, from: "#primary_gates.n_g2", to: n_g2.P}
+  - {id: W43, from: SW2.G, to: "~n_g2@SW2.G.P"}
+  - {id: W44, from: "#primary_gates.n_g3", to: n_g3.P}
+  - {id: W45, from: SW3.G, to: "~n_g3@SW3.G.P"}
+  - {id: W46, from: "#primary_gates.n_g4", to: n_g4.P}
+  - {id: W47, from: SW4.G, to: "~n_g4@SW4.G.P"}
+  - {id: W48, from: "#secondary_gates.n_g5", to: n_g5.P}
+  - {id: W49, from: SW5.G, to: "~n_g5@SW5.G.P"}
+  - {id: W50, from: "#secondary_gates.n_g6", to: n_g6.P}
+  - {id: W51, from: SW6.G, to: "~n_g6@SW6.G.P"}
+  - {id: W52, from: "#secondary_gates.n_g7", to: n_g7.P}
+  - {id: W53, from: SW7.G, to: "~n_g7@SW7.G.P"}
+  - {id: W54, from: "#secondary_gates.n_g8", to: n_g8.P}
+  - {id: W55, from: SW8.G, to: "~n_g8@SW8.G.P"}
+  - {id: W56, from: C_OUT.A, to: R_LOAD.A}
+  - {id: W57, from: VSW5_SENSE.A, to: VSW7_SENSE.A}
+  - {id: W58, from: C_OUT.A, to: VSW7_SENSE.A}
+  - {id: W59, from: VSW5_SENSE.A, to: n_out.P}
+  - {id: W60, from: "#voltage_loop.n_out", to: "~n_out@#voltage_loop.n_out.P"}
+  - {id: W61, from: SW1.S, to: VSW2_SENSE.A}
+  - {id: W62, from: DSW1.A, to: SW1.S}
+  - {id: W63, from: DSW1.A, to: VLk_SENSE.A}
+  - {id: W64, from: SW1.S, to: n_pA.P}
+  - {id: W65, from: "#primary_gates.n_pA", to: "~n_pA@#primary_gates.n_pA.P"}
+  - {id: W66, from: LLk.B, to: R_damp.B}
+  - {id: W67, from: LLk.B, to: T1.P1}
+  - {id: W68, from: LLk.B, to: n_pA_tx.P}
+  - {id: W69, from: SW3.S, to: VSW4_SENSE.A}
+  - {id: W70, from: DSW3.A, to: SW3.S}
+  - {id: W71, from: DSW3.A, to: T1.P2}
+  - {id: W72, from: SW3.S, to: n_pB.P}
+  - {id: W73, from: "#primary_gates.n_pB", to: "~n_pB@#primary_gates.n_pB.P"}
+  - {id: W74, from: SW5.S, to: VSW6_SENSE.A}
+  - {id: W75, from: DSW5.A, to: SW5.S}
+  - {id: W76, from: SW5.S, to: T1.S1}
+  - {id: W77, from: SW5.S, to: n_sA.P}
+  - {id: W78, from: "#secondary_gates.n_sA", to: "~n_sA@#secondary_gates.n_sA.P"}
+  - {id: W79, from: SW7.S, to: VSW8_SENSE.A}
+  - {id: W80, from: DSW7.A, to: SW7.S}
+  - {id: W81, from: T1.S2, to: VSW8_SENSE.A}
+  - {id: W82, from: SW7.S, to: n_sB.P}
+  - {id: W83, from: "#secondary_gates.n_sB", to: "~n_sB@#secondary_gates.n_sB.P"}
+  - {id: W84, from: DSW6.A, to: SW6.S}
+  - {id: W85, from: DSW8.A, to: SW8.S}
+  - {id: W86, from: C_OUT.B, to: R_LOAD.B}
+  - {id: W87, from: DSW6.A, to: SW8.S}
+  - {id: W88, from: C_OUT.B, to: DSW8.A}
+  - {id: W89, from: SW6.S, to: n_sec_gnd.P}
+  - {id: W90, from: RR_ISO.A, to: SW6.S}
+  - {id: W91, from: "#secondary_gates.n_sec_gnd", to: "~n_sec_gnd@#secondary_gates.n_sec_gnd.P"}
+  - {id: W92, from: "#voltage_loop.n_sec_gnd", to: "~n_sec_gnd@#voltage_loop.n_sec_gnd.P"}
+  - {id: W93, from: "#primary_gates.ramp", to: "~ramp@#primary_gates.ramp.P"}
+  - {id: W94, from: "#secondary_gates.ramp", to: "~ramp@#secondary_gates.ramp.P"}
+  groups:
+    voltage_loop: {label: "Voltage loop", members: [V_ref_raw, LPF_REF, SUM_E, KP, INT, SUM_C, LIM_C]}
+    primary_gates: {label: "Primary gate signals", members: [Vramp, B_S1, GATE_S2, B_S3, GATE_S4, RPWM1_drive, RPWM2_drive, RPWM3_drive, RPWM4_drive]}
+    secondary_gates: {label: "Secondary gate signals", members: [SEC_RAMP, B_S5, B_S6, B_S7, B_S8, RPWM5_drive, RPWM6_drive, RPWM7_drive, RPWM8_drive]}
+  sheets:
+    primary_gates:
+      wires:
+      - {id: W1, from: Vramp.B, to: "~GND@Vramp.B.P"}
+      - {id: W2, from: B_S1.A, to: RPWM1_drive.A}
+      - {id: W3, from: B_S1.A, to: n_PWM1_int.P}
+      - {id: W4, from: GATE_S2.out, to: RPWM2_drive.A}
+      - {id: W5, from: GATE_S2.out, to: n_PWM2_int.P}
+      - {id: W6, from: B_S3.A, to: RPWM3_drive.A}
+      - {id: W7, from: B_S3.A, to: n_PWM3_int.P}
+      - {id: W8, from: GATE_S4.out, to: RPWM4_drive.A}
+      - {id: W9, from: GATE_S4.out, to: n_PWM4_int.P}
+      - {id: W10, from: RPWM1_drive.B, to: "^primary_gates:n_g1.P"}
+      - {id: W11, from: RPWM2_drive.B, to: "^primary_gates:n_g2.P"}
+      - {id: W12, from: RPWM3_drive.B, to: "^primary_gates:n_g3.P"}
+      - {id: W13, from: RPWM4_drive.B, to: "^primary_gates:n_g4.P"}
+      - {id: W14, from: B_S1.B, to: "^primary_gates:n_pA.P"}
+      - {id: W15, from: B_S3.B, to: "^primary_gates:n_pB.P"}
+      - {id: W16, from: GATE_S2.in1, to: Vramp.A}
+      - {id: W17, from: Vramp.A, to: "^primary_gates:ramp.P"}
+      - {id: W18, from: GATE_S4.in1, to: Vramp.A}
+      - {id: W19, from: GATE_S2.in1, to: ramp.P}
+    secondary_gates:
+      wires:
+      - {id: W1, from: SEC_RAMP.in2, to: "^secondary_gates:ctrl.P"}
+      - {id: W2, from: SEC_RAMP.in2, to: ctrl.P}
+      - {id: W3, from: B_S5.A, to: RPWM5_drive.A}
+      - {id: W4, from: B_S5.A, to: n_PWM5_int.P}
+      - {id: W5, from: B_S6.A, to: RPWM6_drive.A}
+      - {id: W6, from: B_S6.A, to: n_PWM6_int.P}
+      - {id: W7, from: B_S7.A, to: RPWM7_drive.A}
+      - {id: W8, from: B_S7.A, to: n_PWM7_int.P}
+      - {id: W9, from: B_S8.A, to: RPWM8_drive.A}
+      - {id: W10, from: RPWM8_drive.A, to: n_PWM8_int.P}
+      - {id: W11, from: RPWM5_drive.B, to: "^secondary_gates:n_g5.P"}
+      - {id: W12, from: RPWM6_drive.B, to: "^secondary_gates:n_g6.P"}
+      - {id: W13, from: RPWM7_drive.B, to: "^secondary_gates:n_g7.P"}
+      - {id: W14, from: RPWM8_drive.B, to: "^secondary_gates:n_g8.P"}
+      - {id: W15, from: B_S5.B, to: "^secondary_gates:n_sA.P"}
+      - {id: W16, from: B_S7.B, to: "^secondary_gates:n_sB.P"}
+      - {id: W17, from: B_S8.B, to: "^secondary_gates:n_sec_gnd.P"}
+      - {id: W18, from: B_S6.B, to: B_S8.B}
+      - {id: W19, from: SEC_RAMP.in1, to: "^secondary_gates:ramp.P"}
+      - {id: W20, from: SEC_RAMP.out, to: sec_ramp.P}
+    voltage_loop:
+      wires:
+      - {id: W1, from: V_ref_raw.B, to: "~GND@V_ref_raw.B.P"}
+      - {id: W2, from: INT.out, to: SUM_C.in2}
+      - {id: W3, from: I_term.P, to: SUM_C.in2}
+      - {id: W4, from: KP.out, to: SUM_C.in1}
+      - {id: W5, from: P_term.P, to: SUM_C.in1}
+      - {id: W6, from: LIM_C.out, to: "^voltage_loop:ctrl.P"}
+      - {id: W7, from: LIM_C.in, to: SUM_C.out}
+      - {id: W8, from: LIM_C.in, to: ctrl_raw.P}
+      - {id: W9, from: KP.in, to: SUM_E.out}
+      - {id: W10, from: INT.in, to: KP.in}
+      - {id: W11, from: KP.in, to: err.P}
+      - {id: W12, from: SUM_E.in2, to: "^voltage_loop:n_out.P"}
+      - {id: W13, from: LPF_REF.out, to: SUM_E.in1}
+      - {id: W14, from: SUM_E.in1, to: n_ref.P}
+      - {id: W15, from: LPF_REF.in, to: V_ref_raw.A}
+      - {id: W16, from: LPF_REF.in, to: n_ref_raw.P}
+      - {id: W17, from: SUM_E.in3, to: "^voltage_loop:n_sec_gnd.P"}

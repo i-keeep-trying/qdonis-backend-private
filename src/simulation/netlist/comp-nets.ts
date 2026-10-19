@@ -174,6 +174,22 @@ export function deviceCurrentVector(comp: Dict): string | null {
 }
 
 const LABEL_PINS = new Set(['pin', 'net', 'label', 'net_name', 'node']);
+const MAIN_DC_REFS = new Set<unknown>([
+  'VIN',
+  'V5',
+  'VDC',
+  'V_DC',
+  'V_IN',
+  'V_BUS',
+  'Vdc',
+  'Vin',
+]);
+const MAIN_DC_ROLES = new Set<unknown>([
+  'dc_link_voltage',
+  'dc_bus',
+  'input_voltage',
+  'input_source',
+]);
 
 /**
  * `build_comp_nets`: merges nets that share a pin, names each one (`0` for
@@ -236,6 +252,20 @@ export function buildCompNets(design: Dict): [CompNets, string[]] {
     }
   }
 
+  const explicitGround =
+    [...compByRef.values()].some(
+      (c) =>
+        get(c, 'type') === 'node' &&
+        get(or(get(c, 'params'), {}), 'node_type') === 'ground',
+    ) ||
+    netsAsSets.some((pinSet) =>
+      [...pinSet.values()].some(
+        ([ref]) =>
+          !(typeof ref === 'string' && compByRef.has(ref)) &&
+          ['GND', '0'].includes(pyStr(ref).toUpperCase()),
+      ),
+    );
+
   netsAsSets.forEach((pinSet, idx) => {
     let groundMember: Member | null = null;
     let namedMember: unknown = null;
@@ -248,10 +278,16 @@ export function buildCompNets(design: Dict): [CompNets, string[]] {
           groundMember = [ref, pin];
           break;
         }
+        // Main DC voltage source with minus pin (traditional ground reference).
+        // Sources other than VIN only when the circuit has no ground of its own:
+        // with a split DC link (NPC: midpoint grounded) grounding every rail's
+        // minus pin would short the rails.
         if (
           get(params, 'node_type') === 'voltage_source' &&
           (pin === '-' || pin === 'neg') &&
-          ref === 'VIN'
+          (ref === 'VIN' ||
+            (!explicitGround &&
+              (MAIN_DC_REFS.has(ref) || MAIN_DC_ROLES.has(get(comp, 'role')))))
         ) {
           groundMember = [ref, pin];
           break;

@@ -302,3 +302,39 @@ analysis:
           - var: vout_ripple_vpp_v
             formula: '[Vout_ripple_vpp]'
             description: Output voltage peak-to-peak ripple
+schematic:
+  tuned: false
+  components:
+    CSN_P: {x: 180, y: 100, rotation: 180}
+    Cout: {x: 800, y: 200, rotation: 0}
+    D_FW: {x: 560, y: 200, rotation: 180}
+    D_FWD: {x: 460, y: 60, rotation: 270}
+    L_OUT: {x: 660, y: 60, rotation: 270}
+    PWM1: {x: 180, y: 360, rotation: 0}
+    RSN_P: {x: 180, y: 220, rotation: 180}
+    R_ISO: {x: 380, y: 400, rotation: 90}
+    R_LOAD: {x: 920, y: 200, rotation: 0}
+    SW1: {x: 300, y: 300, rotation: 0}
+    T1: {x: 320, y: 120, rotation: 0}
+    VIN: {x: 0, y: 200, rotation: 0}
+    "~GND@VIN.B": {x: 0, y: 320, rotation: 0}
+  wires:
+  - {id: W3, from: VIN.B, to: "~GND@VIN.B.P"}
+  - {id: W1, from: SW1.S, to: "~GND@VIN.B.P"}
+  - {id: W2, from: R_ISO.B, to: SW1.S}
+  - {id: W4, from: CSN_P.B, to: T1.P1}
+  - {id: W5, from: CSN_P.B, to: VIN.A}
+  - {id: W6, from: SW1.D, to: T1.P2}
+  - {id: W7, from: RSN_P.A, to: SW1.D}
+  - {id: W8, from: PWM1.A, to: SW1.G}
+  - {id: W9, from: D_FWD.A, to: T1.S1}
+  - {id: W10, from: D_FWD.B, to: L_OUT.A}
+  - {id: W11, from: D_FW.B, to: D_FWD.B}
+  - {id: W12, from: Cout.B, to: R_LOAD.B}
+  - {id: W13, from: Cout.B, to: D_FW.A}
+  - {id: W15, from: D_FW.A, to: T1.S2}
+  - {id: W14, from: D_FW.A, to: R_ISO.A}
+  - {id: W16, from: Cout.A, to: R_LOAD.A}
+  - {id: W17, from: Cout.A, to: L_OUT.B}
+  - {id: W18, from: CSN_P.A, to: RSN_P.B}
+  groups: {}

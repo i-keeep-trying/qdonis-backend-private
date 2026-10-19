@@ -157,6 +157,8 @@ export class JsonLossModel {
   private readonly turnOff: GridInterpolator | null;
   private readonly conductionOn: GridInterpolator | null;
   private readonly conductionOff: GridInterpolator | null;
+  /** Junction temperatures (°C) the loss tables are characterised at, sorted. */
+  readonly temperatures: number[];
 
   constructor(readonly filepath: string) {
     const data = JSON.parse(readFileSync(filepath, 'utf8')) as unknown;
@@ -171,6 +173,18 @@ export class JsonLossModel {
     this.turnOff = parseBlock(data.turn_off_loss);
     this.conductionOn = parseBlock(data.conduction_loss_on);
     this.conductionOff = parseBlock(data.conduction_loss_off);
+    const temps = new Set<number>();
+    for (const block of [
+      data.turn_on_loss,
+      data.turn_off_loss,
+      data.conduction_loss_on,
+      data.conduction_loss_off,
+    ]) {
+      if (isDict(block) && Object.keys(block).length > 0) {
+        for (const t of floats(block.t_axis)) temps.add(t);
+      }
+    }
+    this.temperatures = [...temps].sort((a, b) => a - b);
   }
 
   getTurnOnEnergy(v: number, i: number, t: number): number {

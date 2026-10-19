@@ -124,6 +124,9 @@ export const ErrorCode = {
   StageNotAvailable: 'STAGE_NOT_AVAILABLE',
   StageFailed: 'STAGE_FAILED',
   StageRunning: 'STAGE_RUNNING',
+  // synced schematic
+  SheetNotFound: 'SHEET_NOT_FOUND',
+  SchematicInvalid: 'SCHEMATIC_INVALID',
 } as const;
 
 export type ErrorCode = (typeof ErrorCode)[keyof typeof ErrorCode];

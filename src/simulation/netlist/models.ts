@@ -205,16 +205,18 @@ export function generateComponentModels(design: Dict): string {
         const n = get(params, 'n', 1.1);
         const Rs = get(params, 'Rs', 0.1);
         const Cjo = get(params, 'Cjo', 10e-12);
+        // No default Tt: a diode without a recovery time is modelled without one.
         const Tt = get(
           params,
           'Tt',
-          get(params, 'reverse_recovery_time', 20e-9),
+          get(params, 'reverse_recovery_time', null),
         );
         let Bv = get(params, 'Bv');
         if (Bv === null || Bv === undefined) Bv = diodeBv(design);
         const Ibv = get(params, 'Ibv', 1e-6);
+        const ttText = truthy(Tt) ? ` Tt=${fmt(Tt)}` : '';
         models.push(
-          `.model ${pyStr(name)} D(Is=${fmt(Is)} n=${fmt(n)} Rs=${fmt(Rs)} Cjo=${fmt(Cjo)} Tt=${fmt(Tt)} Bv=${fmt(Bv)} Ibv=${fmt(Ibv)})`,
+          `.model ${pyStr(name)} D(Is=${fmt(Is)} n=${fmt(n)} Rs=${fmt(Rs)} Cjo=${fmt(Cjo)}${ttText} Bv=${fmt(Bv)} Ibv=${fmt(Ibv)})`,
         );
         used.add(name);
       }

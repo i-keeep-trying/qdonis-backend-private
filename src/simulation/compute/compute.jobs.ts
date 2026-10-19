@@ -11,16 +11,16 @@ import { basename, join } from 'node:path';
 import type { WaveformStats } from '../../studio-stages/circuit-data.provider';
 import {
   selectDevices,
-  selectDevicesFromStresses,
   type Overrides,
   type Preference,
   type SelectionResult,
-  type StandaloneResult,
 } from '../loss/device-selection';
 import {
   calculateLosses,
+  lossesVsTemperature,
   type DeviceKind,
   type LossAnalysis,
+  type LossTemperatureCurve,
 } from '../loss/loss-engine';
 import type { Dict } from '../netlist/py';
 import type { NgspiceOptions } from '../ngspice/ngspice.runner';
@@ -43,15 +43,6 @@ export interface ComputeJobs {
     };
     result: { selection: SelectionResult; lossAnalysis: LossAnalysis };
   };
-  selectFromStresses: {
-    args: {
-      entries: Dict[];
-      tj: number;
-      preference: Preference;
-      overrides: Overrides | null;
-    };
-    result: StandaloneResult;
-  };
   losses: {
     args: {
       zipBase64: string;
@@ -60,6 +51,14 @@ export interface ComputeJobs {
       deviceTypes: Record<string, DeviceKind> | null;
     };
     result: LossAnalysis;
+  };
+  lossVsTemperature: {
+    args: {
+      zipBase64: string;
+      componentModels: Record<string, string>;
+      deviceTypes: Record<string, DeviceKind> | null;
+    };
+    result: LossTemperatureCurve[];
   };
   waveformStats: {
     args: { zipBase64: string; yaml: Dict | null; fsw: number | null };
@@ -117,19 +116,16 @@ export async function runJob<K extends ComputeKind>(
         return { selection, lossAnalysis };
       });
     }
-    case 'selectFromStresses': {
-      const a = args as ComputeJobs['selectFromStresses']['args'];
-      return selectDevicesFromStresses(
-        a.entries,
-        a.tj,
-        a.preference,
-        a.overrides,
-      );
-    }
     case 'losses': {
       const a = args as ComputeJobs['losses']['args'];
       return await withArchive(a.zipBase64, (dir) =>
         calculateLosses(dir, a.tj, a.componentModels, a.deviceTypes),
+      );
+    }
+    case 'lossVsTemperature': {
+      const a = args as ComputeJobs['lossVsTemperature']['args'];
+      return await withArchive(a.zipBase64, (dir) =>
+        lossesVsTemperature(dir, a.componentModels, a.deviceTypes),
       );
     }
     case 'waveformStats': {

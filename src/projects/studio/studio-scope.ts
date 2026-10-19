@@ -1,6 +1,6 @@
 import {
   CORE_STAGES,
-  isStageKind,
+  isWorkspaceStage,
   type JsonObject,
   STAGE_LABEL,
   STAGE_ORDER,
@@ -8,6 +8,7 @@ import {
   stageNodeOnBranch,
   type StudioProject,
   type StudioScope,
+  type WorkspaceStage,
 } from './studio-graph';
 
 /**
@@ -19,20 +20,21 @@ import {
 /**
  * Data flow between stages: each stage lists the stages that consume its
  * output. "After" a stage means reachable from it in this graph, never the
- * tab order.
+ * tab order. Device selection runs on the simulation node, so it has no
+ * stage of its own.
  */
-export const STAGE_FLOW: Record<StageKind, readonly StageKind[]> = {
+export const STAGE_FLOW: Record<WorkspaceStage, readonly WorkspaceStage[]> = {
   specs: ['visualization'],
   visualization: ['design'],
   design: ['simulation', 'emc', 'components'],
-  simulation: ['devices', 'magnetics', 'thermal', 'emc'],
-  devices: ['thermal', 'components'],
-  magnetics: ['thermal', 'components'],
-  thermal: ['mtbf'],
-  emc: [],
-  components: ['bom', 'mtbf'],
-  bom: [],
+  simulation: ['magnetics', 'thermal', 'emc', 'mtbf', 'bom'],
+  magnetics: ['thermal', 'mtbf', 'bom', 'components'],
+  // Junction / hotspot temperatures for MTBF, the heatsink line for the BOM.
+  thermal: ['mtbf', 'bom'],
   mtbf: [],
+  bom: [],
+  emc: [],
+  components: [],
 };
 
 /** Projects made before entry steps existed behave as full projects. */
@@ -50,8 +52,8 @@ export const isFullScope = (scope: StudioScope): boolean =>
   scope.mode === 'entry' && scope.entry === 'specs';
 
 /** Every stage reachable from `stage` (itself excluded), in display order. */
-export function downstreamOf(stage: StageKind): StageKind[] {
-  const seen = new Set<StageKind>();
+export function downstreamOf(stage: WorkspaceStage): WorkspaceStage[] {
+  const seen = new Set<WorkspaceStage>();
   const queue = [...STAGE_FLOW[stage]];
   while (queue.length) {
     const next = queue.shift()!;
@@ -63,14 +65,14 @@ export function downstreamOf(stage: StageKind): StageKind[] {
 }
 
 /** Stages the project may run: the entry step and everything after it. */
-export function allowedStages(scope: StudioScope): StageKind[] {
+export function allowedStages(scope: StudioScope): WorkspaceStage[] {
   if (scope.mode === 'undecided') return [];
   const allowed = new Set([scope.entry, ...downstreamOf(scope.entry)]);
   return STAGE_ORDER.filter((s) => allowed.has(s));
 }
 
 export const isStageAllowed = (scope: StudioScope, stage: StageKind): boolean =>
-  allowedStages(scope).includes(stage);
+  (allowedStages(scope) as readonly StageKind[]).includes(stage);
 
 /**
  * Tabs of the workspace: nothing while undecided; the full flow shows the
@@ -79,10 +81,10 @@ export const isStageAllowed = (scope: StudioScope, stage: StageKind): boolean =>
  */
 export function visibleStages(
   scope: StudioScope,
-  hasResult: (stage: StageKind) => boolean,
-): StageKind[] {
+  hasResult: (stage: WorkspaceStage) => boolean,
+): WorkspaceStage[] {
   if (scope.mode === 'undecided') return [];
-  const core = new Set<StageKind>(isFullScope(scope) ? CORE_STAGES : []);
+  const core = new Set<WorkspaceStage>(isFullScope(scope) ? CORE_STAGES : []);
   return allowedStages(scope).filter(
     (s) => s === scope.entry || core.has(s) || hasResult(s),
   );
@@ -94,11 +96,11 @@ export function visibleStages(
  */
 export function nextSteps(
   scope: StudioScope,
-  ready: (stage: StageKind) => boolean,
-): StageKind[] {
+  ready: (stage: WorkspaceStage) => boolean,
+): WorkspaceStage[] {
   if (scope.mode === 'undecided') return [];
   const allowed = allowedStages(scope);
-  const out = new Set<StageKind>();
+  const out = new Set<WorkspaceStage>();
   for (const stage of allowed) {
     if (!ready(stage)) continue;
     for (const next of STAGE_FLOW[stage]) {
@@ -113,21 +115,26 @@ export function readyOn(project: StudioProject): (stage: StageKind) => boolean {
   return (stage) => stageNodeOnBranch(project, stage)?.status === 'ready';
 }
 
-/** `{ mode, entry, locked }` as stored in `data.studio.scope`; null when malformed. */
+/**
+ * `{ mode, entry, locked }` as stored in `data.studio.scope`; null when
+ * malformed. A stored `devices` entry (before device selection moved onto
+ * the simulation) becomes a Simulation entry.
+ */
 export function parseScope(value: unknown): StudioScope | null {
   if (typeof value !== 'object' || value === null || Array.isArray(value)) {
     return null;
   }
   const raw = value as JsonObject;
   if (raw.mode === 'undecided') return { mode: 'undecided' };
-  if (raw.mode === 'entry' && isStageKind(raw.entry)) {
-    return { mode: 'entry', entry: raw.entry, locked: raw.locked === true };
+  const entry = raw.entry === 'devices' ? 'simulation' : raw.entry;
+  if (raw.mode === 'entry' && isWorkspaceStage(entry)) {
+    return { mode: 'entry', entry, locked: raw.locked === true };
   }
   return null;
 }
 
 /** The project's entry step (null while undecided), for the dashboard badge. */
-export function entryStepOf(scope: StudioScope): StageKind | null {
+export function entryStepOf(scope: StudioScope): WorkspaceStage | null {
   return scope.mode === 'entry' ? scope.entry : null;
 }
 
@@ -136,7 +143,7 @@ export const stageLabel = (stage: StageKind): string => STAGE_LABEL[stage];
 /** Result of choosing an entry step: the new scope, or why it is refused. */
 export function chooseEntry(
   current: StudioScope,
-  entry: StageKind,
+  entry: WorkspaceStage,
 ): { ok: true; scope: StudioScope } | { ok: false; reason: string } {
   if (current.mode === 'entry' && current.locked) {
     if (current.entry === entry) return { ok: true, scope: current };
@@ -165,7 +172,9 @@ export function lockAfterRun(scope: StudioScope, ran: StageKind): StudioScope {
  * Design needs a topology (and the electrical values as specs); Simulation
  * of an uploaded .cir stores it as a design on its topology.
  */
-export const INPUT_STAGES: Partial<Record<StageKind, readonly StageKind[]>> = {
+export const INPUT_STAGES: Partial<
+  Record<WorkspaceStage, readonly StageKind[]>
+> = {
   design: ['specs', 'visualization'],
   simulation: ['visualization', 'design'],
 };

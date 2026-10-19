@@ -8,6 +8,84 @@
   "T1": null,
   "VIN": null
  },
+ "loss_vs_temperature": [
+  {
+   "component": "D",
+   "device_type": "diode",
+   "diode_model": null,
+   "model": "C3D02060A",
+   "points": [
+    {
+     "conduction_loss_w": 0.5726,
+     "switching_loss_w": 0.0,
+     "tj_c": -55.0,
+     "total_loss_w": 0.5726
+    },
+    {
+     "conduction_loss_w": 0.5441,
+     "switching_loss_w": 0.0,
+     "tj_c": 25.0,
+     "total_loss_w": 0.5441
+    },
+    {
+     "conduction_loss_w": 0.546,
+     "switching_loss_w": 0.0,
+     "tj_c": 75.0,
+     "total_loss_w": 0.546
+    },
+    {
+     "conduction_loss_w": 0.56,
+     "switching_loss_w": 0.0,
+     "tj_c": 125.0,
+     "total_loss_w": 0.56
+    },
+    {
+     "conduction_loss_w": 0.5986,
+     "switching_loss_w": 0.0,
+     "tj_c": 175.0,
+     "total_loss_w": 0.5986
+    }
+   ]
+  },
+  {
+   "component": "SW",
+   "device_type": "switch",
+   "diode_model": null,
+   "model": "E4M0045075J2",
+   "points": [
+    {
+     "conduction_loss_w": 0.093,
+     "switching_loss_w": 0.0322,
+     "tj_c": -55.0,
+     "total_loss_w": 0.1252
+    },
+    {
+     "conduction_loss_w": 0.0848,
+     "switching_loss_w": 0.0352,
+     "tj_c": 25.0,
+     "total_loss_w": 0.1199
+    },
+    {
+     "conduction_loss_w": 0.0998,
+     "switching_loss_w": 0.037,
+     "tj_c": 75.0,
+     "total_loss_w": 0.1369
+    },
+    {
+     "conduction_loss_w": 0.1149,
+     "switching_loss_w": 0.0341,
+     "tj_c": 125.0,
+     "total_loss_w": 0.149
+    },
+    {
+     "conduction_loss_w": 0.13,
+     "switching_loss_w": 0.0355,
+     "tj_c": 175.0,
+     "total_loss_w": 0.1655
+    }
+   ]
+  }
+ ],
  "override": {
   "SW": "C3M0045065J1"
  },
@@ -472,6 +550,16 @@
  "waveform_stats": {
   "components": {
    "CSN_P": {
+    "links": [
+     [
+      "RSN_P",
+      "neg"
+     ],
+     [
+      "T1",
+      "P1"
+     ]
+    ],
     "params": {
      "capacitance": 2.2e-08
     },
@@ -480,6 +568,16 @@
     "type": "capacitor"
    },
    "CSN_S": {
+    "links": [
+     [
+      "RSN_S",
+      "neg"
+     ],
+     [
+      "T1",
+      "S2"
+     ]
+    ],
     "params": {
      "capacitance": 1e-09
     },
@@ -488,6 +586,16 @@
     "type": "capacitor"
    },
    "CWW": {
+    "links": [
+     [
+      "T1",
+      "P1"
+     ],
+     [
+      "T1",
+      "S1"
+     ]
+    ],
     "params": {
      "capacitance": 2e-11
     },
@@ -533,6 +641,16 @@
     }
    },
    "RSN_P": {
+    "links": [
+     [
+      "T1",
+      "P2"
+     ],
+     [
+      "CSN_P",
+      "pos"
+     ]
+    ],
     "params": {
      "resistance": 22.0
     },
@@ -541,6 +659,16 @@
     "type": "resistor"
    },
    "RSN_S": {
+    "links": [
+     [
+      "T1",
+      "S1"
+     ],
+     [
+      "CSN_S",
+      "pos"
+     ]
+    ],
     "params": {
      "resistance": 100.0
     },
@@ -549,6 +677,16 @@
     "type": "resistor"
    },
    "R_ISO": {
+    "links": [
+     [
+      "T1",
+      "S2"
+     ],
+     [
+      "VIN",
+      "-"
+     ]
+    ],
     "params": {
      "resistance": 100000000.0
     },

@@ -488,3 +488,47 @@ metadata:
     - forward-converter
     - telecom
     - isolated
+schematic:
+  tuned: true
+  components:
+    Cout: {x: 1060, y: 160, rotation: 0}
+    D1: {x: 440, y: 100, rotation: 180}
+    D2: {x: 200, y: 300, rotation: 180}
+    D_FW: {x: 840, y: 160, rotation: 180}
+    D_FWD: {x: 720, y: 40, rotation: 270}
+    L_OUT: {x: 920, y: 40, rotation: 270}
+    PWM1: {x: 140, y: 160, rotation: 0}
+    PWM2: {x: 360, y: 320, rotation: 0}
+    R_ISO: {x: 660, y: 420, rotation: 90}
+    R_LOAD: {x: 1200, y: 160, rotation: 0}
+    SW1: {x: 200, y: 100, rotation: 0}
+    SW2: {x: 440, y: 280, rotation: 0}
+    T1: {x: 580, y: 220, rotation: 0}
+    VIN: {x: 20, y: 180, rotation: 0}
+    "~GND@D2.A": {x: 200, y: 420, rotation: 0}
+    "~GND@VIN.B": {x: 40, y: 420, rotation: 0}
+  wires:
+  - {id: W1, from: PWM2.B, to: SW2.S, path: [[360, 360], [360, 360], [440, 360], [440, 320]]}
+  - {id: W2, from: D2.A, to: PWM2.B, path: [[200, 340], [200, 360], [250, 360], [250, 360], [300, 360], [300, 360], [300, 360], [360, 360], [360, 360]]}
+  - {id: W4, from: D2.A, to: "~GND@D2.A.P", path: [[200, 340], [200, 370], [200, 370], [200, 400], [200, 400]]}
+  - {id: W3, from: R_ISO.B, to: SW2.S}
+  - {id: W6, from: D1.B, to: SW1.D}
+  - {id: W7, from: SW1.D, to: VIN.A}
+  - {id: W8, from: D2.B, to: SW1.S}
+  - {id: W9, from: D2.B, to: PWM1.B, path: [[200, 260], [200, 220], [140, 220], [140, 200]]}
+  - {id: W10, from: SW1.S, to: T1.P1}
+  - {id: W11, from: PWM1.A, to: SW1.G}
+  - {id: W12, from: D1.A, to: SW2.D}
+  - {id: W13, from: SW2.D, to: T1.P2}
+  - {id: W14, from: PWM2.A, to: SW2.G, path: [[360, 280], [360, 280], [400, 280], [400, 280], [420, 280]]}
+  - {id: W15, from: D_FWD.A, to: T1.S1}
+  - {id: W16, from: D_FWD.B, to: L_OUT.A}
+  - {id: W17, from: D_FW.B, to: D_FWD.B, path: [[840, 120], [840, 40], [780, 40], [780, 40], [760, 40]]}
+  - {id: W18, from: Cout.B, to: R_LOAD.B, path: [[1060, 200], [1060, 360], [1200, 360], [1200, 200]]}
+  - {id: W20, from: Cout.B, to: D_FW.A, path: [[1060, 200], [1060, 360], [840, 360], [840, 200]]}
+  - {id: W19, from: D_FW.A, to: T1.S2, path: [[840, 200], [840, 360], [820, 360], [820, 360], [600, 360], [600, 260]]}
+  - {id: W21, from: D_FW.A, to: R_ISO.A}
+  - {id: W22, from: Cout.A, to: R_LOAD.A, path: [[1060, 120], [1060, 40], [1200, 40], [1200, 120]]}
+  - {id: W23, from: Cout.A, to: L_OUT.B, path: [[1060, 120], [1060, 100], [1060, 100], [1060, 40], [960, 40]]}
+  - {id: W24, from: D2.A, to: VIN.B}
+  groups: {}

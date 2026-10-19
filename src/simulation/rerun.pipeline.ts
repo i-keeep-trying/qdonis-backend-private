@@ -24,6 +24,7 @@ import {
 } from './loss/loss-engine';
 import type { DeviceKind, LossAnalysis } from './loss/loss-engine';
 import { globOrder, sliceSteadyState } from './loss/time-series';
+import { applyDesignSummary } from './netlist/design-summary';
 import { isDict, toFloat, truthy, type Dict } from './netlist/py';
 import {
   DECK_FILES,
@@ -128,6 +129,20 @@ function lossAnalysis(
   }
 }
 
+/**
+ * The template YAML carries the template's targets and component values.
+ * Decks produced by the design embed the designed ones (`* qdonis-design:`);
+ * applied to a copy so result formulas (regulation error, output power, ...)
+ * use the design that was simulated.
+ */
+function designedYaml(input: RerunInput): unknown {
+  if (!isDict(input.yamlData)) return input.yamlData;
+  const design = structuredClone(input.yamlData);
+  return applyDesignSummary(design, Object.values(input.analysisCirs))
+    ? design
+    : input.yamlData;
+}
+
 export async function runRerun(
   input: RerunInput,
   ngspice: NgspiceOptions,
@@ -158,19 +173,20 @@ export async function runRerun(
       }
     }
 
+    const yamlData = designedYaml(input);
     const env = {
       outputDir: logs.length ? outputDir : null,
-      yamlData: input.yamlData,
+      yamlData,
     };
     const filter = analysisFilter.length ? analysisFilter : null;
     const results = structureSimulationResults(
       measurements,
-      input.yamlData,
+      yamlData,
       filter,
       env,
     );
-    embedFeasibility(results, input.yamlData, filter, env);
-    const plots = generatePlotlyFigures(outputDir, input.yamlData);
+    embedFeasibility(results, yamlData, filter, env);
+    const plots = generatePlotlyFigures(outputDir, yamlData);
 
     const analysisCirs: Partial<Record<AnalysisKind, string>> = {};
     for (const kind of ['dc', 'ac', 'transient'] as const) {
@@ -191,7 +207,7 @@ export async function runRerun(
 
     let loss: LossAnalysis | null = null;
     if (readdirSync(timeSeriesDir).length) {
-      const deviceTypes = semiconductorTypesFromYaml(input.yamlData);
+      const deviceTypes = semiconductorTypesFromYaml(yamlData);
       const keepRefs = Object.entries(deviceTypes)
         .filter(([, kind]) => kind)
         .map(([ref]) => ref);

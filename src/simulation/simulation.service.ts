@@ -7,6 +7,7 @@ import { AppError, ErrorCode } from '../common/errors/error-codes';
 import { ProjectAccessService } from '../projects/project-access.service';
 import { ProjectsService } from '../projects/projects.service';
 import {
+  ancestry,
   commitStage,
   patchNode,
   stageNodeOnBranch,
@@ -30,19 +31,20 @@ import {
   type DesignEditRunInput,
   type DesignRunInput,
 } from './sizing/design-sizing.service';
-import {
-  deviceSelectionView,
-  mergeOverrides,
-  stressEntries,
-} from './devices.format';
+import { deviceSelectionView, mergeOverrides } from './devices.format';
 import { catalogue, type Preference } from './loss/device-selection';
-import { semiconductorTypesFromYaml } from './loss/loss-engine';
+import {
+  semiconductorTypesFromYaml,
+  type LossTemperatureCurve,
+} from './loss/loss-engine';
+import { branchCircuit } from '../schematic/library/stored-circuit';
 import { SimulationArtifactsService } from './simulation-artifacts.service';
 import {
   applyParameterUpdates,
   currentValue,
   designParameters,
   hasComponent,
+  rowUpdates,
   syncedDecks,
 } from './design-values';
 import type {
@@ -91,8 +93,48 @@ const normalizeDecks = (
       .map(([k, v]) => [k, v.replace(/\r\n?/g, '\n')]),
   );
 
+/** A loss-vs-Tj curve as the web reads it (camelCase). */
+export interface LossTemperatureView {
+  component: string;
+  model: string;
+  diodeModel: string | null;
+  deviceType: 'switch' | 'diode';
+  points: Array<{
+    tjC: number;
+    totalLossW: number;
+    conductionLossW: number;
+    switchingLossW: number;
+  }>;
+}
+
+const lossTemperatureView = (c: LossTemperatureCurve): LossTemperatureView => ({
+  component: c.component,
+  model: c.model,
+  diodeModel: c.diode_model,
+  deviceType: c.device_type,
+  points: c.points.map((p) => ({
+    tjC: p.tj_c,
+    totalLossW: p.total_loss_w,
+    conductionLossW: p.conduction_loss_w,
+    switchingLossW: p.switching_loss_w,
+  })),
+});
+
 const missing = (message: string) =>
   AppError.conflict(ErrorCode.StageInputMissing, message);
+
+const isObject = (value: unknown): value is JsonObject =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
+/** The branch's edited circuit for a queued run (absent: the library topology). */
+const editedCircuit = (
+  studio: StudioProject,
+  branchId: string,
+): { circuit?: JsonObject } => {
+  const custom = stageNodeOnBranch(studio, 'visualization', branchId)?.data
+    .customCircuit;
+  return isObject(custom) ? { circuit: custom } : {};
+};
 
 /** Commands an uploaded deck may not run (old frontend `UNSAFE_CONTROL`). */
 const UNSAFE_CONTROL =
@@ -173,13 +215,10 @@ export class SimulationService {
           : null;
       if (!topologyId)
         throw missing('Pick a circuit before running the design.');
-      if (vis?.data.customStructure === true) {
-        throw AppError.unavailable(
-          ErrorCode.StageNotAvailable,
-          'Designing an edited circuit is not available yet.',
-        );
-      }
-      const design = this.topologies.design(topologyId);
+      const design = branchCircuit(
+        vis?.data.customCircuit,
+        this.topologies.design(topologyId),
+      );
       const parameters = designParameters(design);
       const decks = Object.fromEntries(
         Object.entries(generateAnalysisCirs(design, 'all').analysis_cirs).map(
@@ -220,6 +259,7 @@ export class SimulationService {
     await this.sizing.precheck(user, projectId);
     const runId = randomUUID();
     let topologyId = '';
+    let circuit: JsonObject | undefined;
     const result = await this.commit(
       user,
       projectId,
@@ -232,13 +272,10 @@ export class SimulationService {
             ? this.topologies.resolveId(vis.data.topologyId)
             : null;
         if (!id) throw missing('Pick a circuit before running the design.');
-        if (vis?.data.customStructure === true) {
-          throw AppError.unavailable(
-            ErrorCode.StageNotAvailable,
-            'Designing an edited circuit is not available yet.',
-          );
-        }
         topologyId = id;
+        circuit = isObject(vis?.data.customCircuit)
+          ? vis.data.customCircuit
+          : undefined;
         return {
           data: {
             runId,
@@ -263,6 +300,7 @@ export class SimulationService {
       topologyId,
       parameters,
       actor: { id: user.id, role: user.role },
+      ...(circuit ? { circuit } : {}),
     };
     try {
       await this.runs.enqueue({
@@ -460,7 +498,11 @@ export class SimulationService {
       if (!topologyId) {
         throw missing('The design does not name a library topology.');
       }
-      const library = this.topologies.design(topologyId);
+      const library = branchCircuit(
+        stageNodeOnBranch(studio, 'visualization', branchId)?.data
+          .customCircuit,
+        this.topologies.design(topologyId),
+      );
       const rows: RecalculatedParameter[] = Array.isArray(
         node.data.recalculatedParameters,
       )
@@ -490,15 +532,7 @@ export class SimulationService {
         }
       }
 
-      // Only changed rows: the table shows rounded values (6 digits).
-      const updates = new Map<string, Map<string, string>>();
-      for (const row of rows) {
-        if (row.after === row.before) continue;
-        const params = updates.get(row.ref) ?? new Map<string, string>();
-        params.set(row.param, row.after);
-        updates.set(row.ref, params);
-      }
-      applyParameterUpdates(library, updates);
+      applyParameterUpdates(library, rowUpdates(rows));
       const decks = syncedDecks(library);
       return {
         data: {
@@ -569,6 +603,7 @@ export class SimulationService {
           analysisCirs: Object.fromEntries(wanted.map((k) => [k, decks[k]])),
           componentModels: {},
           junctionTemperature: null,
+          ...editedCircuit(studio, branchId),
         };
         const data = pendingSimulation({
           runId,
@@ -648,6 +683,57 @@ export class SimulationService {
   }
 
   /**
+   * Each semiconductor's losses at every junction temperature its loss model
+   * is characterised at, on the simulated waveforms and with the parts the
+   * simulation's loss analysis uses (core `/api/simulate/loss_vs_temperature`).
+   */
+  async lossVsTemperature(
+    user: Actor,
+    projectId: string,
+    nodeId: string,
+  ): Promise<{ curves: LossTemperatureView[] }> {
+    await this.access.require(user, projectId);
+    const node = await this.graph.node(projectId, nodeId);
+    if (!node || node.stage !== 'simulation') {
+      throw AppError.notFound(
+        ErrorCode.NodeNotFound,
+        'This simulation no longer exists.',
+      );
+    }
+    if (node.status !== 'ready') {
+      throw missing('The simulation has not finished.');
+    }
+    const timeSeriesZip = await this.artifacts.timeSeriesZip(projectId, nodeId);
+    if (!timeSeriesZip) {
+      this.files.assertEnabled();
+      throw missing(
+        'The raw waveforms of this simulation were not kept. Re-run the simulation to plot losses against temperature.',
+      );
+    }
+    const data = node.data as unknown as Partial<SimulationData>;
+    const topologyId = this.topologies.resolveId(rec(data.metadata).topology);
+    let deviceTypes: ReturnType<typeof semiconductorTypesFromYaml> | null =
+      null;
+    if (topologyId) {
+      const studio = await this.projects.loadStudio(projectId, user.id);
+      const circuit = ancestry(studio, nodeId)
+        .reverse()
+        .find((n) => n.stage === 'visualization')?.data.customCircuit;
+      deviceTypes = semiconductorTypesFromYaml(
+        branchCircuit(circuit, this.topologies.design(topologyId)),
+      );
+    }
+    const curves = await this.compute.run('lossVsTemperature', {
+      zipBase64: timeSeriesZip,
+      componentModels: rec(
+        rec(data.deviceSelection).component_models,
+      ) as Record<string, string>,
+      deviceTypes,
+    });
+    return { curves: curves.map(lossTemperatureView) };
+  }
+
+  /**
    * Whether a requested netlist change shows in a finished simulation (core
    * `/api/simulate/verify-rerun`). Analysis only; nothing is changed.
    */
@@ -698,9 +784,10 @@ export class SimulationService {
   // --- devices ---------------------------------------------------------------------
 
   /**
-   * Devices stage: picks the switches and diodes from the device library,
-   * from entered stresses or (without them) on the branch simulation's
-   * waveforms. The simulation's selection and losses are updated too.
+   * Device selection, part of the Simulation stage: picks the switches and
+   * diodes from the device library on the branch simulation's waveforms and
+   * redoes its loss analysis with them. The simulation node is updated in
+   * place (later re-runs keep the parts); there is no devices stage.
    */
   async selectDevices(
     user: Actor,
@@ -710,59 +797,20 @@ export class SimulationService {
   ) {
     await this.access.require(user, projectId, 'canEdit');
     const studio = await this.projects.loadStudio(projectId, user.id, branchId);
-    const previous = stageNodeOnBranch(studio, 'devices', branchId);
     const sim = stageNodeOnBranch(studio, 'simulation', branchId);
     const tj = 100.0;
     this.assertParts(dto.overrides);
 
-    if (dto.inputs?.length) {
-      const result = await this.compute.run('selectFromStresses', {
-        entries: stressEntries(dto.inputs),
-        tj,
-        preference: dto.preference ?? 'auto',
-        overrides: mergeOverrides(
-          dto.preference ? null : rec(previous?.data).selection,
-          dto.overrides,
-        ),
-      });
-      if (!result.success) {
-        const missing = Object.entries(result.missing_inputs)
-          .map(([ref, need]) => `${ref}: ${need.join(', ')}`)
-          .join('; ');
-        throw AppError.badRequest(
-          ErrorCode.ValidationFailed,
-          `Missing inputs — ${missing}`,
-        );
-      }
-      const selection = deviceSelectionView(result);
-      const losses = lossAnalysisView({
-        assumptions: {
-          junction_temperature_c: tj,
-          plecs_model: result.loss_analysis.assumptions.waveforms,
-          default_mosfet: '',
-          default_diode: '',
-        },
-        components: result.loss_analysis.components,
-      });
-      return this.commit(user, projectId, branchId, 'devices', () => ({
-        data: {
-          inputs: dto.inputs,
-          selection,
-          losses: losses?.components ?? [],
-          loss_analysis: result.loss_analysis,
-        },
-        options: { source: 'user', summary: 'Devices selected' },
-      }));
-    }
-
     if (!sim || sim.status !== 'ready') {
-      throw missing('Run a simulation first, or enter the device stresses.');
+      throw missing(
+        'Devices are selected from the simulated waveforms, and there is no successful simulation on this branch. Run the simulation first.',
+      );
     }
     const timeSeriesZip = await this.artifacts.timeSeriesZip(projectId, sim.id);
     if (!timeSeriesZip) {
       this.files.assertEnabled();
       throw missing(
-        'The raw waveforms of this simulation were not kept. Re-run the simulation, or enter the device stresses.',
+        'The raw waveforms of this simulation were not kept. Re-run the simulation to select devices.',
       );
     }
     const topologyId = this.topologies.resolveId(
@@ -774,7 +822,13 @@ export class SimulationService {
         zipBase64: timeSeriesZip,
         tj,
         deviceTypes: topologyId
-          ? semiconductorTypesFromYaml(this.topologies.design(topologyId))
+          ? semiconductorTypesFromYaml(
+              branchCircuit(
+                stageNodeOnBranch(studio, 'visualization', branchId)?.data
+                  .customCircuit,
+                this.topologies.design(topologyId),
+              ),
+            )
           : null,
         preference: dto.preference ?? 'auto',
         overrides: mergeOverrides(
@@ -785,13 +839,18 @@ export class SimulationService {
     );
     const selection = deviceSelectionView(core);
     const losses = lossAnalysisView(lossAnalysis);
-    return this.commit(user, projectId, branchId, 'devices', (current) => {
-      // Keep the simulation's view in step with the chosen parts.
-      const node = stageNodeOnBranch(current, 'simulation', branchId);
-      let project = current;
-      if (node && node.id === sim.id) {
+    const meta = await this.projects.mutateStudio(
+      projectId,
+      user.id,
+      (current) => {
+        const node = current.nodes[sim.id];
+        if (!node || node.status !== 'ready') {
+          throw missing(
+            'The simulation changed while the devices were evaluated. Try again.',
+          );
+        }
         const data = node.data as unknown as SimulationData;
-        project = patchNode(current, node.id, {
+        return patchNode(current, node.id, {
           rev: node.rev + 1,
           data: {
             ...node.data,
@@ -806,18 +865,23 @@ export class SimulationService {
             ),
           },
         });
-      }
-      return {
-        project,
-        data: {
-          inputs: [],
-          selection,
-          losses: losses?.components ?? [],
-          loss_analysis: lossAnalysis,
-        },
-        options: { source: 'user', summary: 'Devices selected' },
-      };
-    });
+      },
+      branchId,
+    );
+    const node = await this.graph.stage(
+      projectId,
+      user.id,
+      branchId,
+      'simulation',
+    );
+    if (!node) throw new Error('The simulation result was not recorded');
+    return {
+      node,
+      branchId,
+      forked: false,
+      branchName: '',
+      workspaceVersion: meta.revision,
+    };
   }
 
   /** Overridden parts must exist in the device library. */

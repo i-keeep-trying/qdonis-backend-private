@@ -5,15 +5,14 @@ import type {
 import {
   STAGE_LABEL,
   STAGE_ORDER,
-  type StageKind,
   type StudioScope,
+  type WorkspaceStage,
 } from '../../projects/studio/studio-graph';
 import {
   allowedStages,
   downstreamOf,
   isFullScope,
 } from '../../projects/studio/studio-scope';
-import { MTBF_METHODS } from '../../studio-stages/dto/stages.dto';
 import {
   allowedTools,
   inputLabel,
@@ -32,11 +31,11 @@ import {
 export interface AgentScope {
   scope: StudioScope;
   /** Allowed stages with a ready result on the active branch. */
-  ready: StageKind[];
+  ready: WorkspaceStage[];
   /** Steps that may be offered next. */
-  next: StageKind[];
+  next: WorkspaceStage[];
   /** Steps the user's latest message names (decided by the server, not the model). */
-  named?: StageKind[];
+  named?: WorkspaceStage[];
 }
 
 function fn(
@@ -207,37 +206,6 @@ function extraTools(): FunctionToolDefinition[] {
         assumed: ASSUMED,
       },
     ),
-    fn(
-      'build_bom',
-      'BOM tool: bill of materials (lines, quantities, unit and extended prices, stock) from the parts of the Components stage, or from entered `parts`.',
-      {
-        parts: PARTS_SCHEMA,
-        build_quantity: {
-          type: 'integer',
-          description: 'Boards to build; multiplies every quantity. Default 1.',
-        },
-        assumed: ASSUMED,
-      },
-    ),
-    fn(
-      'run_mtbf',
-      'MTBF tool: failure rate per part and system MTBF. Parts come from `parts`, else the Components / BOM stage; temperatures from `temperature_c`, else the Thermal stage.',
-      {
-        method: { type: 'string', enum: [...MTBF_METHODS] },
-        environment: {
-          type: 'string',
-          description:
-            'Environment of the method, e.g. "Ground, Benign" or "Ground, Fixed" (MIL-HDBK-217F).',
-        },
-        parts: PARTS_SCHEMA,
-        temperature_c: {
-          type: 'number',
-          description: 'Operating temperature of every part.',
-        },
-        assumed: ASSUMED,
-      },
-      ['method', 'environment'],
-    ),
   ];
 }
 
@@ -271,7 +239,7 @@ export function scopedTools(
   return all.map((t) => (stageOfTool(t.function.name) ? withAssumed(t) : t));
 }
 
-function stepLines(stages: readonly StageKind[]): string {
+function stepLines(stages: readonly WorkspaceStage[]): string {
   return stages
     .map(
       (s) =>
@@ -280,7 +248,7 @@ function stepLines(stages: readonly StageKind[]): string {
     .join('\n');
 }
 
-function contractLines(stage: StageKind): string {
+function contractLines(stage: WorkspaceStage): string {
   const contract = STAGE_CONTRACTS[stage];
   const seen = new Set<string>();
   const rows: string[] = [];
@@ -334,9 +302,9 @@ ${stepLines(STAGE_ORDER)}
     return `\n${ENTRY_RULES}
 
 ## This project: full design (start from scratch)
-Follow the full design conversation above. After thermal, these steps are also available — offer them when
-useful, never run them unasked: \`run_emc\` (EMC), \`select_components\` (Components), \`build_bom\` (BOM),
-\`run_mtbf\` (MTBF).
+Follow the full design conversation above. Two more steps are available — offer them when useful, never run
+them unasked: \`run_emc\` (EMC, a conducted-emissions check of a PFC input filter) and \`select_components\`
+(Components, real parts for every component).
 `;
   }
   const entry = scope.entry;

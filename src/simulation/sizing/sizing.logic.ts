@@ -16,6 +16,7 @@ import {
   toFloat,
   type Dict,
 } from '../netlist/py';
+import { isControlBlock } from '../netlist/signal-blocks';
 import { pyRound } from '../numeric/numpy';
 import { jsonDumpsIndent, yamlDumpFlow } from './py-dump';
 
@@ -147,27 +148,28 @@ const hasWord = (text: string, words: string[]): boolean =>
     ).test(text),
   );
 
+const MEGA_NEXT = ['', 'V', 'W', 'A', 'H', 'h', 'O', 'Ω'];
+const MILLI_NEXT = ['V', 'A', 's', 'W', 'H', 'F', 'Ω', 'O', 'v', 'a', 'w'];
+
 function cleanVal(raw: unknown): number | null {
   if (isNum(raw)) return f(raw);
   if (typeof raw !== 'string') return null;
-  const m = /[-+]?[\d.]+/.exec(raw);
+  // Only the SI prefix written right after the number scales it ("65 kHz",
+  // "200 mV", "4.7 uF"); letters elsewhere ("380 VDC bus") must not.
+  const m = /([-+]?\d*\.?\d+(?:[eE][-+]?\d+)?)\s*([A-Za-zµ]*)/.exec(raw);
   if (!m) return null;
-  let val = floatOfMatch(m[0]);
-  const s = raw.toLowerCase();
+  let val = Number(m[1]);
+  const unit = m[2];
+  const first = unit.slice(0, 1);
+  const next = unit.slice(1, 2);
   if (
-    s.includes('kw') ||
-    s.includes('khz') ||
-    raw.includes('k') ||
-    raw.includes('K')
+    unit.slice(0, 3).toLowerCase() === 'meg' ||
+    (first === 'M' && MEGA_NEXT.includes(next))
   )
-    val *= 1e3;
-  else if (s.includes('meg') || s.includes('mhz')) val *= 1e6;
-  else if (s.includes('u') || s.includes('µ')) val *= 1e-6;
-  else if (
-    s.includes('m') &&
-    (s.includes('ma') || s.includes('mv') || s.includes('ms'))
-  )
-    val *= 1e-3;
+    val *= 1e6;
+  else if (first === 'k' || first === 'K') val *= 1e3;
+  else if (first === 'u' || first === 'µ') val *= 1e-6;
+  else if (first === 'm' && MILLI_NEXT.includes(next)) val *= 1e-3;
   return val;
 }
 
@@ -421,7 +423,8 @@ export function adaptDab(
       }
       for (const out of Array.isArray(req.outputs) ? req.outputs : []) {
         if (isDict(out) && out.var === 'pout_avg_w') {
-          out.formula = `(abs([Vout_avg])**2) / ${floatRepr(pyRound(rLoad, 4))}`;
+          // Reference the load so the deck's design summary carries R_LOAD to re-runs.
+          out.formula = '(abs([Vout_avg])**2) / {components.R_LOAD.resistance}';
           out.description = `Delivered Output Power (${floatRepr(pyRound(power, 1))}W nominal)`;
         }
       }
@@ -563,6 +566,88 @@ export function adaptDab(
 `;
 }
 
+/** `_has_comp`. */
+const hasComp = (yaml: Dict, ref: string): boolean =>
+  allComponents(yaml.components ?? []).some(([c]) => or(c.ref, c.id) === ref);
+
+/** Python `any(c.get("ref") == ref for c in yaml_dict.get("components", []))`. */
+const hasTopLevel = (yaml: Dict, ref: string): boolean =>
+  Array.isArray(yaml.components) &&
+  yaml.components.some((c) => isDict(c) && c.ref === ref);
+
+/**
+ * `_control_update` (beyond chat-first): the chat-first adapters scale
+ * control loops written as behavioural sources (`legacyRef`); the library
+ * builds the same loops from control blocks. Updates whichever form the
+ * template has: the block when only it exists (`block` undefined: the block
+ * needs no change), else the source.
+ */
+function controlUpdate(
+  yaml: Dict,
+  updates: Updates,
+  legacyRef: string,
+  legacy: Dict,
+  blockRef?: string,
+  block?: Dict,
+): void {
+  if (blockRef && hasComp(yaml, blockRef) && !hasComp(yaml, legacyRef)) {
+    if (block && Object.keys(block).length)
+      Object.assign(slot(updates, blockRef), block);
+    return;
+  }
+  Object.assign(slot(updates, legacyRef), legacy);
+}
+
+const present = (v: unknown): boolean => v !== null && v !== undefined;
+
+/** `_comp_param`: the update's value if any, else the template's. */
+function compParam(
+  yaml: Dict,
+  updates: Updates,
+  ref: string,
+  keys: string | string[],
+  dflt: unknown = null,
+): unknown {
+  const names = (typeof keys === 'string' ? [keys] : keys).map((k) =>
+    k.toLowerCase(),
+  );
+  const upd = or(updates[ref], {});
+  for (const k of names) {
+    for (const [uk, uv] of Object.entries(isDict(upd) ? upd : {})) {
+      if (uk.toLowerCase() === k && present(uv)) return uv;
+    }
+  }
+  for (const [comp] of allComponents(yaml.components ?? [])) {
+    if (or(comp.ref, comp.id) !== ref) continue;
+    const params = or(comp.params, or(comp.parameters, {}));
+    for (const k of names) {
+      for (const [pk, pv] of Object.entries(isDict(params) ? params : {})) {
+        if (pk.toLowerCase() === k && present(pv)) return pv;
+      }
+    }
+  }
+  return dflt;
+}
+
+/** `_num`. */
+function num(value: unknown, dflt: number): number {
+  const v = parseEngToNum(value);
+  return v !== null && !Number.isNaN(v) ? v : dflt;
+}
+
+/** `float(f"{x:.{d}g}")`. */
+const gNum = (x: number, digits: number): number => Number(g(x, digits));
+
+const AFE_VIN_KEYS = [
+  'nominal input voltage',
+  'input_voltage',
+  'input voltage',
+  'vin',
+  'v_in',
+  'line_voltage',
+  'grid_voltage',
+];
+
 /** `_adapt_three_phase_afe_parameters`; returns the reasoning markdown. */
 export function adaptAfe(
   yaml: Dict,
@@ -571,29 +656,17 @@ export function adaptAfe(
 ): string {
   const params = paramsIn ?? {};
   const vin =
-    extractNumericParam(
-      params,
-      [
-        'nominal input voltage',
-        'input_voltage',
-        'input voltage',
-        'vin',
-        'v_in',
-        'line_voltage',
-        'grid_voltage',
-      ],
-      [
-        'range',
-        'min',
-        'max',
-        'ripple',
-        'drop',
-        'capacitor',
-        'filter',
-        'current',
-        'phase',
-      ],
-    ) ?? 380.0;
+    extractNumericParam(params, AFE_VIN_KEYS, [
+      'range',
+      'min',
+      'max',
+      'ripple',
+      'drop',
+      'capacitor',
+      'filter',
+      'current',
+      'phase',
+    ]) ?? 380.0;
   const vout =
     extractNumericParam(
       params,
@@ -617,42 +690,153 @@ export function adaptAfe(
   const iPhasePk = Math.sqrt(2.0) * iPhaseRms;
   const iMax = Math.max(12.0, pyRound(1.4 * iPhasePk, 1));
   const iMaxText = floatRepr(iMax);
+  const vHalf = vout / 2.0;
+  // (core also migrates pre-block templates: R_N_star -> R_N_TOP / R_N_BOT,
+  // B_INT -> G_INT; no library template or saved design has them.)
 
   for (const v of ['V_A', 'V_B', 'V_C'])
     slot(updates, v).amplitude = pyRound(vPhasePk, 2);
   slot(updates, 'R_DC').resistance = pyRound(rLoad, 2);
-  const cDc = power >= 5000.0 ? 2200e-6 : 1500e-6;
-  slot(updates, 'C_DC').capacitance = cDc;
-  slot(updates, 'B_ERR').expression = `${g(vout, 4)} - v(V_DC)`;
-  slot(updates, 'B_INT').expression =
-    `v(V_I) >= ${iMaxText} ? (v(V_ERR) > 0 ? 0 : 0.005 * v(V_ERR)) : (v(V_I) <= 0 ? (v(V_ERR) < 0 ? 0 : 0.005 * v(V_ERR)) : 0.005 * v(V_ERR))`;
-  slot(updates, 'C_INT').capacitance = 10e-6;
-  slot(updates, 'B_VERR_RAW').expression =
-    `((v(V_ERR) * 0.08) + v(V_I)) > ${iMaxText} ? ${iMaxText} : (((v(V_ERR) * 0.08) + v(V_I)) < 0 ? 0 : ((v(V_ERR) * 0.08) + v(V_I)))`;
+  // 0.5 mH boost + 0.1 mH EMI inductors keep the reactive drop (wLI) small
+  for (const l of ['LA', 'LB', 'LC']) slot(updates, l).inductance = 0.5e-3;
+  for (const l of ['L_EMI_A', 'L_EMI_B', 'L_EMI_C'])
+    slot(updates, l).inductance = 0.1e-3;
+  const cDc =
+    power >= 80000.0
+      ? 15e-3
+      : power >= 40000.0
+        ? 5e-3
+        : power >= 20000.0
+          ? 3e-3
+          : 2.2e-3;
+  Object.assign(slot(updates, 'C_DC'), { capacitance: cDc, ic: vout });
+  slot(updates, 'R_N_TOP').resistance = '10k';
+  slot(updates, 'R_N_BOT').resistance = '10k';
+
+  controlUpdate(
+    yaml,
+    updates,
+    'B_ERR',
+    { expression: `${g(vout, 4)} - v(V_DC)` },
+    'REF_V',
+    { value: vout },
+  );
+  controlUpdate(
+    yaml,
+    updates,
+    'B_P',
+    { expression: 'v(V_ERR) * 0.02' },
+    'KP_V',
+    { gain: 0.02 },
+  );
+  // Integrator ki = G_INT / C_INT = 5 mA/V / 10 uF
+  controlUpdate(yaml, updates, 'G_INT', { gain: 0.005 }, 'INT_V', {
+    ki: 500.0,
+    upper: iMax,
+  });
+  controlUpdate(
+    yaml,
+    updates,
+    'C_INT',
+    { capacitance: 10e-6, ic: pyRound(iPhasePk, 2) },
+    'INT_V',
+    { ic: pyRound(iPhasePk, 2) },
+  );
+  controlUpdate(yaml, updates, 'R_INT', { resistance: '10Meg' }, 'INT_V');
+  controlUpdate(
+    yaml,
+    updates,
+    'C_MAG_FLT',
+    { capacitance: 1e-6, ic: pyRound(iPhasePk, 2) },
+    'LPF_MAG',
+    { ic: pyRound(iPhasePk, 2) },
+  );
+  controlUpdate(
+    yaml,
+    updates,
+    'B_VERR_RAW',
+    {
+      expression: `((v(V_ERR) * 0.02) + v(V_I)) > ${iMaxText} ? ${iMaxText} : (((v(V_ERR) * 0.02) + v(V_I)) < 0 ? 0 : ((v(V_ERR) * 0.02) + v(V_I)))`,
+    },
+    'LIM_PI',
+    { upper: iMax },
+  );
   for (const ph of ['A', 'B', 'C']) {
-    slot(updates, `B_REF${ph}`).expression =
-      `v(I_MAG) * (v(V_${ph}_node) - v(N_star)) / ${fx(vPhasePk, 2)}`;
-    slot(updates, `B_ERR_${ph}`).expression =
-      `((v(I_REF_${ph}) - v(V_IACT_${ph})) * 20) > 12 ? 12 : (((v(I_REF_${ph}) - v(V_IACT_${ph})) * 20) < -12 ? -12 : ((v(I_REF_${ph}) - v(V_IACT_${ph})) * 20))`;
+    controlUpdate(
+      yaml,
+      updates,
+      `B_REF${ph}`,
+      {
+        expression: `v(I_MAG) * (v(V_${ph}_node) - v(N_star)) / ${fx(vPhasePk, 2)}`,
+      },
+      `REF_${ph}`,
+      { gain: `1/${fx(vPhasePk, 2)}` },
+    );
+    // Inner current loop: normalised grid-voltage feed-forward + proportional current feedback
+    const ff = `((10 * (v(V_${ph}_node) - v(N_star)) / ${fx(vHalf, 2)}) - 0.1 * (v(I_REF_${ph}) - v(V_IACT_${ph})))`;
+    controlUpdate(
+      yaml,
+      updates,
+      `B_ERR_${ph}`,
+      { expression: `${ff} > 9.5 ? 9.5 : (${ff} < -9.5 ? -9.5 : ${ff})` },
+      `K_FF_${ph}`,
+      { gain: `10/${fx(vHalf, 2)}` },
+    );
   }
+  controlUpdate(
+    yaml,
+    updates,
+    'VTRI',
+    { v1: -10n, v2: 10n, td: 0n, tr: '25u', tf: '25u', pw: 0n, per: '50u' },
+    'CAR',
+    { frequency: 20000.0, low: -10n, high: 10n },
+  );
+  // Positive control effort drives the bottom switches
   for (const [ph, top, bot] of [
     ['A', 'B1', 'B4'],
     ['B', 'B2', 'B5'],
     ['C', 'B3', 'B6'],
   ]) {
-    slot(updates, top).expression =
-      `7.5 * (1 + tanh(5 * (v(V_TRI) - 0.2 - v(V_CTRL_${ph}))))`;
-    slot(updates, bot).expression =
-      `7.5 * (1 + tanh(5 * (v(V_CTRL_${ph}) - v(V_TRI) - 0.2)))`;
+    controlUpdate(
+      yaml,
+      updates,
+      top,
+      {
+        expression: `7.5 * (1 + tanh(5 * (v(V_CTRL_${ph}) - v(V_TRI) - 0.2)))`,
+      },
+      `CMP_${ph}_TOP`,
+    );
+    controlUpdate(
+      yaml,
+      updates,
+      bot,
+      {
+        expression: `7.5 * (1 + tanh(5 * (v(V_TRI) - 0.2 - v(V_CTRL_${ph}))))`,
+      },
+      `CMP_${ph}_BOT`,
+    );
   }
+  // Ideal diodes and MOSFETs: no reverse-recovery (Tt) spikes
   const bv = Math.max(1200.0, pyRound(1.5 * vout, 1));
+  if (!('models' in yaml)) yaml.models = [];
+  const models: unknown[] = Array.isArray(yaml.models) ? yaml.models : [];
+  yaml.models = [
+    ...models.filter(
+      (m) =>
+        !(
+          typeof m === 'string' &&
+          (m.includes('dmodel1') || m.includes('sic_mosfet'))
+        ),
+    ),
+    `.model dmodel1 D(Is=1e-12 n=1.1 Rs=0.001 Cjo=5e-11 Bv=${fx(bv, 0)} Ibv=1e-06)`,
+    '.model sic_mosfet NMOS(Vto=3 Lambda=0.01 Kp=8.333 Cbd=0.3n Cbs=0.3n Cgdo=0.3n Is=1e-14 Rs=0.015)',
+  ];
   for (const d of ['D1', 'D2', 'D3', 'D4', 'D5', 'D6']) {
-    Object.assign(slot(updates, d), {
-      Bv: bv,
-      Rs: 0.001,
-      Tt: 10e-9,
-      Cjo: 50e-12,
-    });
+    Object.assign(slot(updates, d), { Bv: bv, Rs: 0.001, Cjo: 50e-12 });
+    for (const comp of Array.isArray(yaml.components) ? yaml.components : []) {
+      if (isDict(comp) && comp.ref === d && isDict(comp.params))
+        delete comp.params.Tt;
+    }
   }
   for (const sw of [
     'M_A_TOP',
@@ -676,10 +860,10 @@ export function adaptAfe(
     if (isDict(trans)) {
       if (!isDict(trans.spice_settings)) trans.spice_settings = {};
       const ss = trans.spice_settings as Dict;
-      ss.use_ic = false;
+      ss.use_ic = true;
       ss.method = 'trap';
       ss.trtol = 7n;
-      ss.ic = `v(V_DC)=${g(vout, 4)} v(V_I)=${fx(iPhasePk, 2)}`;
+      ss.ic = `v(V_DC)=${g(vout, 4)} v(V_I)=${fx(iPhasePk, 2)} v(I_MAG)=${fx(iPhasePk, 2)}`;
       for (const req of Array.isArray(trans.requirements)
         ? trans.requirements
         : []) {
@@ -687,6 +871,30 @@ export function adaptAfe(
         if (!isDict(req.criteria)) req.criteria = {};
         (req.criteria as Dict).target_vout = vout;
         (req.criteria as Dict).tolerance_pct = 5.0;
+        for (const env of Array.isArray(req.environment)
+          ? req.environment
+          : []) {
+          if (!isDict(env)) continue;
+          env.t_step = 1.0e-6;
+          env.t_max_step = 1.0e-6;
+          env.t_stop = 0.05;
+          env.t_start = 0.04;
+        }
+        for (const meas of Array.isArray(req.measurement)
+          ? req.measurement
+          : []) {
+          if (
+            !isDict(meas) ||
+            !['V_DC_OUT', 'VDC_OUT'].includes(meas.ref as string)
+          )
+            continue;
+          meas.ref = 'VOUT';
+          if (!('plot' in meas)) meas.plot = {};
+          if (isDict(meas.plot)) {
+            meas.plot.title = 'Output DC Voltage';
+            meas.plot.x_axis = 'time';
+          }
+        }
         for (const out of Array.isArray(req.outputs) ? req.outputs : []) {
           if (isDict(out) && out.var === 'vout_avg_v') {
             out.description = `Regulated DC Output Voltage (${g(vout, 4)}V target)`;
@@ -695,7 +903,7 @@ export function adaptAfe(
       }
     }
   }
-  return `## Three-Phase Active Front End (AFE) Parameter Optimization & Control Tuning
+  return `## Three-Phase Active Front End (AFE) Parameter Optimization & Control Loop Stabilization
 
 ### 1. Operating Specifications
 - **Grid Voltage ($V_{in(L-L)}$)**: $${g(vin, 4)}\\,\\text{V}_{\\text{RMS}}$ ($V_{phase,pk} = \\frac{${g(vin, 4)}}{\\sqrt{3}} \\cdot \\sqrt{2} = ${fx(vPhasePk, 2)}\\,\\text{V}$)
@@ -704,28 +912,1085 @@ export function adaptAfe(
 - **DC Load Resistance**:
   $$R_{DC} = \\frac{V_{out}^2}{P_{out}} = \\frac{${g(vout, 4)}^2}{${g(power, 4)}} = ${fx(rLoad, 2)}\\,\\Omega$$
 
-### 2. AC Grid Currents & Modulation Headroom
+### 2. AC Grid Currents & Modulation
 - **Nominal Grid Current (RMS)**:
   $$I_{phase,RMS} = \\frac{P_{out}}{\\sqrt{3} \\cdot V_{in}} = \\frac{${g(power, 4)}}{\\sqrt{3} \\cdot ${g(vin, 4)}} = ${fx(iPhaseRms, 2)}\\,\\text{A}$$
 - **Peak Phase Current ($I_{phase,pk}$)**:
   $$I_{phase,pk} = \\sqrt{2} \\cdot I_{phase,RMS} = ${fx(iPhasePk, 2)}\\,\\text{A}$$
 - **Current Reference Clamp**: Set to $${fx(iMax, 1)}\\,\\text{A}$ ($1.4\\times$ nominal peak headroom).
-- **Modulation Index**: $m = \\frac{V_{phase,pk}}{V_{DC} / 2} = \\frac{${fx(vPhasePk, 2)}}{${fx(vout / 2, 1)}} = ${fx(vPhasePk / (vout / 2.0), 3)} < 1.0$ (linear SPWM operating region).
+- **Modulation Index**: $m = \\frac{V_{phase,pk}}{V_{DC} / 2} = \\frac{${fx(vPhasePk, 2)}}{${fx(vHalf, 1)}} = ${fx(vPhasePk / vHalf, 3)} < 1.0$ (linear SPWM operating region).
 
-### 3. Closed-Loop Voltage & Current Controller Tuning
-- **Outer Voltage PI Loop**:
-  - Proportional Gain: $K_p = 0.08$
-  - Transconductance Integrator: $G_{INT} = 5\\,\\text{mA/V}$, $C_{INT} = 10\\,\\mu\\text{F}$
-  - Precharged Integrator Initial Condition: $V_I(0) = ${fx(iPhasePk, 2)}\\,\\text{V}$ matching nominal steady-state current command.
-- **Inner Current Loop**:
-  - Proportional current error gain: $20\\,\\text{V/A}$ with $\\pm 12\\,\\text{V}$ anti-windup clamping using continuous ternary operators.
-  - Low-pass PWM filtering: $R = 1\\,\\text{k}\\Omega, C = 10\\,\\text{nF}$ ($f_c \\approx 15.9\\,\\text{kHz}$).
-
-### 4. EMI & Damping Filter Verification
-- **Series RC Damping**: Damping resistors $R_{DAMP} = 2\\,\\Omega$ are wired in series with $C_{EMI} = 10\\,\\mu\\text{F}$ to damp filter resonance while completely eliminating unintended fundamental shunt grid loading.
-- **DC Link Capacitor**: Sized at $${fx(cDc * 1e6, 0)}\\,\\mu\\text{F}$ to ensure DC bus ripple $< 1\\%$.
-- **Semiconductor Stress**: SiC diodes and MOSFETs rated for $B_v = ${fx(bv, 0)}\\,\\text{V} \\ge 1.5 \\times V_{out}$.
+### 3. Physics, Hardware & Simulation Stability Fixes
+- **Inductor Voltage Saturation Prevention**: Boost inductors sized to $0.5\\,\\text{mH}$ and EMI inductors to $0.1\\,\\text{mH}$ ($0.6\\,\\text{mH}$ total vs previous $6\\,\\text{mH}$), eliminating the massive reactive voltage drop ($\\omega L I$) that previously starved the converter and distorted the AC current.
+- **DC Buffer Capacitance Sizing**: Scaled $C_{DC}$ to $${fx(cDc * 1e3, 0)}\\,\\text{mF}$ ($${fx(cDc * 1e6, 0)}\\,\\mu\\text{F}$) to provide adequate buffer energy storage between $50\\,\\text{Hz}$ grid peaks, flattening DC bus voltage ripple to $< 1\\%$.
+- **Inverted PWM Polarity Correction**: Positive current error correctly mapped to bottom MOSFETs to charge boost inductors against ground without shorting the DC bus.
+- **Normalized Grid Voltage Feedforward**: Injected normalized feedforward term ($V_{FF} = 10 \\cdot \\frac{v(V_{ph}) - v(N_{star})}{V_{DC}/2}$) with anti-windup clamping to eliminate duty-cycle blowup.
+- **Continuous-Time VCCS Integrator**: Replaced discontinuous ternary integrator with continuous-time transconductance integrator ($G_{INT} = 5\\,\\text{mA/V}$) and dampened proportional gain ($K_p = 0.02$).
+- **Neutral Point Midpoint Anchoring**: Connected two $10\\,\\text{k}\\Omega$ balancing resistors ($R_{N,TOP}, R_{N,BOT}$) between $V_{DC}$, $N_{star}$, and ground, eliminating floating-node solver drift.
+- **Diode Shoot-Through Prevention**: Eliminated transit time ($T_t$) reverse-recovery shoot-through spikes on freewheeling diodes.
+- **Steady-State Inrush Suppression**: Precharged $C_{DC}$ to $${g(vout, 4)}\\,\\text{V}$, $C_{INT}$ to $${fx(iPhasePk, 2)}\\,\\text{V}$, and $C_{MAG,FLT}$ to $${fx(iPhasePk, 2)}\\,\\text{V}$ with \`.tran uic\`.
+- **Simulation Anti-Aliasing**: Set carrier frequency to $20\\,\\text{kHz}$ with $1\\,\\mu\\text{s}$ transient timestep resolution.
 `;
+}
+
+const PFC_TOPOLOGIES = new Set([
+  'acdc_single_phase_boost_power_factor_correction',
+  'acdc_interleaved_boost_power_factor_correction',
+  'acdc_totem_pole_power_factor_correction',
+  'acdc_flyback_pfc_dcm',
+]);
+
+type OperatingPoint = [number, number, number, number];
+
+/** `_single_phase_operating_point`: (Vin rms, Vout, Pout, f_line). */
+function singlePhaseOperatingPoint(
+  paramsIn: Dict | null,
+  defaults: OperatingPoint,
+): OperatingPoint {
+  const [vinD, voutD, pD, fD] = defaults;
+  const params = paramsIn ?? {};
+  let vin = extractNumericParam(
+    params,
+    [
+      'nominal input voltage',
+      'input_voltage',
+      'input voltage',
+      'vin',
+      'v_in',
+      'line_voltage',
+      'line voltage',
+      'grid_voltage',
+      'ac input voltage',
+    ],
+    [
+      'range',
+      'min',
+      'max',
+      'ripple',
+      'drop',
+      'capacitor',
+      'filter',
+      'current',
+      'frequency',
+    ],
+  );
+  const vout = extractNumericParam(
+    params,
+    [
+      'nominal output voltage',
+      'output_voltage',
+      'output voltage',
+      'vout',
+      'v_out',
+      'dc_bus',
+      'bus_voltage',
+      'dc bus voltage',
+    ],
+    [
+      'range',
+      'min',
+      'max',
+      'ripple',
+      'regulation',
+      'capacitor',
+      'current',
+      'tolerance',
+    ],
+  );
+  let power = extractNumericParam(
+    params,
+    [
+      'output_power',
+      'output power',
+      'total_power',
+      'rated_power',
+      'rated power',
+      'nominal_power',
+      'nominal power',
+      'pout',
+      'p_out',
+      'power',
+    ],
+    [...POWER_EXCLUDE, 'factor', 'density'],
+  );
+  if (power === null && vout) {
+    const iout = extractNumericParam(
+      params,
+      ['output current', 'output_current', 'iout', 'i_out'],
+      ['input', 'inrush', 'ripple', 'range'],
+    );
+    if (iout) power = vout * iout;
+  }
+  let fLine = extractNumericParam(params, [
+    'input frequency',
+    'line frequency',
+    'grid frequency',
+    'ac frequency',
+    'mains frequency',
+    'input_frequency',
+    'line_frequency',
+  ]);
+  if (fLine !== null && !(fLine >= 40.0 && fLine <= 440.0)) fLine = null;
+  // A spec written as a peak value ("325 Vpk") is converted back to RMS.
+  for (const [k, v] of Object.entries(params)) {
+    if (
+      typeof v === 'string' &&
+      vin !== null &&
+      /input/i.test(k) &&
+      /\b(pk|peak)\b/i.test(v)
+    ) {
+      vin = vin / 2 ** 0.5;
+      break;
+    }
+  }
+  return [vin || vinD, vout ? Math.abs(vout) : voutD, power || pD, fLine || fD];
+}
+
+const PFC_DEFAULTS: Record<string, OperatingPoint> = {
+  acdc_single_phase_boost_power_factor_correction: [230.0, 385.0, 370.0, 50.0],
+  acdc_interleaved_boost_power_factor_correction: [230.0, 385.0, 370.0, 50.0],
+  acdc_totem_pole_power_factor_correction: [200.0, 400.0, 4000.0, 50.0],
+  acdc_flyback_pfc_dcm: [230.0, 12.0, 30.0, 50.0],
+};
+
+/**
+ * `_adapt_single_phase_pfc`: the PFC control loops are hidden from the model
+ * and hard-code the template's operating point, so they are rescaled here.
+ */
+function adaptSinglePhasePfc(
+  yaml: Dict,
+  updates: Updates,
+  params: Dict | null,
+): string {
+  const topologyId = lowerStr(yaml.id ?? '');
+  const [vinRms, vout, power, fLine] = singlePhaseOperatingPoint(
+    params,
+    PFC_DEFAULTS[topologyId],
+  );
+  const vpk = vinRms * Math.sqrt(2.0);
+  const rLoad = vout ** 2 / power;
+  const notes = [
+    '## Deterministic PFC control scaling',
+    `- Line: $V_{in,rms} = ${g(vinRms, 4)}\\,V$, $V_{pk} = \\sqrt{2} V_{in,rms} = ${g(vpk, 4)}\\,V$, $f_{line} = ${g(fLine, 4)}\\,Hz$`,
+    `- Load: $R_{LOAD} = V_{out}^2 / P_{out} = ${g(vout, 4)}^2 / ${g(power, 4)} = ${g(rLoad, 4)}\\,\\Omega$`,
+  ];
+  // Twice-line-frequency ripple: C = P / (2*pi*2*f_line * Vout * dV)
+  const holdUpCap = (ref: string, rippleFrac = 0.05): number => {
+    const cMin = power / (2 * Math.PI * 2 * fLine * vout * rippleFrac * vout);
+    const cNow = num(compParam(yaml, updates, ref, 'capacitance'), 0.0);
+    return Math.max(cNow, cMin);
+  };
+
+  if (
+    topologyId === 'acdc_single_phase_boost_power_factor_correction' ||
+    topologyId === 'acdc_interleaved_boost_power_factor_correction'
+  ) {
+    const nPhases = topologyId.includes('interleaved') ? 2 : 1;
+    Object.assign(slot(updates, 'VAC'), {
+      amplitude: pyRound(vpk, 2),
+      frequency: fLine,
+    });
+    slot(updates, 'R1').resistance = pyRound(rLoad, 3);
+    const vref = num(
+      compParam(
+        yaml,
+        updates,
+        'VREF',
+        'voltage',
+        compParam(yaml, updates, 'REF_V', 'value'),
+      ),
+      5.0,
+    );
+    const r3 = num(compParam(yaml, updates, 'R3', 'resistance'), 10e3);
+    slot(updates, 'R2').resistance = pyRound(r3 * (vout / vref - 1.0), 1);
+    // I_pk = k * |v_line| * V_COMP with V_COMP ~ 2.5 V (half its clamp) at full load
+    const iPk = (2.0 * power) / (0.95 * vpk) / nPhases;
+    const kMult = iPk / (vpk * 2.5);
+    const lineSense = nPhases > 1 ? 'abs(V(a,b))' : 'V(d)';
+    controlUpdate(
+      yaml,
+      updates,
+      'B_MULT',
+      { expression: `${lineSense} * V(V_COMP) * ${g(kMult, 4)}` },
+      'MULT',
+      { gain: gNum(kMult, 4) },
+    );
+    const cOut = holdUpCap('C1');
+    Object.assign(slot(updates, 'C1'), {
+      capacitance: gNum(cOut, 3),
+      ic: pyRound(vout, 1),
+    });
+    notes.push(
+      `- Divider: $R_2 = R_3 (V_{out}/V_{ref} - 1) = ${g(r3, 4)}(${g(vout, 4)}/${g(vref, 3)} - 1)$`,
+      `- Multiplier: $k = I_{pk} / (V_{pk} \\cdot 2.5) = ${g(iPk, 3)} / (${g(vpk, 4)} \\cdot 2.5) = ${g(kMult, 4)}$ per phase`,
+    );
+  } else if (topologyId === 'acdc_totem_pole_power_factor_correction') {
+    Object.assign(slot(updates, 'VAC'), {
+      amplitude: pyRound(vpk, 2),
+      frequency: fLine,
+    });
+    slot(updates, 'R_LOAD').resistance = pyRound(rLoad, 3);
+    const iPk = (2.0 * power) / vpk;
+    controlUpdate(
+      yaml,
+      updates,
+      'B_pol',
+      { expression: 'V(n_AC_L, n_AC_N) >= 0 ? 1 : 0' },
+      'POL',
+    );
+    controlUpdate(
+      yaml,
+      updates,
+      'B_pol_sign',
+      { expression: 'V(n_AC_L, n_AC_N) >= 0 ? 1 : -1' },
+      'POL_SIGN',
+    );
+    controlUpdate(
+      yaml,
+      updates,
+      'B_Verr',
+      { expression: `${g(vout, 6)} - V(n_DC_POS)` },
+      'REF_V',
+      { value: gNum(vout, 6) },
+    );
+    controlUpdate(
+      yaml,
+      updates,
+      'B_PI_out',
+      {
+        expression: `max(0, min(${g(1.6 * iPk, 4)}, V(n_Vp) + V(n_Vint)))`,
+      },
+      'LIM_PI',
+      { upper: gNum(1.6 * iPk, 4) },
+    );
+    controlUpdate(
+      yaml,
+      updates,
+      'B_Iref',
+      {
+        expression: `V(n_PI_out) * abs(V(n_AC_L, n_AC_N) / ${g(vpk, 6)})`,
+      },
+      'VAC_NORM',
+      { expression: `abs(in1-in2)/${g(vpk, 6)}` },
+    );
+    controlUpdate(
+      yaml,
+      updates,
+      'B_Duty',
+      {
+        expression: `1 - ( abs(V(n_AC_L, n_AC_N)) / ${g(vout, 6)} ) + (0.05 * V(n_Ierr))`,
+      },
+      'FF_D',
+      { expression: `1-abs(in1-in2)/${g(vout, 6)}` },
+    );
+    controlUpdate(yaml, updates, 'C_Vint', { ic: pyRound(iPk, 3) }, 'INT_V', {
+      ic: pyRound(iPk, 3),
+    });
+    const cOut = holdUpCap('Cout');
+    Object.assign(slot(updates, 'Cout'), {
+      capacitance: gNum(cOut, 3),
+      ic: pyRound(vout, 2),
+    });
+    notes.push(
+      `- Polarity detection: ternary comparators $V(n_{AC\\_L}, n_{AC\\_N}) \\ge 0 \\,? 1 : 0$ and $\\ge 0 \\,? 1 : -1$ (no $t=0$ shoot-through)`,
+      `- Voltage loop target ${g(vout, 4)} V, line normalisation ${g(vpk, 4)} V, duty feed-forward $1 - |v_{line}|/V_{out}$`,
+      `- Integrator pre-charge $I_{pk} = 2P/V_{pk} = ${g(iPk, 3)}\\,A$, limit $1.6 I_{pk}$`,
+    );
+  } else if (topologyId === 'acdc_flyback_pfc_dcm') {
+    Object.assign(slot(updates, 'VAC'), {
+      amplitude: pyRound(vpk, 2),
+      frequency: fLine,
+      phase: 90n,
+    });
+    slot(updates, 'R_LOAD').resistance = pyRound(rLoad, 3);
+    const fsw = num(compParam(yaml, updates, 'PWM', 'frequency'), 1e5);
+    let lm = num(
+      compParam(yaml, updates, 'T1', ['Lm_primary', 'lm_primary', 'lm']),
+      500e-6,
+    );
+    // Constant on-time DCM: line-averaged P_in = Vpk^2 * D^2 / (4 * Lm * fsw)
+    const pIn = power / 0.92;
+    let duty = Math.sqrt(4.0 * lm * fsw * pIn) / vpk;
+    const dMax = 0.4;
+    if (duty > dMax) {
+      lm = (dMax * vpk) ** 2 / (4.0 * fsw * pIn);
+      duty = dMax;
+    }
+    // Stay in DCM at the line peak: D + D_reset <= 0.85, D_reset = D * Vpk / V_or
+    const vOr = (vpk * duty) / (0.85 - duty);
+    const turns = (vout + 0.7) / vOr;
+    Object.assign(slot(updates, 'PWM'), {
+      duty_cycle: pyRound(duty, 5),
+      frequency: fsw,
+    });
+    Object.assign(slot(updates, 'T1'), {
+      Lm_primary: gNum(lm, 4),
+      turns_ratio: pyRound(turns, 5),
+    });
+    slot(updates, 'D1').Bv = pyRound(1.5 * (vout + turns * vpk), 1);
+    // Winding RC snubbers, realistic leakage (k = 0.985) and no diode
+    // reverse-recovery charge carry ngspice through the line zero crossings.
+    slot(updates, 'R_SNUB_P').resistance = 22.0;
+    slot(updates, 'C_SNUB_P').capacitance = 2.2e-9;
+    slot(updates, 'R_SNUB_S').resistance = 100.0;
+    slot(updates, 'C_SNUB_S').capacitance = 1e-9;
+    updates.T1.k_coupling = 0.985;
+    for (const ref of ['DB1', 'DB2', 'DB3', 'DB4', 'D1'])
+      slot(updates, ref).Tt = 0n;
+    const cOut = holdUpCap('Cout', 0.04);
+    Object.assign(slot(updates, 'Cout'), {
+      capacitance: gNum(cOut, 3),
+      ic: pyRound(vout, 2),
+    });
+    notes.push(
+      `- DCM constant on-time: $D = \\sqrt{4 L_m f_{sw} P_{in}} / V_{pk} = ${fx(duty, 4)}$ with $L_m = ${g(lm * 1e6, 4)}\\,\\mu H$, $P_{in} = P_{out}/0.92$`,
+      `- Reflected voltage $V_{or} = V_{pk} D / (0.85 - D) = ${g(vOr, 4)}\\,V$, $N_s/N_p = (V_{out} + 0.7)/V_{or} = ${g(turns, 4)}$`,
+    );
+  }
+  return notes.join('\n');
+}
+
+/** `_adapt_single_phase_afe_parameters`; returns the reasoning markdown. */
+export function adaptSinglePhaseAfe(
+  yaml: Dict,
+  updates: Updates,
+  params: Dict | null,
+): string {
+  const [vinRms, vout, power, fLine] = singlePhaseOperatingPoint(
+    params,
+    [230.0, 400.0, 3000.0, 50.0],
+  );
+  const vpk = vinRms * Math.sqrt(2.0);
+  const rLoad = power > 0 ? vout ** 2 / power : 53.33;
+  const iPk = vinRms > 0 ? (Math.sqrt(2.0) * power) / vinRms : 18.45;
+  const iMax = Math.max(40.0, pyRound(1.5 * iPk, 1));
+  // Hold-up DC link for 2x line-frequency ripple (< 5 %)
+  const cMin =
+    vout > 0 && fLine > 0
+      ? power / (4.0 * Math.PI * fLine * vout * (0.05 * vout))
+      : 0.0022;
+  const cDc = Math.max(0.0022, cMin);
+  const bvReq = Math.max(800.0, pyRound(1.8 * vout, 1));
+
+  slot(updates, 'GLOBAL_PARAMS').spice_line =
+    `.param V_TARGET=${g(vout, 4)} V_PEAK=${g(vpk, 4)}`;
+  Object.assign(slot(updates, 'VAC'), {
+    amplitude: pyRound(vpk, 2),
+    frequency: fLine,
+  });
+  slot(updates, 'R_DC').resistance = pyRound(rLoad, 2);
+  Object.assign(slot(updates, 'C_DC'), { capacitance: gNum(cDc, 4), ic: vout });
+  controlUpdate(
+    yaml,
+    updates,
+    'B_ERR',
+    { expression: 'V_TARGET - v(n_DC_BUS)' },
+    'REF_V',
+  );
+  // Critically damped voltage loop: Kp 0.05, ki = G_INT / C_INT = 1 mA/V / 100 uF
+  controlUpdate(
+    yaml,
+    updates,
+    'B_P',
+    { expression: 'v(n_err) * 0.05' },
+    'KP_V',
+    { gain: 0.05 },
+  );
+  controlUpdate(
+    yaml,
+    updates,
+    'G_INT',
+    { spice_line: 'G_INT 0 n_INT n_err 0 0.001' },
+    'INT_V',
+    { ki: 10.0, ic: gNum(iPk, 4) },
+  );
+  // Magnitude filter 2.2 uF: pole at ~72 Hz, away from the 3-15 Hz region
+  controlUpdate(
+    yaml,
+    updates,
+    'C_MAG_FLT',
+    { capacitance: 2.2e-6 },
+    'LPF_MAG',
+    { ic: gNum(iPk, 4) },
+  );
+  controlUpdate(
+    yaml,
+    updates,
+    'B_MAG',
+    { expression: `min(max(v(n_P) + v(n_INT), 0), ${g(iMax, 4)})` },
+    'LIM_MAG',
+    { upper: gNum(iMax, 4) },
+  );
+  controlUpdate(
+    yaml,
+    updates,
+    'B_REF',
+    { expression: 'v(n_mag_flt) * v(n_VAC_P, n_VAC_N) / V_PEAK' },
+    'REF_I',
+  );
+  slot(updates, 'IC_CMD').spice_line =
+    `.ic V(n_DC_BUS)=${g(vout, 4)} V(n_INT)=${g(iPk, 4)} V(n_mag_flt)=${g(iPk, 4)}`;
+  for (const d of ['D_A_TOP', 'D_A_BOT', 'D_B_TOP', 'D_B_BOT'])
+    slot(updates, d).Bv = bvReq;
+
+  return [
+    '## Deterministic Single-Phase Active Front End (AFE) Parameter Sizing & Control Tuning',
+    `- Line: $V_{in,rms} = ${g(vinRms, 4)}\\,\\text{V}$, $V_{pk} = \\sqrt{2} V_{in,rms} = ${g(vpk, 4)}\\,\\text{V}$, $f_{line} = ${g(fLine, 4)}\\,\\text{Hz}$`,
+    `- Target Bus & Load: $V_{out} = ${g(vout, 4)}\\,\\text{V}$, $P_{out} = ${g(power, 4)}\\,\\text{W}$, $R_{DC} = V_{out}^2 / P_{out} = ${g(rLoad, 4)}\\,\\Omega$`,
+    `- Peak AC Input Current: $I_{pk} = \\sqrt{2} P_{out} / V_{in,rms} = ${g(iPk, 4)}\\,\\text{A}$ (Limiter clamp $I_{max} = ${g(iMax, 4)}\\,\\text{A}$)`,
+    '- Magnitude Filter ($C_{{MAG,FLT}} = 2.2\\,\\mu\\text{{F}}$): Shifts the outer loop filter pole to $f_c \\approx 72.3\\,\\text{{Hz}}$ (away from the critical 3–15 Hz delay region), restoring loop phase margin and eliminating hunting/drift.',
+    `- Softened Voltage Loop PI Gains: $K_p = 0.05$ and $G_{INT} = 0.001\\,\\text{A/V}$ ($1\\,\\text{mA/V}$) to achieve critical damping and hold a steady ${g(vout, 4)} V bus.`,
+    `- DC Link Capacitor: $C_{DC} = ${fx(cDc * 1e3, 2)}\\,\\text{mF}$ for $2 f_{line}$ ripple buffering.`,
+    `- Initial Conditions: $.ic\\; V(n_{DC\\_BUS})=${g(vout, 4)}\\; V(n_{INT})=${g(iPk, 4)}\\; V(n_{mag\\_flt})=${g(iPk, 4)}$`,
+  ].join('\n');
+}
+
+const DIODE_BRIDGE = new Set([
+  'acdc_single_phase_diode_bridge',
+  'single_phase_diode_bridge',
+]);
+
+const hasPin = (net: unknown[], ref: string, pin: string): boolean =>
+  net.some(
+    (p) => Array.isArray(p) && p.length === 2 && p[0] === ref && p[1] === pin,
+  );
+
+/** Adds the diode bridge's output capacitor `C_OUT` across `R_LOAD`. */
+function addBridgeOutputCap(yaml: Dict, params: Dict): Dict {
+  const comp: Dict = {
+    ref: 'C_OUT',
+    type: 'capacitor',
+    role: 'output_filter',
+    params,
+  };
+  if (!Array.isArray(yaml.components)) yaml.components = [];
+  (yaml.components as unknown[]).push(comp);
+  if (!Array.isArray(yaml.nets)) yaml.nets = [];
+  for (const net of yaml.nets as unknown[]) {
+    if (!Array.isArray(net)) continue;
+    if (hasPin(net, 'R_LOAD', 'pos') && !hasPin(net, 'C_OUT', 'pos'))
+      net.push(['C_OUT', 'pos']);
+    if (hasPin(net, 'R_LOAD', 'neg') && !hasPin(net, 'C_OUT', 'neg'))
+      net.push(['C_OUT', 'neg']);
+  }
+  return comp;
+}
+
+/** `_adapt_single_phase_diode_bridge`; returns the reasoning markdown. */
+export function adaptDiodeBridge(
+  yaml: Dict,
+  updates: Updates,
+  paramsIn: Dict | null,
+): string {
+  const params = paramsIn ?? {};
+  const hasCout = allComponents(yaml.components ?? []).some(
+    ([c]) => c.ref === 'C_OUT' || c.id === 'C_OUT' || c.type === 'capacitor',
+  );
+  if (!hasCout) {
+    addBridgeOutputCap(yaml, {
+      capacitance: 0.00022,
+      voltage_rating: 400.0,
+      std_voltage_rating: 400.0,
+    });
+  }
+  const [vinRms, vout, power, fLine] = singlePhaseOperatingPoint(
+    params,
+    [230.0, 207.0, 50.0, 50.0],
+  );
+  const vpk = vinRms * Math.sqrt(2.0);
+  const rLoad = power > 0 ? vout ** 2 / power : 857.0;
+  const iDc = vout > 0 ? power / vout : 0.24;
+  Object.assign(slot(updates, 'VAC'), {
+    amplitude: pyRound(vpk, 2),
+    frequency: fLine,
+    v_peak: pyRound(vpk, 2),
+    v_rms: pyRound(vinRms, 2),
+  });
+  Object.assign(slot(updates, 'R_LOAD'), {
+    resistance: pyRound(rLoad, 3),
+    v_peak: pyRound(vpk, 2),
+    v_rms: pyRound(vout, 2),
+    i_rms: pyRound(iDc, 3),
+  });
+  const rLine = Math.max(0.1, Math.min(10.0, 0.01 * rLoad));
+  slot(updates, 'R_LINE').resistance = pyRound(rLine, 2);
+  const stdSemi = stdRating(vpk, STD_SEMI, 1.5);
+  for (const d of ['D1', 'D2', 'D3', 'D4']) {
+    Object.assign(slot(updates, d), {
+      Bv: pyRound(1.5 * vpk, 1),
+      std_voltage_rating: stdSemi,
+      v_peak: pyRound(vpk, 2),
+      v_rms: pyRound(vinRms, 2),
+      i_peak: pyRound(iDc * Math.PI, 2),
+      i_rms: pyRound(iDc * 1.11, 2),
+    });
+  }
+  let ripple =
+    extractNumericParam(params, [
+      'ripple',
+      'voltage ripple',
+      'output voltage ripple',
+      'vripple',
+    ]) ?? 0.05;
+  if (ripple && ripple > 0.5) ripple /= 100.0;
+  if (!ripple || ripple <= 0) ripple = 0.05;
+  ripple = Math.max(0.01, Math.min(0.2, ripple));
+  const vripplePp = ripple * vout;
+  let cout = power / (2.0 * fLine * vout * vripplePp);
+  cout = Math.max(47.0e-6, Math.min(0.1, cout));
+  const stdCap = stdRating(vpk, STD_PASSIVE, 1.2);
+  Object.assign(slot(updates, 'C_OUT'), {
+    capacitance: gNum(cout, 6),
+    voltage_rating: stdCap,
+    std_voltage_rating: stdCap,
+    v_peak: pyRound(vpk, 2),
+    i_rms: pyRound(iDc * 0.48, 2),
+  });
+  if (isDict(yaml.analysis)) {
+    const reqs = getDict(yaml.analysis, 'transient').requirements ?? [];
+    const tStop = Math.max(0.08, 4.0 / fLine);
+    const tStart = tStop - 2.0 / fLine;
+    for (const req of Array.isArray(reqs) ? reqs : []) {
+      if (!isDict(req)) continue;
+      for (const env of Array.isArray(req.environment) ? req.environment : []) {
+        if (!isDict(env)) continue;
+        env.t_stop = pyRound(tStop, 4);
+        env.t_start = pyRound(tStart, 4);
+        env.t_step = 1.0e-5;
+        env.t_max_step = 1.0e-5;
+      }
+    }
+  }
+  return [
+    '## Deterministic Single-Phase Diode Bridge Rectifier Sizing',
+    `- AC Line Input: $V_{in,rms} = ${g(vinRms, 4)}\\,V$, $V_{pk} = \\sqrt{2} V_{in,rms} = ${g(vpk, 4)}\\,V$, $f_{line} = ${g(fLine, 4)}\\,Hz$`,
+    `- DC Load: $R_{LOAD} = V_{out}^2 / P_{out} = ${g(vout, 4)}^2 / ${g(power, 4)} = ${g(rLoad, 4)}\\,\\Omega$ ($I_{dc} = ${g(iDc, 4)}\\,A$)`,
+    `- Output Filter Capacitor: $C_{OUT} = \\frac{P_{out}}{2 f_{line} V_{out} \\Delta V_{ripple}} = ${fx(cout * 1e6, 1)}\\,\\mu F$ (rated ${pyStr(stdCap)} V, target ripple ${fx(ripple * 100, 1)}%)`,
+    `- Diodes D1..D4: $V_{RRM} \\ge 1.5 V_{pk} = ${fx(1.5 * vpk, 1)}\\,V$, std rating ${pyStr(stdSemi)} V`,
+  ].join('\n');
+}
+
+const INVERTER_POWER_KEYS = [
+  'output power',
+  'output_power',
+  'rated power',
+  'rated_power',
+  'power',
+  'pout',
+];
+const INVERTER_POWER_EXCLUDE = ['factor', 'loss', 'density', 'aux', 'supply'];
+const INVERTER_FREQ_KEYS = [
+  'output frequency',
+  'output_frequency',
+  'fundamental frequency',
+  'line frequency',
+  'ac frequency',
+];
+const INVERTER_VLL_EXCLUDE = [
+  'range',
+  'min',
+  'max',
+  'ripple',
+  'thd',
+  'regulation',
+  'frequency',
+  'current',
+];
+
+/**
+ * `_adapt_three_phase_vsi`: SPWM references against the +/-10 V carrier carry
+ * the modulation index (amplitude / carrier peak) and output frequency. Vout
+ * is line-to-line RMS: V_ph,pk = V_LL sqrt(2/3), m = V_ph,pk / (Vdc/2) <= 1.
+ */
+function adaptVsi(yaml: Dict, updates: Updates, paramsIn: Dict | null): string {
+  const params = paramsIn ?? {};
+  const vdc =
+    extractNumericParam(
+      params,
+      [
+        'input voltage',
+        'input_voltage',
+        'dc link voltage',
+        'dc bus voltage',
+        'vin',
+        'v_in',
+        'vdc',
+      ],
+      ['range', 'min', 'max', 'ripple', 'current'],
+    ) || num(compParam(yaml, updates, 'V5', 'voltage'), 380.0);
+  const vll =
+    extractNumericParam(
+      params,
+      [
+        'output voltage',
+        'output_voltage',
+        'line-to-line voltage',
+        'vout',
+        'v_out',
+        'ac output voltage',
+      ],
+      INVERTER_VLL_EXCLUDE,
+    ) || vdc * 0.55;
+  const power = extractNumericParam(
+    params,
+    INVERTER_POWER_KEYS,
+    INVERTER_POWER_EXCLUDE,
+  );
+  let fOut = extractNumericParam(params, INVERTER_FREQ_KEYS);
+  fOut = fOut && fOut >= 1.0 && fOut <= 1000.0 ? fOut : 50.0;
+  const vPhPk = vll * Math.sqrt(2.0 / 3.0);
+  const mReq = vPhPk / (vdc / 2.0);
+  const m = Math.min(mReq, 1.0);
+  const triLine = pyStr(compParam(yaml, updates, 'V1', 'spice_line', ''));
+  const tri = /PULSE\s*\(\s*([-\d.eE+]+)\s+([-\d.eE+]+)/i.exec(triLine);
+  const carrierPk = tri
+    ? Math.abs(toFloat(tri[2]))
+    : Math.abs(num(compParam(yaml, updates, 'V1', 'v2'), 10.0));
+  const amp = m * carrierPk;
+  slot(updates, 'V5').voltage = vdc;
+  // R13/R14 balance the DC link across C1/C2 (shunts: lowering them shorts it)
+  for (const ref of ['R13', 'R14']) slot(updates, ref).resistance = 100e3;
+  for (let k = 1; k <= 6; k++) slot(updates, `E${k}`).gain = 15n;
+  // Gate drive: 50 ohm series, 50 kohm pull-down
+  for (const k of [1, 3, 5, 7, 9, 11]) slot(updates, `R${k}`).resistance = 50.0;
+  for (const k of [2, 4, 6, 8, 10, 12])
+    slot(updates, `R${k}`).resistance = 50e3;
+  const bvTarget = Math.max(600.0, vdc * 1.5);
+  for (let k = 1; k <= 6; k++) slot(updates, `M${k}`).Bv = pyRound(bvTarget, 1);
+  for (const [ref, node, phase] of [
+    ['V2', 'ControlA', ''],
+    ['V3', 'ControlB', ' 0 0 120'],
+    ['V4', 'ControlC', ' 0 0 240'],
+  ]) {
+    if (hasComp(yaml, ref) && compParam(yaml, {}, ref, 'spice_line') === null) {
+      // Library form: a sine source (its phase kept), not a raw SINE() line
+      Object.assign(slot(updates, ref), {
+        amplitude: gNum(amp, 4),
+        frequency: fOut,
+      });
+    } else {
+      slot(updates, ref).spice_line =
+        `${ref} ${node} 0 SINE(0 ${g(amp, 4)} ${g(fOut, 6)}${phase})`;
+    }
+  }
+  const notes = [
+    '## Deterministic SPWM modulation',
+    `- $V_{ph,pk} = V_{LL} \\sqrt{2/3} = ${g(vll, 4)} \\cdot 0.8165 = ${g(vPhPk, 4)}\\,V$`,
+    `- $m = V_{ph,pk} / (V_{dc}/2) = ${g(vPhPk, 4)} / ${g(vdc / 2, 4)} = ${fx(mReq, 3)}$` +
+      (mReq > 1.0
+        ? ' (capped at 1.0: the DC link is too low for this output in linear SPWM; expect $V_{LL} \\approx 0.612 V_{dc}$)'
+        : ''),
+    `- Reference amplitude $${g(amp, 3)}\\,V$ against the $\\pm${g(carrierPk, 3)}\\,V$ carrier at $f_{out} = ${g(fOut, 4)}\\,Hz$`,
+  ];
+  if (power) {
+    const vPhRms = Math.min(vll, 0.612 * vdc) / Math.sqrt(3.0);
+    const rPh = vPhRms ** 2 / (power / 3.0);
+    for (const ref of ['R15', 'R16', 'R17'])
+      slot(updates, ref).resistance = pyRound(rPh, 4);
+    notes.push(
+      `- Load per phase $R = V_{ph,rms}^2 / (P/3) = ${g(vPhRms, 4)}^2 / ${g(power / 3, 4)} = ${g(rPh, 4)}\\,\\Omega$`,
+    );
+  }
+  return notes.join('\n');
+}
+
+/**
+ * `_adapt_three_phase_vienna`: grid amplitude and current-reference
+ * normalisation (phase peak), bus target, current limit, pre-charge, load.
+ * The input voltage is the grid line-to-line RMS value.
+ */
+function adaptVienna(
+  yaml: Dict,
+  updates: Updates,
+  paramsIn: Dict | null,
+): string {
+  const params = paramsIn ?? {};
+  const vinLl =
+    extractNumericParam(
+      params,
+      [
+        'input voltage',
+        'input_voltage',
+        'grid voltage',
+        'line voltage',
+        'vin',
+        'v_in',
+        'ac input voltage',
+      ],
+      ['range', 'min', 'max', 'ripple', 'current', 'frequency'],
+    ) || 208.0;
+  const vout =
+    extractNumericParam(
+      params,
+      [
+        'output voltage',
+        'output_voltage',
+        'dc bus voltage',
+        'dc_bus',
+        'vout',
+        'v_out',
+      ],
+      ['range', 'min', 'max', 'ripple', 'regulation', 'current'],
+    ) || 800.0;
+  const power =
+    extractNumericParam(
+      params,
+      ['output power', 'output_power', 'rated power', 'power', 'pout'],
+      INVERTER_POWER_EXCLUDE,
+    ) || 15000.0;
+  let fLine = extractNumericParam(params, [
+    'input frequency',
+    'line frequency',
+    'grid frequency',
+    'ac frequency',
+  ]);
+  fLine = fLine && fLine >= 40.0 && fLine <= 440.0 ? fLine : 50.0;
+  const vpk = (vinLl / Math.sqrt(3.0)) * Math.sqrt(2.0);
+  const iPk = (2.0 * power) / (3.0 * vpk * 0.97);
+  const rLoad = vout ** 2 / power;
+  for (const ph of ['A', 'B', 'C']) {
+    const lower = ph.toLowerCase();
+    Object.assign(slot(updates, `V_AC_${ph}`), {
+      amplitude: pyRound(vpk, 2),
+      frequency: fLine,
+    });
+    controlUpdate(
+      yaml,
+      updates,
+      `B_Iref_${ph}`,
+      { expression: `V(i_mag) * abs(V(v_${lower}_grid)) / ${g(vpk, 6)}` },
+      `REF_${ph}`,
+      { gain: `1/${g(vpk, 6)}` },
+    );
+    // The block feed-forward divides by the measured bus: nothing to scale
+    controlUpdate(
+      yaml,
+      updates,
+      `B_Duty_${ph}`,
+      {
+        expression: `1 - (abs(V(v_${lower}_grid))/${g(vout / 2, 6)}) + 0.01*(V(i_ref_${ph}) - V(i_act_${ph}))`,
+      },
+      `FF_${ph}`,
+    );
+  }
+  controlUpdate(
+    yaml,
+    updates,
+    'B_VERR',
+    { expression: `${g(vout, 6)} - V(v_dc_tot)` },
+    'REF_V',
+    { value: gNum(vout, 6) },
+  );
+  controlUpdate(
+    yaml,
+    updates,
+    'B_IMAG',
+    { expression: `max(0, min(${g(1.6 * iPk, 4)}, V(v_p) + V(v_int)))` },
+    'LIM_PI',
+    { upper: gNum(1.6 * iPk, 4) },
+  );
+  controlUpdate(yaml, updates, 'C_VINT', { ic: pyRound(iPk, 3) }, 'INT_V', {
+    ic: pyRound(iPk, 3),
+    upper: gNum(1.6 * iPk, 4),
+  });
+  slot(updates, 'C_DC_TOP').ic = pyRound(vout / 2.0, 2);
+  slot(updates, 'C_DC_BOT').ic = pyRound(-vout / 2.0, 2);
+  slot(updates, 'R_LOAD').resistance = pyRound(rLoad, 3);
+  return [
+    '## Deterministic Vienna control scaling',
+    `- $V_{pk} = V_{LL} \\sqrt{2/3} = ${g(vpk, 4)}\\,V$ (grid amplitude and current-reference normalisation)`,
+    `- DC bus target ${g(vout, 4)} V, duty feed-forward $1 - |v_{ph}| / (V_{out}/2)$ with $V_{out}/2 = ${g(vout / 2, 4)}\\,V$`,
+    `- $I_{pk} = 2P / (3 V_{pk} \\eta) = ${g(iPk, 3)}\\,A$ (integrator pre-charge, limit $1.6 I_{pk}$); $R_{LOAD} = ${g(rLoad, 4)}\\,\\Omega$`,
+  ].join('\n');
+}
+
+/** `_three_phase_inverter_spec`: (Vdc, V_LL rms, Pout, f_out). */
+function threePhaseInverterSpec(
+  paramsIn: Dict | null,
+  vdcDefault: number,
+): [number, number, number | null, number] {
+  const params = paramsIn ?? {};
+  const vdc =
+    extractNumericParam(
+      params,
+      [
+        'voltage_in',
+        'input voltage',
+        'input_voltage',
+        'dc link voltage',
+        'dc bus voltage',
+        'vin',
+        'v_in',
+        'vdc',
+      ],
+      ['range', 'min', 'max', 'ripple', 'current'],
+    ) || vdcDefault;
+  const vll =
+    extractNumericParam(
+      params,
+      [
+        'voltage_out',
+        'output voltage',
+        'output_voltage',
+        'line-to-line voltage',
+        'vout',
+        'v_out',
+        'ac output voltage',
+      ],
+      INVERTER_VLL_EXCLUDE,
+    ) || 0.55 * vdc;
+  const power = extractNumericParam(
+    params,
+    INVERTER_POWER_KEYS,
+    INVERTER_POWER_EXCLUDE,
+  );
+  const fOut = extractNumericParam(params, INVERTER_FREQ_KEYS);
+  return [vdc, vll, power, fOut && fOut >= 1.0 && fOut <= 1000.0 ? fOut : 50.0];
+}
+
+/**
+ * `_adapt_npc_inverter`: three-phase 3L-NPC; each phase leg regulates
+ * V_LL / sqrt(3) with feed-forward normalised to Vdc/2.
+ */
+function adaptNpc(yaml: Dict, updates: Updates, params: Dict | null): string {
+  const [vdc, vll, power, fOut] = threePhaseInverterSpec(params, 800.0);
+  const half = vdc / 2.0;
+  const vPhRms = vll / Math.sqrt(3.0);
+  const vPhPk = vPhRms * Math.sqrt(2.0);
+  const vRef = Math.min(vPhPk, 0.95 * half);
+  for (const ref of ['VDC_TOP', 'VDC_BOT']) slot(updates, ref).voltage = half;
+  for (const ref of ['C1', 'C2'])
+    if (hasTopLevel(yaml, ref)) slot(updates, ref).ic = half;
+  const loadR = power ? vPhRms ** 2 / (power / 3.0) : 0;
+  if (hasTopLevel(yaml, 'V_ref_a')) {
+    for (const [ph, shift] of [
+      ['a', 0.0],
+      ['b', -120.0],
+      ['c', -240.0],
+    ] as const) {
+      Object.assign(slot(updates, `V_ref_${ph}`), {
+        amplitude: pyRound(vRef, 2),
+        frequency: fOut,
+        delay: 0n,
+        damping: 0n,
+        phase: shift,
+      });
+      controlUpdate(
+        yaml,
+        updates,
+        `B_ctrl_${ph}`,
+        {
+          expression: `(V(n_err_${ph})*2.0 + V(n_pi_int_${ph}) + V(n_ref_target_${ph}))/${g(half, 6)}`,
+        },
+        `K_NORM_${ph}`,
+        { gain: `1/${g(half, 6)}` },
+      );
+      if (power) slot(updates, `R_LOAD_${ph}`).resistance = pyRound(loadR, 4);
+    }
+  } else {
+    Object.assign(slot(updates, 'V_ref_target'), {
+      amplitude: pyRound(vRef, 2),
+      frequency: fOut,
+    });
+    controlUpdate(
+      yaml,
+      updates,
+      'B_ctrl',
+      {
+        expression: `(V(n_err)*2.0 + V(n_pi_int) + V(n_ref_target))/${g(half, 6)}`,
+      },
+      'K_NORM',
+      { gain: `1/${g(half, 6)}` },
+    );
+    if (power) slot(updates, 'R_LOAD').resistance = pyRound(loadR, 4);
+  }
+  const notes = [
+    '## Deterministic 3-Phase NPC control scaling',
+    `- $V_{ph,pk} = V_{LL} \\sqrt{2/3} = ${g(vPhPk, 4)}\\,V$ against $V_{dc}/2 = ${g(half, 4)}\\,V$ (m = ${fx(vPhPk / half, 3)})` +
+      (vPhPk > 0.95 * half
+        ? ' - beyond the bus, reference capped at $0.95 V_{dc}/2$'
+        : ''),
+    `- Feed-forward normalisation $V_{dc}/2 = ${g(half, 4)}\\,V$, output frequency ${g(fOut, 4)} Hz`,
+    '- Phase displacement: Phase A (0°), Phase B (-120°), Phase C (-240°)',
+  ];
+  if (power) {
+    notes.push(
+      `- Per-phase load $R = V_{ph,rms}^2 / (P/3) = ${g(loadR, 4)}\\,\\Omega$ (Total $P = ${g(power, 4)}\\,W$)`,
+    );
+  }
+  return notes.join('\n');
+}
+
+/**
+ * `_adapt_t_type_inverter`: feed-forward + proportional current control into
+ * a star R-L load; load, current reference and feed-forward follow from V_LL,
+ * P and the load inductance (carrier +/-10 V: modulation gain (Vdc/2)/10).
+ */
+export function adaptTType(
+  yaml: Dict,
+  updates: Updates,
+  params: Dict | null,
+): string {
+  const [vdc, vll, powerIn, fOut] = threePhaseInverterSpec(params, 800.0);
+  const half = vdc / 2.0;
+  const vPhRms = vll / Math.sqrt(3.0);
+  const power = powerIn || (3.0 * vPhRms ** 2) / 10.0;
+  const r = vPhRms ** 2 / (power / 3.0);
+  let lLoad = num(compParam(yaml, updates, 'L1', 'inductance'), 1e-3);
+  // keep the load mostly resistive
+  lLoad = Math.min(lLoad, (0.1 * r) / (2 * Math.PI * fOut));
+  const xl = 2 * Math.PI * fOut * lLoad;
+  const z = Math.hypot(r, xl);
+  const phi = (180.0 / Math.PI) * Math.atan2(xl, r);
+  const iPk = (vPhRms * Math.sqrt(2.0)) / z;
+  const vAcPk = iPk * z;
+  const vFf = Math.min((vAcPk * 10.0) / half, 9.5);
+  slot(updates, 'VIN').voltage = vdc;
+  for (const ref of ['R15', 'R16', 'R17'])
+    slot(updates, ref).resistance = pyRound(r, 4);
+  for (const ref of ['L1', 'L2', 'L3'])
+    slot(updates, ref).inductance = gNum(lLoad, 4);
+  for (const [ph, shift] of [
+    ['A', 0.0],
+    ['B', -120.0],
+    ['C', -240.0],
+  ] as const) {
+    Object.assign(slot(updates, `V_IREF_${ph}`), {
+      amplitude: pyRound(iPk, 4),
+      frequency: fOut,
+      phase: shift,
+    });
+    Object.assign(slot(updates, `V_VFF_${ph}`), {
+      amplitude: pyRound(vFf, 4),
+      frequency: fOut,
+      phase: pyRound(shift + phi, 3),
+    });
+  }
+  // Split DC-link capacitors sized for power and midpoint stability
+  const cDc = power >= 40000 ? '2200u' : power >= 15000 ? '1000u' : '470u';
+  for (const ref of ['C1', 'C2']) {
+    if (hasTopLevel(yaml, ref)) {
+      slot(updates, ref).capacitance = cDc;
+      slot(updates, ref).ic = half;
+    }
+  }
+  // 100 nF / 10 ohm RC snubbers damp the dv/dt transients
+  for (const ref of ['C_SNUB_A', 'C_SNUB_B', 'C_SNUB_C'])
+    slot(updates, ref).capacitance = '100n';
+  for (const ref of ['R_SNUB_A', 'R_SNUB_B', 'R_SNUB_C'])
+    slot(updates, ref).resistance = 10n;
+  slot(updates, 'SPICE_SETTINGS').ic = `v(N008)=${g(half, 6)}`;
+  return [
+    '## Deterministic T-type control scaling',
+    `- Load per phase $R = V_{ph,rms}^2/(P/3) = ${g(r, 4)}\\,\\Omega$, $L = ${g(lLoad * 1e3, 4)}\\,mH$, $|Z| = ${g(z, 4)}\\,\\Omega$, $\\phi = ${g(phi, 3)}^\\circ$`,
+    `- $I_{pk} = \\sqrt{2} V_{ph,rms} / |Z| = ${g(iPk, 4)}\\,A$`,
+    `- Feed-forward $V_{FF} = V_{ac,pk} \\cdot 10 / (V_{dc}/2) = ${g(vFf, 4)}\\,V$` +
+      ((vAcPk * 10.0) / half > 9.5
+        ? ' (capped at 9.5: the bus is too low for this output)'
+        : ''),
+    `- DC-link capacitors $C_1 = C_2 = ${cDc}$ with midpoint bias $V(N008) = ${g(half, 4)}\\,V$`,
+    '- Snubbers scaled to $C_{{snub}} = 100\\,nF$, $R_{{snub}} = 10\\,\\Omega$ for dv/dt damping and numerical stability',
+  ].join('\n');
+}
+
+/** Topologies whose control loops are scaled deterministically. */
+const DETERMINISTIC_CONTROL = new Set([
+  ...PFC_TOPOLOGIES,
+  'acdc_three_phase_vienna',
+  'acdc_three_phase_active_front_end',
+  'acdc_single_phase_active_front_end',
+  'dcac_neutral_point_clamped',
+  'dcac_t_type',
+  'dcac_three_phase_voltage_source_inverter',
+]);
+
+const UNSUPPORTED_BSOURCE_FUNCS = /\b(if|ifelse|limit|step|sign)\s*\(/i;
+
+/**
+ * `_drop_unsafe_control_updates`: model edits to behavioural sources that use
+ * functions ngspice lacks are dropped; with `keepNone` every model edit to
+ * the control (sources and, beyond chat-first, control blocks) is dropped.
+ */
+function dropUnsafeControlUpdates(
+  yaml: Dict,
+  updates: Updates,
+  keepNone: boolean,
+): void {
+  const controlRefs = new Set<unknown>();
+  for (const [comp] of allComponents(yaml.components ?? [])) {
+    if (
+      ['b_source', 'e_source', 'g_source'].includes(comp.type as string) ||
+      (keepNone && isControlBlock(comp.type))
+    )
+      controlRefs.add(or(comp.ref, comp.id));
+  }
+  for (const ref of Object.keys(updates)) {
+    if (!controlRefs.has(ref) || !isDict(updates[ref])) continue;
+    if (keepNone) {
+      delete updates[ref];
+      continue;
+    }
+    const expr = updates[ref].expression;
+    if (typeof expr === 'string' && UNSUPPORTED_BSOURCE_FUNCS.test(expr)) {
+      delete updates[ref].expression;
+      if (Object.keys(updates[ref]).length === 0) delete updates[ref];
+    }
+  }
+}
+
+/**
+ * `_sync_interleaved_buck_pwms`: phase k's high side PWM(2k+1) starts at
+ * k*T/N; its low side PWM(2k+2) is the complement with `deadTime` on both
+ * edges (the model produced overlapping pulses on the later phases).
+ */
+function syncInterleavedBuckPwms(
+  yaml: Dict,
+  updates: Updates,
+  deadTime = 40e-9,
+): void {
+  const pwmParams = new Map<number, Dict>();
+  for (const [comp] of allComponents(yaml.components ?? [])) {
+    const ref = pyStr(or(comp.ref, ''));
+    if (ref.startsWith('PWM') && /^\d+$/.test(ref.slice(3))) {
+      const p = or(comp.params, {});
+      pwmParams.set(Number(ref.slice(3)), isDict(p) ? p : {});
+    }
+  }
+  const nPhases = Math.floor(pwmParams.size / 2);
+  if (nPhases < 1) return;
+  const first: Dict = {
+    ...(pwmParams.get(1) ?? {}),
+    ...(isDict(updates.PWM1) ? updates.PWM1 : {}),
+  };
+  let freq: number;
+  let duty: number;
+  try {
+    freq = f(or(first.frequency, 500e3));
+    duty = f(or(first.duty_cycle, 0.12));
+  } catch (error) {
+    if (error instanceof PyError) return;
+    throw error;
+  }
+  const period = 1.0 / freq;
+  duty = Math.min(Math.max(duty, 0.02), 0.9);
+  const lsDuty = Math.max(1.0 - duty - (2.0 * deadTime) / period, 0.0);
+  for (let k = 0; k < nPhases; k++) {
+    const offset = (k * period) / nPhases;
+    Object.assign(slot(updates, `PWM${2 * k + 1}`), {
+      frequency: freq,
+      duty_cycle: pyRound(duty, 6),
+      tdelay: pyRound(offset, 12),
+      vlow: 0n,
+      vhigh: 12n,
+    });
+    Object.assign(slot(updates, `PWM${2 * k + 2}`), {
+      frequency: freq,
+      duty_cycle: pyRound(lsDuty, 6),
+      tdelay: pyRound(offset + duty * period + deadTime, 12),
+      vlow: 0n,
+      vhigh: 12n,
+    });
+  }
 }
 
 /** `sanitize_fsbb_negative_vout`. */
@@ -895,8 +2160,40 @@ const fget = (d: unknown, key: string, dflt: number): number => {
 const forget = (d: unknown, key: string, dflt: number): number =>
   f(or(asDict(d)[key], dflt));
 
+/**
+ * Full-bridge centre-tapped, open loop: Vout = 2 D n Vin - (Vf + I R_path).
+ * n covers the rectifier / conduction drop (~0.8 V + 6 mOhm * Iout,
+ * measured); Lm keeps the magnetizing current under 10 % of the reflected
+ * load current so it does not pump extra energy into the output.
+ */
+function sizeCenterTappedTransformer(
+  yaml: Dict,
+  updates: Updates,
+  params: Dict,
+  d1: number,
+  freq: number,
+): void {
+  const vin = num(compParam(yaml, updates, 'VIN', 'voltage'), 0.0);
+  const vout = Math.abs(extractVoutFromParams(params) ?? 0.0);
+  const rLoad = num(compParam(yaml, updates, 'R_LOAD', 'resistance'), 0.0);
+  if (!(vin > 0 && vout > 0 && d1 > 0)) return;
+  const iout = rLoad > 0 ? vout / rLoad : 0.0;
+  const n = (vout + 0.8 + 0.006 * iout) / (2.0 * d1 * vin);
+  const t1 = slot(updates, 'T1');
+  t1.turns_ratio = pyRound(n, 5);
+  if (iout > 0) {
+    const lmMin = (vin * d1) / (freq * 0.1 * iout * n);
+    const lmNow = num(
+      compParam(yaml, updates, 'T1', ['Lm_primary', 'lm_primary']),
+      0.0,
+    );
+    if (lmNow < lmMin) t1.Lm_primary = gNum(lmMin, 3);
+  }
+}
+
 /** PWM synchronisation rules core enforces on the model's PWM settings. */
-function enforcePwmRules(topologyId: unknown, updates: Updates): void {
+function enforcePwmRules(yaml: Dict, updates: Updates, params: Dict): void {
+  const topologyId = yaml.id;
   if (!('PWM1' in updates)) return;
   const pwm = (ref: string) => slot(updates, ref);
   const set = (
@@ -935,6 +2232,8 @@ function enforcePwmRules(topologyId: unknown, updates: Updates): void {
     const delay2 = pyRound(0.5 * (1.0 / freq), 9);
     set(['PWM1', 'PWM4'], d1, 0n, freq);
     set(['PWM2', 'PWM3'], d1, delay2, freq);
+    if (topologyId === 'dcdc_full_bridge_centertapped')
+      sizeCenterTappedTransformer(yaml, updates, params, d1, freq);
   } else if (
     [
       'dcdc_push_pull',
@@ -980,12 +2279,20 @@ export interface SizingOutcome {
   yaml: Dict;
 }
 
-const AFE = 'acdc_three_phase_active_front_end';
+/** Control scaling run on the model's reply, by topology id. */
+const REPLY_ADAPTERS: Array<
+  [(id: string) => boolean, (y: Dict, u: Updates, p: Dict) => string]
+> = [
+  [(id) => PFC_TOPOLOGIES.has(id), adaptSinglePhasePfc],
+  [(id) => id === 'dcac_three_phase_voltage_source_inverter', adaptVsi],
+  [(id) => id === 'acdc_three_phase_vienna', adaptVienna],
+  [(id) => id === 'dcac_neutral_point_clamped', adaptNpc],
+];
 
 /**
  * Everything after the model call (core `optimize_topology_parameters`):
- * parse, normalise keys, enforce PWM rules, run the DAB / AFE adapters and
- * apply the updates. `template` is an untouched copy of the YAML.
+ * parse, normalise keys, enforce PWM rules, run the control-scaling adapters
+ * and apply the updates. `template` is an untouched copy of the YAML.
  */
 export function processReply(
   text: string,
@@ -993,13 +2300,6 @@ export function processReply(
   template: Dict,
   params: Dict,
 ): SizingOutcome {
-  const afeFallback = (): SizingOutcome => {
-    const fresh = structuredClone(template);
-    const updates: Updates = {};
-    const reasoning = adaptAfe(fresh, updates, params);
-    applyUpdatesToYaml(fresh, updates, params);
-    return { updates, reasoning, yaml: fresh };
-  };
   const raw = text.trim();
   const start = raw.indexOf('{');
   const end = raw.lastIndexOf('}');
@@ -1011,7 +2311,6 @@ export function processReply(
   try {
     parsed = jsonLoadsPy(json);
   } catch (error) {
-    if (yaml.id === AFE) return afeFallback();
     const message = error instanceof Error ? error.message : String(error);
     return {
       updates: {},
@@ -1034,12 +2333,16 @@ export function processReply(
         updates[ref] = normalized;
       } else updates[ref] = value as Dict;
     }
-    enforcePwmRules(yaml.id, updates);
-    if (yaml.id === 'dcdc_dual_active_bridge') adaptDab(yaml, updates, params);
-    else if (yaml.id === AFE) {
-      const afe = adaptAfe(yaml, updates, params);
-      if (!truthy(reasoning)) reasoning = afe;
-    }
+    enforcePwmRules(yaml, updates, params);
+    const id = typeof yaml.id === 'string' ? yaml.id : '';
+    dropUnsafeControlUpdates(yaml, updates, DETERMINISTIC_CONTROL.has(id));
+    if (id === 'dcdc_interleaved_multiphase_buck')
+      syncInterleavedBuckPwms(yaml, updates);
+    const adapter = REPLY_ADAPTERS.find(([matches]) => matches(id));
+    if (adapter)
+      reasoning = `${pyStr(reasoning)}
+
+${adapter[1](yaml, updates, params)}`;
     const text2 =
       reasoning === null || reasoning === undefined ? null : pyStr(reasoning);
     if (Object.keys(updates).length === 0) {
@@ -1048,15 +2351,39 @@ export function processReply(
     applyUpdatesToYaml(yaml, updates, params);
     return { updates, reasoning: text2, yaml };
   } catch {
-    // core: any other failure keeps the template (AFE: deterministic sizing)
-    if (yaml.id === AFE) return afeFallback();
+    // core: any other failure keeps the template
     return { updates: {}, reasoning: null, yaml: structuredClone(template) };
   }
 }
 
+/** Topologies sized without the model (core checks them before any call). */
+const DETERMINISTIC_SIZING: Array<
+  [string[], (y: Dict, u: Updates, p: Dict) => string]
+> = [
+  [['dcdc_dual_active_bridge', 'dual_active_bridge', 'dab'], adaptDab],
+  [['dcac_t_type', 't_type_multilevel_inverter'], adaptTType],
+  [
+    [
+      'acdc_three_phase_active_front_end',
+      'three_phase_active_front_end',
+      'three_phase_afe',
+    ],
+    adaptAfe,
+  ],
+  [
+    [
+      'acdc_single_phase_active_front_end',
+      'single_phase_active_front_end',
+      'single_phase_afe',
+    ],
+    adaptSinglePhaseAfe,
+  ],
+  [[...DIODE_BRIDGE], adaptDiodeBridge],
+];
+
 /**
  * The deterministic part before any model call. Returns the outcome for the
- * DAB (core never asks the model for it), else the prompt inputs.
+ * topologies core sizes without the model, else the prompt inputs.
  */
 export function prepareSizing(
   template: Dict,
@@ -1069,9 +2396,11 @@ export function prepareSizing(
       params = sanitizeFsbbNegativeVout(params, Math.abs(vout));
   }
   const yaml = structuredClone(template);
-  if (lowerStr(yaml.id ?? '') === 'dcdc_dual_active_bridge') {
+  const topId = lowerStr(yaml.id ?? '');
+  const adapter = DETERMINISTIC_SIZING.find(([ids]) => ids.includes(topId));
+  if (adapter) {
     const updates: Updates = {};
-    const reasoning = adaptDab(yaml, updates, params);
+    const reasoning = adapter[1](yaml, updates, params);
     applyUpdatesToYaml(yaml, updates, params);
     return { outcome: { updates, reasoning, yaml } };
   }
@@ -1132,7 +2461,15 @@ export function applyUpdatesToYaml(
       }
       continue;
     }
-    const targets = byRef.get(ref);
+    let targets = byRef.get(ref);
+    if (
+      !targets &&
+      ['C_OUT', 'COUT'].includes(ref.toUpperCase()) &&
+      DIODE_BRIDGE.has(lowerStr(yaml.id ?? ''))
+    ) {
+      targets = [addBridgeOutputCap(yaml, {})];
+      byRef.set('C_OUT', targets);
+    }
     if (!targets || !isDict(newParams) || Object.keys(newParams).length === 0)
       continue;
     for (const comp of targets) {
@@ -1357,6 +2694,14 @@ const TEMPLATES: Array<[string, string]> = [
   [
     'acdc_three_phase_active_front_end',
     'Vin=380  Vout=700  Pout=10k  fsw=20k  LA=5m  C_DC=2200u  R_DC=49  Kp=0.08  Ki=5m',
+  ],
+  [
+    'single_phase_diode_bridge',
+    'Vin=230  Vout=207  Pout=50  f_line=50  C_OUT=220u  R_LOAD=857',
+  ],
+  [
+    'acdc_single_phase_diode_bridge',
+    'Vin=230  Vout=207  Pout=50  f_line=50  C_OUT=220u  R_LOAD=857',
   ],
   ['default', 'Vin=24  Vout=5  fsw=100k  L1=47u  C1=220u  R1=5'],
 ];

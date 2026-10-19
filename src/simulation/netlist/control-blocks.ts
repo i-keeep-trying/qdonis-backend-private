@@ -43,6 +43,12 @@ import {
   truthy,
   type Dict,
 } from './py';
+import {
+  alignWindowToLineCycles,
+  detectPwmPeriod,
+  linePeriod,
+  parseValue,
+} from './timing';
 
 export const RELTOL_DEFAULT = 1e-2;
 export const ABSTOL_DEFAULT = 1e-9;
@@ -622,6 +628,55 @@ const CONTROL_TOKENS = [
   'R_ISO',
 ];
 
+const AUTO_TELEMETRY_FILES = [
+  'gate_',
+  'v_m_',
+  'v_r_',
+  'v_c_',
+  'v_l_',
+  'v_rp',
+  'v_d',
+  'i_m_',
+  'i_d',
+];
+
+/**
+ * Nested resistors (RC snubbers, damping) inside a parent part: exports their
+ * voltage so the Thermal stage computes V_rms^2/R from the waveform. R_ISO-style
+ * ground anchors are simulation aids, not parts.
+ */
+function exportNestedResistors(
+  comp: unknown,
+  compNets: CompNets,
+  uniqueRefs: ReadonlyMap<string, Dict>,
+  lines: string[],
+): void {
+  for (const inner of iter(or(get(comp, 'internal', []), []))) {
+    const iref = get(inner, 'ref');
+    if (
+      !truthy(iref) ||
+      lower(pyStr(get(inner, 'type', ''))) !== 'resistor' ||
+      uniqueRefs.has(keyText(iref))
+    )
+      continue;
+    const refText = pyStr(iref);
+    if (
+      refText.toUpperCase().includes('R_ISO') ||
+      lower(pyStr(get(inner, 'role', ''))).includes('anchor')
+    )
+      continue;
+    const nets = netsOf(compNets, iref);
+    const pos = nets.get('pos') ?? '0';
+    const neg = nets.get('neg') ?? '0';
+    if (pos === neg) continue;
+    const vLet = `v_${refText}_auto`;
+    if (pos === '0') lines.push(`let ${vLet} = 0 - v(${neg})`);
+    else if (neg === '0') lines.push(`let ${vLet} = v(${pos})`);
+    else lines.push(`let ${vLet} = v(${pos}) - v(${neg})`);
+    lines.push(`wrdata time_series/V_${refText}.csv ${vLet}`);
+  }
+}
+
 function calculateWindowTimes(
   winFrom: string | null,
   winTo: string | null,
@@ -683,7 +738,7 @@ export function generateTransientControlBlock(
   compNets: CompNets,
   pwmPeriod: number | null,
 ): string {
-  const per = pwmPeriod ? pwmPeriod : 1e-5;
+  const per = (pwmPeriod ?? detectPwmPeriod(design)) || 1e-5;
   let tstep: number = Math.max(
     per / PRINT_POINTS_PER_PERIOD,
     MIN_TSTEP_DEFAULT,
@@ -728,6 +783,7 @@ export function generateTransientControlBlock(
   lines.push('');
 
   const requirements = sectionRequirements(get(analysisData, 'transient', {}));
+  const period = linePeriod(design);
   for (const req of requirements) {
     const [reqKey, heading] = requirementHeader(
       req,
@@ -740,30 +796,20 @@ export function generateTransientControlBlock(
     let reqTstop: unknown = tstop;
     for (const envVar of iter(or(get(req, 'environment', []), []))) {
       if (get(envVar, 'ref') !== 'time_domain') continue;
-      const envTstop = get(envVar, 't_stop');
-      if (envTstop !== null && envTstop !== undefined) {
-        try {
-          reqTstop = toFloat(envTstop);
-        } catch {
-          // keep default
-        }
-      }
-      const envTstep = get(envVar, 't_step');
-      if (envTstep !== null && envTstep !== undefined) {
-        try {
-          tstep = toFloat(envTstep);
-        } catch {
-          // keep default
-        }
-      }
-      const envMax = or(get(envVar, 't_max_step'), get(envVar, 'max_step'));
-      if (envMax !== null && envMax !== undefined) {
-        try {
-          maxstep = toFloat(envMax);
-        } catch {
-          // keep default
-        }
-      }
+      // Values may carry SPICE suffixes ("30m", "1u"); unparsable ones keep the default.
+      const envTstop = parseValue(or(get(envVar, 't_stop'), null));
+      if (envTstop && envTstop > 0) reqTstop = envTstop;
+      const envTstep = parseValue(
+        or(get(envVar, 't_step'), get(envVar, 'step_size')),
+      );
+      if (envTstep && envTstep > 0) tstep = envTstep;
+      const envMax = parseValue(
+        or(
+          or(get(envVar, 't_max_step'), get(envVar, 'max_step')),
+          get(envVar, 'tmax'),
+        ),
+      );
+      if (envMax && envMax > 0) maxstep = envMax;
       break;
     }
 
@@ -870,6 +916,12 @@ export function generateTransientControlBlock(
             winTo,
             per,
             toFloat(reqTstop),
+          );
+          [winFrom, winTo] = alignWindowToLineCycles(
+            cmdRest,
+            winFrom,
+            winTo,
+            period,
           );
         }
         lines.push(emitMeas(name, cmdRest, winFrom, winTo));
@@ -1030,6 +1082,8 @@ export function generateTransientControlBlock(
         }
       }
 
+      if (first) exportNestedResistors(comp, compNets, uniqueRefs, lines);
+
       const nodeType = get(params, 'node_type', '');
       if (
         !PHYSICAL.includes(ctype) &&
@@ -1069,6 +1123,10 @@ export function generateTransientControlBlock(
       if (!s.startsWith('wrdata ')) continue;
       const parts = splitWs(s);
       if (parts.length < 3) continue;
+      // Internal component auto-telemetry gets no interactive plot command.
+      const file = (parts[1].split(/[\\/]/).pop() ?? parts[1]).toLowerCase();
+      if (AUTO_TELEMETRY_FILES.some((prefix) => file.startsWith(prefix)))
+        continue;
       const signalStart =
         parts.length >= 4 &&
         ['time', 'frequency'].includes(parts[2].toLowerCase())

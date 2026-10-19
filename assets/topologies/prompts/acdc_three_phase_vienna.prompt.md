@@ -1,4 +1,5 @@
 ## Topology-Specific Rules: Three-Phase Vienna Rectifier
+- **Control scaling is automatic (OVERRIDES the items below)**: The input voltage is the grid line-to-line RMS value. The application writes the grid source amplitudes/frequency, every behavioural control expression (current-reference normalisation, DC-bus target, duty feed-forward, current limit), the integrator and DC-capacitor initial conditions and the load (`Vout^2 / Pout`). Do NOT emit expressions for B_* sources. Focus on the boost inductors, DC-link capacitors and semiconductor ratings.
 - **Grid Voltage and Current Reference Scaling**: The reference netlist uses a specific phase peak voltage in the AC sources (e.g., `170.0` for 208Vrms line-to-line) and in the current shaping references (`B_Iref_A`, `B_Iref_B`, `B_Iref_C`). 
   - If the requested input voltage (`Vin`) changes, you MUST calculate the new peak phase voltage $V_{peak} = (V_{in(L-L)} / \sqrt{3}) \times \sqrt{2}$. 
   - You MUST update the `amplitude` parameter of `V_AC_A`, `V_AC_B`, and `V_AC_C` to this new $V_{peak}$.

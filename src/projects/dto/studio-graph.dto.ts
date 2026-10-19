@@ -17,7 +17,11 @@ import {
 
 import { AppError, ErrorCode } from '../../common/errors/error-codes';
 import { BRANCH_NAME_MAX } from '../studio/studio-branches';
-import { STAGE_ORDER, type StageKind } from '../studio/studio-graph';
+import {
+  STAGE_ORDER,
+  type StageKind,
+  type WorkspaceStage,
+} from '../studio/studio-graph';
 
 /** Branch and result ids (`br_…`, `n_…`): the graph's id alphabet. */
 export const GRAPH_ID = /^[A-Za-z0-9_-]{1,100}$/;
@@ -84,7 +88,7 @@ export class SetEntryStepDto {
     description: '`specs` = start from scratch (full design)',
   })
   @IsIn(STAGE_ORDER)
-  step!: StageKind;
+  step!: WorkspaceStage;
 }
 
 export class CreateBranchDto {

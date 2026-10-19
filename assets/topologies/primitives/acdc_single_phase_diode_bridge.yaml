@@ -52,6 +52,12 @@ components:
     type: resistor
     params:
       resistance: 9.0
+  - ref: C_OUT
+    type: capacitor
+    role: output_filter
+    params:
+      capacitance: 0.0022
+      voltage_rating: 50
 nets:
   - - - VAC
       - '-'
@@ -77,17 +83,25 @@ nets:
       - cathode
     - - R_LOAD
       - pos
+    - - C_OUT
+      - pos
   - - - D1
       - anode
     - - D2
       - anode
     - - R_LOAD
       - neg
+    - - C_OUT
+      - neg
 analysis:
   transient:
     requirements:
       - rid: tr_rectifier
         requirement: Verify full-wave rectification and output ripple.
+        criteria:
+          # 16.65 V with the output capacitor C_OUT (always present since chat-first 7f41908); 12.7 V was the
+          # average of the unfiltered rectified sine.
+          target_vout: 16.7
         environment:
           - ref: time_domain
             t_step: 1.0e-06
@@ -125,3 +139,26 @@ analysis:
           - var: vout_ripple_vpp
             formula: '[Vout_ripple_vpp]'
             description: Output Voltage Ripple peak-to-peak
+schematic:
+  tuned: true
+  components:
+    D1: {x: 300, y: 280, rotation: 180}
+    D2: {x: 460, y: 280, rotation: 180}
+    D3: {x: 300, y: 120, rotation: 180}
+    D4: {x: 460, y: 120, rotation: 180}
+    GND.pin: {x: 0, y: 300, rotation: 0}
+    R_LINE: {x: 140, y: 140, rotation: 270}
+    R_LOAD: {x: 620, y: 200, rotation: 0}
+    VAC: {x: 0, y: 200, rotation: 0}
+  wires:
+  - {id: W1, from: GND.pin.P, to: VAC.B}
+  - {id: W2, from: D2.B, to: D4.A}
+  - {id: W3, from: D2.B, to: GND.pin.P}
+  - {id: W4, from: R_LINE.A, to: VAC.A}
+  - {id: W5, from: D1.B, to: D3.A}
+  - {id: W6, from: D3.A, to: R_LINE.B}
+  - {id: W7, from: D3.B, to: D4.B}
+  - {id: W8, from: D4.B, to: R_LOAD.A}
+  - {id: W9, from: D1.A, to: D2.A}
+  - {id: W10, from: D2.A, to: R_LOAD.B}
+  groups: {}

@@ -1036,3 +1036,58 @@ metadata:
   topology: ''
   control: ''
   tags: []
+schematic:
+  tuned: true
+  components:
+    C1: {x: 120, y: 80, rotation: 0}
+    C2: {x: 120, y: 320, rotation: 0}
+    C_OUT: {x: 1040, y: 220, rotation: 0}
+    C_SNUB: {x: 520, y: 260, rotation: 0}
+    D1: {x: 440, y: 60, rotation: 180}
+    D2: {x: 440, y: 340, rotation: 180}
+    DR1: {x: 740, y: 100, rotation: 270}
+    DR2: {x: 740, y: 300, rotation: 270}
+    L_OUT: {x: 900, y: 100, rotation: 270}
+    PWM1: {x: 220, y: 120, rotation: 0}
+    PWM2: {x: 220, y: 380, rotation: 0}
+    R_ISO: {x: 760, y: 440, rotation: 90}
+    R_LOAD: {x: 1160, y: 220, rotation: 0}
+    R_SNUB: {x: 520, y: 160, rotation: 0}
+    SW1: {x: 320, y: 60, rotation: 0}
+    SW2: {x: 320, y: 340, rotation: 0}
+    T1: {x: 640, y: 200, rotation: 0}
+    VIN: {x: 0, y: 200, rotation: 0}
+    "~GND@C2.B": {x: 220, y: 500, rotation: 0}
+    "~GND@R_ISO.B": {x: 640, y: 480, rotation: 0}
+  wires:
+  - {id: W1, from: D2.A, to: SW2.S, path: [[440, 380], [440, 440], [320, 440], [320, 380]]}
+  - {id: W2, from: PWM2.B, to: SW2.S}
+  - {id: W3, from: C2.B, to: PWM2.B}
+  - {id: W4, from: C2.B, to: VIN.B, path: [[120, 360], [120, 440], [0, 440], [0, 240]]}
+  - {id: W6, from: C2.B, to: "~GND@C2.B.P", path: [[120, 360], [120, 380], [120, 380], [120, 440], [220, 440], [220, 480]]}
+  - {id: W7, from: D1.B, to: SW1.D}
+  - {id: W8, from: C1.A, to: SW1.D}
+  - {id: W9, from: C1.A, to: VIN.A, path: [[120, 40], [120, 0], [0, 0], [0, 160]]}
+  - {id: W10, from: C_OUT.A, to: R_LOAD.A, path: [[1040, 180], [1040, 100], [1160, 100], [1160, 180]]}
+  - {id: W11, from: C_OUT.A, to: L_OUT.B}
+  - {id: W12, from: C_SNUB.A, to: R_SNUB.B}
+  - {id: W13, from: D1.A, to: R_SNUB.A, path: [[440, 100], [440, 180], [460, 180], [460, 180], [480, 180], [480, 120], [480, 100], [520, 100], [520, 120]]}
+  - {id: W14, from: D1.A, to: SW1.S, path: [[440, 100], [440, 180], [320, 180], [320, 100]]}
+  - {id: W15, from: D2.B, to: SW2.D}
+  - {id: W16, from: R_SNUB.A, to: T1.P1}
+  - {id: W17, from: PWM1.B, to: SW1.S}
+  - {id: W18, from: D1.A, to: D2.B}
+  - {id: W19, from: C1.B, to: C2.A}
+  - {id: W20, from: C_SNUB.B, to: T1.P2}
+  - {id: W21, from: C2.A, to: C_SNUB.B}
+  - {id: W22, from: PWM1.A, to: SW1.G}
+  - {id: W23, from: PWM2.A, to: SW2.G, path: [[220, 340], [220, 340], [280, 340], [280, 340], [300, 340]]}
+  - {id: W24, from: DR1.A, to: T1.S1}
+  - {id: W25, from: DR2.A, to: T1.S2}
+  - {id: W26, from: DR1.B, to: L_OUT.A}
+  - {id: W27, from: DR1.B, to: DR2.B}
+  - {id: W28, from: C_OUT.B, to: R_LOAD.B}
+  - {id: W29, from: C_OUT.B, to: T1.SCT, path: [[1040, 260], [1040, 280], [820, 280], [820, 200], [680, 200], [680, 200], [660, 200]]}
+  - {id: W30, from: R_ISO.A, to: T1.SCT}
+  - {id: W5, from: R_ISO.B, to: "~GND@R_ISO.B.P"}
+  groups: {}

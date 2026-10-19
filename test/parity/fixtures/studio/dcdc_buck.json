@@ -8,6 +8,84 @@
   "SW": "switch",
   "VIN": null
  },
+ "loss_vs_temperature": [
+  {
+   "component": "D",
+   "device_type": "diode",
+   "diode_model": null,
+   "model": "C6D04065A",
+   "points": [
+    {
+     "conduction_loss_w": 0.3138,
+     "switching_loss_w": 0.0,
+     "tj_c": -55.0,
+     "total_loss_w": 0.3138
+    },
+    {
+     "conduction_loss_w": 0.2943,
+     "switching_loss_w": 0.0,
+     "tj_c": 25.0,
+     "total_loss_w": 0.2943
+    },
+    {
+     "conduction_loss_w": 0.2825,
+     "switching_loss_w": 0.0,
+     "tj_c": 75.0,
+     "total_loss_w": 0.2825
+    },
+    {
+     "conduction_loss_w": 0.2725,
+     "switching_loss_w": 0.0,
+     "tj_c": 125.0,
+     "total_loss_w": 0.2725
+    },
+    {
+     "conduction_loss_w": 0.2635,
+     "switching_loss_w": 0.0,
+     "tj_c": 175.0,
+     "total_loss_w": 0.2635
+    }
+   ]
+  },
+  {
+   "component": "SW",
+   "device_type": "switch",
+   "diode_model": null,
+   "model": "C3M0045065D",
+   "points": [
+    {
+     "conduction_loss_w": 0.0128,
+     "switching_loss_w": 0.0059,
+     "tj_c": -40.0,
+     "total_loss_w": 0.0188
+    },
+    {
+     "conduction_loss_w": 0.0111,
+     "switching_loss_w": 0.0063,
+     "tj_c": 25.0,
+     "total_loss_w": 0.0174
+    },
+    {
+     "conduction_loss_w": 0.0123,
+     "switching_loss_w": 0.0066,
+     "tj_c": 75.0,
+     "total_loss_w": 0.0189
+    },
+    {
+     "conduction_loss_w": 0.0135,
+     "switching_loss_w": 0.0067,
+     "tj_c": 125.0,
+     "total_loss_w": 0.0202
+    },
+    {
+     "conduction_loss_w": 0.0147,
+     "switching_loss_w": 0.0065,
+     "tj_c": 175.0,
+     "total_loss_w": 0.0212
+    }
+   ]
+  }
+ ],
  "override": {
   "SW": "C3M0045065J1"
  },

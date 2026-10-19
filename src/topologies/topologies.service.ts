@@ -26,6 +26,13 @@ export class TopologiesService {
 
   constructor(private readonly repository: TopologiesRepository) {}
 
+  /** DEV-LAYOUT: reads the library again after a library layout was saved. */
+  async reload(): Promise<void> {
+    await this.repository.reload();
+    this.idSet = null;
+    this.entries = null;
+  }
+
   /** Library ids in the order the core listed them. */
   ids(): readonly string[] {
     return this.repository.catalog.ids;

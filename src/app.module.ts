@@ -39,6 +39,7 @@ import { UsersModule } from './users/users.module';
 import { CircuitsModule } from './circuits/circuits.module';
 import { DevicesModule } from './devices/devices.module';
 import { VisualizationModule } from './visualization/visualization.module';
+import { SchematicModule } from './schematic/schematic.module';
 import { SimulationModule } from './simulation/simulation.module';
 import { SpecsModule } from './specs/specs.module';
 import { StudioChatModule } from './studio-chat/studio-chat.module';
@@ -182,6 +183,7 @@ const QUIET_PATHS = new Set(['/health', '/health/live', '/favicon.ico']);
     DevicesModule,
     CircuitsModule,
     VisualizationModule,
+    SchematicModule,
     SimulationModule,
     SpecsModule,
     StudioChatModule,

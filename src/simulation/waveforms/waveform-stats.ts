@@ -11,7 +11,14 @@ import {
   toNumber,
 } from '../../circuits/library/circuit-inventory';
 import type { WaveformStats } from '../../studio-stages/circuit-data.provider';
-import { formatG, isDict, pyStr, roundInt, type Dict } from '../netlist/py';
+import {
+  formatG,
+  isDict,
+  pyStr,
+  roundInt,
+  truthy,
+  type Dict,
+} from '../netlist/py';
 import { readZip } from '../ngspice/zip';
 import { max, min, pairwiseSum } from '../numeric/numpy';
 import { readWhitespaceTable } from '../numeric/pandas-float';
@@ -259,12 +266,22 @@ export function waveformStats(
       const value = toNumber(params[key]);
       if (value !== null) values[key] = value;
     }
-    meta.set(pyStr(ref), {
+    const entry: Dict = {
       type: comp.type ?? null,
       role: comp.role ?? null,
       parent: parent ?? null,
       params: values,
-    });
+    };
+    if (truthy(parent)) {
+      // Nested parts (RC snubbers…) connect by [ref, pin]; the Thermal stage uses
+      // these to find the snubber's own capacitor and the winding it sits across.
+      const connections = isDict(comp.connections) ? comp.connections : {};
+      const links = Object.values(connections)
+        .filter((c): c is unknown[] => Array.isArray(c) && c.length === 2)
+        .map((c) => [pyStr(c[0]), pyStr(c[1])]);
+      if (links.length) entry.links = links;
+    }
+    meta.set(pyStr(ref), entry);
   }
 
   const archive = new Map<string, string>();

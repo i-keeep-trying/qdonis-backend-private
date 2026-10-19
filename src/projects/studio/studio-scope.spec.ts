@@ -26,13 +26,21 @@ describe('entry-step scope', () => {
   it('follows data flow, not tab order, for what comes after a step', () => {
     expect(downstreamOf('magnetics')).toEqual([
       'thermal',
-      'components',
-      'bom',
       'mtbf',
+      'bom',
+      'components',
     ]);
-    expect(downstreamOf('devices')).not.toContain('magnetics');
+    // Device selection lives on the simulation: no Devices step.
+    expect(downstreamOf('simulation')).toEqual([
+      'magnetics',
+      'thermal',
+      'mtbf',
+      'bom',
+      'emc',
+      'components',
+    ]);
     expect(downstreamOf('mtbf')).toEqual([]);
-    expect(downstreamOf('specs')).toHaveLength(10);
+    expect(downstreamOf('specs')).toHaveLength(9);
   });
 
   it('allows the entry step and everything after it, nothing before', () => {
@@ -41,7 +49,7 @@ describe('entry-step scope', () => {
       entry: 'thermal' as const,
       locked: false,
     };
-    expect(allowedStages(scope)).toEqual(['thermal', 'mtbf']);
+    expect(allowedStages(scope)).toEqual(['thermal', 'mtbf', 'bom']);
     expect(allowedStages({ mode: 'undecided' })).toEqual([]);
   });
 
@@ -56,7 +64,7 @@ describe('entry-step scope', () => {
       'magnetics',
       'thermal',
     ]);
-    expect(visibleStages(FULL_SCOPE, () => false)).toHaveLength(7);
+    expect(visibleStages(FULL_SCOPE, () => false)).toHaveLength(8);
     expect(visibleStages(FULL_SCOPE, (s) => s === 'emc')).toContain('emc');
     expect(visibleStages({ mode: 'undecided' }, () => true)).toEqual([]);
   });
@@ -69,6 +77,8 @@ describe('entry-step scope', () => {
     };
     expect(nextSteps(scope, (s) => s === 'magnetics')).toEqual([
       'thermal',
+      'mtbf',
+      'bom',
       'components',
     ]);
     expect(nextSteps(scope, () => false)).toEqual([]);

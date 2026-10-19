@@ -5,11 +5,8 @@ import {
 import {
   branchParts,
   enteredParts,
-  matchEnvironment,
-  planBom,
   planComponents,
   planEmc,
-  planMtbf,
 } from './extra-stages';
 
 const EMC = {
@@ -57,33 +54,17 @@ describe('extra stages', () => {
     expect(planComponents([], 'branch', []).ok).toBe(false);
   });
 
-  it('builds a BOM with the build quantity', () => {
+  it('lists entered parts', () => {
     const parts = enteredParts([
       { ref: 'C1', type: 'capacitor', value: '47 µF', quantity: 2 },
       { ref: 'R1', type: 'resistor', value: '10 kΩ' },
+      { type: 'resistor' },
     ]);
-    const plan = planBom(parts, 10);
-    expect(plan.ok).toBe(true);
-    if (!plan.ok) return;
-    expect(plan.data.summary).toMatchObject({ totalQuantity: 30 });
-  });
-
-  it('predicts MTBF with a loosely named environment', () => {
-    expect(matchEnvironment('MIL-HDBK-217F', 'ground benign')).toMatch(/^GB/);
-    expect(matchEnvironment('MIL-HDBK-217F', 'GF')).toMatch(/^GF/);
-    expect(matchEnvironment('MIL-HDBK-217F', 'moon base')).toBeNull();
-    const parts = enteredParts([
-      { ref: 'C1', type: 'capacitor' },
-      { ref: 'Q1', type: 'mosfet' },
+    expect(parts.map((p) => [p.ref, p.quantity])).toEqual([
+      ['C1', 2],
+      ['R1', 1],
     ]);
-    const plan = planMtbf(createEmptyProject(), {
-      method: 'MIL-HDBK-217F',
-      environment: 'ground fixed',
-      parts,
-      temperatureC: 60,
-    });
-    expect(plan.ok).toBe(true);
-    if (!plan.ok) return;
-    expect(plan.data.mtbfHours).toBeGreaterThan(0);
+    const plan = planComponents(parts, 'input', []);
+    expect(plan.ok && plan.data.parts).toHaveLength(2);
   });
 });

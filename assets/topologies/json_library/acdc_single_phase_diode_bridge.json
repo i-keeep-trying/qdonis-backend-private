@@ -66,9 +66,22 @@
       "lastClickTime": 1785653016520
     },
     {
+      "id": "C_OUT",
+      "type": "C",
+      "x": 20,
+      "y": 600,
+      "rotation": 0,
+      "parameters": {
+        "C": "220u",
+        "esr": "10m",
+        "vC0": "0"
+      },
+      "lastClickTime": 1785653067300
+    },
+    {
       "id": "R_LOAD",
       "type": "R",
-      "x": 20,
+      "x": 140,
       "y": 600,
       "rotation": 0,
       "parameters": {
@@ -145,7 +158,7 @@
       },
       "to": {
         "type": "pin",
-        "compId": "R_LOAD",
+        "compId": "C_OUT",
         "terminal": "B",
         "x": 60,
         "y": 620
@@ -201,7 +214,7 @@
       },
       "to": {
         "type": "pin",
-        "compId": "R_LOAD",
+        "compId": "C_OUT",
         "terminal": "A",
         "x": 60,
         "y": 540
@@ -247,6 +260,60 @@
         "y": 460
       },
       "manualPath": null
+    },
+    {
+      "id": "W9",
+      "from": {
+        "type": "pin",
+        "compId": "C_OUT",
+        "terminal": "A"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "R_LOAD",
+        "terminal": "A"
+      },
+      "manualPath": [
+        {
+          "x": 20,
+          "y": 460
+        },
+        {
+          "x": 140,
+          "y": 460
+        },
+        {
+          "x": 140,
+          "y": 560
+        }
+      ]
+    },
+    {
+      "id": "W10",
+      "from": {
+        "type": "pin",
+        "compId": "C_OUT",
+        "terminal": "B"
+      },
+      "to": {
+        "type": "pin",
+        "compId": "R_LOAD",
+        "terminal": "B"
+      },
+      "manualPath": [
+        {
+          "x": 20,
+          "y": 780
+        },
+        {
+          "x": 140,
+          "y": 780
+        },
+        {
+          "x": 140,
+          "y": 640
+        }
+      ]
     }
   ],
   "plotConfiguration": {

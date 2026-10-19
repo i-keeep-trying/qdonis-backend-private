@@ -148,11 +148,11 @@ export class SimulationStagesController {
     );
   }
 
-  @Post('devices/run')
+  @Post('simulation/devices')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
-    summary: 'Select the power devices (entered stresses, or the simulation)',
-    description: `${STAGE_RESULT} Without \`inputs\` the parts are chosen on the branch simulation's waveforms and its losses are updated.`,
+    summary: "Pick the power devices on the branch simulation's waveforms",
+    description: `${STAGE_RESULT} Part of the Simulation stage: the simulation node is updated in place (selection and losses), \`forked\` is always false.`,
   })
   @ApiForbiddenResponse({ description: 'View-only project' })
   @ApiConflictResponse({
@@ -226,6 +226,25 @@ export class SimulationWaveformsController {
     @Param('nodeId', ParseGraphIdPipe) nodeId: string,
   ) {
     return this.simulation.waveformsUrl(user, projectId, nodeId);
+  }
+
+  @Get(':nodeId/loss-vs-temperature')
+  @ApiOperation({
+    summary: 'Semiconductor losses versus junction temperature',
+    description:
+      "Answers `{ curves: [{ component, model, diodeModel, deviceType, points: [{ tjC, totalLossW, conductionLossW, switchingLossW }] }] }`: each device evaluated on the simulated waveforms at every temperature its loss model is characterised at, with the parts the simulation's losses use.",
+  })
+  @ApiNotFoundResponse({ description: 'PROJECT_NOT_FOUND, NODE_NOT_FOUND' })
+  @ApiConflictResponse({
+    description: 'STAGE_INPUT_MISSING: not finished, or no raw waveforms',
+  })
+  @ApiServiceUnavailableResponse({ description: 'STORAGE_NOT_CONFIGURED' })
+  lossVsTemperature(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('projectId', ParseUUIDPipe) projectId: string,
+    @Param('nodeId', ParseGraphIdPipe) nodeId: string,
+  ) {
+    return this.simulation.lossVsTemperature(user, projectId, nodeId);
   }
 
   @Post(':nodeId/verify')

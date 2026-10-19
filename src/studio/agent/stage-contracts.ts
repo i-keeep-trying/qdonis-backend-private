@@ -3,6 +3,7 @@ import {
   STAGE_ORDER,
   type StageKind,
   type StudioScope,
+  type WorkspaceStage,
 } from '../../projects/studio/studio-graph';
 import { allowedStages, isFullScope } from '../../projects/studio/studio-scope';
 
@@ -46,7 +47,7 @@ export interface StageContract {
 const LOAD = 'load';
 const CURRENT = 'current';
 
-export const STAGE_CONTRACTS: Record<StageKind, StageContract> = {
+export const STAGE_CONTRACTS: Record<WorkspaceStage, StageContract> = {
   specs: {
     stage: 'specs',
     summary:
@@ -158,8 +159,9 @@ export const STAGE_CONTRACTS: Record<StageKind, StageContract> = {
   simulation: {
     stage: 'simulation',
     summary:
-      'Run ngspice on a design or on your own .cir netlist: waveforms, measurements, losses.',
-    tools: ['run_simulation'],
+      'Run ngspice on a design or on your own .cir netlist: waveforms, measurements, losses, and the power devices chosen from the simulated stresses.',
+    // Device selection runs on the simulation node.
+    tools: ['run_simulation', 'select_devices'],
     prerequisiteTools: ['import_netlist'],
     template: 'Simulate my circuit (netlist attached): ',
     inputs: [
@@ -179,55 +181,6 @@ export const STAGE_CONTRACTS: Record<StageKind, StageContract> = {
         required: false,
         satisfiedBy: ['visualization'],
       },
-    ],
-  },
-  devices: {
-    stage: 'devices',
-    summary:
-      'Pick MOSFETs, IGBTs and diodes from the device library and compute their losses.',
-    tools: ['select_devices'],
-    prerequisiteTools: [],
-    template: 'Pick a power device for ',
-    inputs: [
-      {
-        key: 'kind',
-        label: 'Device type (switch / diode)',
-        unit: null,
-        required: true,
-        satisfiedBy: ['simulation'],
-        suggestion: 'switch',
-      },
-      {
-        key: 'v_block',
-        label: 'Blocking voltage',
-        unit: 'V',
-        required: true,
-        satisfiedBy: ['simulation'],
-      },
-      {
-        key: 'fsw',
-        label: 'Switching frequency',
-        unit: 'kHz',
-        required: true,
-        satisfiedBy: ['simulation'],
-      },
-      {
-        key: 'i_peak',
-        label: 'Peak current',
-        unit: 'A',
-        required: true,
-        group: CURRENT,
-        satisfiedBy: ['simulation'],
-      },
-      {
-        key: 'i_rms',
-        label: 'RMS current',
-        unit: 'A',
-        required: true,
-        group: CURRENT,
-        satisfiedBy: ['simulation'],
-      },
-      { key: 'duty', label: 'Duty cycle', unit: null, required: false },
     ],
   },
   magnetics: {
@@ -416,57 +369,33 @@ export const STAGE_CONTRACTS: Record<StageKind, StageContract> = {
       },
     ],
   },
-  bom: {
-    stage: 'bom',
-    summary:
-      'Bill of materials of the selected parts, with quantities and cost.',
-    tools: ['build_bom'],
-    prerequisiteTools: [],
-    template: 'Build a bill of materials for: ',
-    inputs: [
-      {
-        key: 'parts',
-        label: 'Parts (designator, manufacturer, part number, quantity)',
-        unit: null,
-        required: true,
-        satisfiedBy: ['components'],
-      },
-      {
-        key: 'build_quantity',
-        label: 'Build quantity',
-        unit: 'units',
-        required: false,
-        suggestion: '1',
-      },
-    ],
-  },
   mtbf: {
     stage: 'mtbf',
     summary:
-      'Reliability prediction (MIL-HDBK-217F, Telcordia SR-332, IEC TR 62380, FIDES 2022): failure rates and system MTBF.',
+      'Reliability prediction (MIL-HDBK-217F, Telcordia SR-332, IEC TR 62380, FIDES 2022): failure rates and system MTBF, from entered parts or the branch circuit.',
     tools: ['run_mtbf'],
     prerequisiteTools: [],
     template: 'Estimate the MTBF of: ',
     inputs: [
       {
+        key: 'parts',
+        label: 'Parts (designator, type)',
+        unit: null,
+        required: true,
+        satisfiedBy: ['visualization', 'design', 'simulation'],
+      },
+      {
         key: 'method',
         label: 'Prediction method',
         unit: null,
-        required: true,
+        required: false,
         suggestion: 'MIL-HDBK-217F',
       },
       {
         key: 'environment',
         label: 'Environment',
         unit: null,
-        required: true,
-      },
-      {
-        key: 'parts',
-        label: 'Parts (designator, type)',
-        unit: null,
-        required: true,
-        satisfiedBy: ['components', 'bom'],
+        required: false,
       },
       {
         key: 'temperature',
@@ -474,6 +403,25 @@ export const STAGE_CONTRACTS: Record<StageKind, StageContract> = {
         unit: '°C',
         required: false,
         satisfiedBy: ['thermal'],
+      },
+    ],
+  },
+  bom: {
+    stage: 'bom',
+    summary:
+      'Bill of materials of the branch circuit: one line per part, the selected devices priced on Mouser, custom magnetics and the heatsink; XLSX / CSV export.',
+    tools: ['build_bom'],
+    prerequisiteTools: [],
+    template: 'Build the bill of materials of ',
+    inputs: [
+      {
+        key: 'circuit',
+        label: 'Circuit (a topology or an imported netlist)',
+        unit: null,
+        required: true,
+        satisfiedBy: ['visualization', 'design'],
+        artifact: 'design',
+        redirect: 'visualization',
       },
     ],
   },
@@ -488,12 +436,7 @@ export const SCOPE_TOOLS = [
   'check_step_inputs',
 ] as const;
 /** Agent tools of the stages added with entry steps (not in the core tool set). */
-export const EXTRA_STAGE_TOOLS = [
-  'run_emc',
-  'select_components',
-  'build_bom',
-  'run_mtbf',
-] as const;
+export const EXTRA_STAGE_TOOLS = ['run_emc', 'select_components'] as const;
 
 /** The stage a tool runs (null: not a stage tool). */
 export function stageOfTool(tool: string): StageKind | null {
@@ -574,15 +517,15 @@ export function toolRefusal(scope: StudioScope, tool: string): string | null {
  * need a heatsink?") names nothing, so the agent has to ask the either/or
  * question instead of starting the step itself.
  */
-const STEP_NAMES: Record<StageKind, RegExp> = {
+const STEP_NAMES: Record<WorkspaceStage, RegExp> = {
   specs: /\b(from scratch|full design|whole design|complete design)\b/,
   visualization:
     /\b(schematic|visuali[sz]ation|circuit (step|tool|stage|view))\b/,
   design:
     /\b(design (step|tool|stage)|component sizing|size (the |all )?(components|component values|values))\b/,
-  simulation: /\b(simulat(e|ion|ions|ing)|ngspice|spice)\b/,
-  devices:
-    /\b(devices? (step|tool|stage|selection)|power devices?|device library)\b/,
+  // Device selection runs on the simulation, so naming it names Simulation.
+  simulation:
+    /\b(simulat(e|ion|ions|ing)|ngspice|spice|devices? (step|tool|stage|selection)|device library)\b/,
   magnetics: /\b(magnetics?)\b/,
   thermal: /\b(thermals?)\b/,
   emc: /\b(emc|emi|conducted emissions?)\b/,
@@ -593,7 +536,7 @@ const STEP_NAMES: Record<StageKind, RegExp> = {
 };
 
 /** The steps a user message names, in display order. */
-export function namedSteps(text: string): StageKind[] {
+export function namedSteps(text: string): WorkspaceStage[] {
   const lower = text.toLowerCase();
   return STAGE_ORDER.filter((stage) => STEP_NAMES[stage].test(lower));
 }
@@ -601,7 +544,7 @@ export function namedSteps(text: string): StageKind[] {
 // --- missing inputs ---------------------------------------------------------------
 
 export interface InputCheck {
-  stage: StageKind;
+  stage: WorkspaceStage;
   /** Values the user gave, by input. */
   provided: Array<{ input: StageInput; value: string }>;
   /** Inputs an existing result on the branch provides. */
@@ -636,7 +579,7 @@ export function matchInput(
  * the stages with ready results on the branch and the attached netlists.
  */
 export function checkInputs(
-  stage: StageKind,
+  stage: WorkspaceStage,
   values: Array<{ name: string; value: string }>,
   ready: (stage: StageKind) => boolean,
   hasNetlist: boolean,
@@ -693,7 +636,7 @@ export function checkInputs(
 }
 
 /** Label of an input with its alternatives (`Peak current or RMS current`). */
-export function inputLabel(stage: StageKind, input: StageInput): string {
+export function inputLabel(stage: WorkspaceStage, input: StageInput): string {
   if (!input.group) return input.label;
   return STAGE_CONTRACTS[stage].inputs
     .filter((i) => i.group === input.group)

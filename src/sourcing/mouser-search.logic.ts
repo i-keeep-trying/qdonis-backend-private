@@ -612,6 +612,9 @@ export const transformMouserPartToComponentOption = (
     leadTime: part.LeadTime,
     lifecycleStatus: part.LifecycleStatus,
     rohsStatus: part.ROHSStatus,
+    ...(part.PriceBreaks[0]?.Currency
+      ? { currency: part.PriceBreaks[0].Currency }
+      : {}),
   };
 };
 

@@ -80,6 +80,23 @@ export interface MagneticRequirement {
   waves: MagneticWaveforms;
   /** Transformer driven one way only (forward converter): flux 0 → ΔB. */
   unipolar?: boolean;
+  /** The electrical operating point the waveforms were built from (shown with the design). */
+  inputs?: MagneticInputs;
+}
+
+/** One electrical input of a part's design, e.g. { label: 'Vin (min)', value: '36 V', note: 'specs' }. */
+export interface MagneticInputRow {
+  label: string;
+  value: string;
+  note?: string;
+}
+
+export interface MagneticInputs {
+  /** Operating mode / case the waveforms describe, e.g. "Buck output inductor · CCM · at Vin max". */
+  basis: string;
+  rows: MagneticInputRow[];
+  /** Values that were not given and were assumed. */
+  assumptions?: string[];
 }
 
 export interface MagneticsSettings {
@@ -147,6 +164,7 @@ export interface MagneticDesign {
   /** Volt-seconds per switching period (max over the window), V·µs. */
   voltSeconds_uVs: number;
   fsw: number;
+  inputs?: MagneticInputs;
   warnings: string[];
 }
 
@@ -1042,6 +1060,7 @@ export function designMagnetic(
     },
     voltSeconds_uVs: a.dLambdaMax * 1e6,
     fsw: f,
+    ...(req.inputs ? { inputs: req.inputs } : {}),
     warnings,
   };
 }

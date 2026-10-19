@@ -26,6 +26,7 @@ import { stageDataView } from './stage-views';
 import {
   type JsonObject,
   type StageKind,
+  type WorkspaceStage,
   type StageNode,
   STAGE_LABEL,
   stageNodeOnBranch,
@@ -64,13 +65,14 @@ const VIEW_OF: Record<StageKind, string> = {
   visualization: 'circuit',
   design: 'design',
   simulation: 'simulation',
-  devices: 'devices',
+  // Former stage: its results open the Simulation view.
+  devices: 'simulation',
   magnetics: 'magnetics',
   thermal: 'thermal',
+  mtbf: 'mtbf',
+  bom: 'bom',
   emc: 'emc',
   components: 'components',
-  bom: 'bom',
-  mtbf: 'mtbf',
 };
 
 export interface MutateOptions {
@@ -134,19 +136,7 @@ export class StudioGraphService {
     const header = await this.rows.header(projectId);
     if (!header) throw this.projectNotFound();
     const active = project.activeBranchId;
-    // Devices count as done when the branch's simulation already chose them.
-    const simNode = stageNodeOnBranch(project, 'devices', active)
-      ? null
-      : stageNodeOnBranch(project, 'simulation', active);
-    const simulation = simNode
-      ? await this.rows.nodeWithData(projectId, simNode.id)
-      : null;
-    const hasSimDevices = Boolean(
-      simulation?.status === 'ready' &&
-      (isObject(simulation.data.device_selection) ||
-        isObject(simulation.data.deviceSelection)),
-    );
-    const stages = stageViews(project, active, hasSimDevices);
+    const stages = stageViews(project, active);
     const scope = scopeOf(project);
     return {
       projectId,
@@ -564,7 +554,7 @@ export class StudioGraphService {
   async chooseEntryStep(
     projectId: string,
     userId: string,
-    entry: StageKind,
+    entry: WorkspaceStage,
   ): Promise<StudioScope> {
     const result = await this.mutate(projectId, userId, (project) => {
       const chosen = chooseEntry(scopeOf(project), entry);

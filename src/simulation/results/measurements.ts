@@ -58,7 +58,19 @@ export function parseMeasurements(logContent: string): Map<string, number> {
           const valuePart = pythonStrip(m.slice(at + 1));
           const words = splitWs(valuePart);
           const value = tryFloat(words.length ? words[0] : valuePart);
-          if (value !== null) measurements.set(name, value);
+          const previous = measurements.get(name);
+          // Each measurement appears twice: the `meas` result and the `print`
+          // echo (more digits). In the -o log the echo of the last measurement
+          // can be cut by interleaved warnings ("= 3.8" for 3.810305e+02), so
+          // only let the echo refine a value it agrees with.
+          if (
+            value !== null &&
+            (previous === undefined ||
+              Math.abs(value - previous) <=
+                1e-3 * Math.max(Math.abs(previous), 1e-12))
+          ) {
+            measurements.set(name, value);
+          }
         }
         i += 1;
       }

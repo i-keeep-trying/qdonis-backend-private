@@ -28,9 +28,6 @@ components:
       Cgd: 400e-12
       Cdb: 150e-12
       Tpd: 5e-9
-    transient:
-      tstep: 0.1u
-      tstop: 0.01
     layout:
       schX: 0.0
       schY: 2.0
@@ -1109,3 +1106,60 @@ metadata:
   topology: ''
   control: ''
   tags: []
+schematic:
+  tuned: false
+  components:
+    CSN_P: {x: 320, y: 360, rotation: 0}
+    CSN_S1: {x: 820, y: 20, rotation: 270}
+    CSN_S2: {x: 820, y: 380, rotation: 270}
+    Cout: {x: 980, y: 220, rotation: 0}
+    Cr: {x: 540, y: 340, rotation: 0}
+    D1: {x: 760, y: 100, rotation: 270}
+    D2: {x: 760, y: 300, rotation: 270}
+    Lr: {x: 440, y: 200, rotation: 270}
+    PWM1: {x: 120, y: 140, rotation: 0}
+    PWM2: {x: 120, y: 380, rotation: 0}
+    RSN_P: {x: 320, y: 260, rotation: 0}
+    RSN_S1: {x: 720, y: 20, rotation: 270}
+    RSN_S2: {x: 720, y: 380, rotation: 270}
+    R_ISO: {x: 760, y: 500, rotation: 90}
+    Rout: {x: 1100, y: 220, rotation: 0}
+    SW1: {x: 220, y: 80, rotation: 0}
+    SW2: {x: 220, y: 320, rotation: 0}
+    T1: {x: 600, y: 200, rotation: 0}
+    VIN: {x: 0, y: 200, rotation: 0}
+    "~GND@CSN_P.B": {x: 320, y: 480, rotation: 0}
+    "~GND@R_ISO.B": {x: 640, y: 540, rotation: 0}
+    "~GND@VIN.B": {x: -20, y: 320, rotation: 0}
+  wires:
+  - {id: W1, from: CSN_P.B, to: SW2.S}
+  - {id: W2, from: PWM2.B, to: SW2.S}
+  - {id: W3, from: CSN_P.B, to: Cr.B}
+  - {id: W4, from: CSN_P.B, to: "~GND@CSN_P.B.P"}
+  - {id: W5, from: R_ISO.B, to: "~GND@R_ISO.B.P"}
+  - {id: W6, from: VIN.B, to: "~GND@VIN.B.P"}
+  - {id: W7, from: SW1.D, to: VIN.A}
+  - {id: W8, from: Cout.A, to: Rout.A}
+  - {id: W9, from: CSN_S1.B, to: D1.B}
+  - {id: W10, from: CSN_S2.B, to: D2.B}
+  - {id: W11, from: D1.B, to: D2.B}
+  - {id: W12, from: Cout.A, to: D1.B}
+  - {id: W13, from: CSN_P.A, to: RSN_P.B}
+  - {id: W14, from: CSN_S1.A, to: RSN_S1.B}
+  - {id: W15, from: CSN_S2.A, to: RSN_S2.B}
+  - {id: W16, from: Lr.A, to: RSN_P.A}
+  - {id: W17, from: PWM1.B, to: SW1.S}
+  - {id: W18, from: RSN_P.A, to: SW2.D}
+  - {id: W19, from: SW1.S, to: SW2.D}
+  - {id: W20, from: PWM1.A, to: SW1.G}
+  - {id: W21, from: PWM2.A, to: SW2.G}
+  - {id: W22, from: Lr.B, to: T1.P1}
+  - {id: W23, from: Cr.A, to: T1.P2}
+  - {id: W24, from: D1.A, to: RSN_S1.A}
+  - {id: W25, from: D1.A, to: T1.S1}
+  - {id: W26, from: D2.A, to: RSN_S2.A}
+  - {id: W27, from: D2.A, to: T1.S2}
+  - {id: W28, from: Cout.B, to: Rout.B}
+  - {id: W29, from: Cout.B, to: R_ISO.A}
+  - {id: W30, from: Cout.B, to: T1.SCT}
+  groups: {}

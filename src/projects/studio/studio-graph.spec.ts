@@ -45,7 +45,7 @@ describe('studio graph', () => {
     let project = createEmptyProject();
     project = commitStage(project, 'specs', {}).project;
     project = commitStage(project, 'design', {}, { status: 'error' }).project;
-    expect(studioProgress(project)).toEqual({ completed: 1, total: 7 });
+    expect(studioProgress(project)).toEqual({ completed: 1, total: 8 });
   });
 });
 

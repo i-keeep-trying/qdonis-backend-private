@@ -1,0 +1,2759 @@
+[
+ {
+  "ref": "D_GAIN",
+  "type": "gain",
+  "params": {},
+  "pins": {
+   "inputs": [
+    "in"
+   ],
+   "outputs": [
+    "out"
+   ]
+  },
+  "describe": "k=1",
+  "symbol_pins": {
+   "in": {
+    "x": -40,
+    "y": 0,
+    "dx": -1,
+    "dy": 0
+   },
+   "out": {
+    "x": 40,
+    "y": 0,
+    "dx": 1,
+    "dy": 0
+   }
+  },
+  "nets": {
+   "in": "d_gain_in",
+   "out": "d_gain_out"
+  },
+  "lines": [
+   "* control block D_GAIN (gain)",
+   "BD_GAIN d_gain_out 0 V='1*V(d_gain_in)'"
+  ]
+ },
+ {
+  "ref": "D_GAIN",
+  "type": "gain",
+  "params": {},
+  "nets": {
+   "in": "",
+   "out": "d_gain_out"
+  },
+  "error": "D_GAIN: control block 'gain' has unconnected pins: in"
+ },
+ {
+  "ref": "D_SUM",
+  "type": "sum",
+  "params": {},
+  "pins": {
+   "inputs": [
+    "in1",
+    "in2"
+   ],
+   "outputs": [
+    "out"
+   ]
+  },
+  "describe": "++",
+  "symbol_pins": {
+   "in1": {
+    "x": -40,
+    "y": -20,
+    "dx": -1,
+    "dy": 0
+   },
+   "in2": {
+    "x": -40,
+    "y": 20,
+    "dx": -1,
+    "dy": 0
+   },
+   "out": {
+    "x": 40,
+    "y": 0,
+    "dx": 1,
+    "dy": 0
+   }
+  },
+  "nets": {
+   "in1": "d_sum_in1",
+   "in2": "d_sum_in2",
+   "out": "d_sum_out"
+  },
+  "lines": [
+   "* control block D_SUM (sum)",
+   "BD_SUM d_sum_out 0 V='V(d_sum_in1)+V(d_sum_in2)'"
+  ]
+ },
+ {
+  "ref": "D_SUM",
+  "type": "sum",
+  "params": {},
+  "nets": {
+   "in1": "",
+   "in2": "d_sum_in2",
+   "out": "d_sum_out"
+  },
+  "error": "D_SUM: control block 'sum' has unconnected pins: in1"
+ },
+ {
+  "ref": "D_PRODUCT",
+  "type": "product",
+  "params": {},
+  "pins": {
+   "inputs": [
+    "in1",
+    "in2"
+   ],
+   "outputs": [
+    "out"
+   ]
+  },
+  "describe": "",
+  "symbol_pins": {
+   "in1": {
+    "x": -40,
+    "y": -20,
+    "dx": -1,
+    "dy": 0
+   },
+   "in2": {
+    "x": -40,
+    "y": 20,
+    "dx": -1,
+    "dy": 0
+   },
+   "out": {
+    "x": 40,
+    "y": 0,
+    "dx": 1,
+    "dy": 0
+   }
+  },
+  "nets": {
+   "in1": "d_product_in1",
+   "in2": "d_product_in2",
+   "out": "d_product_out"
+  },
+  "lines": [
+   "* control block D_PRODUCT (product)",
+   "BD_PRODUCT d_product_out 0 V='1*V(d_product_in1)*V(d_product_in2)'"
+  ]
+ },
+ {
+  "ref": "D_PRODUCT",
+  "type": "product",
+  "params": {},
+  "nets": {
+   "in1": "",
+   "in2": "d_product_in2",
+   "out": "d_product_out"
+  },
+  "error": "D_PRODUCT: control block 'product' has unconnected pins: in1"
+ },
+ {
+  "ref": "D_CONST",
+  "type": "const",
+  "params": {},
+  "pins": {
+   "inputs": [],
+   "outputs": [
+    "out"
+   ]
+  },
+  "describe": "1",
+  "symbol_pins": {
+   "out": {
+    "x": 40,
+    "y": 0,
+    "dx": 1,
+    "dy": 0
+   }
+  },
+  "nets": {
+   "out": "d_const_out"
+  },
+  "lines": [
+   "* control block D_CONST (const)",
+   "BD_CONST d_const_out 0 V='1'"
+  ]
+ },
+ {
+  "ref": "D_CONST",
+  "type": "const",
+  "params": {},
+  "nets": {
+   "out": ""
+  },
+  "error": "D_CONST: control block 'const' has unconnected pins: out"
+ },
+ {
+  "ref": "D_FUNCTION",
+  "type": "function",
+  "params": {},
+  "pins": {
+   "inputs": [
+    "in1"
+   ],
+   "outputs": [
+    "out"
+   ]
+  },
+  "describe": "",
+  "symbol_pins": {
+   "in1": {
+    "x": -40,
+    "y": 0,
+    "dx": -1,
+    "dy": 0
+   },
+   "out": {
+    "x": 40,
+    "y": 0,
+    "dx": 1,
+    "dy": 0
+   }
+  },
+  "nets": {
+   "in1": "d_function_in1",
+   "out": "d_function_out"
+  },
+  "lines": [
+   "* control block D_FUNCTION (function)",
+   "BD_FUNCTION d_function_out 0 V='V(d_function_in1)'"
+  ]
+ },
+ {
+  "ref": "D_FUNCTION",
+  "type": "function",
+  "params": {},
+  "nets": {
+   "in1": "",
+   "out": "d_function_out"
+  },
+  "error": "D_FUNCTION: control block 'function' has unconnected pins: in1"
+ },
+ {
+  "ref": "D_LIMITER",
+  "type": "limiter",
+  "params": {},
+  "pins": {
+   "inputs": [
+    "in"
+   ],
+   "outputs": [
+    "out"
+   ]
+  },
+  "describe": "[0, 1]",
+  "symbol_pins": {
+   "in": {
+    "x": -40,
+    "y": 0,
+    "dx": -1,
+    "dy": 0
+   },
+   "out": {
+    "x": 40,
+    "y": 0,
+    "dx": 1,
+    "dy": 0
+   }
+  },
+  "nets": {
+   "in": "d_limiter_in",
+   "out": "d_limiter_out"
+  },
+  "lines": [
+   "* control block D_LIMITER (limiter)",
+   "BD_LIMITER d_limiter_out 0 V='min(max(V(d_limiter_in),0),1)'"
+  ]
+ },
+ {
+  "ref": "D_LIMITER",
+  "type": "limiter",
+  "params": {},
+  "nets": {
+   "in": "",
+   "out": "d_limiter_out"
+  },
+  "error": "D_LIMITER: control block 'limiter' has unconnected pins: in"
+ },
+ {
+  "ref": "D_COMPARATOR",
+  "type": "comparator",
+  "params": {},
+  "pins": {
+   "inputs": [
+    "inp",
+    "inn"
+   ],
+   "outputs": [
+    "out"
+   ]
+  },
+  "describe": "",
+  "symbol_pins": {
+   "inp": {
+    "x": -40,
+    "y": -20,
+    "dx": -1,
+    "dy": 0
+   },
+   "inn": {
+    "x": -40,
+    "y": 20,
+    "dx": -1,
+    "dy": 0
+   },
+   "out": {
+    "x": 40,
+    "y": 0,
+    "dx": 1,
+    "dy": 0
+   }
+  },
+  "nets": {
+   "inp": "d_comparator_inp",
+   "inn": "d_comparator_inn",
+   "out": "d_comparator_out"
+  },
+  "lines": [
+   "* control block D_COMPARATOR (comparator)",
+   "BD_COMPARATOR d_comparator_out 0 V='0+1*(0.5*(1+tanh((V(d_comparator_inp)-V(d_comparator_inn))/0.001)))'"
+  ]
+ },
+ {
+  "ref": "D_COMPARATOR",
+  "type": "comparator",
+  "params": {},
+  "nets": {
+   "inp": "",
+   "inn": "d_comparator_inn",
+   "out": "d_comparator_out"
+  },
+  "error": "D_COMPARATOR: control block 'comparator' has unconnected pins: inp"
+ },
+ {
+  "ref": "D_INTEGRATOR",
+  "type": "integrator",
+  "params": {},
+  "pins": {
+   "inputs": [
+    "in"
+   ],
+   "outputs": [
+    "out"
+   ]
+  },
+  "describe": "ki=1",
+  "symbol_pins": {
+   "in": {
+    "x": -40,
+    "y": 0,
+    "dx": -1,
+    "dy": 0
+   },
+   "out": {
+    "x": 40,
+    "y": 0,
+    "dx": 1,
+    "dy": 0
+   }
+  },
+  "nets": {
+   "in": "d_integrator_in",
+   "out": "d_integrator_out"
+  },
+  "lines": [
+   "* control block D_INTEGRATOR (integrator)",
+   "BD_INTEGRATOR_I 0 d_integrator_out I='0.001*V(d_integrator_in)-10*max(V(d_integrator_out)-1e+09,0)+10*max(-1e+09-V(d_integrator_out),0)'",
+   "CD_INTEGRATOR_X d_integrator_out 0 0.001 IC=0",
+   "RD_INTEGRATOR_X d_integrator_out 0 1e12"
+  ]
+ },
+ {
+  "ref": "D_INTEGRATOR",
+  "type": "integrator",
+  "params": {},
+  "nets": {
+   "in": "",
+   "out": "d_integrator_out"
+  },
+  "error": "D_INTEGRATOR: control block 'integrator' has unconnected pins: in"
+ },
+ {
+  "ref": "D_LOWPASS",
+  "type": "lowpass",
+  "params": {},
+  "pins": {
+   "inputs": [
+    "in"
+   ],
+   "outputs": [
+    "out"
+   ]
+  },
+  "describe": "τ=0.001 s",
+  "symbol_pins": {
+   "in": {
+    "x": -40,
+    "y": 0,
+    "dx": -1,
+    "dy": 0
+   },
+   "out": {
+    "x": 40,
+    "y": 0,
+    "dx": 1,
+    "dy": 0
+   }
+  },
+  "nets": {
+   "in": "d_lowpass_in",
+   "out": "d_lowpass_out"
+  },
+  "lines": [
+   "* control block D_LOWPASS (lowpass)",
+   "BD_LOWPASS cb_D_LOWPASS_d 0 V='1*V(d_lowpass_in)'",
+   "RD_LOWPASS_R cb_D_LOWPASS_d d_lowpass_out 1000",
+   "CD_LOWPASS_X d_lowpass_out 0 1e-06 IC=0"
+  ]
+ },
+ {
+  "ref": "D_LOWPASS",
+  "type": "lowpass",
+  "params": {},
+  "nets": {
+   "in": "",
+   "out": "d_lowpass_out"
+  },
+  "error": "D_LOWPASS: control block 'lowpass' has unconnected pins: in"
+ },
+ {
+  "ref": "D_PI",
+  "type": "pi",
+  "params": {},
+  "pins": {
+   "inputs": [
+    "in"
+   ],
+   "outputs": [
+    "out"
+   ]
+  },
+  "describe": "kp=1 ki=100",
+  "symbol_pins": {
+   "in": {
+    "x": -40,
+    "y": 0,
+    "dx": -1,
+    "dy": 0
+   },
+   "out": {
+    "x": 40,
+    "y": 0,
+    "dx": 1,
+    "dy": 0
+   }
+  },
+  "nets": {
+   "in": "d_pi_in",
+   "out": "d_pi_out"
+  },
+  "lines": [
+   "* control block D_PI (pi)",
+   "BD_PI_I 0 cb_D_PI_x I='0.1*V(d_pi_in)-10*max(V(cb_D_PI_x)-1000,0)+10*max(-1000-V(cb_D_PI_x),0)'",
+   "CD_PI_X cb_D_PI_x 0 0.001 IC=0",
+   "RD_PI_X cb_D_PI_x 0 1e12",
+   "BD_PI d_pi_out 0 V='min(max(1*V(d_pi_in)+V(cb_D_PI_x),-1000),1000)'"
+  ]
+ },
+ {
+  "ref": "D_PI",
+  "type": "pi",
+  "params": {},
+  "nets": {
+   "in": "",
+   "out": "d_pi_out"
+  },
+  "error": "D_PI: control block 'pi' has unconnected pins: in"
+ },
+ {
+  "ref": "D_PID",
+  "type": "pid",
+  "params": {},
+  "pins": {
+   "inputs": [
+    "in"
+   ],
+   "outputs": [
+    "out"
+   ]
+  },
+  "describe": "kp=1 ki=100 kd=0",
+  "symbol_pins": {
+   "in": {
+    "x": -40,
+    "y": 0,
+    "dx": -1,
+    "dy": 0
+   },
+   "out": {
+    "x": 40,
+    "y": 0,
+    "dx": 1,
+    "dy": 0
+   }
+  },
+  "nets": {
+   "in": "d_pid_in",
+   "out": "d_pid_out"
+  },
+  "lines": [
+   "* control block D_PID (pid)",
+   "BD_PID_I 0 cb_D_PID_x I='0.1*V(d_pid_in)-10*max(V(cb_D_PID_x)-1000,0)+10*max(-1000-V(cb_D_PID_x),0)'",
+   "CD_PID_X cb_D_PID_x 0 0.001 IC=0",
+   "RD_PID_X cb_D_PID_x 0 1e12",
+   "BD_PID d_pid_out 0 V='min(max(1*V(d_pid_in)+V(cb_D_PID_x),-1000),1000)'"
+  ]
+ },
+ {
+  "ref": "D_PID",
+  "type": "pid",
+  "params": {},
+  "nets": {
+   "in": "",
+   "out": "d_pid_out"
+  },
+  "error": "D_PID: control block 'pid' has unconnected pins: in"
+ },
+ {
+  "ref": "D_CARRIER",
+  "type": "carrier",
+  "params": {},
+  "pins": {
+   "inputs": [],
+   "outputs": [
+    "out"
+   ]
+  },
+  "describe": "100 kHz",
+  "symbol_pins": {
+   "out": {
+    "x": 40,
+    "y": 0,
+    "dx": 1,
+    "dy": 0
+   }
+  },
+  "nets": {
+   "out": "d_carrier_out"
+  },
+  "lines": [
+   "* control block D_CARRIER (carrier)",
+   "VD_CARRIER_CAR d_carrier_out 0 PULSE(0 1 0 5e-06 5e-06 0 1e-05)"
+  ]
+ },
+ {
+  "ref": "D_CARRIER",
+  "type": "carrier",
+  "params": {},
+  "nets": {
+   "out": ""
+  },
+  "error": "D_CARRIER: control block 'carrier' has unconnected pins: out"
+ },
+ {
+  "ref": "D_PWM",
+  "type": "pwm",
+  "params": {},
+  "pins": {
+   "inputs": [
+    "in"
+   ],
+   "outputs": [
+    "out"
+   ]
+  },
+  "describe": "100 kHz",
+  "symbol_pins": {
+   "in": {
+    "x": -40,
+    "y": 0,
+    "dx": -1,
+    "dy": 0
+   },
+   "out": {
+    "x": 40,
+    "y": 0,
+    "dx": 1,
+    "dy": 0
+   }
+  },
+  "nets": {
+   "in": "d_pwm_in",
+   "out": "d_pwm_out"
+  },
+  "lines": [
+   "* control block D_PWM (pwm)",
+   "VD_PWM_CAR cb_D_PWM_car 0 PULSE(0 1 0 5e-06 5e-06 0 1e-05)",
+   "BD_PWM d_pwm_out 0 V='0+1*(0.5*(1+tanh((V(d_pwm_in)-V(cb_D_PWM_car))/0.001)))'"
+  ]
+ },
+ {
+  "ref": "D_PWM",
+  "type": "pwm",
+  "params": {},
+  "nets": {
+   "in": "",
+   "out": "d_pwm_out"
+  },
+  "error": "D_PWM: control block 'pwm' has unconnected pins: in"
+ },
+ {
+  "ref": "D_GATE_DRIVER",
+  "type": "gate_driver",
+  "params": {},
+  "pins": {
+   "inputs": [
+    "in"
+   ],
+   "outputs": [
+    "g",
+    "s"
+   ]
+  },
+  "describe": "0/15 V",
+  "symbol_pins": {
+   "in": {
+    "x": -40,
+    "y": 0,
+    "dx": -1,
+    "dy": 0
+   },
+   "g": {
+    "x": 40,
+    "y": -20,
+    "dx": 1,
+    "dy": 0
+   },
+   "s": {
+    "x": 40,
+    "y": 20,
+    "dx": 1,
+    "dy": 0
+   }
+  },
+  "nets": {
+   "in": "d_gate_driver_in",
+   "g": "d_gate_driver_g",
+   "s": "d_gate_driver_s"
+  },
+  "lines": [
+   "* control block D_GATE_DRIVER (gate_driver)",
+   "BD_GATE_DRIVER cb_D_GATE_DRIVER_drv d_gate_driver_s V='0+15*(0.5*(1+tanh((V(d_gate_driver_in)-0.5)/0.001)))'",
+   "RD_GATE_DRIVER_G cb_D_GATE_DRIVER_drv d_gate_driver_g 10"
+  ]
+ },
+ {
+  "ref": "D_GATE_DRIVER",
+  "type": "gate_driver",
+  "params": {},
+  "nets": {
+   "in": "",
+   "g": "d_gate_driver_g",
+   "s": "d_gate_driver_s"
+  },
+  "error": "D_GATE_DRIVER: control block 'gate_driver' has unconnected pins: in"
+ },
+ {
+  "ref": "D_AND",
+  "type": "and",
+  "params": {},
+  "pins": {
+   "inputs": [
+    "in1",
+    "in2"
+   ],
+   "outputs": [
+    "out"
+   ]
+  },
+  "describe": "",
+  "symbol_pins": {
+   "in1": {
+    "x": -40,
+    "y": -20,
+    "dx": -1,
+    "dy": 0
+   },
+   "in2": {
+    "x": -40,
+    "y": 20,
+    "dx": -1,
+    "dy": 0
+   },
+   "out": {
+    "x": 40,
+    "y": 0,
+    "dx": 1,
+    "dy": 0
+   }
+  },
+  "nets": {
+   "in1": "d_and_in1",
+   "in2": "d_and_in2",
+   "out": "d_and_out"
+  },
+  "lines": [
+   "* control block D_AND (and)",
+   "BD_AND d_and_out 0 V='1*(0.5*(1+tanh((V(d_and_in1)-0.5)/0.001)))*(0.5*(1+tanh((V(d_and_in2)-0.5)/0.001)))'"
+  ]
+ },
+ {
+  "ref": "D_AND",
+  "type": "and",
+  "params": {},
+  "nets": {
+   "in1": "",
+   "in2": "d_and_in2",
+   "out": "d_and_out"
+  },
+  "error": "D_AND: control block 'and' has unconnected pins: in1"
+ },
+ {
+  "ref": "D_OR",
+  "type": "or",
+  "params": {},
+  "pins": {
+   "inputs": [
+    "in1",
+    "in2"
+   ],
+   "outputs": [
+    "out"
+   ]
+  },
+  "describe": "",
+  "symbol_pins": {
+   "in1": {
+    "x": -40,
+    "y": -20,
+    "dx": -1,
+    "dy": 0
+   },
+   "in2": {
+    "x": -40,
+    "y": 20,
+    "dx": -1,
+    "dy": 0
+   },
+   "out": {
+    "x": 40,
+    "y": 0,
+    "dx": 1,
+    "dy": 0
+   }
+  },
+  "nets": {
+   "in1": "d_or_in1",
+   "in2": "d_or_in2",
+   "out": "d_or_out"
+  },
+  "lines": [
+   "* control block D_OR (or)",
+   "BD_OR d_or_out 0 V='1*((0.5*(1+tanh((V(d_or_in1)-0.5)/0.001)))+(0.5*(1+tanh((V(d_or_in2)-0.5)/0.001)))-(0.5*(1+tanh((V(d_or_in1)-0.5)/0.001)))*(0.5*(1+tanh((V(d_or_in2)-0.5)/0.001))))'"
+  ]
+ },
+ {
+  "ref": "D_OR",
+  "type": "or",
+  "params": {},
+  "nets": {
+   "in1": "",
+   "in2": "d_or_in2",
+   "out": "d_or_out"
+  },
+  "error": "D_OR: control block 'or' has unconnected pins: in1"
+ },
+ {
+  "ref": "D_NOT",
+  "type": "not",
+  "params": {},
+  "pins": {
+   "inputs": [
+    "in"
+   ],
+   "outputs": [
+    "out"
+   ]
+  },
+  "describe": "",
+  "symbol_pins": {
+   "in": {
+    "x": -40,
+    "y": 0,
+    "dx": -1,
+    "dy": 0
+   },
+   "out": {
+    "x": 40,
+    "y": 0,
+    "dx": 1,
+    "dy": 0
+   }
+  },
+  "nets": {
+   "in": "d_not_in",
+   "out": "d_not_out"
+  },
+  "lines": [
+   "* control block D_NOT (not)",
+   "BD_NOT d_not_out 0 V='1*(1-(0.5*(1+tanh((V(d_not_in)-0.5)/0.001))))'"
+  ]
+ },
+ {
+  "ref": "D_NOT",
+  "type": "not",
+  "params": {},
+  "nets": {
+   "in": "",
+   "out": "d_not_out"
+  },
+  "error": "D_NOT: control block 'not' has unconnected pins: in"
+ },
+ {
+  "ref": "D_XOR",
+  "type": "xor",
+  "params": {},
+  "pins": {
+   "inputs": [
+    "in1",
+    "in2"
+   ],
+   "outputs": [
+    "out"
+   ]
+  },
+  "describe": "",
+  "symbol_pins": {
+   "in1": {
+    "x": -40,
+    "y": -20,
+    "dx": -1,
+    "dy": 0
+   },
+   "in2": {
+    "x": -40,
+    "y": 20,
+    "dx": -1,
+    "dy": 0
+   },
+   "out": {
+    "x": 40,
+    "y": 0,
+    "dx": 1,
+    "dy": 0
+   }
+  },
+  "nets": {
+   "in1": "d_xor_in1",
+   "in2": "d_xor_in2",
+   "out": "d_xor_out"
+  },
+  "lines": [
+   "* control block D_XOR (xor)",
+   "BD_XOR d_xor_out 0 V='1*((0.5*(1+tanh((V(d_xor_in1)-0.5)/0.001)))+(0.5*(1+tanh((V(d_xor_in2)-0.5)/0.001)))-2*(0.5*(1+tanh((V(d_xor_in1)-0.5)/0.001)))*(0.5*(1+tanh((V(d_xor_in2)-0.5)/0.001))))'"
+  ]
+ },
+ {
+  "ref": "D_XOR",
+  "type": "xor",
+  "params": {},
+  "nets": {
+   "in1": "",
+   "in2": "d_xor_in2",
+   "out": "d_xor_out"
+  },
+  "error": "D_XOR: control block 'xor' has unconnected pins: in1"
+ },
+ {
+  "ref": "K_V",
+  "type": "gain",
+  "params": {
+   "gain": 100.0
+  },
+  "pins": {
+   "inputs": [
+    "in"
+   ],
+   "outputs": [
+    "out"
+   ]
+  },
+  "describe": "k=100",
+  "symbol_pins": {
+   "in": {
+    "x": -40,
+    "y": 0,
+    "dx": -1,
+    "dy": 0
+   },
+   "out": {
+    "x": 40,
+    "y": 0,
+    "dx": 1,
+    "dy": 0
+   }
+  },
+  "nets": {
+   "in": "k_v_in",
+   "out": "k_v_out"
+  },
+  "lines": [
+   "* control block K_V (gain)",
+   "BK_V k_v_out 0 V='100*V(k_v_in)'"
+  ]
+ },
+ {
+  "ref": "K_V",
+  "type": "gain",
+  "params": {
+   "gain": 100.0
+  },
+  "nets": {
+   "in": "",
+   "out": "k_v_out"
+  },
+  "error": "K_V: control block 'gain' has unconnected pins: in"
+ },
+ {
+  "ref": "K_P",
+  "type": "gain",
+  "params": {
+   "gain": "1/V_PEAK"
+  },
+  "pins": {
+   "inputs": [
+    "in"
+   ],
+   "outputs": [
+    "out"
+   ]
+  },
+  "describe": "k=1/V_PEAK",
+  "symbol_pins": {
+   "in": {
+    "x": -40,
+    "y": 0,
+    "dx": -1,
+    "dy": 0
+   },
+   "out": {
+    "x": 40,
+    "y": 0,
+    "dx": 1,
+    "dy": 0
+   }
+  },
+  "nets": {
+   "in": "k_p_in",
+   "out": "k_p_out"
+  },
+  "lines": [
+   "* control block K_P (gain)",
+   "BK_P k_p_out 0 V='(1/V_PEAK)*V(k_p_in)'"
+  ]
+ },
+ {
+  "ref": "K_P",
+  "type": "gain",
+  "params": {
+   "gain": "1/V_PEAK"
+  },
+  "nets": {
+   "in": "",
+   "out": "k_p_out"
+  },
+  "error": "K_P: control block 'gain' has unconnected pins: in"
+ },
+ {
+  "ref": "K_S",
+  "type": "gain",
+  "params": {
+   "gain": "4.7u"
+  },
+  "pins": {
+   "inputs": [
+    "in"
+   ],
+   "outputs": [
+    "out"
+   ]
+  },
+  "describe": "k=4.7e-06",
+  "symbol_pins": {
+   "in": {
+    "x": -40,
+    "y": 0,
+    "dx": -1,
+    "dy": 0
+   },
+   "out": {
+    "x": 40,
+    "y": 0,
+    "dx": 1,
+    "dy": 0
+   }
+  },
+  "nets": {
+   "in": "k_s_in",
+   "out": "k_s_out"
+  },
+  "lines": [
+   "* control block K_S (gain)",
+   "BK_S k_s_out 0 V='4.7e-06*V(k_s_in)'"
+  ]
+ },
+ {
+  "ref": "K_S",
+  "type": "gain",
+  "params": {
+   "gain": "4.7u"
+  },
+  "nets": {
+   "in": "",
+   "out": "k_s_out"
+  },
+  "error": "K_S: control block 'gain' has unconnected pins: in"
+ },
+ {
+  "ref": "K_X",
+  "type": "gain",
+  "params": {
+   "gain": "bad'quote"
+  },
+  "pins": {
+   "inputs": [
+    "in"
+   ],
+   "outputs": [
+    "out"
+   ]
+  },
+  "describe": "k=1",
+  "symbol_pins": {
+   "in": {
+    "x": -40,
+    "y": 0,
+    "dx": -1,
+    "dy": 0
+   },
+   "out": {
+    "x": 40,
+    "y": 0,
+    "dx": 1,
+    "dy": 0
+   }
+  },
+  "nets": {
+   "in": "k_x_in",
+   "out": "k_x_out"
+  },
+  "lines": [
+   "* control block K_X (gain)",
+   "BK_X k_x_out 0 V='1*V(k_x_in)'"
+  ]
+ },
+ {
+  "ref": "K_X",
+  "type": "gain",
+  "params": {
+   "gain": "bad'quote"
+  },
+  "nets": {
+   "in": "",
+   "out": "k_x_out"
+  },
+  "error": "K_X: control block 'gain' has unconnected pins: in"
+ },
+ {
+  "ref": "K_M",
+  "type": "gain",
+  "params": {
+   "gain": "2MEG"
+  },
+  "pins": {
+   "inputs": [
+    "in"
+   ],
+   "outputs": [
+    "out"
+   ]
+  },
+  "describe": "k=2",
+  "symbol_pins": {
+   "in": {
+    "x": -40,
+    "y": 0,
+    "dx": -1,
+    "dy": 0
+   },
+   "out": {
+    "x": 40,
+    "y": 0,
+    "dx": 1,
+    "dy": 0
+   }
+  },
+  "nets": {
+   "in": "k_m_in",
+   "out": "k_m_out"
+  },
+  "lines": [
+   "* control block K_M (gain)",
+   "BK_M k_m_out 0 V='2*V(k_m_in)'"
+  ]
+ },
+ {
+  "ref": "K_M",
+  "type": "gain",
+  "params": {
+   "gain": "2MEG"
+  },
+  "nets": {
+   "in": "",
+   "out": "k_m_out"
+  },
+  "error": "K_M: control block 'gain' has unconnected pins: in"
+ },
+ {
+  "ref": "SUM3",
+  "type": "sum",
+  "params": {
+   "signs": "+ - +"
+  },
+  "pins": {
+   "inputs": [
+    "in1",
+    "in2",
+    "in3"
+   ],
+   "outputs": [
+    "out"
+   ]
+  },
+  "describe": "+ - +",
+  "symbol_pins": {
+   "in1": {
+    "x": -40,
+    "y": -40,
+    "dx": -1,
+    "dy": 0
+   },
+   "in2": {
+    "x": -40,
+    "y": 0,
+    "dx": -1,
+    "dy": 0
+   },
+   "in3": {
+    "x": -40,
+    "y": 40,
+    "dx": -1,
+    "dy": 0
+   },
+   "out": {
+    "x": 40,
+    "y": 0,
+    "dx": 1,
+    "dy": 0
+   }
+  },
+  "nets": {
+   "in1": "sum3_in1",
+   "in2": "sum3_in2",
+   "in3": "sum3_in3",
+   "out": "sum3_out"
+  },
+  "lines": [
+   "* control block SUM3 (sum)",
+   "BSUM3 sum3_out 0 V='V(sum3_in1)-V(sum3_in2)+V(sum3_in3)'"
+  ]
+ },
+ {
+  "ref": "SUM3",
+  "type": "sum",
+  "params": {
+   "signs": "+ - +"
+  },
+  "nets": {
+   "in1": "",
+   "in2": "sum3_in2",
+   "in3": "sum3_in3",
+   "out": "sum3_out"
+  },
+  "error": "SUM3: control block 'sum' has unconnected pins: in1"
+ },
+ {
+  "ref": "SUM0",
+  "type": "sum",
+  "params": {
+   "signs": ""
+  },
+  "pins": {
+   "inputs": [
+    "in1",
+    "in2"
+   ],
+   "outputs": [
+    "out"
+   ]
+  },
+  "describe": "++",
+  "symbol_pins": {
+   "in1": {
+    "x": -40,
+    "y": -20,
+    "dx": -1,
+    "dy": 0
+   },
+   "in2": {
+    "x": -40,
+    "y": 20,
+    "dx": -1,
+    "dy": 0
+   },
+   "out": {
+    "x": 40,
+    "y": 0,
+    "dx": 1,
+    "dy": 0
+   }
+  },
+  "nets": {
+   "in1": "sum0_in1",
+   "in2": "sum0_in2",
+   "out": "sum0_out"
+  },
+  "lines": [
+   "* control block SUM0 (sum)",
+   "BSUM0 sum0_out 0 V='V(sum0_in1)+V(sum0_in2)'"
+  ]
+ },
+ {
+  "ref": "SUM0",
+  "type": "sum",
+  "params": {
+   "signs": ""
+  },
+  "nets": {
+   "in1": "",
+   "in2": "sum0_in2",
+   "out": "sum0_out"
+  },
+  "error": "SUM0: control block 'sum' has unconnected pins: in1"
+ },
+ {
+  "ref": "SUMN",
+  "type": "sum",
+  "params": {
+   "signs": "-+"
+  },
+  "pins": {
+   "inputs": [
+    "in1",
+    "in2"
+   ],
+   "outputs": [
+    "out"
+   ]
+  },
+  "describe": "-+",
+  "symbol_pins": {
+   "in1": {
+    "x": -40,
+    "y": -20,
+    "dx": -1,
+    "dy": 0
+   },
+   "in2": {
+    "x": -40,
+    "y": 20,
+    "dx": -1,
+    "dy": 0
+   },
+   "out": {
+    "x": 40,
+    "y": 0,
+    "dx": 1,
+    "dy": 0
+   }
+  },
+  "nets": {
+   "in1": "sumn_in1",
+   "in2": "sumn_in2",
+   "out": "sumn_out"
+  },
+  "lines": [
+   "* control block SUMN (sum)",
+   "BSUMN sumn_out 0 V='-V(sumn_in1)+V(sumn_in2)'"
+  ]
+ },
+ {
+  "ref": "SUMN",
+  "type": "sum",
+  "params": {
+   "signs": "-+"
+  },
+  "nets": {
+   "in1": "",
+   "in2": "sumn_in2",
+   "out": "sumn_out"
+  },
+  "error": "SUMN: control block 'sum' has unconnected pins: in1"
+ },
+ {
+  "ref": "MULT",
+  "type": "product",
+  "params": {
+   "gain": 0.003
+  },
+  "pins": {
+   "inputs": [
+    "in1",
+    "in2"
+   ],
+   "outputs": [
+    "out"
+   ]
+  },
+  "describe": "",
+  "symbol_pins": {
+   "in1": {
+    "x": -40,
+    "y": -20,
+    "dx": -1,
+    "dy": 0
+   },
+   "in2": {
+    "x": -40,
+    "y": 20,
+    "dx": -1,
+    "dy": 0
+   },
+   "out": {
+    "x": 40,
+    "y": 0,
+    "dx": 1,
+    "dy": 0
+   }
+  },
+  "nets": {
+   "in1": "mult_in1",
+   "in2": "mult_in2",
+   "out": "mult_out"
+  },
+  "lines": [
+   "* control block MULT (product)",
+   "BMULT mult_out 0 V='0.003*V(mult_in1)*V(mult_in2)'"
+  ]
+ },
+ {
+  "ref": "MULT",
+  "type": "product",
+  "params": {
+   "gain": 0.003
+  },
+  "nets": {
+   "in1": "",
+   "in2": "mult_in2",
+   "out": "mult_out"
+  },
+  "error": "MULT: control block 'product' has unconnected pins: in1"
+ },
+ {
+  "ref": "REF",
+  "type": "const",
+  "params": {
+   "value": "V_TARGET"
+  },
+  "pins": {
+   "inputs": [],
+   "outputs": [
+    "out"
+   ]
+  },
+  "describe": "V_TARGET",
+  "symbol_pins": {
+   "out": {
+    "x": 40,
+    "y": 0,
+    "dx": 1,
+    "dy": 0
+   }
+  },
+  "nets": {
+   "out": "ref_out"
+  },
+  "lines": [
+   "* control block REF (const)",
+   "BREF ref_out 0 V='(V_TARGET)'"
+  ]
+ },
+ {
+  "ref": "REF",
+  "type": "const",
+  "params": {
+   "value": "V_TARGET"
+  },
+  "nets": {
+   "out": ""
+  },
+  "error": "REF: control block 'const' has unconnected pins: out"
+ },
+ {
+  "ref": "REF2",
+  "type": "const",
+  "params": {
+   "value": 5
+  },
+  "pins": {
+   "inputs": [],
+   "outputs": [
+    "out"
+   ]
+  },
+  "describe": "5",
+  "symbol_pins": {
+   "out": {
+    "x": 40,
+    "y": 0,
+    "dx": 1,
+    "dy": 0
+   }
+  },
+  "nets": {
+   "out": "ref2_out"
+  },
+  "lines": [
+   "* control block REF2 (const)",
+   "BREF2 ref2_out 0 V='5'"
+  ]
+ },
+ {
+  "ref": "REF2",
+  "type": "const",
+  "params": {
+   "value": 5
+  },
+  "nets": {
+   "out": ""
+  },
+  "error": "REF2: control block 'const' has unconnected pins: out"
+ },
+ {
+  "ref": "I_SENSE",
+  "type": "function",
+  "params": {
+   "expression": "I(VSENSE)",
+   "inputs": 0
+  },
+  "pins": {
+   "inputs": [],
+   "outputs": [
+    "out"
+   ]
+  },
+  "describe": "I(VSENSE)",
+  "symbol_pins": {
+   "out": {
+    "x": 40,
+    "y": 0,
+    "dx": 1,
+    "dy": 0
+   }
+  },
+  "nets": {
+   "out": "i_sense_out"
+  },
+  "lines": [
+   "* control block I_SENSE (function)",
+   "BI_SENSE i_sense_out 0 V='I(VSENSE)'"
+  ]
+ },
+ {
+  "ref": "I_SENSE",
+  "type": "function",
+  "params": {
+   "expression": "I(VSENSE)",
+   "inputs": 0
+  },
+  "nets": {
+   "out": ""
+  },
+  "error": "I_SENSE: control block 'function' has unconnected pins: out"
+ },
+ {
+  "ref": "FN2",
+  "type": "function",
+  "params": {
+   "expression": "in1*in3+in2",
+   "inputs": 1
+  },
+  "pins": {
+   "inputs": [
+    "in1",
+    "in2",
+    "in3"
+   ],
+   "outputs": [
+    "out"
+   ]
+  },
+  "describe": "in1*in3+in2",
+  "symbol_pins": {
+   "in1": {
+    "x": -40,
+    "y": -40,
+    "dx": -1,
+    "dy": 0
+   },
+   "in2": {
+    "x": -40,
+    "y": 0,
+    "dx": -1,
+    "dy": 0
+   },
+   "in3": {
+    "x": -40,
+    "y": 40,
+    "dx": -1,
+    "dy": 0
+   },
+   "out": {
+    "x": 40,
+    "y": 0,
+    "dx": 1,
+    "dy": 0
+   }
+  },
+  "nets": {
+   "in1": "fn2_in1",
+   "in2": "fn2_in2",
+   "in3": "fn2_in3",
+   "out": "fn2_out"
+  },
+  "lines": [
+   "* control block FN2 (function)",
+   "BFN2 fn2_out 0 V='V(fn2_in1)*V(fn2_in3)+V(fn2_in2)'"
+  ]
+ },
+ {
+  "ref": "FN2",
+  "type": "function",
+  "params": {
+   "expression": "in1*in3+in2",
+   "inputs": 1
+  },
+  "nets": {
+   "in1": "",
+   "in2": "fn2_in2",
+   "in3": "fn2_in3",
+   "out": "fn2_out"
+  },
+  "error": "FN2: control block 'function' has unconnected pins: in1"
+ },
+ {
+  "ref": "FNQ",
+  "type": "function",
+  "params": {
+   "expression": "V(a)*'2'"
+  },
+  "pins": {
+   "inputs": [
+    "in1"
+   ],
+   "outputs": [
+    "out"
+   ]
+  },
+  "describe": "V(a)*'2'",
+  "symbol_pins": {
+   "in1": {
+    "x": -40,
+    "y": 0,
+    "dx": -1,
+    "dy": 0
+   },
+   "out": {
+    "x": 40,
+    "y": 0,
+    "dx": 1,
+    "dy": 0
+   }
+  },
+  "nets": {
+   "in1": "fnq_in1",
+   "out": "fnq_out"
+  },
+  "error": "FNQ: the function expression may not contain quotes"
+ },
+ {
+  "ref": "FNQ",
+  "type": "function",
+  "params": {
+   "expression": "V(a)*'2'"
+  },
+  "nets": {
+   "in1": "",
+   "out": "fnq_out"
+  },
+  "error": "FNQ: control block 'function' has unconnected pins: in1"
+ },
+ {
+  "ref": "LIM",
+  "type": "limiter",
+  "params": {
+   "lower": "-5",
+   "upper": "5k"
+  },
+  "pins": {
+   "inputs": [
+    "in"
+   ],
+   "outputs": [
+    "out"
+   ]
+  },
+  "describe": "[-5, 5000]",
+  "symbol_pins": {
+   "in": {
+    "x": -40,
+    "y": 0,
+    "dx": -1,
+    "dy": 0
+   },
+   "out": {
+    "x": 40,
+    "y": 0,
+    "dx": 1,
+    "dy": 0
+   }
+  },
+  "nets": {
+   "in": "lim_in",
+   "out": "lim_out"
+  },
+  "lines": [
+   "* control block LIM (limiter)",
+   "BLIM lim_out 0 V='min(max(V(lim_in),-5),5000)'"
+  ]
+ },
+ {
+  "ref": "LIM",
+  "type": "limiter",
+  "params": {
+   "lower": "-5",
+   "upper": "5k"
+  },
+  "nets": {
+   "in": "",
+   "out": "lim_out"
+  },
+  "error": "LIM: control block 'limiter' has unconnected pins: in"
+ },
+ {
+  "ref": "CMP",
+  "type": "comparator",
+  "params": {
+   "high": 5,
+   "low": 0,
+   "width": 1e-06
+  },
+  "pins": {
+   "inputs": [
+    "inp",
+    "inn"
+   ],
+   "outputs": [
+    "out"
+   ]
+  },
+  "describe": "",
+  "symbol_pins": {
+   "inp": {
+    "x": -40,
+    "y": -20,
+    "dx": -1,
+    "dy": 0
+   },
+   "inn": {
+    "x": -40,
+    "y": 20,
+    "dx": -1,
+    "dy": 0
+   },
+   "out": {
+    "x": 40,
+    "y": 0,
+    "dx": 1,
+    "dy": 0
+   }
+  },
+  "nets": {
+   "inp": "cmp_inp",
+   "inn": "cmp_inn",
+   "out": "cmp_out"
+  },
+  "lines": [
+   "* control block CMP (comparator)",
+   "BCMP cmp_out 0 V='0+5*(0.5*(1+tanh((V(cmp_inp)-V(cmp_inn))/1e-06)))'"
+  ]
+ },
+ {
+  "ref": "CMP",
+  "type": "comparator",
+  "params": {
+   "high": 5,
+   "low": 0,
+   "width": 1e-06
+  },
+  "nets": {
+   "inp": "",
+   "inn": "cmp_inn",
+   "out": "cmp_out"
+  },
+  "error": "CMP: control block 'comparator' has unconnected pins: inp"
+ },
+ {
+  "ref": "CMPT",
+  "type": "comparator",
+  "params": {
+   "high": 15,
+   "low": -15,
+   "threshold": 0.02
+  },
+  "pins": {
+   "inputs": [
+    "inp",
+    "inn"
+   ],
+   "outputs": [
+    "out"
+   ]
+  },
+  "describe": "",
+  "symbol_pins": {
+   "inp": {
+    "x": -40,
+    "y": -20,
+    "dx": -1,
+    "dy": 0
+   },
+   "inn": {
+    "x": -40,
+    "y": 20,
+    "dx": -1,
+    "dy": 0
+   },
+   "out": {
+    "x": 40,
+    "y": 0,
+    "dx": 1,
+    "dy": 0
+   }
+  },
+  "nets": {
+   "inp": "cmpt_inp",
+   "inn": "cmpt_inn",
+   "out": "cmpt_out"
+  },
+  "lines": [
+   "* control block CMPT (comparator)",
+   "BCMPT cmpt_out 0 V='-15+30*(0.5*(1+tanh((V(cmpt_inp)-V(cmpt_inn)-0.02)/0.001)))'"
+  ]
+ },
+ {
+  "ref": "CMPT",
+  "type": "comparator",
+  "params": {
+   "high": 15,
+   "low": -15,
+   "threshold": 0.02
+  },
+  "nets": {
+   "inp": "",
+   "inn": "cmpt_inn",
+   "out": "cmpt_out"
+  },
+  "error": "CMPT: control block 'comparator' has unconnected pins: inp"
+ },
+ {
+  "ref": "LPF",
+  "type": "lowpass",
+  "params": {
+   "tau": 4.7e-06,
+   "ic": 2.5
+  },
+  "pins": {
+   "inputs": [
+    "in"
+   ],
+   "outputs": [
+    "out"
+   ]
+  },
+  "describe": "τ=4.7e-06 s",
+  "symbol_pins": {
+   "in": {
+    "x": -40,
+    "y": 0,
+    "dx": -1,
+    "dy": 0
+   },
+   "out": {
+    "x": 40,
+    "y": 0,
+    "dx": 1,
+    "dy": 0
+   }
+  },
+  "nets": {
+   "in": "lpf_in",
+   "out": "lpf_out"
+  },
+  "lines": [
+   "* control block LPF (lowpass)",
+   "BLPF cb_LPF_d 0 V='1*V(lpf_in)'",
+   "RLPF_R cb_LPF_d lpf_out 1000",
+   "CLPF_X lpf_out 0 4.7e-09 IC=2.5"
+  ]
+ },
+ {
+  "ref": "LPF",
+  "type": "lowpass",
+  "params": {
+   "tau": 4.7e-06,
+   "ic": 2.5
+  },
+  "nets": {
+   "in": "",
+   "out": "lpf_out"
+  },
+  "error": "LPF: control block 'lowpass' has unconnected pins: in"
+ },
+ {
+  "ref": "INT",
+  "type": "integrator",
+  "params": {
+   "ki": 20,
+   "ic": 1,
+   "lower": 0,
+   "upper": 80
+  },
+  "pins": {
+   "inputs": [
+    "in"
+   ],
+   "outputs": [
+    "out"
+   ]
+  },
+  "describe": "ki=20",
+  "symbol_pins": {
+   "in": {
+    "x": -40,
+    "y": 0,
+    "dx": -1,
+    "dy": 0
+   },
+   "out": {
+    "x": 40,
+    "y": 0,
+    "dx": 1,
+    "dy": 0
+   }
+  },
+  "nets": {
+   "in": "int_in",
+   "out": "int_out"
+  },
+  "lines": [
+   "* control block INT (integrator)",
+   "BINT_I 0 int_out I='0.02*V(int_in)-10*max(V(int_out)-80,0)+10*max(0-V(int_out),0)'",
+   "CINT_X int_out 0 0.001 IC=1",
+   "RINT_X int_out 0 1e12"
+  ]
+ },
+ {
+  "ref": "INT",
+  "type": "integrator",
+  "params": {
+   "ki": 20,
+   "ic": 1,
+   "lower": 0,
+   "upper": 80
+  },
+  "nets": {
+   "in": "",
+   "out": "int_out"
+  },
+  "error": "INT: control block 'integrator' has unconnected pins: in"
+ },
+ {
+  "ref": "INTC",
+  "type": "integrator",
+  "params": {
+   "ki": 5,
+   "antiwindup": "conditional",
+   "lower": -1,
+   "upper": 1
+  },
+  "pins": {
+   "inputs": [
+    "in"
+   ],
+   "outputs": [
+    "out"
+   ]
+  },
+  "describe": "ki=5",
+  "symbol_pins": {
+   "in": {
+    "x": -40,
+    "y": 0,
+    "dx": -1,
+    "dy": 0
+   },
+   "out": {
+    "x": 40,
+    "y": 0,
+    "dx": 1,
+    "dy": 0
+   }
+  },
+  "nets": {
+   "in": "intc_in",
+   "out": "intc_out"
+  },
+  "lines": [
+   "* control block INTC (integrator)",
+   "BINTC_I 0 intc_out I='V(intc_out) >= 1 ? (V(intc_in) > 0 ? 0 : 0.005*V(intc_in)) : (V(intc_out) <= -1 ? (V(intc_in) < 0 ? 0 : 0.005*V(intc_in)) : 0.005*V(intc_in))'",
+   "CINTC_X intc_out 0 0.001 IC=0",
+   "RINTC_X intc_out 0 1e12"
+  ]
+ },
+ {
+  "ref": "INTC",
+  "type": "integrator",
+  "params": {
+   "ki": 5,
+   "antiwindup": "conditional",
+   "lower": -1,
+   "upper": 1
+  },
+  "nets": {
+   "in": "",
+   "out": "intc_out"
+  },
+  "error": "INTC: control block 'integrator' has unconnected pins: in"
+ },
+ {
+  "ref": "PI_C",
+  "type": "pi",
+  "params": {
+   "kp": 1.0,
+   "ki": 31415.9,
+   "lower": 0.1,
+   "upper": 4.8,
+   "ic": 2.5
+  },
+  "pins": {
+   "inputs": [
+    "in"
+   ],
+   "outputs": [
+    "out"
+   ]
+  },
+  "describe": "kp=1 ki=31415.9",
+  "symbol_pins": {
+   "in": {
+    "x": -40,
+    "y": 0,
+    "dx": -1,
+    "dy": 0
+   },
+   "out": {
+    "x": 40,
+    "y": 0,
+    "dx": 1,
+    "dy": 0
+   }
+  },
+  "nets": {
+   "in": "pi_c_in",
+   "out": "pi_c_out"
+  },
+  "lines": [
+   "* control block PI_C (pi)",
+   "BPI_C_I 0 cb_PI_C_x I='31.4159*V(pi_c_in)-3141.59*max(V(cb_PI_C_x)-4.8,0)+3141.59*max(0.1-V(cb_PI_C_x),0)'",
+   "CPI_C_X cb_PI_C_x 0 0.001 IC=2.5",
+   "RPI_C_X cb_PI_C_x 0 1e12",
+   "BPI_C pi_c_out 0 V='min(max(1*V(pi_c_in)+V(cb_PI_C_x),0.1),4.8)'"
+  ]
+ },
+ {
+  "ref": "PI_C",
+  "type": "pi",
+  "params": {
+   "kp": 1.0,
+   "ki": 31415.9,
+   "lower": 0.1,
+   "upper": 4.8,
+   "ic": 2.5
+  },
+  "nets": {
+   "in": "",
+   "out": "pi_c_out"
+  },
+  "error": "PI_C: control block 'pi' has unconnected pins: in"
+ },
+ {
+  "ref": "PIC",
+  "type": "pi",
+  "params": {
+   "kp": 0.3,
+   "ki": 20,
+   "antiwindup": "Conditional"
+  },
+  "pins": {
+   "inputs": [
+    "in"
+   ],
+   "outputs": [
+    "out"
+   ]
+  },
+  "describe": "kp=0.3 ki=20",
+  "symbol_pins": {
+   "in": {
+    "x": -40,
+    "y": 0,
+    "dx": -1,
+    "dy": 0
+   },
+   "out": {
+    "x": 40,
+    "y": 0,
+    "dx": 1,
+    "dy": 0
+   }
+  },
+  "nets": {
+   "in": "pic_in",
+   "out": "pic_out"
+  },
+  "lines": [
+   "* control block PIC (pi)",
+   "BPIC_I 0 cb_PIC_x I='V(cb_PIC_x) >= 1000 ? (V(pic_in) > 0 ? 0 : 0.02*V(pic_in)) : (V(cb_PIC_x) <= -1000 ? (V(pic_in) < 0 ? 0 : 0.02*V(pic_in)) : 0.02*V(pic_in))'",
+   "CPIC_X cb_PIC_x 0 0.001 IC=0",
+   "RPIC_X cb_PIC_x 0 1e12",
+   "BPIC pic_out 0 V='min(max(0.3*V(pic_in)+V(cb_PIC_x),-1000),1000)'"
+  ]
+ },
+ {
+  "ref": "PIC",
+  "type": "pi",
+  "params": {
+   "kp": 0.3,
+   "ki": 20,
+   "antiwindup": "Conditional"
+  },
+  "nets": {
+   "in": "",
+   "out": "pic_out"
+  },
+  "error": "PIC: control block 'pi' has unconnected pins: in"
+ },
+ {
+  "ref": "PID1",
+  "type": "pid",
+  "params": {
+   "kp": 2,
+   "ki": 50,
+   "kd": 0.0001,
+   "tf": "10u"
+  },
+  "pins": {
+   "inputs": [
+    "in"
+   ],
+   "outputs": [
+    "out"
+   ]
+  },
+  "describe": "kp=2 ki=50 kd=0.0001",
+  "symbol_pins": {
+   "in": {
+    "x": -40,
+    "y": 0,
+    "dx": -1,
+    "dy": 0
+   },
+   "out": {
+    "x": 40,
+    "y": 0,
+    "dx": 1,
+    "dy": 0
+   }
+  },
+  "nets": {
+   "in": "pid1_in",
+   "out": "pid1_out"
+  },
+  "lines": [
+   "* control block PID1 (pid)",
+   "BPID1_I 0 cb_PID1_x I='0.05*V(pid1_in)-10*max(V(cb_PID1_x)-1000,0)+10*max(-1000-V(cb_PID1_x),0)'",
+   "CPID1_X cb_PID1_x 0 0.001 IC=0",
+   "RPID1_X cb_PID1_x 0 1e12",
+   "BPID1_D cb_PID1_yd 0 V='V(pid1_in)'",
+   "RPID1_Y cb_PID1_yd cb_PID1_y 1000",
+   "CPID1_Y cb_PID1_y 0 1e-08 IC=0",
+   "BPID1 pid1_out 0 V='min(max(2*V(pid1_in)+V(cb_PID1_x)+10*(V(pid1_in)-V(cb_PID1_y)),-1000),1000)'"
+  ]
+ },
+ {
+  "ref": "PID1",
+  "type": "pid",
+  "params": {
+   "kp": 2,
+   "ki": 50,
+   "kd": 0.0001,
+   "tf": "10u"
+  },
+  "nets": {
+   "in": "",
+   "out": "pid1_out"
+  },
+  "error": "PID1: control block 'pid' has unconnected pins: in"
+ },
+ {
+  "ref": "CAR",
+  "type": "carrier",
+  "params": {
+   "frequency": "50k",
+   "low": -1,
+   "high": 1,
+   "phase": -90
+  },
+  "pins": {
+   "inputs": [],
+   "outputs": [
+    "out"
+   ]
+  },
+  "describe": "50 kHz",
+  "symbol_pins": {
+   "out": {
+    "x": 40,
+    "y": 0,
+    "dx": 1,
+    "dy": 0
+   }
+  },
+  "nets": {
+   "out": "car_out"
+  },
+  "lines": [
+   "* control block CAR (carrier)",
+   "VCAR_CAR car_out 0 PULSE(-1 1 1.5e-05 1e-05 1e-05 0 2e-05)"
+  ]
+ },
+ {
+  "ref": "CAR",
+  "type": "carrier",
+  "params": {
+   "frequency": "50k",
+   "low": -1,
+   "high": 1,
+   "phase": -90
+  },
+  "nets": {
+   "out": ""
+  },
+  "error": "CAR: control block 'carrier' has unconnected pins: out"
+ },
+ {
+  "ref": "SAW",
+  "type": "carrier",
+  "params": {
+   "frequency": 20000,
+   "shape": "sawtooth",
+   "phase": 450
+  },
+  "pins": {
+   "inputs": [],
+   "outputs": [
+    "out"
+   ]
+  },
+  "describe": "20 kHz",
+  "symbol_pins": {
+   "out": {
+    "x": 40,
+    "y": 0,
+    "dx": 1,
+    "dy": 0
+   }
+  },
+  "nets": {
+   "out": "saw_out"
+  },
+  "lines": [
+   "* control block SAW (carrier)",
+   "VSAW_CAR saw_out 0 PULSE(0 1 1.25e-05 4.9995e-05 5e-09 0 5e-05)"
+  ]
+ },
+ {
+  "ref": "SAW",
+  "type": "carrier",
+  "params": {
+   "frequency": 20000,
+   "shape": "sawtooth",
+   "phase": 450
+  },
+  "nets": {
+   "out": ""
+  },
+  "error": "SAW: control block 'carrier' has unconnected pins: out"
+ },
+ {
+  "ref": "CARZ",
+  "type": "carrier",
+  "params": {
+   "frequency": 0
+  },
+  "pins": {
+   "inputs": [],
+   "outputs": [
+    "out"
+   ]
+  },
+  "describe": "0 Hz",
+  "symbol_pins": {
+   "out": {
+    "x": 40,
+    "y": 0,
+    "dx": 1,
+    "dy": 0
+   }
+  },
+  "nets": {
+   "out": "carz_out"
+  },
+  "error": "CARZ: frequency must be positive"
+ },
+ {
+  "ref": "CARZ",
+  "type": "carrier",
+  "params": {
+   "frequency": 0
+  },
+  "nets": {
+   "out": ""
+  },
+  "error": "CARZ: control block 'carrier' has unconnected pins: out"
+ },
+ {
+  "ref": "PWM1",
+  "type": "pwm",
+  "params": {
+   "frequency": 100000,
+   "phase": 180,
+   "carrier": "saw"
+  },
+  "pins": {
+   "inputs": [
+    "in"
+   ],
+   "outputs": [
+    "out"
+   ]
+  },
+  "describe": "100 kHz",
+  "symbol_pins": {
+   "in": {
+    "x": -40,
+    "y": 0,
+    "dx": -1,
+    "dy": 0
+   },
+   "out": {
+    "x": 40,
+    "y": 0,
+    "dx": 1,
+    "dy": 0
+   }
+  },
+  "nets": {
+   "in": "pwm1_in",
+   "out": "pwm1_out"
+  },
+  "lines": [
+   "* control block PWM1 (pwm)",
+   "VPWM1_CAR cb_PWM1_car 0 PULSE(0 1 5e-06 9.999e-06 1e-09 0 1e-05)",
+   "BPWM1 pwm1_out 0 V='0+1*(0.5*(1+tanh((V(pwm1_in)-V(cb_PWM1_car))/0.001)))'"
+  ]
+ },
+ {
+  "ref": "PWM1",
+  "type": "pwm",
+  "params": {
+   "frequency": 100000,
+   "phase": 180,
+   "carrier": "saw"
+  },
+  "nets": {
+   "in": "",
+   "out": "pwm1_out"
+  },
+  "error": "PWM1: control block 'pwm' has unconnected pins: in"
+ },
+ {
+  "ref": "DRV",
+  "type": "gate_driver",
+  "params": {
+   "von": 12,
+   "voff": -5,
+   "rg": 0
+  },
+  "pins": {
+   "inputs": [
+    "in"
+   ],
+   "outputs": [
+    "g",
+    "s"
+   ]
+  },
+  "describe": "-5/12 V",
+  "symbol_pins": {
+   "in": {
+    "x": -40,
+    "y": 0,
+    "dx": -1,
+    "dy": 0
+   },
+   "g": {
+    "x": 40,
+    "y": -20,
+    "dx": 1,
+    "dy": 0
+   },
+   "s": {
+    "x": 40,
+    "y": 20,
+    "dx": 1,
+    "dy": 0
+   }
+  },
+  "nets": {
+   "in": "drv_in",
+   "g": "drv_g",
+   "s": "drv_s"
+  },
+  "lines": [
+   "* control block DRV (gate_driver)",
+   "BDRV cb_DRV_drv drv_s V='-5+17*(0.5*(1+tanh((V(drv_in)-0.5)/0.001)))'",
+   "RDRV_G cb_DRV_drv drv_g 0.001"
+  ]
+ },
+ {
+  "ref": "DRV",
+  "type": "gate_driver",
+  "params": {
+   "von": 12,
+   "voff": -5,
+   "rg": 0
+  },
+  "nets": {
+   "in": "",
+   "g": "drv_g",
+   "s": "drv_s"
+  },
+  "error": "DRV: control block 'gate_driver' has unconnected pins: in"
+ },
+ {
+  "ref": "AND1",
+  "type": "and",
+  "params": {
+   "high": 5
+  },
+  "pins": {
+   "inputs": [
+    "in1",
+    "in2"
+   ],
+   "outputs": [
+    "out"
+   ]
+  },
+  "describe": "",
+  "symbol_pins": {
+   "in1": {
+    "x": -40,
+    "y": -20,
+    "dx": -1,
+    "dy": 0
+   },
+   "in2": {
+    "x": -40,
+    "y": 20,
+    "dx": -1,
+    "dy": 0
+   },
+   "out": {
+    "x": 40,
+    "y": 0,
+    "dx": 1,
+    "dy": 0
+   }
+  },
+  "nets": {
+   "in1": "and1_in1",
+   "in2": "and1_in2",
+   "out": "and1_out"
+  },
+  "lines": [
+   "* control block AND1 (and)",
+   "BAND1 and1_out 0 V='5*(0.5*(1+tanh((V(and1_in1)-0.5)/0.001)))*(0.5*(1+tanh((V(and1_in2)-0.5)/0.001)))'"
+  ]
+ },
+ {
+  "ref": "AND1",
+  "type": "and",
+  "params": {
+   "high": 5
+  },
+  "nets": {
+   "in1": "",
+   "in2": "and1_in2",
+   "out": "and1_out"
+  },
+  "error": "AND1: control block 'and' has unconnected pins: in1"
+ },
+ {
+  "ref": "XOR1",
+  "type": "xor",
+  "params": {
+   "threshold": 2.5,
+   "width": 0
+  },
+  "pins": {
+   "inputs": [
+    "in1",
+    "in2"
+   ],
+   "outputs": [
+    "out"
+   ]
+  },
+  "describe": "",
+  "symbol_pins": {
+   "in1": {
+    "x": -40,
+    "y": -20,
+    "dx": -1,
+    "dy": 0
+   },
+   "in2": {
+    "x": -40,
+    "y": 20,
+    "dx": -1,
+    "dy": 0
+   },
+   "out": {
+    "x": 40,
+    "y": 0,
+    "dx": 1,
+    "dy": 0
+   }
+  },
+  "nets": {
+   "in1": "xor1_in1",
+   "in2": "xor1_in2",
+   "out": "xor1_out"
+  },
+  "lines": [
+   "* control block XOR1 (xor)",
+   "BXOR1 xor1_out 0 V='1*((0.5*(1+tanh((V(xor1_in1)-2.5)/1e-12)))+(0.5*(1+tanh((V(xor1_in2)-2.5)/1e-12)))-2*(0.5*(1+tanh((V(xor1_in1)-2.5)/1e-12)))*(0.5*(1+tanh((V(xor1_in2)-2.5)/1e-12))))'"
+  ]
+ },
+ {
+  "ref": "XOR1",
+  "type": "xor",
+  "params": {
+   "threshold": 2.5,
+   "width": 0
+  },
+  "nets": {
+   "in1": "",
+   "in2": "xor1_in2",
+   "out": "xor1_out"
+  },
+  "error": "XOR1: control block 'xor' has unconnected pins: in1"
+ },
+ {
+  "ref": "NOT1",
+  "type": "not",
+  "params": {
+   "high": true
+  },
+  "pins": {
+   "inputs": [
+    "in"
+   ],
+   "outputs": [
+    "out"
+   ]
+  },
+  "describe": "",
+  "symbol_pins": {
+   "in": {
+    "x": -40,
+    "y": 0,
+    "dx": -1,
+    "dy": 0
+   },
+   "out": {
+    "x": 40,
+    "y": 0,
+    "dx": 1,
+    "dy": 0
+   }
+  },
+  "nets": {
+   "in": "not1_in",
+   "out": "not1_out"
+  },
+  "lines": [
+   "* control block NOT1 (not)",
+   "BNOT1 not1_out 0 V='1*(1-(0.5*(1+tanh((V(not1_in)-0.5)/0.001))))'"
+  ]
+ },
+ {
+  "ref": "NOT1",
+  "type": "not",
+  "params": {
+   "high": true
+  },
+  "nets": {
+   "in": "",
+   "out": "not1_out"
+  },
+  "error": "NOT1: control block 'not' has unconnected pins: in"
+ },
+ {
+  "ref": "OR1",
+  "type": "or",
+  "params": {
+   "high": null
+  },
+  "pins": {
+   "inputs": [
+    "in1",
+    "in2"
+   ],
+   "outputs": [
+    "out"
+   ]
+  },
+  "describe": "",
+  "symbol_pins": {
+   "in1": {
+    "x": -40,
+    "y": -20,
+    "dx": -1,
+    "dy": 0
+   },
+   "in2": {
+    "x": -40,
+    "y": 20,
+    "dx": -1,
+    "dy": 0
+   },
+   "out": {
+    "x": 40,
+    "y": 0,
+    "dx": 1,
+    "dy": 0
+   }
+  },
+  "nets": {
+   "in1": "or1_in1",
+   "in2": "or1_in2",
+   "out": "or1_out"
+  },
+  "lines": [
+   "* control block OR1 (or)",
+   "BOR1 or1_out 0 V='1*((0.5*(1+tanh((V(or1_in1)-0.5)/0.001)))+(0.5*(1+tanh((V(or1_in2)-0.5)/0.001)))-(0.5*(1+tanh((V(or1_in1)-0.5)/0.001)))*(0.5*(1+tanh((V(or1_in2)-0.5)/0.001))))'"
+  ]
+ },
+ {
+  "ref": "OR1",
+  "type": "or",
+  "params": {
+   "high": null
+  },
+  "nets": {
+   "in1": "",
+   "in2": "or1_in2",
+   "out": "or1_out"
+  },
+  "error": "OR1: control block 'or' has unconnected pins: in1"
+ },
+ {
+  "defaults": {
+   "gain": {
+    "gain": 1
+   },
+   "sum": {
+    "signs": "+-"
+   },
+   "product": {
+    "gain": 1
+   },
+   "const": {
+    "value": 1
+   },
+   "function": {
+    "expression": "in1",
+    "inputs": 1
+   },
+   "limiter": {
+    "lower": 0,
+    "upper": 1
+   },
+   "comparator": {
+    "high": 1,
+    "low": 0,
+    "threshold": 0,
+    "width": 0.001
+   },
+   "integrator": {
+    "ki": 1,
+    "ic": 0
+   },
+   "lowpass": {
+    "tau": 0.001,
+    "gain": 1,
+    "ic": 0
+   },
+   "pi": {
+    "kp": 1,
+    "ki": 100,
+    "lower": -1000.0,
+    "upper": 1000.0,
+    "ic": 0
+   },
+   "pid": {
+    "kp": 1,
+    "ki": 100,
+    "kd": 0,
+    "tf": 1e-05,
+    "lower": -1000.0,
+    "upper": 1000.0,
+    "ic": 0
+   },
+   "carrier": {
+    "frequency": 100000.0,
+    "low": 0,
+    "high": 1,
+    "phase": 0,
+    "shape": "triangle"
+   },
+   "pwm": {
+    "frequency": 100000.0,
+    "low": 0,
+    "high": 1,
+    "phase": 0,
+    "carrier": "triangle",
+    "width": 0.001
+   },
+   "gate_driver": {
+    "von": 15,
+    "voff": 0,
+    "rg": 10,
+    "threshold": 0.5,
+    "width": 0.001
+   },
+   "and": {
+    "high": 1,
+    "threshold": 0.5,
+    "width": 0.001
+   },
+   "or": {
+    "high": 1,
+    "threshold": 0.5,
+    "width": 0.001
+   },
+   "not": {
+    "high": 1,
+    "threshold": 0.5,
+    "width": 0.001
+   },
+   "xor": {
+    "high": 1,
+    "threshold": 0.5,
+    "width": 0.001
+   }
+  },
+  "labels": {
+   "gain": "Gain",
+   "sum": "Sum",
+   "product": "Product",
+   "const": "Constant",
+   "function": "Function",
+   "limiter": "Limiter",
+   "comparator": "Comparator",
+   "integrator": "Integrator",
+   "lowpass": "Low-pass filter (first order)",
+   "pi": "PI controller",
+   "pid": "PID controller",
+   "carrier": "Carrier (triangle / sawtooth)",
+   "pwm": "PWM modulator",
+   "gate_driver": "Gate driver",
+   "and": "AND",
+   "or": "OR",
+   "not": "NOT",
+   "xor": "XOR"
+  },
+  "glyphs": {
+   "gain": "K",
+   "sum": "Σ",
+   "product": "×",
+   "const": "C",
+   "function": "f(u)",
+   "limiter": "⊐⊏",
+   "comparator": "≥",
+   "integrator": "∫",
+   "lowpass": "1/(1+sτ)",
+   "pi": "PI",
+   "pid": "PID",
+   "carrier": "△",
+   "pwm": "PWM",
+   "gate_driver": "DRV",
+   "and": "&",
+   "or": "≥1",
+   "not": "¬",
+   "xor": "=1"
+  }
+ }
+]

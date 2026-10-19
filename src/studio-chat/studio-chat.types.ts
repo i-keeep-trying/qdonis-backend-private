@@ -1,4 +1,7 @@
-import type { StageKind } from '../projects/studio/studio-graph';
+import type {
+  StageKind,
+  WorkspaceStage,
+} from '../projects/studio/studio-graph';
 
 /**
  * Wire shapes of the Studio chat (qdonis-web `types/chat.ts`): messages are
@@ -11,31 +14,31 @@ export type StudioView =
   | 'circuit'
   | 'design'
   | 'simulation'
-  | 'devices'
   | 'magnetics'
   | 'thermal'
-  | 'emc'
-  | 'components'
+  | 'mtbf'
   | 'bom'
-  | 'mtbf';
+  | 'emc'
+  | 'components';
 
 export const VIEW_OF_STAGE: Record<StageKind, StudioView> = {
   specs: 'specs',
   visualization: 'circuit',
   design: 'design',
   simulation: 'simulation',
-  devices: 'devices',
+  // Former stage: its results open the Simulation view.
+  devices: 'simulation',
   magnetics: 'magnetics',
   thermal: 'thermal',
+  mtbf: 'mtbf',
+  bom: 'bom',
   emc: 'emc',
   components: 'components',
-  bom: 'bom',
-  mtbf: 'mtbf',
 };
 
 /** One choice of the entry-step widget (`specs` = start from scratch). */
 export interface EntryStepOption {
-  step: StageKind;
+  step: WorkspaceStage;
   title: string;
   summary: string;
   recommended: boolean;
@@ -101,7 +104,7 @@ export type WidgetAnswer =
   | { kind: 'fields'; values: Record<string, string>; assumeRest?: boolean }
   | { kind: 'topologies'; topologyId: string }
   | { kind: 'spec_approval'; approve: boolean }
-  | { kind: 'entry_step'; step: StageKind };
+  | { kind: 'entry_step'; step: WorkspaceStage };
 
 export type ToolStatus = 'running' | 'done' | 'error';
 

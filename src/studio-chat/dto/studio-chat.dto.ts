@@ -17,7 +17,7 @@ import {
 
 import {
   STAGE_ORDER,
-  type StageKind,
+  type WorkspaceStage,
 } from '../../projects/studio/studio-graph';
 
 export const CHAT_MESSAGE_MAX = 8_000;
@@ -58,7 +58,7 @@ export class SendChatMessageDto {
   })
   @IsOptional()
   @IsIn(STAGE_ORDER)
-  requestedStep?: StageKind;
+  requestedStep?: WorkspaceStage;
 }
 
 const KINDS = [
@@ -119,7 +119,7 @@ export class WidgetAnswerDto {
   @ApiPropertyOptional({ enum: STAGE_ORDER, description: 'entry_step' })
   @IsOptional()
   @IsIn(STAGE_ORDER)
-  step?: StageKind;
+  step?: WorkspaceStage;
 
   @ApiPropertyOptional({ description: 'topologies' })
   @IsOptional()

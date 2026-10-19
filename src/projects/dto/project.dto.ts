@@ -21,7 +21,7 @@ import { TrimmedString } from '../../common/validation/field-rules';
 import { ProjectActivityType } from '../../generated/prisma/enums';
 import { STAGE_BLOB_CONTENT_TYPES } from '../../storage/storage.constants';
 import type { ProjectScope } from '../projects.repository';
-import { STAGE_ORDER, type StageKind } from '../studio/studio-graph';
+import { STAGE_ORDER, type WorkspaceStage } from '../studio/studio-graph';
 
 export const DEFAULT_PROJECT_NAME = 'My Project';
 
@@ -58,7 +58,7 @@ export class CreateProjectDto {
   })
   @IsOptional()
   @IsIn(STAGE_ORDER)
-  entryStep?: StageKind;
+  entryStep?: WorkspaceStage;
 }
 
 export class UpdateProjectDto {

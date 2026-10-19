@@ -1,7 +1,8 @@
 id: dcdc_zeta
 name: Zeta DC-DC Converter
-description: Non-inverting step-up/step-down converter similar to SEPIC with continuous
-  input current. Converts 12V input to regulated output (D=0.4 for step-up operation).
+description: Non-inverting step-up/step-down converter, the dual of the SEPIC (continuous
+  output current, pulsating input current). Converts 12V input to 12V output at 1.2A (ideal
+  D=0.5; D=0.526 covers the conduction and diode losses).
 components:
   - ref: Vs
     type: node
@@ -16,12 +17,12 @@ components:
     role: power_switch
     params:
       family: mosfet
-      type: pnp
+      type: nmos
       mode: enhancement
       voltage_rating: 100
       current_rating: 5
-      Vto: -2.0
-      Kp: 5.0
+      Vto: 1.5
+      Kn: 5.0
       Lambda: 0.01
       Cgs: 500e-12
       Cgd: 100e-12
@@ -125,7 +126,7 @@ components:
     params:
       node_type: pwm_control
       frequency: 100e3
-      duty_cycle: 0.42
+      duty_cycle: 0.526  # was 0.42 (ideal Vout 8.7 V, measured 7.75 V against the 12 V target)
       vhigh: 12.0
       vlow: 0.0
       trise: 1e-7
@@ -136,7 +137,7 @@ nets:
   - - - Vs
       - +
     - - SW
-      - source
+      - drain
   - - - Vs
       - '-'
     - - L1
@@ -148,7 +149,9 @@ nets:
     - - R1
       - neg
   - - - SW
-      - drain
+      - source
+    - - PWM
+      - neg
     - - L1
       - pin1
     - - C1
@@ -169,23 +172,21 @@ nets:
       - pos
     - - SW
       - gate
-  - - - PWM
-      - neg
-    - - Vs
-      - '-'
 analysis:
+  # Solver settings (the netlist generator reads them here, at analysis level). Until 2026-10-11 they sat under
+  # transient.simulator and were never applied; applied, ripple is within 6 % of a tight-tolerance reference
+  # (was 28 % off with the defaults).
+  spice_settings:
+    method: gear
+    maxord: 2
+    reltol: 0.001
+    abstol: 1.0e-09
+    vntol: 1.0e-05
+    chgtol: 1.0e-11
+    gmin: 1.0e-10
+    rshunt: 1000000.0
+    trtol: 2.0
   transient:
-    simulator:
-      method: gear
-      maxord: 2.0
-      reltol: 0.001
-      abstol: 1.0e-09
-      vntol: 1.0e-05
-      chgtol: 1.0e-11
-      gmin: 1.0e-10
-      rshunt: 1000000.0
-      trtol: 2.0
-      use_ic: true
     requirements:
       - rid: tr_reg
         requirement: Output voltage regulation
@@ -193,10 +194,11 @@ analysis:
           target_vout: 12.0
         environment:
           - ref: time_domain
-            t_start: 0.009
-            t_stop: 0.01
+            t_start: 0.019
+            t_stop: 0.02
             t_step: 1.0e-07
-            description: 10ms with 100ns step
+            description: 20ms with 100ns step, measured over the last 1ms (at 10ms the output is still rising and
+              the ripple reads 6x too high)
         measurement:
           - ref: VIN
             plot:
@@ -285,3 +287,30 @@ metadata:
     - zeta
     - step-up
     - step-down
+schematic:
+  tuned: true
+  components:
+    C1: {x: 400, y: 80, rotation: 90}
+    C2: {x: 780, y: 200, rotation: 0}
+    D1: {x: 520, y: 200, rotation: 180}
+    L1: {x: 300, y: 200, rotation: 0}
+    L2: {x: 640, y: 80, rotation: 270}
+    PWM: {x: 60, y: 160, rotation: 0}
+    R1: {x: 880, y: 200, rotation: 0}
+    SW: {x: 240, y: 80, rotation: 90}
+    Vs: {x: 180, y: 200, rotation: 0}
+  wires:
+  - {id: W1, from: SW.S, to: Vs.A}
+  - {id: W2, from: C2.B, to: R1.B}
+  - {id: W3, from: PWM.B, to: Vs.B}
+  - {id: W4, from: D1.A, to: L1.B}
+  - {id: W5, from: C2.B, to: D1.A}
+  - {id: W6, from: L1.B, to: Vs.B}
+  - {id: W7, from: C1.B, to: L1.A}
+  - {id: W8, from: C1.B, to: SW.D}
+  - {id: W9, from: C1.A, to: D1.B}
+  - {id: W10, from: C1.A, to: L2.A}
+  - {id: W11, from: C2.A, to: R1.A, path: [[780, 160], [780, 80], [880, 80], [880, 160]]}
+  - {id: W12, from: C2.A, to: L2.B}
+  - {id: W13, from: PWM.A, to: SW.G}
+  groups: {}

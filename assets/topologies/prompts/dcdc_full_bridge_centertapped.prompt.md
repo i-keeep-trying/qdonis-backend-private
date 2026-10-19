@@ -1,10 +1,8 @@
 ## Topology-Specific Rules: Full-Bridge (Center-Tapped) Converter
-- **Turns Ratio**: The primary applies the full `Vin`. Use `turns_ratio = (Vout + 1.0) / (Vin * 0.85)` (accounting for diode drops and effective D).
-- **Phase-Shift Regulation**: You MUST NOT regulate voltage using `frequency` or `duty_cycle`. Regulate using the phase shift (`tdelay`) of the right leg (PWM3/PWM4).
-- **Resonant Inductor (L_R)**: Size L_R to keep duty cycle loss <= 5%. `L_R_max = (0.05 * Vin) / (2 * I_primary * fsw)`.
-- **Duty Cycle Loss Comp**: `D_loss = (2 * L_R * I_primary * fsw) / Vin`. Set `D_eff = ((Vout + 1.0) / (Vin * turns_ratio)) + D_loss`.
-- **Overlap & Delays**: `t_overlap = D_eff * (0.5 / frequency)`. 
-  `PWM3_tdelay = (0.5 / frequency) + t_overlap - (duty_cycle / frequency)`
-  `PWM4_tdelay = PWM3_tdelay + (0.5 / frequency)`
-- **Center-Tapped Transformer**: DO NOT emit `K1`, `K2`, or `K12`. Emit ONLY `k_coupling = 0.99999`. Anti-phase secondaries are expressed ONLY via `phase_s1` / `phase_s2` (`same` or `opposite`), never by sign-flipping `k_coupling`.
-- **Diode Margin**: Center-tapped diode `Bv >= 2.5 * Vout` to prevent Zener clamping action.
+- **Switching scheme (fixed by the application)**: Hard-switched diagonal pairs. S1 (upper left) + S4 (lower right) conduct in the first half period (PWM1, PWM4, tdelay = 0); S2 (lower left) + S3 (upper right) in the second (PWM2, PWM3, tdelay = T/2). All four PWMs share the same `duty_cycle` and `frequency`; you only choose them. All switches are NMOS (high-side gate drives float on the switch node): keep `vlow = 0`, `vhigh = 15`.
+- **Duty Cycle**: Each pair conducts for `duty_cycle * T` per period, so `duty_cycle` MUST stay below 0.5 (dead time). Use `duty_cycle = 0.42` as the nominal operating point.
+- **Turns Ratio**: The secondary sees `±Vin * turns_ratio` for `2 * duty_cycle` of the period (center-tapped full-wave rectifier). Use `turns_ratio = Vout / (Vin * 2 * duty_cycle)` (`Ns / Np` per secondary half); the application re-applies this exact value from your duty cycle.
+- **Output Inductor**: `L_OUT = (Vin * turns_ratio - Vout) * duty_cycle / (Delta_I_L * fsw)` with `Delta_I_L = 0.3 * Iout` (the inductor ripple runs at `2 * fsw`; this estimate is conservative).
+- **Output Capacitor**: Size `C_OUT` for 1% ripple but keep `5 * R_LOAD * C_OUT` below the simulation `tstop`.
+- **Center-Tapped Transformer**: DO NOT emit `K1`, `K2`, or `K12`. Emit ONLY `k_coupling = 0.99999`. Anti-phase secondaries are expressed ONLY via `phase_s1` / `phase_s2` (`same` or `opposite`), never by sign-flipping `k_coupling`. Size `Lm_primary` so the magnetizing current is under 10% of the reflected load current.
+- **Diode Margin**: Rectifier diodes block `2 * Vin * turns_ratio`; set `Bv >= 1.5 * 2 * Vin * turns_ratio`. Primary body diodes (D1..D4) block `Vin`; set `Bv >= 1.5 * Vin`.
