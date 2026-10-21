@@ -154,11 +154,12 @@ export class StudioGraphService {
       allowedStages: allowedStages(scope),
       nextSteps: nextSteps(scope, (stage) => stages[stage].status === 'ready'),
       defaultView: this.defaultView(project, active),
-      // The dashboard prompt is sent once, as the person's first chat message.
+      // The dashboard prompt is sent once, as the first chat message of a new
+      // project; never again once work began (copies, shared projects).
       pendingInitialPrompt:
         !readOnly &&
         header.initialPrompt?.trim() &&
-        !(await this.rows.hasChatted(projectId, userId))
+        !(await this.rows.hasStarted(projectId))
           ? { id: 'initial', text: header.initialPrompt.trim() }
           : null,
     };
@@ -413,6 +414,8 @@ export class StudioGraphService {
     tx: DbClient,
   ): Promise<void> {
     await this.rows.copy(fromProjectId, toProjectId, tx);
+    // The copier keeps their conversation, so the copy picks up where it was.
+    await this.rows.copyChat(fromProjectId, toProjectId, userId, tx);
     const first = await tx.studioBranch.findFirst({
       where: { projectId: toProjectId },
       orderBy: [{ position: 'asc' }, { createdAt: 'asc' }],
@@ -421,8 +424,10 @@ export class StudioGraphService {
     if (first) await this.rows.setCursor(toProjectId, userId, first.id, tx);
   }
 
-  rewriteNodeData(projectId: string, ids: ReadonlyMap<string, string>) {
-    return this.rows.rewriteNodeData(projectId, ids);
+  /** Points node data and chat attachments at the copied files. */
+  async rewriteNodeData(projectId: string, ids: ReadonlyMap<string, string>) {
+    await this.rows.rewriteNodeData(projectId, ids);
+    await this.rows.rewriteChatMetadata(projectId, ids);
   }
 
   /** Imports a project saved before the tables existed (no-op otherwise). */
