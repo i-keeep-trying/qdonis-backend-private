@@ -136,13 +136,17 @@ export class StudioGraphRepository {
     return rows[0] ?? null;
   }
 
-  /** Whether the person has written anything in the project chat yet. */
-  async hasChatted(projectId: string, userId: string): Promise<boolean> {
-    const count = await this.prisma.projectChatMessage.count({
-      where: { projectId, userId },
-      take: 1,
-    });
-    return count > 0;
+  /**
+   * Whether work on the project has begun: anyone wrote in its chat or any
+   * stage exists. A copy or a shared project has, so its dashboard prompt is
+   * not sent (and run) again.
+   */
+  async hasStarted(projectId: string): Promise<boolean> {
+    const [messages, nodes] = await Promise.all([
+      this.prisma.projectChatMessage.count({ where: { projectId }, take: 1 }),
+      this.prisma.studioNode.count({ where: { projectId }, take: 1 }),
+    ]);
+    return messages > 0 || nodes > 0;
   }
 
   async load(
@@ -326,6 +330,47 @@ export class StudioGraphRepository {
       SELECT id, ${toProjectId}::uuid, name, name_key, head_node_id, forked_from_node_id, color_index, position, created_by_id, created_at, updated_at
       FROM studio_branches WHERE project_id = ${fromProjectId}::uuid
     `;
+  }
+
+  /**
+   * Copies one person's chat into another project (duplicate). Chats are
+   * private, so only the copier's own messages come along; branch and node ids
+   * in their metadata stay valid because the graph keeps its ids.
+   */
+  async copyChat(
+    fromProjectId: string,
+    toProjectId: string,
+    userId: string,
+    tx: DbClient,
+  ) {
+    await tx.$executeRaw`
+      INSERT INTO project_chat_messages (id, project_id, user_id, sender, content, metadata, created_at)
+      SELECT gen_random_uuid(), ${toProjectId}::uuid, user_id, sender, content, metadata, created_at
+      FROM project_chat_messages
+      WHERE project_id = ${fromProjectId}::uuid AND user_id = ${userId}::uuid
+    `;
+  }
+
+  /** Replaces text in every chat message's metadata (attachment file ids after a project copy). */
+  async rewriteChatMetadata(
+    projectId: string,
+    replacements: ReadonlyMap<string, string>,
+  ): Promise<void> {
+    if (replacements.size === 0) return;
+    const rows = await this.prisma.projectChatMessage.findMany({
+      where: { projectId },
+      select: { id: true, metadata: true },
+    });
+    for (const row of rows) {
+      const before = JSON.stringify(row.metadata);
+      let after = before;
+      for (const [from, to] of replacements) after = after.split(from).join(to);
+      if (after === before) continue;
+      await this.prisma.projectChatMessage.update({
+        where: { id: row.id },
+        data: { metadata: JSON.parse(after) as Prisma.InputJsonObject },
+      });
+    }
   }
 
   /** Replaces text in every node's data (file ids after a project copy). */
