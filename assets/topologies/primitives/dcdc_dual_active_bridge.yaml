@@ -7,7 +7,8 @@ description: Bidirectional isolated DC-DC converter with two full H-bridges, hig
 
 models:
   - ".model nmos_model NMOS(Vto=3 Lambda=0.01 Kp=73 Cbd=1n Cbs=1n Cgdo=100p Is=1e-14 Rs=0.01)"
-  - ".model Dmodel D(Is=1e-12 n=1.1 Rs=0.0001 Cjo=3e-11 Tt=100n Bv=1000 Ibv=1e-06)"
+  # 2026-10-22: no Tt (was 100 ns = ~5 uC recovery charge at 50 A, 140 A spikes; SiC body diodes store ~0.1 uC)
+  - ".model Dmodel D(Is=1e-12 n=1.1 Rs=0.0001 Cjo=3e-11 Bv=1000 Ibv=1e-06)"
 
 components:
   # Reference & semantic node labels
@@ -537,6 +538,9 @@ components:
   # 0.34 * integral(err), 0.001..0.25); the secondary ramp is the primary ramp delayed by the phase shift.
   # Gate signals: S2 / S4 (ground-referenced) as blocks; S1, S3, S5..S8 stay B sources (floating on switch nodes
   # or on the isolated secondary ground).
+  # 2026-10-22: the gate logic and the secondary-ramp wrap use narrow tanh steps (width 0.002 of the 0..1 ramp,
+  # ~30 ns) instead of hard comparisons: at 1000 V / 50 kW the steps aborted ngspice ("timestep too small" on a
+  # floating gate source at 3.5 ms, output 0 V); smoothed, the run finishes (796 V for 800 V).
   - ref: LPF_REF
     type: lowpass
     role: reference_soft_start
@@ -578,21 +582,21 @@ components:
     type: function
     role: secondary_ramp
     params:
-      expression: "in1-in2+(in1<in2)"
+      expression: "in1-in2+0.5*(1-tanh((in1-in2)/0.002))"
       inputs: 2
 
   - ref: GATE_S2
     type: function
     role: s2_gate_signal
     params:
-      expression: "15*((in1>0.50)*(in1<0.98))"
+      expression: "15*(0.5*(1+tanh((in1-0.50)/0.002)))*(0.5*(1-tanh((in1-0.98)/0.002)))"
       inputs: 1
 
   - ref: GATE_S4
     type: function
     role: s4_gate_signal
     params:
-      expression: "15*(in1<0.48)"
+      expression: "15*(0.5*(1-tanh((in1-0.48)/0.002)))"
       inputs: 1
 
   # ==========================================
@@ -601,7 +605,7 @@ components:
   - ref: B_S1
     type: b_source
     params:
-      expression: "15 * (V(ramp) < 0.48)"
+      expression: "15 * (0.5*(1-tanh((V(ramp)-0.48)/0.002)))"
 
   - ref: RPWM1_drive
     type: resistor
@@ -618,7 +622,7 @@ components:
   - ref: B_S3
     type: b_source
     params:
-      expression: "15 * ((V(ramp) > 0.50) * (V(ramp) < 0.98))"
+      expression: "15 * (0.5*(1+tanh((V(ramp)-0.50)/0.002))) * (0.5*(1-tanh((V(ramp)-0.98)/0.002)))"
 
   - ref: RPWM3_drive
     type: resistor
@@ -635,7 +639,7 @@ components:
   - ref: B_S5
     type: b_source
     params:
-      expression: "15 * (V(sec_ramp) < 0.48)"
+      expression: "15 * (0.5*(1-tanh((V(sec_ramp)-0.48)/0.002)))"
 
   - ref: RPWM5_drive
     type: resistor
@@ -646,7 +650,7 @@ components:
   - ref: B_S6
     type: b_source
     params:
-      expression: "15 * ((V(sec_ramp) > 0.50) * (V(sec_ramp) < 0.98))"
+      expression: "15 * (0.5*(1+tanh((V(sec_ramp)-0.50)/0.002))) * (0.5*(1-tanh((V(sec_ramp)-0.98)/0.002)))"
 
   - ref: RPWM6_drive
     type: resistor
@@ -657,7 +661,7 @@ components:
   - ref: B_S7
     type: b_source
     params:
-      expression: "15 * ((V(sec_ramp) > 0.50) * (V(sec_ramp) < 0.98))"
+      expression: "15 * (0.5*(1+tanh((V(sec_ramp)-0.50)/0.002))) * (0.5*(1-tanh((V(sec_ramp)-0.98)/0.002)))"
 
   - ref: RPWM7_drive
     type: resistor
@@ -668,7 +672,7 @@ components:
   - ref: B_S8
     type: b_source
     params:
-      expression: "15 * (V(sec_ramp) < 0.48)"
+      expression: "15 * (0.5*(1-tanh((V(sec_ramp)-0.48)/0.002)))"
 
   - ref: RPWM8_drive
     type: resistor

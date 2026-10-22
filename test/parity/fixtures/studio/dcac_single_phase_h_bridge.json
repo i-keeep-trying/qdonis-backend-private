@@ -601,7 +601,7 @@
      "S4"
     ],
     "kind": "switch",
-    "reason": "SiC MOSFET rated 650 V for 380 V peak (1.7\u00d7 margin); lowest evaluated loss 0.058 W (position total) at Tj 100 \u00b0C and 16.0 kHz; next best C3M0120065L at 0.058 W; shared by S1, S2, S3, S4 (same circuit position)",
+    "reason": "SiC MOSFET rated 650 V for 380 V peak (1.7× margin); lowest evaluated loss 0.058 W (position total) at Tj 100 °C and 16.0 kHz; next best C3M0120065L at 0.058 W; shared by S1, S2, S3, S4 (same circuit position)",
     "ref": "S1",
     "selected": {
      "diode": null,
@@ -656,7 +656,7 @@
      "S4"
     ],
     "kind": "switch",
-    "reason": "SiC MOSFET rated 650 V for 380 V peak (1.7\u00d7 margin); lowest evaluated loss 0.058 W (position total) at Tj 100 \u00b0C and 16.0 kHz; next best C3M0120065L at 0.058 W; shared by S1, S2, S3, S4 (same circuit position)",
+    "reason": "SiC MOSFET rated 650 V for 380 V peak (1.7× margin); lowest evaluated loss 0.058 W (position total) at Tj 100 °C and 16.0 kHz; next best C3M0120065L at 0.058 W; shared by S1, S2, S3, S4 (same circuit position)",
     "ref": "S2",
     "selected": {
      "diode": null,
@@ -711,7 +711,7 @@
      "S4"
     ],
     "kind": "switch",
-    "reason": "SiC MOSFET rated 650 V for 380 V peak (1.7\u00d7 margin); lowest evaluated loss 0.058 W (position total) at Tj 100 \u00b0C and 16.0 kHz; next best C3M0120065L at 0.058 W; shared by S1, S2, S3, S4 (same circuit position)",
+    "reason": "SiC MOSFET rated 650 V for 380 V peak (1.7× margin); lowest evaluated loss 0.058 W (position total) at Tj 100 °C and 16.0 kHz; next best C3M0120065L at 0.058 W; shared by S1, S2, S3, S4 (same circuit position)",
     "ref": "S3",
     "selected": {
      "diode": null,
@@ -766,7 +766,7 @@
      "S4"
     ],
     "kind": "switch",
-    "reason": "SiC MOSFET rated 650 V for 380 V peak (1.7\u00d7 margin); lowest evaluated loss 0.058 W (position total) at Tj 100 \u00b0C and 16.0 kHz; next best C3M0120065L at 0.058 W; shared by S1, S2, S3, S4 (same circuit position)",
+    "reason": "SiC MOSFET rated 650 V for 380 V peak (1.7× margin); lowest evaluated loss 0.058 W (position total) at Tj 100 °C and 16.0 kHz; next best C3M0120065L at 0.058 W; shared by S1, S2, S3, S4 (same circuit position)",
     "ref": "S4",
     "selected": {
      "diode": null,
@@ -837,7 +837,7 @@
      "D4"
     ],
     "kind": "diode",
-    "reason": "SiC Schottky diode rated 600 V for 380 V peak (1.6\u00d7 margin); lowest evaluated loss 0.000 W (position total) at Tj 100 \u00b0C; next best C3D02060E at 0.000 W; shared by D1, D2, D3, D4 (same circuit position)",
+    "reason": "SiC Schottky diode rated 600 V for 380 V peak (1.6× margin); lowest evaluated loss 0.000 W (position total) at Tj 100 °C; next best C3D02060E at 0.000 W; shared by D1, D2, D3, D4 (same circuit position)",
     "ref": "D1",
     "selected": {
      "diode": null,
@@ -908,7 +908,7 @@
      "D4"
     ],
     "kind": "diode",
-    "reason": "SiC Schottky diode rated 600 V for 380 V peak (1.6\u00d7 margin); lowest evaluated loss 0.000 W (position total) at Tj 100 \u00b0C; next best C3D02060E at 0.000 W; shared by D1, D2, D3, D4 (same circuit position)",
+    "reason": "SiC Schottky diode rated 600 V for 380 V peak (1.6× margin); lowest evaluated loss 0.000 W (position total) at Tj 100 °C; next best C3D02060E at 0.000 W; shared by D1, D2, D3, D4 (same circuit position)",
     "ref": "D2",
     "selected": {
      "diode": null,
@@ -979,7 +979,7 @@
      "D4"
     ],
     "kind": "diode",
-    "reason": "SiC Schottky diode rated 600 V for 380 V peak (1.6\u00d7 margin); lowest evaluated loss 0.000 W (position total) at Tj 100 \u00b0C; next best C3D02060E at 0.000 W; shared by D1, D2, D3, D4 (same circuit position)",
+    "reason": "SiC Schottky diode rated 600 V for 380 V peak (1.6× margin); lowest evaluated loss 0.000 W (position total) at Tj 100 °C; next best C3D02060E at 0.000 W; shared by D1, D2, D3, D4 (same circuit position)",
     "ref": "D3",
     "selected": {
      "diode": null,
@@ -1050,7 +1050,7 @@
      "D4"
     ],
     "kind": "diode",
-    "reason": "SiC Schottky diode rated 600 V for 380 V peak (1.6\u00d7 margin); lowest evaluated loss 0.000 W (position total) at Tj 100 \u00b0C; next best C3D02060E at 0.000 W; shared by D1, D2, D3, D4 (same circuit position)",
+    "reason": "SiC Schottky diode rated 600 V for 380 V peak (1.6× margin); lowest evaluated loss 0.000 W (position total) at Tj 100 °C; next best C3D02060E at 0.000 W; shared by D1, D2, D3, D4 (same circuit position)",
     "ref": "D4",
     "selected": {
      "diode": null,
@@ -1126,7 +1126,7 @@
      "S4"
     ],
     "kind": "switch",
-    "reason": "Si IGBT module rated 1200 V for 380 V peak (3.2\u00d7 margin); lowest evaluated loss 0.715 W (position total) at Tj 100 \u00b0C and 16.0 kHz; next best DIM400DDM12-A000 at 0.716 W; shared by S1, S2, S3, S4 (same circuit position)",
+    "reason": "Si IGBT module rated 1200 V for 380 V peak (3.2× margin); lowest evaluated loss 0.715 W (position total) at Tj 100 °C and 16.0 kHz; next best DIM400DDM12-A000 at 0.716 W; shared by S1, S2, S3, S4 (same circuit position)",
     "ref": "S1",
     "selected": {
      "diode": "DIM300WHS12-PA500 - DIODE",
@@ -1181,7 +1181,7 @@
      "S4"
     ],
     "kind": "switch",
-    "reason": "Si IGBT module rated 1200 V for 380 V peak (3.2\u00d7 margin); lowest evaluated loss 0.715 W (position total) at Tj 100 \u00b0C and 16.0 kHz; next best DIM400DDM12-A000 at 0.716 W; shared by S1, S2, S3, S4 (same circuit position)",
+    "reason": "Si IGBT module rated 1200 V for 380 V peak (3.2× margin); lowest evaluated loss 0.715 W (position total) at Tj 100 °C and 16.0 kHz; next best DIM400DDM12-A000 at 0.716 W; shared by S1, S2, S3, S4 (same circuit position)",
     "ref": "S2",
     "selected": {
      "diode": "DIM300WHS12-PA500 - DIODE",
@@ -1236,7 +1236,7 @@
      "S4"
     ],
     "kind": "switch",
-    "reason": "Si IGBT module rated 1200 V for 380 V peak (3.2\u00d7 margin); lowest evaluated loss 0.715 W (position total) at Tj 100 \u00b0C and 16.0 kHz; next best DIM400DDM12-A000 at 0.716 W; shared by S1, S2, S3, S4 (same circuit position)",
+    "reason": "Si IGBT module rated 1200 V for 380 V peak (3.2× margin); lowest evaluated loss 0.715 W (position total) at Tj 100 °C and 16.0 kHz; next best DIM400DDM12-A000 at 0.716 W; shared by S1, S2, S3, S4 (same circuit position)",
     "ref": "S3",
     "selected": {
      "diode": "DIM300WHS12-PA500 - DIODE",
@@ -1291,7 +1291,7 @@
      "S4"
     ],
     "kind": "switch",
-    "reason": "Si IGBT module rated 1200 V for 380 V peak (3.2\u00d7 margin); lowest evaluated loss 0.715 W (position total) at Tj 100 \u00b0C and 16.0 kHz; next best DIM400DDM12-A000 at 0.716 W; shared by S1, S2, S3, S4 (same circuit position)",
+    "reason": "Si IGBT module rated 1200 V for 380 V peak (3.2× margin); lowest evaluated loss 0.715 W (position total) at Tj 100 °C and 16.0 kHz; next best DIM400DDM12-A000 at 0.716 W; shared by S1, S2, S3, S4 (same circuit position)",
     "ref": "S4",
     "selected": {
      "diode": "DIM300WHS12-PA500 - DIODE",
@@ -1362,7 +1362,7 @@
      "D4"
     ],
     "kind": "diode",
-    "reason": "SiC Schottky diode rated 600 V for 380 V peak (1.6\u00d7 margin); lowest evaluated loss 0.000 W (position total) at Tj 100 \u00b0C; next best C3D02060E at 0.000 W; shared by D1, D2, D3, D4 (same circuit position)",
+    "reason": "SiC Schottky diode rated 600 V for 380 V peak (1.6× margin); lowest evaluated loss 0.000 W (position total) at Tj 100 °C; next best C3D02060E at 0.000 W; shared by D1, D2, D3, D4 (same circuit position)",
     "ref": "D1",
     "selected": {
      "diode": null,
@@ -1433,7 +1433,7 @@
      "D4"
     ],
     "kind": "diode",
-    "reason": "SiC Schottky diode rated 600 V for 380 V peak (1.6\u00d7 margin); lowest evaluated loss 0.000 W (position total) at Tj 100 \u00b0C; next best C3D02060E at 0.000 W; shared by D1, D2, D3, D4 (same circuit position)",
+    "reason": "SiC Schottky diode rated 600 V for 380 V peak (1.6× margin); lowest evaluated loss 0.000 W (position total) at Tj 100 °C; next best C3D02060E at 0.000 W; shared by D1, D2, D3, D4 (same circuit position)",
     "ref": "D2",
     "selected": {
      "diode": null,
@@ -1504,7 +1504,7 @@
      "D4"
     ],
     "kind": "diode",
-    "reason": "SiC Schottky diode rated 600 V for 380 V peak (1.6\u00d7 margin); lowest evaluated loss 0.000 W (position total) at Tj 100 \u00b0C; next best C3D02060E at 0.000 W; shared by D1, D2, D3, D4 (same circuit position)",
+    "reason": "SiC Schottky diode rated 600 V for 380 V peak (1.6× margin); lowest evaluated loss 0.000 W (position total) at Tj 100 °C; next best C3D02060E at 0.000 W; shared by D1, D2, D3, D4 (same circuit position)",
     "ref": "D3",
     "selected": {
      "diode": null,
@@ -1575,7 +1575,7 @@
      "D4"
     ],
     "kind": "diode",
-    "reason": "SiC Schottky diode rated 600 V for 380 V peak (1.6\u00d7 margin); lowest evaluated loss 0.000 W (position total) at Tj 100 \u00b0C; next best C3D02060E at 0.000 W; shared by D1, D2, D3, D4 (same circuit position)",
+    "reason": "SiC Schottky diode rated 600 V for 380 V peak (1.6× margin); lowest evaluated loss 0.000 W (position total) at Tj 100 °C; next best C3D02060E at 0.000 W; shared by D1, D2, D3, D4 (same circuit position)",
     "ref": "D4",
     "selected": {
      "diode": null,
@@ -1809,7 +1809,7 @@
      "S4"
     ],
     "kind": "switch",
-    "reason": "SiC MOSFET rated 650 V for 380 V peak (1.7\u00d7 margin); lowest evaluated loss 0.033 W (position total) at Tj 100 \u00b0C and 16.0 kHz; next best C3M0120065L at 0.034 W; shared by S2, S3, S4 (same circuit position)",
+    "reason": "SiC MOSFET rated 650 V for 380 V peak (1.7× margin); lowest evaluated loss 0.033 W (position total) at Tj 100 °C and 16.0 kHz; next best C3M0120065L at 0.034 W; shared by S2, S3, S4 (same circuit position)",
     "ref": "S2",
     "selected": {
      "diode": null,
@@ -1863,7 +1863,7 @@
      "S4"
     ],
     "kind": "switch",
-    "reason": "SiC MOSFET rated 650 V for 380 V peak (1.7\u00d7 margin); lowest evaluated loss 0.033 W (position total) at Tj 100 \u00b0C and 16.0 kHz; next best C3M0120065L at 0.034 W; shared by S2, S3, S4 (same circuit position)",
+    "reason": "SiC MOSFET rated 650 V for 380 V peak (1.7× margin); lowest evaluated loss 0.033 W (position total) at Tj 100 °C and 16.0 kHz; next best C3M0120065L at 0.034 W; shared by S2, S3, S4 (same circuit position)",
     "ref": "S3",
     "selected": {
      "diode": null,
@@ -1917,7 +1917,7 @@
      "S4"
     ],
     "kind": "switch",
-    "reason": "SiC MOSFET rated 650 V for 380 V peak (1.7\u00d7 margin); lowest evaluated loss 0.033 W (position total) at Tj 100 \u00b0C and 16.0 kHz; next best C3M0120065L at 0.034 W; shared by S2, S3, S4 (same circuit position)",
+    "reason": "SiC MOSFET rated 650 V for 380 V peak (1.7× margin); lowest evaluated loss 0.033 W (position total) at Tj 100 °C and 16.0 kHz; next best C3M0120065L at 0.034 W; shared by S2, S3, S4 (same circuit position)",
     "ref": "S4",
     "selected": {
      "diode": null,
@@ -1988,7 +1988,7 @@
      "D4"
     ],
     "kind": "diode",
-    "reason": "SiC Schottky diode rated 600 V for 380 V peak (1.6\u00d7 margin); lowest evaluated loss 0.000 W (position total) at Tj 100 \u00b0C; next best C3D02060E at 0.000 W; shared by D1, D2, D3, D4 (same circuit position)",
+    "reason": "SiC Schottky diode rated 600 V for 380 V peak (1.6× margin); lowest evaluated loss 0.000 W (position total) at Tj 100 °C; next best C3D02060E at 0.000 W; shared by D1, D2, D3, D4 (same circuit position)",
     "ref": "D1",
     "selected": {
      "diode": null,
@@ -2059,7 +2059,7 @@
      "D4"
     ],
     "kind": "diode",
-    "reason": "SiC Schottky diode rated 600 V for 380 V peak (1.6\u00d7 margin); lowest evaluated loss 0.000 W (position total) at Tj 100 \u00b0C; next best C3D02060E at 0.000 W; shared by D1, D2, D3, D4 (same circuit position)",
+    "reason": "SiC Schottky diode rated 600 V for 380 V peak (1.6× margin); lowest evaluated loss 0.000 W (position total) at Tj 100 °C; next best C3D02060E at 0.000 W; shared by D1, D2, D3, D4 (same circuit position)",
     "ref": "D2",
     "selected": {
      "diode": null,
@@ -2130,7 +2130,7 @@
      "D4"
     ],
     "kind": "diode",
-    "reason": "SiC Schottky diode rated 600 V for 380 V peak (1.6\u00d7 margin); lowest evaluated loss 0.000 W (position total) at Tj 100 \u00b0C; next best C3D02060E at 0.000 W; shared by D1, D2, D3, D4 (same circuit position)",
+    "reason": "SiC Schottky diode rated 600 V for 380 V peak (1.6× margin); lowest evaluated loss 0.000 W (position total) at Tj 100 °C; next best C3D02060E at 0.000 W; shared by D1, D2, D3, D4 (same circuit position)",
     "ref": "D3",
     "selected": {
      "diode": null,
@@ -2201,7 +2201,7 @@
      "D4"
     ],
     "kind": "diode",
-    "reason": "SiC Schottky diode rated 600 V for 380 V peak (1.6\u00d7 margin); lowest evaluated loss 0.000 W (position total) at Tj 100 \u00b0C; next best C3D02060E at 0.000 W; shared by D1, D2, D3, D4 (same circuit position)",
+    "reason": "SiC Schottky diode rated 600 V for 380 V peak (1.6× margin); lowest evaluated loss 0.000 W (position total) at Tj 100 °C; next best C3D02060E at 0.000 W; shared by D1, D2, D3, D4 (same circuit position)",
     "ref": "D4",
     "selected": {
      "diode": null,
@@ -2226,6 +2226,38 @@
  "topology": "dcac_single_phase_h_bridge",
  "waveform_stats": {
   "components": {
+   "CG1": {
+    "params": {
+     "capacitance": 1e-09
+    },
+    "parent": null,
+    "role": "gate_capacitance",
+    "type": "capacitor"
+   },
+   "CG2": {
+    "params": {
+     "capacitance": 1e-09
+    },
+    "parent": null,
+    "role": "gate_capacitance",
+    "type": "capacitor"
+   },
+   "CG3": {
+    "params": {
+     "capacitance": 1e-09
+    },
+    "parent": null,
+    "role": "gate_capacitance",
+    "type": "capacitor"
+   },
+   "CG4": {
+    "params": {
+     "capacitance": 1e-09
+    },
+    "parent": null,
+    "role": "gate_capacitance",
+    "type": "capacitor"
+   },
    "C_FILT": {
     "params": {
      "capacitance": 9.999999999999999e-06
@@ -2252,12 +2284,12 @@
    },
    "D1": {
     "i": {
-     "ac_rms": 0.0,
+     "ac_rms": 0,
      "avg": -1.491319537e-10,
      "max": -1.491319537e-10,
      "min": -1.491319537e-10,
      "peak": 1.491319537e-10,
-     "pp": 0.0,
+     "pp": 0,
      "rms": 1.491319537e-10
     },
     "p_avg": 4.278361858854071e-08,
@@ -2282,7 +2314,7 @@
      "max": -3.799344101e-08,
      "min": -3.799344101e-08,
      "peak": 3.799344101e-08,
-     "pp": 0.0,
+     "pp": 0,
      "rms": 3.799344100999999e-08
     },
     "p_avg": 3.5354739655950938e-06,
@@ -2307,7 +2339,7 @@
      "max": 1.49006059e-10,
      "min": 1.49006059e-10,
      "peak": 1.49006059e-10,
-     "pp": 0.0,
+     "pp": 0,
      "rms": 1.49006059e-10
     },
     "p_avg": -1.3978330429545827e-08,
@@ -2327,12 +2359,12 @@
    },
    "D4": {
     "i": {
-     "ac_rms": 0.0,
+     "ac_rms": 0,
      "avg": -3.800855725999999e-08,
      "max": -3.800855726e-08,
      "min": -3.800855726e-08,
      "peak": 3.800855726e-08,
-     "pp": 0.0,
+     "pp": 0,
      "rms": 3.800855725999999e-08
     },
     "p_avg": 1.0875338441083957e-05,
@@ -5706,7 +5738,7 @@
       -13.144,
       -13.097,
       -13.049,
-      -13.0,
+      -13,
       -12.952,
       -12.904,
       -12.855,
@@ -6814,7 +6846,7 @@
       -14.949,
       -14.966,
       -14.983,
-      -15.0,
+      -15,
       -15.017,
       -15.034,
       -15.051,
@@ -7192,7 +7224,7 @@
       -14.952,
       -14.968,
       -14.984,
-      -15.0,
+      -15,
       -15.015,
       -15.031,
       -15.047,
@@ -7257,7 +7289,7 @@
       -14.953,
       -14.969,
       -14.985,
-      -15.0,
+      -15,
       -15.016,
       -15.032,
       -15.047,
@@ -7496,7 +7528,7 @@
       -15.104,
       -15.093,
       -15.052,
-      -15.0,
+      -15,
       -14.943,
       -14.885,
       -14.826,
@@ -8356,7 +8388,7 @@
       -14.952,
       -14.968,
       -14.984,
-      -15.0,
+      -15,
       -15.009,
       -14.994,
       -14.95,
@@ -9341,7 +9373,7 @@
       -12.934,
       -12.956,
       -12.978,
-      -13.0,
+      -13,
       -13.022,
       -13.044,
       -13.066,
@@ -13276,7 +13308,7 @@
       -189.17,
       -344.19,
       -344.1,
-      -344.0,
+      -344,
       -341.07,
       -289.21,
       36.301,
@@ -13374,7 +13406,7 @@
       -334.7,
       -334.6,
       -334.5,
-      -215.0,
+      -215,
       -2.6993,
       45.801,
       45.912,
@@ -13535,7 +13567,7 @@
       -319.77,
       -319.66,
       -319.55,
-      -304.0,
+      -304,
       40.422,
       60.671,
       60.867,
@@ -13758,7 +13790,7 @@
       -298.31,
       -298.21,
       -298.11,
-      -298.0,
+      -298,
       -297.89,
       -185.25,
       22.945,
@@ -13809,7 +13841,7 @@
       86.741,
       86.83,
       86.916,
-      87.0,
+      87,
       87.083,
       87.163,
       87.241,
@@ -13884,7 +13916,7 @@
       -286.27,
       -286.18,
       -286.09,
-      -286.0,
+      -286,
       -285.9,
       -285.8,
       -285.69,
@@ -13974,7 +14006,7 @@
       101.81,
       101.88,
       101.94,
-      102.0,
+      102,
       -175.47,
       -277.81,
       -277.74,
@@ -14010,7 +14042,7 @@
       -196.18,
       -272.01,
       -275.08,
-      -275.0,
+      -275,
       -274.93,
       -274.85,
       -274.76,
@@ -14059,7 +14091,7 @@
       108.75,
       108.83,
       108.92,
-      109.0,
+      109,
       109.08,
       109.16,
       109.23,
@@ -14102,7 +14134,7 @@
       112.25,
       112.32,
       112.38,
-      -174.0,
+      -174,
       -267.43,
       -267.36,
       -267.29,
@@ -14468,7 +14500,7 @@
       -237.25,
       -162.29,
       107.86,
-      143.0,
+      143,
       143.11,
       143.22,
       143.32,
@@ -14811,7 +14843,7 @@
       -209.23,
       -209.16,
       -209.08,
-      -209.0,
+      -209,
       -208.92,
       -208.83,
       -208.74,
@@ -14887,7 +14919,7 @@
       107.98,
       176.82,
       176.91,
-      177.0,
+      177,
       177.08,
       177.17,
       177.24,
@@ -14899,7 +14931,7 @@
       177.63,
       177.69,
       177.73,
-      155.0,
+      155,
       -132.77,
       -202.04,
       -201.99,
@@ -15003,7 +15035,7 @@
       -195.21,
       -195.15,
       -195.08,
-      -195.0,
+      -195,
       -194.93,
       -194.85,
       -194.76,
@@ -15015,7 +15047,7 @@
       -87.85,
       108.03,
       185.9,
-      186.0,
+      186,
       186.09,
       186.18,
       186.26,
@@ -15028,7 +15060,7 @@
       186.74,
       156.83,
       -125.45,
-      -193.0,
+      -193,
       -192.94,
       -192.88,
       -192.82,
@@ -15090,7 +15122,7 @@
       191.7,
       191.77,
       191.83,
-      122.0,
+      122,
       -75.993,
       -187.9,
       -187.85,
@@ -15196,7 +15228,7 @@
       -180.21,
       -180.15,
       -180.08,
-      -180.0,
+      -180,
       -179.93,
       -179.85,
       -179.77,
@@ -15405,7 +15437,7 @@
       212.81,
       212.88,
       212.94,
-      213.0,
+      213,
       213.06,
       213.11,
       213.16,
@@ -15421,7 +15453,7 @@
       -166.21,
       -166.14,
       -166.07,
-      -166.0,
+      -166,
       -165.93,
       -165.85,
       -165.77,
@@ -15534,7 +15566,7 @@
       221.8,
       221.87,
       221.94,
-      222.0,
+      222,
       222.05,
       222.1,
       184.99,
@@ -15594,7 +15626,7 @@
       225.77,
       225.85,
       225.93,
-      226.0,
+      226,
       226.07,
       226.13,
       226.19,
@@ -15958,7 +15990,7 @@
       -132.15,
       -132.1,
       -132.06,
-      -132.0,
+      -132,
       -131.95,
       -131.9,
       -131.84,
@@ -16059,7 +16091,7 @@
       -126.15,
       -126.1,
       -126.05,
-      -126.0,
+      -126,
       -125.94,
       -125.88,
       -125.82,
@@ -16097,7 +16129,7 @@
       -124.18,
       -124.12,
       -124.06,
-      -124.0,
+      -124,
       -123.94,
       -123.87,
       -123.81,
@@ -16140,7 +16172,7 @@
       257.86,
       257.91,
       257.96,
-      258.0,
+      258,
       258.04,
       258.07,
       258.1,
@@ -16164,7 +16196,7 @@
       -121.16,
       -121.11,
       -121.05,
-      -121.0,
+      -121,
       -120.94,
       -54.104,
       127.79,
@@ -16247,7 +16279,7 @@
       -118.08,
       -118.06,
       -118.03,
-      -118.0,
+      -118,
       -117.97,
       -117.93,
       -117.9,
@@ -16327,7 +16359,7 @@
       -114.71,
       -114.65,
       -114.58,
-      -26.0,
+      -26,
       167.74,
       265.46,
       265.52,
@@ -16340,7 +16372,7 @@
       -114.09,
       -114.06,
       -114.03,
-      -114.0,
+      -114,
       -113.96,
       -113.93,
       -113.89,
@@ -16542,7 +16574,7 @@
       -105.12,
       -105.08,
       -105.04,
-      -105.0,
+      -105,
       -104.95,
       -104.91,
       -104.86,
@@ -16593,7 +16625,7 @@
       276.8,
       197.44,
       11.98,
-      -103.0,
+      -103,
       -102.98,
       -102.95,
       -102.93,
@@ -16644,7 +16676,7 @@
       -101.16,
       -101.11,
       -101.05,
-      -101.0,
+      -101,
       -100.94,
       -100.88,
       -82.802,
@@ -16716,7 +16748,7 @@
       271.63,
       281.91,
       281.96,
-      282.0,
+      282,
       282.04,
       282.07,
       202.71,
@@ -17129,10 +17161,10 @@
       -85.045,
       -85.004,
       192.31,
-      286.0,
+      286,
       294.95,
       294.98,
-      295.0,
+      295,
       295.02,
       295.03,
       86.042,
@@ -17198,7 +17230,7 @@
       296.32,
       296.34,
       296.35,
-      273.0,
+      273,
       131.04,
       -83.486,
       -83.489,
@@ -17402,7 +17434,7 @@
       -81.006,
       -81.005,
       -81.003,
-      -81.0,
+      -81,
       -80.995,
       -80.988,
       -80.98,
@@ -17847,7 +17879,7 @@
       -80.96,
       -80.975,
       -80.988,
-      -81.0,
+      -81,
       -81.01,
       -81.018,
       -81.025,
@@ -18253,7 +18285,7 @@
       298.01,
       298.01,
       298.01,
-      298.0,
+      298,
       214.15,
       28.661,
       -81.899,
@@ -18285,7 +18317,7 @@
       298.01,
       298.01,
       298.01,
-      298.0,
+      298,
       297.99,
       87.352,
       -58.957,
@@ -18564,7 +18596,7 @@
       -82.032,
       -82.023,
       -82.012,
-      -82.0,
+      -82,
       -81.986,
       -81.971,
       -65.663,
@@ -18577,7 +18609,7 @@
       297.91,
       297.9,
       -41.915,
-      -82.0,
+      -82,
       -82.021,
       -82.04,
       -82.057,
@@ -18761,7 +18793,7 @@
       -83.708,
       -83.702,
       120.04,
-      283.0,
+      283,
       296.16,
       296.15,
       296.14,
@@ -18850,7 +18882,7 @@
       -84.984,
       -84.991,
       -84.997,
-      -85.0,
+      -85,
       -85.002,
       -85.003,
       -85.002,
@@ -19368,7 +19400,7 @@
       -100.77,
       -35.297,
       145.62,
-      279.0,
+      279,
       278.97,
       278.93,
       278.88,
@@ -19408,7 +19440,7 @@
       277.14,
       277.07,
       277.01,
-      202.0,
+      202,
       16.441,
       -103.08,
       -103.16,
@@ -19495,7 +19527,7 @@
       -107.47,
       -107.5,
       -39.022,
-      144.0,
+      144,
       272.27,
       272.23,
       272.19,
@@ -19561,7 +19593,7 @@
       -110.78,
       208.68,
       267.96,
-      269.0,
+      269,
       268.96,
       268.92,
       268.87,
@@ -19628,7 +19660,7 @@
       266.11,
       266.08,
       266.04,
-      266.0,
+      266,
       265.95,
       265.9,
       265.84,
@@ -19678,7 +19710,7 @@
       -115.9,
       -115.94,
       -115.97,
-      -116.0,
+      -116,
       -116.03,
       -116.06,
       -116.08,
@@ -19802,7 +19834,7 @@
       -120.83,
       -120.89,
       -120.94,
-      -121.0,
+      -121,
       -121.05,
       -121.1,
       -121.15,
@@ -20027,7 +20059,7 @@
       -133.82,
       -133.88,
       -133.95,
-      -134.0,
+      -134,
       -134.06,
       -134.11,
       -134.16,
@@ -20126,7 +20158,7 @@
       -138.88,
       -138.92,
       -138.96,
-      -139.0,
+      -139,
       -139.04,
       -139.07,
       -139.1,
@@ -20148,7 +20180,7 @@
       202.94,
       -73.971,
       -139.93,
-      -140.0,
+      -140,
       -140.07,
       -140.13,
       -140.19,
@@ -20169,7 +20201,7 @@
       239.1,
       239.07,
       239.04,
-      239.0,
+      239,
       238.95,
       238.91,
       238.85,
@@ -20187,7 +20219,7 @@
       -141.84,
       -141.9,
       -141.95,
-      -142.0,
+      -142,
       -142.05,
       -142.1,
       -142.14,
@@ -20461,7 +20493,7 @@
       221.18,
       221.13,
       221.07,
-      221.0,
+      221,
       220.93,
       220.86,
       220.79,
@@ -21253,7 +21285,7 @@
       130.19,
       164.13,
       164.07,
-      164.0,
+      164,
       163.93,
       163.86,
       163.79,
@@ -21265,7 +21297,7 @@
       163.29,
       163.19,
       163.1,
-      163.0,
+      163,
       162.9,
       162.8,
       162.69,
@@ -21526,7 +21558,7 @@
       142.29,
       142.2,
       142.1,
-      142.0,
+      142,
       -135.63,
       -238.13,
       -238.22,
@@ -21700,7 +21732,7 @@
       68.838,
       128.12,
       128.06,
-      128.0,
+      128,
       127.93,
       127.86,
       127.79,
@@ -21750,7 +21782,7 @@
       124.29,
       124.2,
       124.1,
-      124.0,
+      124,
       67.712,
       -113.34,
       -256.24,
@@ -21819,7 +21851,7 @@
       -175.49,
       -256.96,
       -261.91,
-      -262.0,
+      -262,
       -262.09,
       -262.18,
       -262.25,
@@ -22259,7 +22291,7 @@
       79.282,
       79.189,
       79.095,
-      79.0,
+      79,
       78.905,
       78.808,
       78.71,
@@ -22753,7 +22785,7 @@
       35.289,
       35.193,
       35.096,
-      35.0,
+      35,
       34.903,
       34.806,
       34.709,
@@ -22865,7 +22897,7 @@
    },
    "R1": {
     "params": {
-     "resistance": 1000.0
+     "resistance": 1000
     },
     "parent": null,
     "role": null,
@@ -22873,7 +22905,7 @@
    },
    "R10": {
     "params": {
-     "resistance": 50000.0
+     "resistance": 50000
     },
     "parent": null,
     "role": null,
@@ -22881,7 +22913,7 @@
    },
    "R11": {
     "params": {
-     "resistance": 50000.0
+     "resistance": 50000
     },
     "parent": null,
     "role": null,
@@ -22889,7 +22921,7 @@
    },
    "R2": {
     "params": {
-     "resistance": 1000.0
+     "resistance": 1000
     },
     "parent": null,
     "role": null,
@@ -22897,7 +22929,7 @@
    },
    "R3": {
     "params": {
-     "resistance": 50000.0
+     "resistance": 50000
     },
     "parent": null,
     "role": null,
@@ -22905,7 +22937,7 @@
    },
    "R4": {
     "params": {
-     "resistance": 1000.0
+     "resistance": 1000
     },
     "parent": null,
     "role": null,
@@ -22913,7 +22945,7 @@
    },
    "R8": {
     "params": {
-     "resistance": 1000.0
+     "resistance": 1000
     },
     "parent": null,
     "role": null,
@@ -22921,7 +22953,7 @@
    },
    "R9": {
     "params": {
-     "resistance": 50000.0
+     "resistance": 50000
     },
     "parent": null,
     "role": null,
@@ -22929,7 +22961,7 @@
    },
    "R_LOAD": {
     "params": {
-     "resistance": 20.0
+     "resistance": 20
     },
     "parent": null,
     "role": "ac_load",
@@ -22937,7 +22969,7 @@
    },
    "Rsnub1": {
     "params": {
-     "resistance": 100.0
+     "resistance": 100
     },
     "parent": null,
     "role": null,
@@ -22945,7 +22977,7 @@
    },
    "Rsnub2": {
     "params": {
-     "resistance": 100.0
+     "resistance": 100
     },
     "parent": null,
     "role": null,
@@ -22958,7 +22990,7 @@
      "max": -0.2822469338,
      "min": -0.2822469338,
      "peak": 0.2822469338,
-     "pp": 0.0,
+     "pp": 0,
      "rms": 0.2822469338
     },
     "p_avg": -80.97221865527199,
@@ -22978,12 +23010,12 @@
    },
    "S2": {
     "i": {
-     "ac_rms": 0.0,
+     "ac_rms": 0,
      "avg": 0.00038000083910000006,
      "max": 0.0003800008391,
      "min": 0.0003800008391,
      "peak": 0.0003800008391,
-     "pp": 0.0,
+     "pp": 0,
      "rms": 0.0003800008391
     },
     "p_avg": 0.035360921196601565,
@@ -23003,12 +23035,12 @@
    },
    "S3": {
     "i": {
-     "ac_rms": 0.0,
+     "ac_rms": 0,
      "avg": 0.2830071116000001,
      "max": 0.2830071116,
      "min": 0.2830071116,
      "peak": 0.2830071116,
-     "pp": 0.0,
+     "pp": 0,
      "rms": 0.2830071116
     },
     "p_avg": 26.549033954761207,
@@ -23028,12 +23060,12 @@
    },
    "S4": {
     "i": {
-     "ac_rms": 0.0,
+     "ac_rms": 0,
      "avg": 0.0003799991434,
      "max": 0.0003799991434,
      "min": 0.0003799991434,
      "peak": 0.0003799991434,
-     "pp": 0.0,
+     "pp": 0,
      "rms": 0.0003799991434
     },
     "p_avg": 0.10872865453764914,
@@ -23053,8 +23085,8 @@
    }
   },
   "dt": 9.765625e-07,
-  "fsw": 16000.0,
-  "line_frequency": 50.0,
+  "fsw": 16000,
+  "line_frequency": 50,
   "samples_per_period": 64,
   "window": {
    "basis": "half line cycle",

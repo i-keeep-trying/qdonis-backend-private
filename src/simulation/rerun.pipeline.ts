@@ -246,6 +246,17 @@ export async function runRerun(
       timeSeries,
     };
   } finally {
-    rmSync(outputDir, { recursive: true, force: true });
+    // Scratch only: a cleanup failure (a file still locked on Windows) must not
+    // replace the run's own result or error.
+    try {
+      rmSync(outputDir, {
+        recursive: true,
+        force: true,
+        maxRetries: 5,
+        retryDelay: 200,
+      });
+    } catch {
+      // left for the OS temp cleanup
+    }
   }
 }

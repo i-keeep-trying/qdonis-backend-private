@@ -48,6 +48,8 @@ const MU0 = 4 * Math.PI * 1e-7;
 const RHO_CU_20 = 1.72e-8; // Ω·m
 const ALPHA_CU = 0.00393;
 const HOTSPOT_LIMIT_C = 120;
+/** Highest temperature losses / Bsat are evaluated at (validity of the fits). */
+const MAX_EVAL_C = 200;
 
 export type MagneticKind = 'inductor' | 'flyback' | 'transformer' | 'resonant';
 
@@ -266,7 +268,7 @@ function cosIntegral(alpha: number): number {
 function bSat(material: string, tempC: number): number {
   const b25 = MATERIAL_PROPERTIES[material]?.saturationB ?? 0.45;
   // Mn-Zn ferrite saturation falls ≈ 20–25 % between 25 °C and 100 °C.
-  return b25 * (1 - 0.003 * Math.max(0, tempC - 25));
+  return b25 * (1 - 0.003 * Math.min(Math.max(0, tempC - 25), MAX_EVAL_C - 25));
 }
 
 function permeability(material: string): number {
@@ -741,7 +743,11 @@ function evaluate(
         : undefined;
     const total = pCore + pri.pDc + pri.pAc + (sec ? sec.pDc + sec.pAc : 0);
     rise = 450 * Math.pow(Math.max(total, 1e-9) / surface, 0.826);
-    const next = settings.ambientC + rise;
+    // The Steinmetz temperature fit and the copper resistivity are only valid
+    // up to ~200 °C: past that the loss -> temperature loop runs away (core loss
+    // 1e12 W, negative Bsat). Evaluate at most at MAX_EVAL_C; the rise stays
+    // finite and the design is flagged by the hotspot / rise limits below.
+    const next = Math.min(settings.ambientC + rise, MAX_EVAL_C);
     if (Math.abs(next - temp) < 0.5) {
       temp = next;
       break;

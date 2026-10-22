@@ -101,6 +101,50 @@ export function estimateDuty(
   return 0.5;
 }
 
+const SPICE_SUFFIX: Record<string, number> = {
+  t: 1e12,
+  g: 1e9,
+  meg: 1e6,
+  k: 1e3,
+  m: 1e-3,
+  u: 1e-6,
+  n: 1e-9,
+  p: 1e-12,
+  f: 1e-15,
+};
+
+function spiceNumber(token: string): number | null {
+  const m = /^([-+]?\d*\.?\d+(?:e[-+]?\d+)?)(meg|[tgkmunpf])?/i.exec(token);
+  if (!m) return null;
+  return parseFloat(m[1]) * (m[2] ? SPICE_SUFFIX[m[2].toLowerCase()] : 1);
+}
+
+/**
+ * Switching frequency of the decks that ran: the most common period of the
+ * PULSE sources (gate drives, carriers, phase ramps) between 1 kHz and 5 MHz.
+ * The design table hides the drive sources, so the YAML inventory can still
+ * carry the template's frequency after sizing (DAB: 20 kHz vs 70 kHz).
+ */
+export function deckSwitchingFrequency(decks: unknown): number | null {
+  if (typeof decks !== 'object' || decks === null) return null;
+  const counts = new Map<number, number>();
+  for (const deck of Object.values(decks as Record<string, unknown>)) {
+    if (typeof deck !== 'string') continue;
+    for (const m of deck.matchAll(/\bPULSE\s*\(([^)]*)\)/gi)) {
+      const args = m[1].trim().split(/[\s,]+/);
+      const per = args.length >= 7 ? spiceNumber(args[6]) : null;
+      if (!per || per < 2e-7 || per > 1e-3) continue;
+      const f = Number((1 / per).toPrecision(6));
+      counts.set(f, (counts.get(f) ?? 0) + 1);
+    }
+  }
+  let best: number | null = null;
+  for (const [f, n] of counts) {
+    if (best === null || n > (counts.get(best) ?? 0)) best = f;
+  }
+  return best;
+}
+
 export const round = (v: number | undefined, digits = 3): number | undefined =>
   v === undefined || !Number.isFinite(v)
     ? undefined

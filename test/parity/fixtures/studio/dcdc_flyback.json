@@ -13,37 +13,37 @@
    "component": "D",
    "device_type": "diode",
    "diode_model": null,
-   "model": "C3D02060A",
+   "model": "GEN_SBD100V030A",
    "points": [
     {
-     "conduction_loss_w": 0.5726,
-     "switching_loss_w": 0.0,
-     "tj_c": -55.0,
-     "total_loss_w": 0.5726
+     "conduction_loss_w": 0.0783,
+     "switching_loss_w": 0,
+     "tj_c": -55,
+     "total_loss_w": 0.0783
     },
     {
-     "conduction_loss_w": 0.5441,
-     "switching_loss_w": 0.0,
-     "tj_c": 25.0,
-     "total_loss_w": 0.5441
+     "conduction_loss_w": 0.0643,
+     "switching_loss_w": 0,
+     "tj_c": 25,
+     "total_loss_w": 0.0643
     },
     {
-     "conduction_loss_w": 0.546,
-     "switching_loss_w": 0.0,
-     "tj_c": 75.0,
-     "total_loss_w": 0.546
+     "conduction_loss_w": 0.0555,
+     "switching_loss_w": 0,
+     "tj_c": 75,
+     "total_loss_w": 0.0555
     },
     {
-     "conduction_loss_w": 0.56,
-     "switching_loss_w": 0.0,
-     "tj_c": 125.0,
-     "total_loss_w": 0.56
+     "conduction_loss_w": 0.0468,
+     "switching_loss_w": 0,
+     "tj_c": 125,
+     "total_loss_w": 0.0468
     },
     {
-     "conduction_loss_w": 0.5986,
-     "switching_loss_w": 0.0,
-     "tj_c": 175.0,
-     "total_loss_w": 0.5986
+     "conduction_loss_w": 0.0381,
+     "switching_loss_w": 0,
+     "tj_c": 175,
+     "total_loss_w": 0.0381
     }
    ]
   },
@@ -51,37 +51,49 @@
    "component": "SW",
    "device_type": "switch",
    "diode_model": null,
-   "model": "E4M0045075J2",
+   "model": "CSD17578Q5A",
    "points": [
     {
-     "conduction_loss_w": 0.093,
-     "switching_loss_w": 0.0322,
-     "tj_c": -55.0,
-     "total_loss_w": 0.1252
+     "conduction_loss_w": 0.0059,
+     "switching_loss_w": 0.0218,
+     "tj_c": -40,
+     "total_loss_w": 0.0277
     },
     {
-     "conduction_loss_w": 0.0848,
-     "switching_loss_w": 0.0352,
-     "tj_c": 25.0,
-     "total_loss_w": 0.1199
+     "conduction_loss_w": 0.0102,
+     "switching_loss_w": 0.0251,
+     "tj_c": 25,
+     "total_loss_w": 0.0353
     },
     {
-     "conduction_loss_w": 0.0998,
-     "switching_loss_w": 0.037,
-     "tj_c": 75.0,
-     "total_loss_w": 0.1369
+     "conduction_loss_w": 0.0135,
+     "switching_loss_w": 0.0276,
+     "tj_c": 75,
+     "total_loss_w": 0.0411
     },
     {
-     "conduction_loss_w": 0.1149,
-     "switching_loss_w": 0.0341,
-     "tj_c": 125.0,
-     "total_loss_w": 0.149
+     "conduction_loss_w": 0.0151,
+     "switching_loss_w": 0.0289,
+     "tj_c": 100,
+     "total_loss_w": 0.044
     },
     {
-     "conduction_loss_w": 0.13,
-     "switching_loss_w": 0.0355,
-     "tj_c": 175.0,
-     "total_loss_w": 0.1655
+     "conduction_loss_w": 0.0168,
+     "switching_loss_w": 0.0301,
+     "tj_c": 125,
+     "total_loss_w": 0.0469
+    },
+    {
+     "conduction_loss_w": 0.0184,
+     "switching_loss_w": 0.0314,
+     "tj_c": 150,
+     "total_loss_w": 0.0498
+    },
+    {
+     "conduction_loss_w": 0.0201,
+     "switching_loss_w": 0.0326,
+     "tj_c": 175,
+     "total_loss_w": 0.0527
     }
    ]
   }
@@ -93,49 +105,49 @@
   "assumptions": {
    "default_diode": "C3D10065A.json",
    "default_mosfet": "E3M0060065K.json",
-   "junction_temperature_c": 150.0,
-   "plecs_model": "Custom: D=C3D02060A, SW=E4M0045075J2"
+   "junction_temperature_c": 150,
+   "plecs_model": "Custom: D=GEN_SBD100V030A, SW=CSD17578Q5A"
   },
   "components": [
    {
-    "component": "D",
-    "conduction_loss_w": 0.5793,
-    "device_kind": "Diode",
-    "device_type": "diode",
-    "forward_conduction_loss_w": 0.0,
-    "gate_drive_loss_w": 0.0,
-    "hard_turn_on_events": 0,
-    "leakage_loss_w": 0.0,
-    "model": "C3D02060A",
-    "reverse_conduction_loss_w": 0.5793,
-    "soft_turn_on_events": 0,
-    "switching_loss_w": 0.0,
-    "total_loss_w": 0.5793,
-    "turn_off_events": 1245
-   },
-   {
     "component": "SW",
-    "conduction_loss_w": 0.1224,
+    "conduction_loss_w": 0.0184,
     "device_kind": "MOSFET",
     "device_type": "switch",
-    "forward_conduction_loss_w": 0.1224,
-    "gate_drive_loss_w": 0.0,
+    "forward_conduction_loss_w": 0.0184,
+    "gate_drive_loss_w": 0,
     "hard_turn_on_events": 0,
-    "leakage_loss_w": 0.0,
-    "model": "E4M0045075J2",
-    "reverse_conduction_loss_w": 0.0,
+    "leakage_loss_w": 0,
+    "model": "CSD17578Q5A",
+    "reverse_conduction_loss_w": 0,
     "soft_turn_on_events": 1500,
-    "switching_loss_w": 0.0348,
-    "total_loss_w": 0.1572,
+    "switching_loss_w": 0.0314,
+    "total_loss_w": 0.0498,
     "turn_off_events": 1486
+   },
+   {
+    "component": "D",
+    "conduction_loss_w": 0.0424,
+    "device_kind": "Diode",
+    "device_type": "diode",
+    "forward_conduction_loss_w": 0,
+    "gate_drive_loss_w": 0,
+    "hard_turn_on_events": 0,
+    "leakage_loss_w": 0,
+    "model": "GEN_SBD100V030A",
+    "reverse_conduction_loss_w": 0.0424,
+    "soft_turn_on_events": 0,
+    "switching_loss_w": 0,
+    "total_loss_w": 0.0424,
+    "turn_off_events": 1245
    }
   ]
  },
  "selection": {
   "basis": "simulated waveforms",
   "component_models": {
-   "D": "C3D02060A",
-   "SW": "E4M0045075J2"
+   "D": "GEN_SBD100V030A",
+   "SW": "CSD17578Q5A"
   },
   "preference": "auto",
   "selections": [
@@ -143,64 +155,40 @@
     "alternatives": [
      {
       "diode": null,
-      "family": "SiC MOSFET",
-      "loss_w": 0.1359,
-      "part": "C3M0045065J1",
+      "family": "Si MOSFET",
+      "loss_w": 0.0495,
+      "part": "CSD17577Q5A",
       "type": "MOSFET with Diode",
-      "v_rating": 650.0
+      "v_rating": 30
      },
      {
       "diode": null,
-      "family": "SiC MOSFET",
-      "loss_w": 0.1375,
-      "part": "C3M0045065D",
+      "family": "Si MOSFET",
+      "loss_w": 0.0556,
+      "part": "CSD19531Q5A",
       "type": "MOSFET with Diode",
-      "v_rating": 650.0
-     },
-     {
-      "diode": null,
-      "family": "SiC MOSFET",
-      "loss_w": 0.1587,
-      "part": "C3M0045075K1",
-      "type": "MOSFET with Diode",
-      "v_rating": 750.0
-     },
-     {
-      "diode": null,
-      "family": "SiC MOSFET",
-      "loss_w": 0.1587,
-      "part": "E4M0045075K1",
-      "type": "MOSFET with Diode",
-      "v_rating": 750.0
-     },
-     {
-      "diode": null,
-      "family": "SiC MOSFET",
-      "loss_w": 0.1558,
-      "part": "C3M0060065J",
-      "type": "MOSFET with Diode",
-      "v_rating": 650.0
+      "v_rating": 100
      }
     ],
-    "evaluated": 18,
+    "evaluated": 3,
     "forced": false,
     "group": null,
     "kind": "switch",
-    "reason": "SiC MOSFET rated 750 V for 23 V peak (32.6\u00d7 margin); lowest evaluated loss 0.143 W (position total) at Tj 100 \u00b0C and 100.0 kHz; NOTE: heavily over-rated because the library's lowest switch voltage class is 650 V; no lower-voltage parts are available to select; next best C3M0045065J1 at 0.136 W",
+    "reason": "Si MOSFET rated 30 V for 23 V peak (1.3× margin); lowest evaluated loss 0.044 W (position total) at Tj 100 °C and 100.0 kHz; next best CSD17577Q5A at 0.050 W",
     "ref": "SW",
     "selected": {
      "diode": null,
-     "family": "SiC MOSFET",
-     "i_rating": 70.0,
-     "loss_w": 0.1429,
-     "part": "E4M0045075J2",
+     "family": "Si MOSFET",
+     "i_rating": 20,
+     "loss_w": 0.044,
+     "part": "CSD17578Q5A",
      "type": "MOSFET with Diode",
-     "v_rating": 750.0
+     "v_rating": 30
     },
     "stress": {
-     "fsw": 100000.0,
+     "fsw": 100000,
      "i_avg": 0.9481,
-     "i_peak": 4.3877,
+     "i_peak": 4.2513,
      "i_rms": 1.4567,
      "v_peak": 23.0036
     }
@@ -209,75 +197,59 @@
     "alternatives": [
      {
       "diode": null,
-      "family": "SiC Schottky diode",
-      "loss_w": 0.553,
-      "part": "C3D02060E",
+      "family": "Si Schottky diode",
+      "loss_w": 0.0651,
+      "part": "GEN_SBD200V030A",
       "type": "Diode",
-      "v_rating": 600.0
+      "v_rating": 200
      },
      {
       "diode": null,
-      "family": "SiC Schottky diode",
-      "loss_w": 0.553,
-      "part": "C3D02060F",
+      "family": "Si Schottky diode",
+      "loss_w": 0.1367,
+      "part": "GEN_SBD100V010A",
       "type": "Diode",
-      "v_rating": 600.0
+      "v_rating": 100
      },
      {
       "diode": null,
-      "family": "SiC Schottky diode",
-      "loss_w": 0.553,
-      "part": "C3D02065E",
+      "family": "Si Schottky diode",
+      "loss_w": 0.176,
+      "part": "GEN_SBD200V010A",
       "type": "Diode",
-      "v_rating": 650.0
-     },
-     {
-      "diode": null,
-      "family": "SiC Schottky diode",
-      "loss_w": 0.4586,
-      "part": "C6D04065A",
-      "type": "Diode",
-      "v_rating": 650.0
-     },
-     {
-      "diode": null,
-      "family": "SiC Schottky diode",
-      "loss_w": 0.4586,
-      "part": "C6D04065E",
-      "type": "Diode",
-      "v_rating": 650.0
+      "v_rating": 200
      }
     ],
-    "evaluated": 18,
+    "evaluated": 4,
     "forced": false,
     "group": null,
     "kind": "diode",
-    "reason": "SiC Schottky diode rated 600 V for 45 V peak (13.4\u00d7 margin); lowest evaluated loss 0.553 W (position total) at Tj 100 \u00b0C; NOTE: heavily over-rated because the library's lowest diode voltage class is 600 V; no lower-voltage parts are available to select; next best C3D02060E at 0.553 W",
+    "reason": "Si Schottky diode rated 100 V for 45 V peak (2.2× margin); lowest evaluated loss 0.051 W (position total) at Tj 100 °C; next best GEN_SBD200V030A at 0.065 W",
     "ref": "D",
     "selected": {
      "diode": null,
-     "family": "SiC Schottky diode",
-     "i_rating": 2.0,
-     "loss_w": 0.553,
-     "part": "C3D02060A",
+     "family": "Si Schottky diode",
+     "i_rating": 30,
+     "loss_w": 0.0512,
+     "part": "GEN_SBD100V030A",
      "type": "Diode",
-     "v_rating": 600.0
+     "v_rating": 100
     },
     "stress": {
-     "fsw": 0.0,
+     "fsw": 0,
      "i_avg": 0.4683,
-     "i_peak": 2.0573,
+     "i_peak": 2.0145,
      "i_rms": 0.6997,
      "v_peak": 44.7423
     }
    }
   ],
-  "tj": 100.0
+  "tj": 100
  },
  "selection_igbt": {
   "basis": "simulated waveforms",
   "component_models": {
-   "D": "C3D02060A",
+   "D": "GEN_SBD100V030A",
    "SW": "DIM300WHS12-PA500",
    "SW_DIODE": "DIM300WHS12-PA500 - DIODE"
   },
@@ -291,7 +263,7 @@
       "loss_w": 1.1948,
       "part": "DIM400DDM12-A000",
       "type": "IGBT",
-      "v_rating": 1200.0
+      "v_rating": 1200
      },
      {
       "diode": "C5D05170H",
@@ -299,7 +271,7 @@
       "loss_w": 1.8278,
       "part": "DIM400DCM17-A000",
       "type": "IGBT",
-      "v_rating": 1700.0
+      "v_rating": 1700
      },
      {
       "diode": "DIM400DDM17-A000 - DIODE",
@@ -307,28 +279,28 @@
       "loss_w": 1.8278,
       "part": "DIM400DDM17-A000",
       "type": "IGBT",
-      "v_rating": 1700.0
+      "v_rating": 1700
      }
     ],
     "evaluated": 4,
     "forced": false,
     "group": null,
     "kind": "switch",
-    "reason": "Si IGBT module rated 1200 V for 23 V peak (52.2\u00d7 margin); lowest evaluated loss 1.197 W (position total) at Tj 100 \u00b0C and 100.0 kHz; next best DIM400DDM12-A000 at 1.195 W",
+    "reason": "Si IGBT module rated 1200 V for 23 V peak (52.2× margin); lowest evaluated loss 1.197 W (position total) at Tj 100 °C and 100.0 kHz; next best DIM400DDM12-A000 at 1.195 W",
     "ref": "SW",
     "selected": {
      "diode": "DIM300WHS12-PA500 - DIODE",
      "family": "Si IGBT module",
-     "i_rating": 300.0,
+     "i_rating": 300,
      "loss_w": 1.1972,
      "part": "DIM300WHS12-PA500",
      "type": "IGBT",
-     "v_rating": 1200.0
+     "v_rating": 1200
     },
     "stress": {
-     "fsw": 100000.0,
+     "fsw": 100000,
      "i_avg": 0.9481,
-     "i_peak": 4.3877,
+     "i_peak": 4.2513,
      "i_rms": 1.4567,
      "v_peak": 23.0036
     }
@@ -337,109 +309,93 @@
     "alternatives": [
      {
       "diode": null,
-      "family": "SiC Schottky diode",
-      "loss_w": 0.553,
-      "part": "C3D02060E",
+      "family": "Si Schottky diode",
+      "loss_w": 0.0651,
+      "part": "GEN_SBD200V030A",
       "type": "Diode",
-      "v_rating": 600.0
+      "v_rating": 200
      },
      {
       "diode": null,
-      "family": "SiC Schottky diode",
-      "loss_w": 0.553,
-      "part": "C3D02060F",
+      "family": "Si Schottky diode",
+      "loss_w": 0.1367,
+      "part": "GEN_SBD100V010A",
       "type": "Diode",
-      "v_rating": 600.0
+      "v_rating": 100
      },
      {
       "diode": null,
-      "family": "SiC Schottky diode",
-      "loss_w": 0.553,
-      "part": "C3D02065E",
+      "family": "Si Schottky diode",
+      "loss_w": 0.176,
+      "part": "GEN_SBD200V010A",
       "type": "Diode",
-      "v_rating": 650.0
-     },
-     {
-      "diode": null,
-      "family": "SiC Schottky diode",
-      "loss_w": 0.4586,
-      "part": "C6D04065A",
-      "type": "Diode",
-      "v_rating": 650.0
-     },
-     {
-      "diode": null,
-      "family": "SiC Schottky diode",
-      "loss_w": 0.4586,
-      "part": "C6D04065E",
-      "type": "Diode",
-      "v_rating": 650.0
+      "v_rating": 200
      }
     ],
-    "evaluated": 18,
+    "evaluated": 4,
     "forced": false,
     "group": null,
     "kind": "diode",
-    "reason": "SiC Schottky diode rated 600 V for 45 V peak (13.4\u00d7 margin); lowest evaluated loss 0.553 W (position total) at Tj 100 \u00b0C; NOTE: heavily over-rated because the library's lowest diode voltage class is 600 V; no lower-voltage parts are available to select; next best C3D02060E at 0.553 W",
+    "reason": "Si Schottky diode rated 100 V for 45 V peak (2.2× margin); lowest evaluated loss 0.051 W (position total) at Tj 100 °C; next best GEN_SBD200V030A at 0.065 W",
     "ref": "D",
     "selected": {
      "diode": null,
-     "family": "SiC Schottky diode",
-     "i_rating": 2.0,
-     "loss_w": 0.553,
-     "part": "C3D02060A",
+     "family": "Si Schottky diode",
+     "i_rating": 30,
+     "loss_w": 0.0512,
+     "part": "GEN_SBD100V030A",
      "type": "Diode",
-     "v_rating": 600.0
+     "v_rating": 100
     },
     "stress": {
-     "fsw": 0.0,
+     "fsw": 0,
      "i_avg": 0.4683,
-     "i_peak": 2.0573,
+     "i_peak": 2.0145,
      "i_rms": 0.6997,
      "v_peak": 44.7423
     }
    }
   ],
-  "tj": 100.0
+  "tj": 100
  },
  "selection_losses": {
   "assumptions": {
    "default_diode": "C3D10065A.json",
    "default_mosfet": "E3M0060065K.json",
-   "junction_temperature_c": 100.0,
-   "plecs_model": "Custom: D=C3D02060A, SW=E4M0045075J2"
+   "junction_temperature_c": 100,
+   "plecs_model": "Custom: D=GEN_SBD100V030A, SW=CSD17578Q5A"
   },
   "components": [
    {
     "component": "D",
-    "conduction_loss_w": 0.553,
+    "conduction_loss_w": 0.0512,
     "device_kind": "Diode",
     "device_type": "diode",
-    "forward_conduction_loss_w": 0.0,
-    "gate_drive_loss_w": 0.0,
+    "forward_conduction_loss_w": 0,
+    "gate_drive_loss_w": 0,
     "hard_turn_on_events": 0,
-    "leakage_loss_w": 0.0,
-    "model": "C3D02060A",
-    "reverse_conduction_loss_w": 0.553,
+    "leakage_loss_w": 0,
+    "model": "GEN_SBD100V030A",
+    "reverse_conduction_loss_w": 0.0512,
     "soft_turn_on_events": 0,
-    "switching_loss_w": 0.0,
-    "total_loss_w": 0.553,
+    "switching_loss_w": 0,
+    "total_loss_w": 0.0512,
     "turn_off_events": 1245
    },
    {
     "component": "SW",
-    "conduction_loss_w": 0.1074,
+    "conduction_loss_w": 0.0151,
     "device_kind": "MOSFET",
     "device_type": "switch",
-    "forward_conduction_loss_w": 0.1074,
-    "gate_drive_loss_w": 0.0,
+    "forward_conduction_loss_w": 0.0151,
+    "gate_drive_loss_w": 0,
     "hard_turn_on_events": 0,
-    "leakage_loss_w": 0.0,
-    "model": "E4M0045075J2",
-    "reverse_conduction_loss_w": 0.0,
+    "leakage_loss_w": 0,
+    "model": "CSD17578Q5A",
+    "reverse_conduction_loss_w": 0,
     "soft_turn_on_events": 1500,
-    "switching_loss_w": 0.0356,
-    "total_loss_w": 0.1429,
+    "switching_loss_w": 0.0289,
+    "total_loss_w": 0.044,
     "turn_off_events": 1486
    }
   ]
@@ -447,7 +403,7 @@
  "selection_override": {
   "basis": "simulated waveforms",
   "component_models": {
-   "D": "C3D02060A",
+   "D": "GEN_SBD100V030A",
    "SW": "C3M0045065J1"
   },
   "preference": "auto",
@@ -463,16 +419,16 @@
     "selected": {
      "diode": null,
      "family": "SiC MOSFET",
-     "i_rating": 100.0,
+     "i_rating": 100,
      "loss_w": 0.1359,
      "part": "C3M0045065J1",
      "type": "MOSFET with Diode",
-     "v_rating": 650.0
+     "v_rating": 650
     },
     "stress": {
-     "fsw": 100000.0,
+     "fsw": 100000,
      "i_avg": 0.9481,
-     "i_peak": 4.3877,
+     "i_peak": 4.2513,
      "i_rms": 1.4567,
      "v_peak": 23.0036
     }
@@ -481,70 +437,54 @@
     "alternatives": [
      {
       "diode": null,
-      "family": "SiC Schottky diode",
-      "loss_w": 0.553,
-      "part": "C3D02060E",
+      "family": "Si Schottky diode",
+      "loss_w": 0.0651,
+      "part": "GEN_SBD200V030A",
       "type": "Diode",
-      "v_rating": 600.0
+      "v_rating": 200
      },
      {
       "diode": null,
-      "family": "SiC Schottky diode",
-      "loss_w": 0.553,
-      "part": "C3D02060F",
+      "family": "Si Schottky diode",
+      "loss_w": 0.1367,
+      "part": "GEN_SBD100V010A",
       "type": "Diode",
-      "v_rating": 600.0
+      "v_rating": 100
      },
      {
       "diode": null,
-      "family": "SiC Schottky diode",
-      "loss_w": 0.553,
-      "part": "C3D02065E",
+      "family": "Si Schottky diode",
+      "loss_w": 0.176,
+      "part": "GEN_SBD200V010A",
       "type": "Diode",
-      "v_rating": 650.0
-     },
-     {
-      "diode": null,
-      "family": "SiC Schottky diode",
-      "loss_w": 0.4586,
-      "part": "C6D04065A",
-      "type": "Diode",
-      "v_rating": 650.0
-     },
-     {
-      "diode": null,
-      "family": "SiC Schottky diode",
-      "loss_w": 0.4586,
-      "part": "C6D04065E",
-      "type": "Diode",
-      "v_rating": 650.0
+      "v_rating": 200
      }
     ],
-    "evaluated": 18,
+    "evaluated": 4,
     "forced": false,
     "group": null,
     "kind": "diode",
-    "reason": "SiC Schottky diode rated 600 V for 45 V peak (13.4\u00d7 margin); lowest evaluated loss 0.553 W (position total) at Tj 100 \u00b0C; NOTE: heavily over-rated because the library's lowest diode voltage class is 600 V; no lower-voltage parts are available to select; next best C3D02060E at 0.553 W",
+    "reason": "Si Schottky diode rated 100 V for 45 V peak (2.2× margin); lowest evaluated loss 0.051 W (position total) at Tj 100 °C; next best GEN_SBD200V030A at 0.065 W",
     "ref": "D",
     "selected": {
      "diode": null,
-     "family": "SiC Schottky diode",
-     "i_rating": 2.0,
-     "loss_w": 0.553,
-     "part": "C3D02060A",
+     "family": "Si Schottky diode",
+     "i_rating": 30,
+     "loss_w": 0.0512,
+     "part": "GEN_SBD100V030A",
      "type": "Diode",
-     "v_rating": 600.0
+     "v_rating": 100
     },
     "stress": {
-     "fsw": 0.0,
+     "fsw": 0,
      "i_avg": 0.4683,
-     "i_peak": 2.0573,
+     "i_peak": 2.0145,
      "i_rms": 0.6997,
      "v_peak": 44.7423
     }
    }
   ],
-  "tj": 100.0
+  "tj": 100
  },
  "topology": "dcdc_flyback",
  "waveform_stats": {

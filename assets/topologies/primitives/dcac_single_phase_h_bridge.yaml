@@ -300,9 +300,36 @@ components:
   type: capacitor
   params:
     capacitance: 1n
+# Gate capacitance of the ideal switches (2026-10-22): the S elements have none, so the gate node stepped
+# instantly and ngspice aborted ("timestep too small" on the floating gate source) for sized designs
+# (380 V -> 120 V, 400 V -> 230 V at 5 kW); 1 nF (tau = 1 us with the 1 kOhm drive) lets the run finish.
+- ref: CG1
+  type: capacitor
+  role: gate_capacitance
+  params:
+    capacitance: 1n
+- ref: CG2
+  type: capacitor
+  role: gate_capacitance
+  params:
+    capacitance: 1n
+- ref: CG3
+  type: capacitor
+  role: gate_capacitance
+  params:
+    capacitance: 1n
+- ref: CG4
+  type: capacitor
+  role: gate_capacitance
+  params:
+    capacitance: 1n
 nets:
 - - - GND
     - pin
+  - - CG2
+    - neg
+  - - CG4
+    - neg
   - - VIN
     - '-'
   - - VTRI
@@ -389,6 +416,8 @@ nets:
     - pos
 - - - g1
     - pin
+  - - CG1
+    - pos
   - - R1
     - neg
   - - R3
@@ -397,6 +426,8 @@ nets:
     - ctrl+
 - - - OUT1
     - pin
+  - - CG1
+    - neg
   - - E1
     - '-'
   - - R3
@@ -429,6 +460,8 @@ nets:
     - pos
 - - - g2
     - pin
+  - - CG2
+    - pos
   - - R2
     - neg
   - - R9
@@ -449,6 +482,8 @@ nets:
     - pos
 - - - g3
     - pin
+  - - CG3
+    - pos
   - - R8
     - neg
   - - R10
@@ -457,6 +492,8 @@ nets:
     - ctrl+
 - - - OUT2
     - pin
+  - - CG3
+    - neg
   - - E5
     - '-'
   - - R10
@@ -491,6 +528,8 @@ nets:
     - pos
 - - - g4
     - pin
+  - - CG4
+    - pos
   - - R4
     - neg
   - - R11
@@ -845,7 +884,7 @@ schematic:
   - {id: W54, from: L_FILT.B, to: out_filt.P}
   groups:
     modulator: {label: "Bipolar PWM", members: [VREF, VTRI, INV_B, CMP_1, CMP_2, CMP_3, CMP_4]}
-    gate_drive: {label: "Gate drive", members: [E1, DRV_2, DRV_4, E5, R1, R2, R4, R8, R3, R9, R10, R11]}
+    gate_drive: {label: "Gate drive", members: [E1, DRV_2, DRV_4, E5, R1, R2, R4, R8, R3, R9, R10, R11, CG1, CG2, CG3, CG4]}
   sheets:
     gate_drive:
       wires:

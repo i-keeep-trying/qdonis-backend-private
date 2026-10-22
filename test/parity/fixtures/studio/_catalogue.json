@@ -2214,6 +2214,78 @@
   "i_lut": 160.0
  },
  {
+  "part": "GEN_SBD045V010A",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si Schottky diode",
+  "v_rating": 45,
+  "i_rating": 10,
+  "i_lut": 10
+ },
+ {
+  "part": "GEN_SBD045V030A",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si Schottky diode",
+  "v_rating": 45,
+  "i_rating": 30,
+  "i_lut": 30
+ },
+ {
+  "part": "GEN_SBD045V060A",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si Schottky diode",
+  "v_rating": 45,
+  "i_rating": 60,
+  "i_lut": 60
+ },
+ {
+  "part": "GEN_SBD100V010A",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si Schottky diode",
+  "v_rating": 100,
+  "i_rating": 10,
+  "i_lut": 10
+ },
+ {
+  "part": "GEN_SBD100V030A",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si Schottky diode",
+  "v_rating": 100,
+  "i_rating": 30,
+  "i_lut": 30
+ },
+ {
+  "part": "GEN_SBD100V060A",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si Schottky diode",
+  "v_rating": 100,
+  "i_rating": 60,
+  "i_lut": 60
+ },
+ {
+  "part": "GEN_SBD200V010A",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si Schottky diode",
+  "v_rating": 200,
+  "i_rating": 10,
+  "i_lut": 10
+ },
+ {
+  "part": "GEN_SBD200V030A",
+  "type": "Diode",
+  "kind": "diode",
+  "family": "Si Schottky diode",
+  "v_rating": 200,
+  "i_rating": 30,
+  "i_lut": 30
+ },
+ {
   "part": "DIM1000ACM33-TF001",
   "type": "IGBT",
   "kind": "switch",
@@ -3312,6 +3384,24 @@
   "i_lut": 1800.0
  },
  {
+  "part": "BSC014N03LSG",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "Si MOSFET",
+  "v_rating": 30,
+  "i_rating": 80,
+  "i_lut": 80
+ },
+ {
+  "part": "BSC035N10NS5",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "Si MOSFET",
+  "v_rating": 100,
+  "i_rating": 90,
+  "i_lut": 90
+ },
+ {
   "part": "C2M0025120D",
   "type": "MOSFET with Diode",
   "kind": "switch",
@@ -4122,7 +4212,7 @@
   "i_lut": 100.0
  },
  {
-  "part": "C4MS035075K1 \u00a0",
+  "part": "C4MS035075K1  ",
   "type": "MOSFET with Diode",
   "kind": "switch",
   "family": "SiC MOSFET",
@@ -4696,6 +4786,60 @@
   "v_rating": 1200.0,
   "i_rating": 800.0,
   "i_lut": 1600.0
+ },
+ {
+  "part": "CSD17570Q5B",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "Si MOSFET",
+  "v_rating": 30,
+  "i_rating": 130,
+  "i_lut": 130
+ },
+ {
+  "part": "CSD17577Q5A",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "Si MOSFET",
+  "v_rating": 30,
+  "i_rating": 50,
+  "i_lut": 50
+ },
+ {
+  "part": "CSD17578Q5A",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "Si MOSFET",
+  "v_rating": 30,
+  "i_rating": 20,
+  "i_lut": 20
+ },
+ {
+  "part": "CSD19531Q5A",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "Si MOSFET",
+  "v_rating": 100,
+  "i_rating": 50,
+  "i_lut": 50
+ },
+ {
+  "part": "CSD19536KCS",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "Si MOSFET",
+  "v_rating": 100,
+  "i_rating": 150,
+  "i_lut": 150
+ },
+ {
+  "part": "CSD19537Q3",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "Si MOSFET",
+  "v_rating": 5370,
+  "i_rating": 20,
+  "i_lut": 20
  },
  {
   "part": "E3M0016120K",
@@ -5344,6 +5488,69 @@
   "v_rating": 1200.0,
   "i_rating": 300.0,
   "i_lut": 300.0
+ },
+ {
+  "part": "FDB52N20",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "Si MOSFET",
+  "v_rating": 200,
+  "i_rating": 55,
+  "i_lut": 55
+ },
+ {
+  "part": "IPD200N20N3",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "Si MOSFET",
+  "v_rating": 200,
+  "i_rating": 20,
+  "i_lut": 20
+ },
+ {
+  "part": "IPT004N03L",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "Si MOSFET",
+  "v_rating": 30,
+  "i_rating": 300,
+  "i_lut": 300
+ },
+ {
+  "part": "IRFB4110PBF",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "Si MOSFET",
+  "v_rating": 100,
+  "i_rating": 200,
+  "i_lut": 200
+ },
+ {
+  "part": "IRFP4227PBF",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "Si MOSFET",
+  "v_rating": 200,
+  "i_rating": 80,
+  "i_lut": 80
+ },
+ {
+  "part": "IXFA120N20T",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "Si MOSFET",
+  "v_rating": 200,
+  "i_rating": 130,
+  "i_lut": 130
+ },
+ {
+  "part": "IXTA180N20T",
+  "type": "MOSFET with Diode",
+  "kind": "switch",
+  "family": "Si MOSFET",
+  "v_rating": 200,
+  "i_rating": 200,
+  "i_lut": 200
  },
  {
   "part": "WAB300M12BM3",

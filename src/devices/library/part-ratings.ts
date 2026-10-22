@@ -26,8 +26,9 @@ export function voltageFromPart(stem: string): number | null {
     const code = Number(m[1]);
     return code === 6 ? 650 : code * 100;
   }
-  // Wolfspeed SiC Schottky diodes: C3D10065A -> 650 V.
-  m = /^(?:[CE]\dD|CSD|CVFD)(\d{2,3})(\d{3})/.exec(s);
+  // Wolfspeed SiC Schottky diodes: C3D10065A -> 650 V. Anchored on the package
+  // suffix so TI Si MOSFETs (CSD17578Q5A, CSD19536KCS) do not parse as 5780 V.
+  m = /^(?:[CE]\dD|CSD|CVFD)(\d{2,3})(\d{3})[A-Z]\d?$/.exec(s);
   if (m) return Number(m[2]) * 10;
   // Dynex IGBT modules and their diodes: DIM800NSM12-A000 -> 1200 V.
   m = /^DIM(\d+)\D[A-Z0-9]*?(\d{2})-/.exec(s);
@@ -60,8 +61,15 @@ export function isModulePart(stem: string): boolean {
   return !/^(?:[CE]\d[MD]|CSD|CVFD)/.test(s);
 }
 
-export function partFamily(stem: string, type: string): string {
+export function partFamily(
+  stem: string,
+  type: string,
+  technology?: unknown,
+): string {
   const s = stem.toUpperCase();
+  // Low-voltage silicon parts carry their technology in the model metadata.
+  if (technology === 'Si')
+    return type === 'Diode' ? 'Si Schottky diode' : 'Si MOSFET';
   if (type === 'IGBT') return 'Si IGBT module';
   if (type === 'Diode') {
     return s.startsWith('DIM') || s.startsWith('DNX_DIM')

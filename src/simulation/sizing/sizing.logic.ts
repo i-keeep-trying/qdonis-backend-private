@@ -1377,6 +1377,45 @@ function addBridgeOutputCap(yaml: Dict, params: Dict): Dict {
 }
 
 /** `_adapt_single_phase_diode_bridge`; returns the reasoning markdown. */
+/** Two conducting bridge diodes at load current. */
+const BRIDGE_DROP_V = 1.6;
+
+/**
+ * Steady-state average output of a single-phase capacitor-input bridge
+ * (|Vpk sin| - 2 Vf through R_LINE into C || R_LOAD), by time stepping.
+ */
+export function bridgeAverage(
+  vpk: number,
+  drop: number,
+  rLine: number,
+  rLoad: number,
+  c: number,
+  fLine: number,
+): number {
+  const period = 1 / fLine;
+  const steps = 1000;
+  const dt = period / steps;
+  // Starts charged to the peak: settles within a few load time constants.
+  const cycles = Math.min(50, Math.max(4, Math.ceil((5 * rLoad * c) / period)));
+  let vc = Math.max(vpk - drop, 0);
+  let sum = 0;
+  let n = 0;
+  for (let k = 0; k < cycles * steps; k += 1) {
+    const t = k * dt;
+    const vr = Math.abs(vpk * Math.sin(2 * Math.PI * fLine * t)) - drop;
+    const i = vr > vc ? (vr - vc) / rLine : 0;
+    // Exact-enough implicit step for a stiff (small C) cell.
+    const g = 1 / rLoad + (i > 0 ? 1 / rLine : 0);
+    const src = i > 0 ? vr / rLine : 0;
+    vc = (vc * c + src * dt) / (c + g * dt);
+    if (k >= (cycles - 2) * steps) {
+      sum += vc;
+      n += 1;
+    }
+  }
+  return n ? sum / n : 0;
+}
+
 export function adaptDiodeBridge(
   yaml: Dict,
   updates: Updates,
@@ -1438,6 +1477,30 @@ export function adaptDiodeBridge(
   const vripplePp = ripple * vout;
   let cout = power / (2.0 * fLine * vout * vripplePp);
   cout = Math.max(47.0e-6, Math.min(0.1, cout));
+  // A capacitor-input bridge settles near the peak (~1.41 Vrms); an average
+  // target below that (e.g. the unfiltered 0.9 Vrms) is only met with a
+  // smaller capacitor. The bridge cannot regulate, so size C for the average.
+  const avgAt = (c: number) =>
+    bridgeAverage(vpk, BRIDGE_DROP_V, rLine, rLoad, c, fLine);
+  let filterNote = `target ripple ${fx(ripple * 100, 1)}%`;
+  if (vout > 0 && avgAt(cout) > 1.02 * vout) {
+    let lo = Math.log(1e-9);
+    let hi = Math.log(cout);
+    if (avgAt(1e-9) >= vout) hi = lo;
+    else {
+      for (let i = 0; i < 40; i += 1) {
+        const mid = (lo + hi) / 2;
+        if (avgAt(Math.exp(mid)) > vout) hi = mid;
+        else lo = mid;
+      }
+    }
+    const full = avgAt(cout);
+    cout = Math.exp(hi);
+    filterNote =
+      `reduced so the average output is ${g(vout, 4)} V: a ${g((power / (2.0 * fLine * vout * vripplePp)) * 1e6, 3)} µF ` +
+      `filter would hold ${g(full, 4)} V (near the ${g(vpk, 4)} V peak); a diode bridge cannot regulate, so the ` +
+      `requested average implies a large ripple (use a transformer or a regulator stage for a low-ripple ${g(vout, 4)} V)`;
+  }
   const stdCap = stdRating(vpk, STD_PASSIVE, 1.2);
   Object.assign(slot(updates, 'C_OUT'), {
     capacitance: gNum(cout, 6),
@@ -1465,9 +1528,153 @@ export function adaptDiodeBridge(
     '## Deterministic Single-Phase Diode Bridge Rectifier Sizing',
     `- AC Line Input: $V_{in,rms} = ${g(vinRms, 4)}\\,V$, $V_{pk} = \\sqrt{2} V_{in,rms} = ${g(vpk, 4)}\\,V$, $f_{line} = ${g(fLine, 4)}\\,Hz$`,
     `- DC Load: $R_{LOAD} = V_{out}^2 / P_{out} = ${g(vout, 4)}^2 / ${g(power, 4)} = ${g(rLoad, 4)}\\,\\Omega$ ($I_{dc} = ${g(iDc, 4)}\\,A$)`,
-    `- Output Filter Capacitor: $C_{OUT} = \\frac{P_{out}}{2 f_{line} V_{out} \\Delta V_{ripple}} = ${fx(cout * 1e6, 1)}\\,\\mu F$ (rated ${pyStr(stdCap)} V, target ripple ${fx(ripple * 100, 1)}%)`,
+    `- Output Filter Capacitor: $C_{OUT} = ${fx(cout * 1e6, 3)}\\,\\mu F$ (rated ${pyStr(stdCap)} V, ${filterNote})`,
     `- Diodes D1..D4: $V_{RRM} \\ge 1.5 V_{pk} = ${fx(1.5 * vpk, 1)}\\,V$, std rating ${pyStr(stdSemi)} V`,
   ].join('\n');
+}
+
+/** Forward drop of the template rectifier diode at `i` (Shockley + Rs). */
+function diodeDrop(yaml: Dict, ref: string, i: number): number {
+  const is = num(compParam(yaml, {}, ref, 'Is'), 3.17e-5);
+  const n = num(compParam(yaml, {}, ref, 'n'), 1.373);
+  const rs = num(compParam(yaml, {}, ref, 'Rs'), 0.051);
+  return n * 0.02585 * Math.log(Math.max(i, 1e-6) / is + 1) + rs * i;
+}
+
+/** Line-cycle transient window (as the diode bridge): 4 cycles, measured over the last 2. */
+function lineCycleWindow(yaml: Dict, fLine: number): void {
+  if (!isDict(yaml.analysis)) return;
+  const reqs = getDict(yaml.analysis, 'transient').requirements ?? [];
+  const tStop = Math.max(0.08, 4.0 / fLine);
+  for (const req of Array.isArray(reqs) ? reqs : []) {
+    if (!isDict(req)) continue;
+    for (const env of Array.isArray(req.environment) ? req.environment : []) {
+      if (!isDict(env)) continue;
+      env.t_stop = pyRound(tStop, 4);
+      env.t_start = pyRound(tStop - 2.0 / fLine, 4);
+    }
+  }
+}
+
+/**
+ * Line-frequency transformer rectifiers, sized without the model (it mixed up
+ * the turns-ratio convention and the filtered / unfiltered output: the
+ * centre-tapped output came out at half the target, the full-wave one 5-60 %
+ * high). The turns ratio is solved for the requested average output.
+ *
+ * - centre-tapped (`dual_ct_transformer` TX: each secondary half carries
+ *   Ns/2 of the turns ratio), no output capacitor:
+ *   Vavg = (2/pi) Vs,half,pk - Vf;
+ * - full-wave (transformer + bridge) with C_OUT: capacitor-input average,
+ *   C_OUT from the ripple target.
+ */
+function adaptTransformerRectifier(
+  yaml: Dict,
+  updates: Updates,
+  paramsIn: Dict | null,
+): string {
+  const params = paramsIn ?? {};
+  const centreTapped = lowerStr(yaml.id ?? '').includes('centre_tapped');
+  const [vinRms, vout, power, fLine] = singlePhaseOperatingPoint(params, [
+    24.0,
+    centreTapped ? 13.0 : 18.0,
+    15.0,
+    50.0,
+  ]);
+  const vinPk = vinRms * Math.SQRT2;
+  const rLoad = power > 0 ? vout ** 2 / power : 10.0;
+  const iout = vout > 0 ? power / vout : 1.0;
+  const iinRms = power / Math.max(vinRms, 1e-6) / 0.9;
+  // Magnetizing current ~5 % of the input current at the line frequency.
+  const lm = vinRms / (2 * Math.PI * fLine * 0.05 * Math.max(iinRms, 1e-3));
+  Object.assign(slot(updates, 'VAC'), {
+    amplitude: pyRound(vinPk, 3),
+    frequency: fLine,
+    v_peak: pyRound(vinPk, 2),
+    v_rms: pyRound(vinRms, 2),
+  });
+  slot(updates, 'R_LOAD').resistance = pyRound(rLoad, 4);
+  const lines = [
+    `## Deterministic ${centreTapped ? 'Centre-Tapped' : 'Transformer'} Full-Wave Rectifier Sizing`,
+    `- AC input $V_{rms} = ${g(vinRms, 4)}\\,V$ ($V_{pk} = ${g(vinPk, 4)}\\,V$), $f = ${g(fLine, 4)}\\,Hz$; load $R = V_{out}^2/P = ${g(rLoad, 4)}\\,\\Omega$ ($I_{out} = ${g(iout, 4)}\\,A$)`,
+  ];
+  let n: number;
+  let vsPk: number;
+  if (centreTapped) {
+    // Each diode carries the full load current for half a cycle (peak ~ pi/2 Iout).
+    const vf = diodeDrop(yaml, 'D1', (Math.PI / 2) * iout);
+    const rIn = num(compParam(yaml, updates, 'R_IN', 'resistance'), 1.0);
+    // R_IN reflected to a half winding, iterated with n.
+    n = (2 * ((Math.PI / 2) * (vout + vf))) / vinPk;
+    for (let k = 0; k < 4; k += 1) {
+      const rRef = rIn * (n / 2) ** 2;
+      vsPk = (Math.PI / 2) * (vout + vf) * ((rLoad + rRef) / rLoad);
+      n = (2 * vsPk) / vinPk;
+    }
+    vsPk = (n / 2) * vinPk;
+    lines.push(
+      `- No output capacitor: $V_{avg} = \\frac{2}{\\pi} V_{s,half,pk} - V_f$ with $V_f = ${fx(vf, 2)}\\,V$ $\\Rightarrow V_{s,half,pk} = ${g(vsPk, 4)}\\,V$`,
+      `- TX turns ratio (whole secondary / primary; each half carries half of it): $n = 2 V_{s,half,pk} / V_{pk} = ${fx(n, 4)}$`,
+    );
+  } else {
+    const drop = 2 * diodeDrop(yaml, 'D1', 2 * iout);
+    let ripple =
+      extractNumericParam(params, [
+        'ripple',
+        'voltage ripple',
+        'output voltage ripple',
+      ]) ?? 0.05;
+    if (ripple > 0.5) ripple /= 100.0;
+    // At least 2 %: a 1 % target at 50 Hz asks for ~0.1 F, which a few line
+    // cycles of simulation cannot charge.
+    ripple = Math.max(0.02, Math.min(0.2, ripple || 0.05));
+    let cout = power / (2.0 * fLine * vout * ripple * vout);
+    cout = Math.max(47e-6, Math.min(0.1, cout));
+    const rSer =
+      num(compParam(yaml, updates, 'R_SEC', 'resistance'), 0.001) + 0.1;
+    const avgAt = (nn: number) =>
+      bridgeAverage(vinPk * nn, drop, rSer, rLoad, cout, fLine);
+    let lo = 1e-3;
+    let hi = 50;
+    for (let k = 0; k < 40; k += 1) {
+      const mid = Math.sqrt(lo * hi);
+      if (avgAt(mid) > vout) hi = mid;
+      else lo = mid;
+    }
+    n = Math.sqrt(lo * hi);
+    vsPk = n * vinPk;
+    Object.assign(slot(updates, 'C_OUT'), {
+      capacitance: gNum(cout, 4),
+      // Pre-charged to the output: the filter time constant (R_LOAD * C_OUT,
+      // up to ~1 s) is far longer than the simulated line cycles.
+      ic: pyRound(vout, 3),
+      v_peak: pyRound(vsPk, 2),
+      std_voltage_rating: stdRating(vsPk, STD_PASSIVE, 1.2),
+    });
+    lines.push(
+      `- Output filter $C_{OUT} = P / (2 f V_{out} \\Delta V) = ${g(cout * 1e6, 4)}\\,\\mu F$ (ripple ${fx(ripple * 100, 1)} %); capacitor-input output $\\approx V_{s,pk} - 2V_f - \\Delta V/2$ with $2V_f = ${fx(drop, 2)}\\,V$`,
+      `- TX turns ratio solved for the ${g(vout, 4)} V average: $n = ${fx(n, 4)}$ ($V_{s,pk} = ${g(vsPk, 4)}\\,V$)`,
+    );
+  }
+  Object.assign(slot(updates, 'TX'), {
+    turns_ratio: pyRound(n, 5),
+    Lm_primary: gNum(lm, 3),
+  });
+  const vr = centreTapped ? 2 * vsPk : vsPk;
+  for (const d of ['D1', 'D2', 'D3', 'D4']) {
+    if (!hasComp(yaml, d)) continue;
+    Object.assign(slot(updates, d), {
+      Bv: pyRound(1.5 * vr, 1),
+      std_voltage_rating: stdRating(vr, STD_SEMI, 1.5),
+      v_peak: pyRound(vr, 2),
+      i_peak: pyRound(iout * Math.PI, 2),
+    });
+  }
+  lines.push(
+    `- Magnetizing inductance $L_m = V_{rms} / (2\\pi f \\cdot 0.05 I_{in}) = ${g(lm, 3)}\\,H$; diodes block $${g(vr, 4)}\\,V$`,
+  );
+  lineCycleWindow(yaml, fLine);
+  return lines.join('\n');
 }
 
 const INVERTER_POWER_KEYS = [
@@ -1540,7 +1747,11 @@ function adaptVsi(yaml: Dict, updates: Updates, paramsIn: Dict | null): string {
   fOut = fOut && fOut >= 1.0 && fOut <= 1000.0 ? fOut : 50.0;
   const vPhPk = vll * Math.sqrt(2.0 / 3.0);
   const mReq = vPhPk / (vdc / 2.0);
-  const m = Math.min(mReq, 1.0);
+  // With third-harmonic injection (V6, 1/6 of the reference at 3 f) the
+  // reference peak is m * sqrt(3)/2, so m reaches 2/sqrt(3) = 1.155 linearly.
+  const thirdHarmonic = hasComp(yaml, 'V6');
+  const mMax = thirdHarmonic ? 2.0 / Math.sqrt(3.0) : 1.0;
+  const m = Math.min(mReq, mMax);
   const triLine = pyStr(compParam(yaml, updates, 'V1', 'spice_line', ''));
   const tri = /PULSE\s*\(\s*([-\d.eE+]+)\s+([-\d.eE+]+)/i.exec(triLine);
   const carrierPk = tri
@@ -1573,17 +1784,31 @@ function adaptVsi(yaml: Dict, updates: Updates, paramsIn: Dict | null): string {
         `${ref} ${node} 0 SINE(0 ${g(amp, 4)} ${g(fOut, 6)}${phase})`;
     }
   }
+  if (thirdHarmonic) {
+    Object.assign(slot(updates, 'V6'), {
+      amplitude: gNum(amp / 6.0, 4),
+      frequency: 3.0 * fOut,
+    });
+  }
   const notes = [
     '## Deterministic SPWM modulation',
     `- $V_{ph,pk} = V_{LL} \\sqrt{2/3} = ${g(vll, 4)} \\cdot 0.8165 = ${g(vPhPk, 4)}\\,V$`,
     `- $m = V_{ph,pk} / (V_{dc}/2) = ${g(vPhPk, 4)} / ${g(vdc / 2, 4)} = ${fx(mReq, 3)}$` +
-      (mReq > 1.0
-        ? ' (capped at 1.0: the DC link is too low for this output in linear SPWM; expect $V_{LL} \\approx 0.612 V_{dc}$)'
+      (mReq > mMax
+        ? thirdHarmonic
+          ? ` (capped at ${fx(mMax, 3)}: the DC link is too low for this output even with third-harmonic injection; expect $V_{LL} \\approx 0.707 V_{dc}$)`
+          : ' (capped at 1.0: the DC link is too low for this output in linear SPWM; expect $V_{LL} \\approx 0.612 V_{dc}$)'
         : ''),
     `- Reference amplitude $${g(amp, 3)}\\,V$ against the $\\pm${g(carrierPk, 3)}\\,V$ carrier at $f_{out} = ${g(fOut, 4)}\\,Hz$`,
+    ...(thirdHarmonic
+      ? [
+          `- Third-harmonic injection V6: $${g(amp / 6.0, 3)}\\,V$ at $${g(3.0 * fOut, 4)}\\,Hz$ (reference peak $${g(amp * 0.866, 3)}\\,V$, linear up to $m = 1.155$)`,
+        ]
+      : []),
   ];
   if (power) {
-    const vPhRms = Math.min(vll, 0.612 * vdc) / Math.sqrt(3.0);
+    const vPhRms =
+      Math.min(vll, (thirdHarmonic ? 0.707 : 0.612) * vdc) / Math.sqrt(3.0);
     const rPh = vPhRms ** 2 / (power / 3.0);
     for (const ref of ['R15', 'R16', 'R17'])
       slot(updates, ref).resistance = pyRound(rPh, 4);
@@ -1943,7 +2168,7 @@ function dropUnsafeControlUpdates(
  * k*T/N; its low side PWM(2k+2) is the complement with `deadTime` on both
  * edges (the model produced overlapping pulses on the later phases).
  */
-function syncInterleavedBuckPwms(
+export function syncInterleavedBuckPwms(
   yaml: Dict,
   updates: Updates,
   deadTime = 40e-9,
@@ -2192,7 +2417,11 @@ function sizeCenterTappedTransformer(
 }
 
 /** PWM synchronisation rules core enforces on the model's PWM settings. */
-function enforcePwmRules(yaml: Dict, updates: Updates, params: Dict): void {
+export function enforcePwmRules(
+  yaml: Dict,
+  updates: Updates,
+  params: Dict,
+): void {
   const topologyId = yaml.id;
   if (!('PWM1' in updates)) return;
   const pwm = (ref: string) => slot(updates, ref);
@@ -2279,6 +2508,42 @@ export interface SizingOutcome {
   yaml: Dict;
 }
 
+const RESONANT_TANKS: Record<string, Array<[string, string]>> = {
+  dcdc_cllc_resonant: [
+    ['Lr', 'Cr_P'],
+    ['Ls', 'Cr_S'],
+  ],
+  dcdc_half_bridge_llc_resonant: [['Lr', 'Cr']],
+  dcdc_full_bridge_llc_resonant: [['Lr', 'Cr']],
+};
+
+/**
+ * Resonant tank check on the model's reply: each L-C tank must resonate at the
+ * switching frequency (the model's arithmetic was off by 10x in L*C for the
+ * 400 -> 800 V CLLC: fr = 317 kHz at fsw = 100 kHz, output 84 V instead of
+ * 800 V). Keeps the chosen inductance and recomputes the capacitor when fr is
+ * more than 15 % away from fsw.
+ */
+function adaptResonantTank(yaml: Dict, updates: Updates): string {
+  const tanks = RESONANT_TANKS[lowerStr(yaml.id ?? '')] ?? [];
+  const fsw = parseEngToNum(compParam(yaml, updates, 'PWM1', 'frequency'));
+  if (!fsw || fsw <= 0) return '';
+  const notes: string[] = [];
+  for (const [lRef, cRef] of tanks) {
+    const l = parseEngToNum(compParam(yaml, updates, lRef, 'inductance'));
+    const c = parseEngToNum(compParam(yaml, updates, cRef, 'capacitance'));
+    if (!l || !c || l <= 0 || c <= 0) continue;
+    const fr = 1 / (2 * Math.PI * Math.sqrt(l * c));
+    if (Math.abs(fr / fsw - 1) <= 0.15) continue;
+    const cNew = 1 / ((2 * Math.PI * fsw) ** 2 * l);
+    slot(updates, cRef).capacitance = gNum(cNew, 4);
+    notes.push(
+      `- ${lRef}-${cRef} resonated at ${g(fr / 1e3, 4)} kHz, not at $f_{sw} = ${g(fsw / 1e3, 4)}\\,kHz$: ${cRef} set to $1/((2\\pi f_{sw})^2 L) = ${g(cNew * 1e9, 4)}\\,nF$`,
+    );
+  }
+  return notes.length ? ['## Resonant tank check', ...notes].join('\n') : '';
+}
+
 /** Control scaling run on the model's reply, by topology id. */
 const REPLY_ADAPTERS: Array<
   [(id: string) => boolean, (y: Dict, u: Updates, p: Dict) => string]
@@ -2287,6 +2552,7 @@ const REPLY_ADAPTERS: Array<
   [(id) => id === 'dcac_three_phase_voltage_source_inverter', adaptVsi],
   [(id) => id === 'acdc_three_phase_vienna', adaptVienna],
   [(id) => id === 'dcac_neutral_point_clamped', adaptNpc],
+  [(id) => id in RESONANT_TANKS, (y, u) => adaptResonantTank(y, u)],
 ];
 
 /**
@@ -2379,6 +2645,13 @@ const DETERMINISTIC_SIZING: Array<
     adaptSinglePhaseAfe,
   ],
   [[...DIODE_BRIDGE], adaptDiodeBridge],
+  [
+    [
+      'acdc_centre_tapped_full_wave',
+      'acdc_single_phase_full_wave(transformer)',
+    ],
+    adaptTransformerRectifier,
+  ],
 ];
 
 /**
@@ -2498,6 +2771,9 @@ export function applyUpdatesToYaml(
         const criteria =
           isDict(req) && isDict(req.criteria) ? req.criteria : null;
         if (criteria && 'target_vout' in criteria) criteria.target_vout = vout;
+        // Single-phase inverter: the output target is an RMS value.
+        if (criteria && 'target_vout_rms' in criteria)
+          criteria.target_vout_rms = Math.abs(vout);
       }
     }
   }

@@ -127,7 +127,7 @@ export function catalogue(): CataloguePart[] {
       part: stem,
       type,
       kind: type === 'Diode' ? 'diode' : 'switch',
-      family: partFamily(stem, type),
+      family: partFamily(stem, type, meta.technology),
       v_rating: voltageFromPart(stem) || numberOr0(meta.voltage_rating_V),
       i_rating: iRating,
       i_lut: iLut || iRating,
@@ -149,6 +149,36 @@ export function companionDiode(igbtPart: string): string | null {
 // Stresses
 // ---------------------------------------------------------------------------
 
+/**
+ * Peak current for sizing the part: the 99.9th time-weighted percentile of
+ * |i|. The sample maximum caught the few-ns charge spikes of the ideal device
+ * capacitances at hard turn-on (DAB 800 V: 270-650 A on 25 A average), which
+ * pushed the selection to 500 A modules; a real peak lasts far longer than
+ * 0.1 % of the window.
+ */
+function peakCurrent(t: number[], i: number[]): number {
+  const n = Math.min(t.length, i.length);
+  if (n < 3) return max(i.map(Math.abs));
+  const pts: Array<[number, number]> = [];
+  let total = 0;
+  for (let k = 0; k < n; k += 1) {
+    // Each sample stands for half the interval on either side.
+    const w = ((k + 1 < n ? t[k + 1] : t[k]) - (k > 0 ? t[k - 1] : t[k])) / 2;
+    if (w > 0) {
+      pts.push([Math.abs(i[k]), w]);
+      total += w;
+    }
+  }
+  if (!(total > 0)) return max(i.map(Math.abs));
+  pts.sort((a, b) => a[0] - b[0]);
+  let acc = 0;
+  for (const [value, w] of pts) {
+    acc += w;
+    if (acc >= 0.999 * total) return value;
+  }
+  return pts[pts.length - 1][0];
+}
+
 export function deviceStress(
   t: number[],
   v: number[],
@@ -167,7 +197,7 @@ export function deviceStress(
   }
   return {
     v_peak: v.length ? max(v.map(Math.abs)) : 0.0,
-    i_peak: i.length ? max(i.map(Math.abs)) : 0.0,
+    i_peak: i.length ? peakCurrent(t, i) : 0.0,
     i_rms: i.length ? Math.sqrt(mean(i.map((x) => x * x))) : 0.0,
     i_avg: i.length ? mean(i.map(Math.abs)) : 0.0,
     fsw,

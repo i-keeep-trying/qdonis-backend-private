@@ -176,16 +176,18 @@ analysis:
   # Solver settings (the netlist generator reads them here, at analysis level). Until 2026-10-11 they sat under
   # transient.simulator and were never applied; applied, ripple is within 6 % of a tight-tolerance reference
   # (was 28 % off with the defaults).
+  # 2026-10-22: reltol 0.001 / trtol 2 aborted ("timestep too small" on the gate source) or ran > 400 s for sized
+  # designs (12 -> 5 V, 5 -> 12 V); 0.002 / 4 runs in ~7 s with the same Vout / ripple where the tight setting finishes.
   spice_settings:
     method: gear
     maxord: 2
-    reltol: 0.001
+    reltol: 0.002
     abstol: 1.0e-09
     vntol: 1.0e-05
     chgtol: 1.0e-11
     gmin: 1.0e-10
     rshunt: 1000000.0
-    trtol: 2.0
+    trtol: 4.0
   transient:
     requirements:
       - rid: tr_reg

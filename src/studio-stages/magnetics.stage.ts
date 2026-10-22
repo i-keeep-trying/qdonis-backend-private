@@ -26,6 +26,7 @@ import {
   type OperatingPoint,
 } from './magnetics-operating-point';
 import {
+  deckSwitchingFrequency,
   estimateDuty,
   num,
   round,
@@ -402,6 +403,7 @@ export async function planMagnetics(
   let fsw: number;
   let waveformsFrom: string;
   let operatingPoint: OperatingPoint | null = null;
+  let skippedLoad: string[] = [];
 
   if (parts) {
     const specFsw = specValue(specs, /switching freq|fsw/i);
@@ -438,18 +440,33 @@ export async function planMagnetics(
         : undefined,
     });
     if (!inventory) return fail('Could not read the circuit from the backend.');
-    if (!inventory.magnetics.length) {
-      return fail('This circuit has no inductors or transformers to design.', {
-        components: inventory.components.length,
-      });
+    // Inverter test loads (role `load_inductor`) model the load, not a part to
+    // wind: designing them as switching-frequency ferrite parts gave 100 kW
+    // "losses" for the VSI / T-type 50 Hz load inductors.
+    skippedLoad = inventory.magnetics
+      .filter((m) => /load/i.test(String(m.role ?? '')))
+      .map((m) => String(m.ref));
+    const parts = inventory.magnetics.filter(
+      (m) => !skippedLoad.includes(String(m.ref)),
+    );
+    if (!parts.length) {
+      return fail(
+        skippedLoad.length
+          ? `This circuit's inductors (${skippedLoad.join(', ')}) only model the load; there is no converter magnetic part to design.`
+          : 'This circuit has no inductors or transformers to design.',
+        { components: inventory.components.length },
+      );
     }
     const specFsw = specValue(specs, /switching freq|fsw/i);
-    fsw = inventory.switching_frequency || specFsw || 100e3;
-    const fswSource = inventory.switching_frequency
-      ? 'circuit'
-      : specFsw
-        ? 'specs'
-        : 'assumed 100 kHz';
+    const deckFsw = deckSwitchingFrequency(design?.data.decks);
+    fsw = deckFsw || inventory.switching_frequency || specFsw || 100e3;
+    const fswSource = deckFsw
+      ? 'design netlist'
+      : inventory.switching_frequency
+        ? 'circuit'
+        : specFsw
+          ? 'specs'
+          : 'assumed 100 kHz';
     const pout = specValue(specs, /output power|^power/i, 'max');
     const vout = specValue(specs, /output voltage/i, 'max');
     const vinMax =
@@ -489,7 +506,7 @@ export async function planMagnetics(
     operatingPoint = op;
 
     const overrideFailures: Record<string, string[]> = {};
-    for (const m of inventory.magnetics) {
+    for (const m of parts) {
       const override = overrides[m.ref];
       if (override) {
         const r = partRequirement({ ...override, ref: m.ref }, fsw);
@@ -571,7 +588,7 @@ export async function planMagnetics(
           ],
         };
       } else {
-        const est = estimatePart(m, inventory.magnetics, op, topology, kind);
+        const est = estimatePart(m, parts, op, topology, kind);
         // Plot traces are min/max decimated but still give a usable RMS to scale the estimate to.
         const trace = waveStats(
           findCurrentTrace(plots, m.ref, isTransformer ? 'pri' : undefined) ||
@@ -705,6 +722,11 @@ export async function planMagnetics(
           ? { assumed_values: assumptions }
           : {}),
         waveforms_from: waveformsFrom,
+        ...(skippedLoad.length
+          ? {
+              not_designed: `${skippedLoad.join(', ')}: these inductors model the load, not a converter part`,
+            }
+          : {}),
         ...(Object.keys(overrides).length
           ? { entered_in_workspace: overrides }
           : {}),

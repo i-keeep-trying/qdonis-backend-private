@@ -113,6 +113,22 @@ components:
       phase: 240
       series_resistance: 0
 
+  # Third-harmonic injection (2026-10-22): common to the three references (in their return path), it lifts the
+  # linear modulation range by 15 % (V_LL up to 0.707 Vdc instead of 0.612 Vdc, as SVPWM). Amplitude = reference / 6.
+  - ref: V6
+    type: node
+    role: third_harmonic_injection
+    params:
+      node_type: "voltage_source"
+      source: "sine"
+      offset: 0
+      amplitude: 1.3333
+      frequency: 150
+      delay: 0
+      damping: 0
+      phase: 0
+      series_resistance: 0
+
   # Sine-triangle PWM (blocks): each phase's top / bottom comparator; hard switching like the original
   # V(a) >= V(b) ? 1 : 0. The gate drivers E1..E6 (gain 100, floating on the switch nodes) stay E sources.
   - ref: CMP_AH
@@ -631,12 +647,17 @@ nets:
       - ctrl-
     - - V1
       - '-'
-    - - V2
+    - - V6
+      - '-'
+  # Third-harmonic injection: the references return through V6
+  - - - V2
       - '-'
     - - V3
       - '-'
     - - V4
       - '-'
+    - - V6
+      - '+'
   # The power stage is referenced to the control ground (chat-first 7f41908): DC link minus = GND.
   - - - GND
       - pin
@@ -950,9 +971,6 @@ schematic:
     "~GND@E5.CN": {x: 520, y: 1040, rotation: 0}
     "~GND@E6.CN": {x: 140, y: 640, rotation: 0}
     "~GND@V1.B": {x: 580, y: 680, rotation: 0}
-    "~GND@V2.B": {x: 160, y: 300, rotation: 0}
-    "~GND@V3.B": {x: 140, y: 420, rotation: 0}
-    "~GND@V4.B": {x: 40, y: 320, rotation: 0}
     "~M1.gate@#gate_drive.M1_gate": {x: 800, y: 820, rotation: 0}
     "~M1.gate@M1.G": {x: 440, y: 20, rotation: 180}
     "~M2.gate@#gate_drive.M2_gate": {x: 800, y: 860, rotation: 0}
@@ -1017,7 +1035,7 @@ schematic:
   - {id: W49, from: "#gate_drive.E3_-", to: "~E3.-@#gate_drive.E3_-.P"}
   - {id: W50, from: L2.A, to: "~E3.-@L2.A.P"}
   groups:
-    modulator: {label: "Sine-triangle PWM", members: [V1, V2, V3, V4, GND, CMP_AH, CMP_AL, CMP_BH, CMP_BL, CMP_CH, CMP_CL]}
+    modulator: {label: "Sine-triangle PWM", members: [V1, V2, V3, V4, V6, GND, CMP_AH, CMP_AL, CMP_BH, CMP_BL, CMP_CH, CMP_CL]}
     gate_drive: {label: "Gate drive", members: [E1, E2, E3, E4, E5, E6, R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12]}
   sheets:
     gate_drive:
@@ -1073,9 +1091,6 @@ schematic:
     modulator:
       wires:
       - {id: W1, from: V1.B, to: "~GND@V1.B.P"}
-      - {id: W2, from: V2.B, to: "~GND@V2.B.P"}
-      - {id: W3, from: V3.B, to: "~GND@V3.B.P"}
-      - {id: W4, from: V4.B, to: "~GND@V4.B.P"}
       - {id: W5, from: CMP_AH.inp, to: V2.A}
       - {id: W6, from: CMP_AL.inn, to: V2.A}
       - {id: W7, from: CMP_AH.inp, to: ControlA.P}

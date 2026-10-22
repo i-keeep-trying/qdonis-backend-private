@@ -2433,6 +2433,46 @@
       "sha256": "871cedd40a59b3be08b42801d93b1876a646190a163f2ff2b7e1348832a62022"
     },
     {
+      "path": "models/library/diode/GEN_SBD045V010A.json",
+      "bytes": 1815,
+      "sha256": "5f19d8997a9fa68aa0c0a53a42874564e5d523455f4d13fc9af6e58a7eff37dd"
+    },
+    {
+      "path": "models/library/diode/GEN_SBD045V030A.json",
+      "bytes": 1799,
+      "sha256": "50c50ae563da2451b54c2edd43e513249dde52ae11498cdd18f4dde1cd360eab"
+    },
+    {
+      "path": "models/library/diode/GEN_SBD045V060A.json",
+      "bytes": 1812,
+      "sha256": "c63d0cfa2aa52a8efdce094006c5ae1c22a0ec921567327599144d70be7a8695"
+    },
+    {
+      "path": "models/library/diode/GEN_SBD100V010A.json",
+      "bytes": 1817,
+      "sha256": "e40af10ccdb3daf61341ebee9b1e4ff1347c1b596a7b1a1923bedc2a4354e902"
+    },
+    {
+      "path": "models/library/diode/GEN_SBD100V030A.json",
+      "bytes": 1822,
+      "sha256": "9f9c1129dd0509209ca96504a65c7edb6027bcefb8613dc1c0e98665513cf1bf"
+    },
+    {
+      "path": "models/library/diode/GEN_SBD100V060A.json",
+      "bytes": 1819,
+      "sha256": "e935b9434286e351b625b3369405d00be8b7dc51d8dbfabe34d400433d43675b"
+    },
+    {
+      "path": "models/library/diode/GEN_SBD200V010A.json",
+      "bytes": 1817,
+      "sha256": "7fdfdf2930461f25fcf2043e027a3cfc3a0feae4b0d3e894b4d904c18a897398"
+    },
+    {
+      "path": "models/library/diode/GEN_SBD200V030A.json",
+      "bytes": 1822,
+      "sha256": "f936c266675f4a171fac4b600026ba9806e579ece7f1dd23a31afa7a173bb3e5"
+    },
+    {
       "path": "models/library/igbt/DIM1000ACM33-TF001.json",
       "bytes": 1211,
       "sha256": "23fccd8a83a5dd91e184099397993373c76fc0f31441b227672d9976eb6c1e3d"
@@ -4308,6 +4348,81 @@
       "sha256": "33c95d7135d159c934a3b04859feef5c24f064ac7748113cfbe797dde7a4a55d"
     },
     {
+      "path": "models/library/mosfet/BSC014N03LSG.json",
+      "bytes": 8687,
+      "sha256": "574b3d26148d237eb84a72a6e0b6896e47bb90198b71f22f83f1361462026382"
+    },
+    {
+      "path": "models/library/mosfet/BSC035N10NS5.json",
+      "bytes": 9043,
+      "sha256": "18828ae10e125be3469bc5fe2eb07a904637e4c53ac6722c155877aedca85d08"
+    },
+    {
+      "path": "models/library/mosfet/CSD17570Q5B.json",
+      "bytes": 9047,
+      "sha256": "9cbc0cc665b869187b6977b268b42197e6ebad8c689248cfb2728d336de06272"
+    },
+    {
+      "path": "models/library/mosfet/CSD17577Q5A.json",
+      "bytes": 8701,
+      "sha256": "09a260f1d5ea3967916e532a272cd87cc6c5727966db9286d348c8bc7718a7ea"
+    },
+    {
+      "path": "models/library/mosfet/CSD17578Q5A.json",
+      "bytes": 8778,
+      "sha256": "646cc8d13e2a81515fbb2ee7a1b128cf660f65fb8f48eca1ca0877b28fdf04b6"
+    },
+    {
+      "path": "models/library/mosfet/CSD19531Q5A.json",
+      "bytes": 8893,
+      "sha256": "a20133f01acf5724566386c7e6590611f9b63426796cba43cad3653e2e071147"
+    },
+    {
+      "path": "models/library/mosfet/CSD19536KCS.json",
+      "bytes": 9100,
+      "sha256": "8d32b646a786dd482d178e9b02b3d28b6c476707756dea01b0f3a6994e0ffd1c"
+    },
+    {
+      "path": "models/library/mosfet/CSD19537Q3.json",
+      "bytes": 8602,
+      "sha256": "ee7118183b618257237a135b0780e11bd962bdfcafa7b0397209adeb4ad48e9b"
+    },
+    {
+      "path": "models/library/mosfet/FDB52N20.json",
+      "bytes": 9135,
+      "sha256": "78b888426e34b90ea0e7030e274c694aeb1dba92fdf0c5e5a16ae352e9c504ae"
+    },
+    {
+      "path": "models/library/mosfet/IPD200N20N3.json",
+      "bytes": 8517,
+      "sha256": "c6083809baf0de735d0aa2abc7e21d2101456a38c04a29b6d13b3cb8922ce21b"
+    },
+    {
+      "path": "models/library/mosfet/IPT004N03L.json",
+      "bytes": 8844,
+      "sha256": "ab8a238a796e237b6e39c0a900fe8187f0b69de655aa90ee582da27bb9c651b3"
+    },
+    {
+      "path": "models/library/mosfet/IRFB4110PBF.json",
+      "bytes": 8814,
+      "sha256": "aee58905fcedb0e19379b973ea2f2e51e5663be7a82cfd42aaeb656eeb76b29a"
+    },
+    {
+      "path": "models/library/mosfet/IRFP4227PBF.json",
+      "bytes": 8613,
+      "sha256": "0337b4aea1c19d9520061afa40597464a93b484998388af8d7f1274c2585e84c"
+    },
+    {
+      "path": "models/library/mosfet/IXFA120N20T.json",
+      "bytes": 8985,
+      "sha256": "625d46d563dd846b96b1f940c704b6c143983362e3de7102be76343f2d5914b6"
+    },
+    {
+      "path": "models/library/mosfet/IXTA180N20T.json",
+      "bytes": 8632,
+      "sha256": "4ed345c3db847b1e5b97de581e620f749c17d808e44095dcc9c150cf8b0347c6"
+    },
+    {
       "path": "mosfet_database.json",
       "bytes": 5166,
       "sha256": "561c26394e1754254cf2049b7980d0f96bb377ad34c8e29706aea109f05c327e"
@@ -4549,8 +4664,8 @@
     },
     {
       "path": "topologies/primitives/dcac_single_phase_h_bridge.yaml",
-      "bytes": 22838,
-      "sha256": "9fe9f7c0faed0300a1d2e0987b846ba5e7878a91979501caa8f94c08eb927407"
+      "bytes": 23666,
+      "sha256": "ca93ae0dc3d3e95e8feae820ce09eaae1d1c479786075402ebf07d2ac6ec3ac0"
     },
     {
       "path": "topologies/primitives/dcac_t_type.yaml",
@@ -4559,8 +4674,8 @@
     },
     {
       "path": "topologies/primitives/dcac_three_phase_voltage_source_inverter.yaml",
-      "bytes": 27970,
-      "sha256": "236645836e7813baf2b73e5063665b5c9b4fb36829612e087b7b64c3df84cc92"
+      "bytes": 28293,
+      "sha256": "1d0b02bb5b6e1707ccd1831df97afbd8a786c8e8ce6ea0f163b61079ccf408c0"
     },
     {
       "path": "topologies/primitives/dcdc_active_clamp_flyback.yaml",
@@ -4589,13 +4704,13 @@
     },
     {
       "path": "topologies/primitives/dcdc_cuk.yaml",
-      "bytes": 17946,
-      "sha256": "e49db65a4c7ef9a537becc7349540521070d6775557dd1e851d8a9d862bc609a"
+      "bytes": 18141,
+      "sha256": "a9cf4fd55df1213132b97ad28f9f961d00376e643f13b89f20705190e0a798e6"
     },
     {
       "path": "topologies/primitives/dcdc_dual_active_bridge.yaml",
-      "bytes": 37257,
-      "sha256": "4bef34b8eed2d7d86627b16e3dc49c7fca39c2c13ef7b29b045c4b9a0a4508ae"
+      "bytes": 37938,
+      "sha256": "640482061f9d1ffa4525dbfb9eb0aa708c26627e376f4192393c6d6cb24ab646"
     },
     {
       "path": "topologies/primitives/dcdc_flyback.yaml",
@@ -4664,8 +4779,8 @@
     },
     {
       "path": "topologies/primitives/dcdc_zeta.yaml",
-      "bytes": 7569,
-      "sha256": "182a8ec809ed8ce905a581414a3a516aa7179e57ee391924df93652fb97581f0"
+      "bytes": 7804,
+      "sha256": "ff4cd23679c8086e610eb1e7b52edc53de8afea2bdcf9ce9ca3793fa01290297"
     },
     {
       "path": "topologies/prompts/acdc_flyback_pfc_dcm.prompt.md",

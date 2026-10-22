@@ -32,8 +32,16 @@ const XL_LIMIT =
 const hasAutoTelemetry = (deck: string): boolean =>
   deck.includes('let v_') || deck.includes('wrdata time_series');
 
+/**
+ * A `save` that would restrict the stored vectors (and starve the
+ * auto-telemetry `wrdata`). `save all @D1[id] ...` keeps everything and adds
+ * the device-internal currents the telemetry reads (`let i_D1_auto =
+ * @D1[id]`): without it ngspice keeps only their last value, so every device
+ * probed that way had a constant current (PFC switch 0.1 A, diodes 0 A).
+ */
 const isSave = (stripped: string): boolean =>
-  stripped.startsWith('save ') || stripped.startsWith('.save ');
+  (stripped.startsWith('save ') || stripped.startsWith('.save ')) &&
+  !/^\.?save\s+all\b/i.test(stripped);
 
 const isXlPlot = (stripped: string): boolean =>
   stripped.startsWith('plot ') && stripped.includes(' xl ');
@@ -131,17 +139,29 @@ function runBatch(
     const stdout: Buffer[] = [];
     child.stdout.on('data', (chunk: Buffer) => stdout.push(chunk));
     child.stderr.resume();
+    let timedOut = false;
+    let grace: NodeJS.Timeout | undefined;
     const timer = setTimeout(() => {
+      timedOut = true;
       child.kill('SIGKILL');
-      reject(new NgspiceTimeoutError(options.timeoutSeconds));
+      // Reject once the process has exited (Windows keeps its files locked
+      // until then, so the caller's cleanup would fail with EBUSY and hide the
+      // timeout); give up waiting after a few seconds.
+      grace = setTimeout(
+        () => reject(new NgspiceTimeoutError(options.timeoutSeconds)),
+        5000,
+      );
     }, options.timeoutSeconds * 1000);
     child.on('error', (error) => {
       clearTimeout(timer);
+      clearTimeout(grace);
       reject(error);
     });
     child.on('close', () => {
       clearTimeout(timer);
-      resolve(Buffer.concat(stdout).toString('utf8'));
+      clearTimeout(grace);
+      if (timedOut) reject(new NgspiceTimeoutError(options.timeoutSeconds));
+      else resolve(Buffer.concat(stdout).toString('utf8'));
     });
   });
 }

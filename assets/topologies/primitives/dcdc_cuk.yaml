@@ -190,12 +190,14 @@ metadata:
 analysis:
   transient:
     spice_settings:
-      reltol: 0.005
+      # 2026-10-22: 0.005 / trtol 1.0 ran past the 300 s limit for sized designs (12 -> -5 V, 5 -> -12 V) with a
+      # garbage ripple (121 V); 0.002 / 4.0 finishes in ~10 s with the same Vout.
+      reltol: 0.002
       abstol: 1.0e-09
       vntol: 1.0e-05
       chgtol: 1.0e-12
       gmin: 1.0e-10
-      trtol: 1.0
+      trtol: 4.0
       method: gear
       maxord: 2
     requirements:

@@ -13,17 +13,17 @@ function walk(dir: string): string[] {
 }
 
 describe('assets/MANIFEST.json (real assets)', () => {
-  it('lists exactly the 967 copied files, all hashes matching', async () => {
+  it('lists exactly the 990 files (967 copied + 23 low-voltage Si models), all hashes matching', async () => {
     const manifest = await readManifest(ASSETS_ROOT);
     expect(manifest.source.commit).toBe(
       '0054f7202abd61e503dbac26ac676431698e66ea',
     );
-    expect(manifest.files).toHaveLength(967);
+    expect(manifest.files).toHaveLength(990);
     const onDisk = walk(ASSETS_ROOT).filter((p) => p !== 'MANIFEST.json');
     expect(onDisk.sort()).toEqual(manifest.files.map((f) => f.path).sort());
     // Verifies size + SHA-256 of every file.
     const all = await loadVerifiedSubtree(ASSETS_ROOT, manifest, '');
-    expect(all.size).toBe(967);
+    expect(all.size).toBe(990);
   }, 60_000);
 
   it('has the per-folder counts of core 0054f72 plus the chat-first prompts', async () => {
@@ -38,9 +38,9 @@ describe('assets/MANIFEST.json (real assets)', () => {
     expect(count('topologies/primitives/', '.yaml')).toBe(35);
     expect(count('topologies/json_library/', '.json')).toBe(35);
     expect(count('topologies/prompts/', '.prompt.md')).toBe(35);
-    expect(count('models/library/diode/', '.json')).toBe(483);
+    expect(count('models/library/diode/', '.json')).toBe(491);
     expect(count('models/library/igbt/', '.json')).toBe(122);
-    expect(count('models/library/mosfet/', '.json')).toBe(253);
+    expect(count('models/library/mosfet/', '.json')).toBe(268);
     expect(
       [
         'spice/spice_components.json',

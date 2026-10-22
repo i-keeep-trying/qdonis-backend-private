@@ -4229,7 +4229,7 @@
    {
     "inside": null,
     "params": {
-     "spice_line": "* ==========================================\n*               PHASE A (0\u00b0)\n* =========================================="
+     "spice_line": "* ==========================================\n*               PHASE A (0°)\n* =========================================="
     },
     "ref": "COMMENT_A",
     "role": null,
@@ -4592,7 +4592,7 @@
    {
     "inside": null,
     "params": {
-     "spice_line": "* ==========================================\n*               PHASE B (-120\u00b0)\n* =========================================="
+     "spice_line": "* ==========================================\n*               PHASE B (-120°)\n* =========================================="
     },
     "ref": "COMMENT_B",
     "role": null,
@@ -4955,7 +4955,7 @@
    {
     "inside": null,
     "params": {
-     "spice_line": "* ==========================================\n*               PHASE C (-240\u00b0)\n* =========================================="
+     "spice_line": "* ==========================================\n*               PHASE C (-240°)\n* =========================================="
     },
     "ref": "COMMENT_C",
     "role": null,
@@ -5721,11 +5721,47 @@
     "ref": "Csnub2",
     "role": null,
     "type": "capacitor"
+   },
+   {
+    "inside": null,
+    "params": {
+     "capacitance": "1n"
+    },
+    "ref": "CG1",
+    "role": "gate_capacitance",
+    "type": "capacitor"
+   },
+   {
+    "inside": null,
+    "params": {
+     "capacitance": "1n"
+    },
+    "ref": "CG2",
+    "role": "gate_capacitance",
+    "type": "capacitor"
+   },
+   {
+    "inside": null,
+    "params": {
+     "capacitance": "1n"
+    },
+    "ref": "CG3",
+    "role": "gate_capacitance",
+    "type": "capacitor"
+   },
+   {
+    "inside": null,
+    "params": {
+     "capacitance": "1n"
+    },
+    "ref": "CG4",
+    "role": "gate_capacitance",
+    "type": "capacitor"
    }
   ],
   "id": "dcac_single_phase_h_bridge",
-  "input_voltage": 380.0,
-  "load_resistance": 20.0,
+  "input_voltage": 380,
+  "load_resistance": 20,
   "magnetics": [
    {
     "coupling": null,
@@ -5742,17 +5778,17 @@
   "output_voltage": {
    "key": "target_vout_rms",
    "rms": true,
-   "value": 215.0
+   "value": 215
   },
   "power_sources": [
    {
     "kind": "dc",
     "ref": "VIN",
     "role": "input_source",
-    "value": 380.0
+    "value": 380
    }
   ],
-  "switching_frequency": 16000.0
+  "switching_frequency": 16000
  },
  "dcac_t_type": {
   "components": [
@@ -7023,6 +7059,20 @@
    {
     "inside": null,
     "params": {
+     "amplitude": 1.3333,
+     "delay": 0,
+     "frequency": 150,
+     "node_type": "voltage_source",
+     "offset": 0,
+     "source": "sine"
+    },
+    "ref": "V6",
+    "role": "third_harmonic_injection",
+    "type": "node"
+   },
+   {
+    "inside": null,
+    "params": {
      "high": 1,
      "low": 0,
      "threshold": 0.2,
@@ -7268,7 +7318,7 @@
    {
     "inside": null,
     "params": {
-     "resistance": 100000.0
+     "resistance": 100000
     },
     "ref": "R13",
     "role": "dc_link_balancing_resistor",
@@ -7286,7 +7336,7 @@
    {
     "inside": null,
     "params": {
-     "resistance": 100000.0
+     "resistance": 100000
     },
     "ref": "R14",
     "role": "dc_link_balancing_resistor",
@@ -7430,7 +7480,7 @@
   ],
   "id": "dcac_three_phase_voltage_source_inverter",
   "input_voltage": null,
-  "load_resistance": 10.0,
+  "load_resistance": 10,
   "magnetics": [
    {
     "coupling": null,
@@ -7467,38 +7517,45 @@
   "output_voltage": {
    "key": "target_vout",
    "rms": false,
-   "value": 380.0
+   "value": 380
   },
   "power_sources": [
    {
-    "frequency": 50.0,
+    "frequency": 50,
     "kind": "ac",
-    "peak": 8.0,
+    "peak": 8,
     "ref": "V2",
     "role": "voltage_source"
    },
    {
-    "frequency": 50.0,
+    "frequency": 50,
     "kind": "ac",
-    "peak": 8.0,
+    "peak": 8,
     "ref": "V3",
     "role": "voltage_source"
    },
    {
-    "frequency": 50.0,
+    "frequency": 50,
     "kind": "ac",
-    "peak": 8.0,
+    "peak": 8,
     "ref": "V4",
     "role": "voltage_source"
+   },
+   {
+    "frequency": 150,
+    "kind": "ac",
+    "peak": 1.3333,
+    "ref": "V6",
+    "role": "third_harmonic_injection"
    },
    {
     "kind": "dc",
     "ref": "V5",
     "role": "dc_link_voltage",
-    "value": 380.0
+    "value": 380
    }
   ],
-  "switching_frequency": 16000.0
+  "switching_frequency": 16000
  },
  "dcdc_active_clamp_flyback": {
   "components": [
@@ -8650,7 +8707,7 @@
      "node_type": "voltage_source",
      "series_resistance": 0.01,
      "source": "dc",
-     "voltage": 60.0
+     "voltage": 60
     },
     "ref": "VIN",
     "role": "input_source",
@@ -8660,9 +8717,9 @@
     "inside": null,
     "params": {
      "node_type": "voltage_source",
-     "series_resistance": 0.0,
+     "series_resistance": 0,
      "source": "dc",
-     "voltage": 0.0
+     "voltage": 0
     },
     "ref": "VSW1_SENSE",
     "role": null,
@@ -8672,9 +8729,9 @@
     "inside": null,
     "params": {
      "node_type": "voltage_source",
-     "series_resistance": 0.0,
+     "series_resistance": 0,
      "source": "dc",
-     "voltage": 0.0
+     "voltage": 0
     },
     "ref": "VSW2_SENSE",
     "role": null,
@@ -8684,9 +8741,9 @@
     "inside": null,
     "params": {
      "node_type": "voltage_source",
-     "series_resistance": 0.0,
+     "series_resistance": 0,
      "source": "dc",
-     "voltage": 0.0
+     "voltage": 0
     },
     "ref": "VSW3_SENSE",
     "role": null,
@@ -8696,9 +8753,9 @@
     "inside": null,
     "params": {
      "node_type": "voltage_source",
-     "series_resistance": 0.0,
+     "series_resistance": 0,
      "source": "dc",
-     "voltage": 0.0
+     "voltage": 0
     },
     "ref": "VSW4_SENSE",
     "role": null,
@@ -8796,9 +8853,9 @@
     "inside": null,
     "params": {
      "node_type": "voltage_source",
-     "series_resistance": 0.0,
+     "series_resistance": 0,
      "source": "dc",
-     "voltage": 0.0
+     "voltage": 0
     },
     "ref": "VLk_SENSE",
     "role": null,
@@ -8827,7 +8884,7 @@
    {
     "inside": null,
     "params": {
-     "resistance": 1000.0,
+     "resistance": 1000,
      "sense": false
     },
     "ref": "R_damp",
@@ -8842,7 +8899,7 @@
      "Rs": 0.001,
      "k_coupling": 0.99999,
      "phase": "same",
-     "turns_ratio": 1.0
+     "turns_ratio": 1
     },
     "ref": "T1",
     "role": "power_transformer",
@@ -8851,7 +8908,7 @@
    {
     "inside": null,
     "params": {
-     "resistance": 100000000.0,
+     "resistance": 100000000,
      "sense": false
     },
     "ref": "RR_ISO",
@@ -8862,9 +8919,9 @@
     "inside": null,
     "params": {
      "node_type": "voltage_source",
-     "series_resistance": 0.0,
+     "series_resistance": 0,
      "source": "dc",
-     "voltage": 0.0
+     "voltage": 0
     },
     "ref": "VSW5_SENSE",
     "role": null,
@@ -8874,9 +8931,9 @@
     "inside": null,
     "params": {
      "node_type": "voltage_source",
-     "series_resistance": 0.0,
+     "series_resistance": 0,
      "source": "dc",
-     "voltage": 0.0
+     "voltage": 0
     },
     "ref": "VSW6_SENSE",
     "role": null,
@@ -8886,9 +8943,9 @@
     "inside": null,
     "params": {
      "node_type": "voltage_source",
-     "series_resistance": 0.0,
+     "series_resistance": 0,
      "source": "dc",
-     "voltage": 0.0
+     "voltage": 0
     },
     "ref": "VSW7_SENSE",
     "role": null,
@@ -8898,9 +8955,9 @@
     "inside": null,
     "params": {
      "node_type": "voltage_source",
-     "series_resistance": 0.0,
+     "series_resistance": 0,
      "source": "dc",
-     "voltage": 0.0
+     "voltage": 0
     },
     "ref": "VSW8_SENSE",
     "role": null,
@@ -9008,8 +9065,8 @@
     "inside": null,
     "params": {
      "capacitance": 0.0047,
-     "esl": 0.0,
-     "esr": 0.0
+     "esl": 0,
+     "esr": 0
     },
     "ref": "C_OUT",
     "role": "output_filter_cap",
@@ -9020,7 +9077,7 @@
     "params": {
      "node_type": "voltage_source",
      "pwl": "0 0 5m 60 40m 60",
-     "series_resistance": 0.0,
+     "series_resistance": 0,
      "source": "pwl"
     },
     "ref": "V_ref_raw",
@@ -9032,10 +9089,10 @@
     "params": {
      "node_type": "voltage_source",
      "source": "pulse",
-     "td": 0.0,
+     "td": 0,
      "tr": 4.99e-05,
-     "v1": 0.0,
-     "v2": 1.0
+     "v1": 0,
+     "v2": 1
     },
     "ref": "Vramp",
     "role": "carrier_source",
@@ -9099,7 +9156,7 @@
    {
     "inside": null,
     "params": {
-     "expression": "in1-in2+(in1<in2)",
+     "expression": "in1-in2+0.5*(1-tanh((in1-in2)/0.002))",
      "inputs": 2
     },
     "ref": "SEC_RAMP",
@@ -9109,7 +9166,7 @@
    {
     "inside": null,
     "params": {
-     "expression": "15*((in1>0.50)*(in1<0.98))",
+     "expression": "15*(0.5*(1+tanh((in1-0.50)/0.002)))*(0.5*(1-tanh((in1-0.98)/0.002)))",
      "inputs": 1
     },
     "ref": "GATE_S2",
@@ -9119,7 +9176,7 @@
    {
     "inside": null,
     "params": {
-     "expression": "15*(in1<0.48)",
+     "expression": "15*(0.5*(1-tanh((in1-0.48)/0.002)))",
      "inputs": 1
     },
     "ref": "GATE_S4",
@@ -9129,7 +9186,7 @@
    {
     "inside": null,
     "params": {
-     "expression": "15 * (V(ramp) < 0.48)"
+     "expression": "15 * (0.5*(1-tanh((V(ramp)-0.48)/0.002)))"
     },
     "ref": "B_S1",
     "role": null,
@@ -9138,7 +9195,7 @@
    {
     "inside": null,
     "params": {
-     "resistance": 10.0,
+     "resistance": 10,
      "sense": false
     },
     "ref": "RPWM1_drive",
@@ -9148,7 +9205,7 @@
    {
     "inside": null,
     "params": {
-     "resistance": 10.0,
+     "resistance": 10,
      "sense": false
     },
     "ref": "RPWM2_drive",
@@ -9158,7 +9215,7 @@
    {
     "inside": null,
     "params": {
-     "expression": "15 * ((V(ramp) > 0.50) * (V(ramp) < 0.98))"
+     "expression": "15 * (0.5*(1+tanh((V(ramp)-0.50)/0.002))) * (0.5*(1-tanh((V(ramp)-0.98)/0.002)))"
     },
     "ref": "B_S3",
     "role": null,
@@ -9167,7 +9224,7 @@
    {
     "inside": null,
     "params": {
-     "resistance": 10.0,
+     "resistance": 10,
      "sense": false
     },
     "ref": "RPWM3_drive",
@@ -9177,7 +9234,7 @@
    {
     "inside": null,
     "params": {
-     "resistance": 10.0,
+     "resistance": 10,
      "sense": false
     },
     "ref": "RPWM4_drive",
@@ -9187,7 +9244,7 @@
    {
     "inside": null,
     "params": {
-     "expression": "15 * (V(sec_ramp) < 0.48)"
+     "expression": "15 * (0.5*(1-tanh((V(sec_ramp)-0.48)/0.002)))"
     },
     "ref": "B_S5",
     "role": null,
@@ -9196,7 +9253,7 @@
    {
     "inside": null,
     "params": {
-     "resistance": 10.0,
+     "resistance": 10,
      "sense": false
     },
     "ref": "RPWM5_drive",
@@ -9206,7 +9263,7 @@
    {
     "inside": null,
     "params": {
-     "expression": "15 * ((V(sec_ramp) > 0.50) * (V(sec_ramp) < 0.98))"
+     "expression": "15 * (0.5*(1+tanh((V(sec_ramp)-0.50)/0.002))) * (0.5*(1-tanh((V(sec_ramp)-0.98)/0.002)))"
     },
     "ref": "B_S6",
     "role": null,
@@ -9215,7 +9272,7 @@
    {
     "inside": null,
     "params": {
-     "resistance": 10.0,
+     "resistance": 10,
      "sense": false
     },
     "ref": "RPWM6_drive",
@@ -9225,7 +9282,7 @@
    {
     "inside": null,
     "params": {
-     "expression": "15 * ((V(sec_ramp) > 0.50) * (V(sec_ramp) < 0.98))"
+     "expression": "15 * (0.5*(1+tanh((V(sec_ramp)-0.50)/0.002))) * (0.5*(1-tanh((V(sec_ramp)-0.98)/0.002)))"
     },
     "ref": "B_S7",
     "role": null,
@@ -9234,7 +9291,7 @@
    {
     "inside": null,
     "params": {
-     "resistance": 10.0,
+     "resistance": 10,
      "sense": false
     },
     "ref": "RPWM7_drive",
@@ -9244,7 +9301,7 @@
    {
     "inside": null,
     "params": {
-     "expression": "15 * (V(sec_ramp) < 0.48)"
+     "expression": "15 * (0.5*(1-tanh((V(sec_ramp)-0.48)/0.002)))"
     },
     "ref": "B_S8",
     "role": null,
@@ -9253,7 +9310,7 @@
    {
     "inside": null,
     "params": {
-     "resistance": 10.0,
+     "resistance": 10,
      "sense": false
     },
     "ref": "RPWM8_drive",
@@ -9262,7 +9319,7 @@
    }
   ],
   "id": "dcdc_dual_active_bridge",
-  "input_voltage": 60.0,
+  "input_voltage": 60,
   "load_resistance": 1.25,
   "magnetics": [
    {
@@ -9282,7 +9339,7 @@
     "ref": "T1",
     "role": "power_transformer",
     "saturation_current": null,
-    "turns_ratio": 1.0,
+    "turns_ratio": 1,
     "type": "transformer"
    }
   ],
@@ -9290,17 +9347,17 @@
   "output_voltage": {
    "key": "target_vout",
    "rms": false,
-   "value": 60.0
+   "value": 60
   },
   "power_sources": [
    {
     "kind": "dc",
     "ref": "VIN",
     "role": "input_source",
-    "value": 60.0
+    "value": 60
    }
   ],
-  "switching_frequency": 20000.0
+  "switching_frequency": 20000
  },
  "dcdc_flyback": {
   "components": [

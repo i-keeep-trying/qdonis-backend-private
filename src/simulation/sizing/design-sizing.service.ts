@@ -1,6 +1,8 @@
 import { HttpException, Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 
 import type { AuthenticatedUser } from '../../auth/auth.types';
+import type { AppConfiguration } from '../../config/configuration';
 import { AiStepRunner } from '../../design/ai/ai-step.runner';
 import { ProjectAccessService } from '../../projects/project-access.service';
 import { TopologiesService } from '../../topologies/topologies.service';
@@ -15,6 +17,7 @@ import type {
 import {
   buildChangeList,
   buildQuickParamsLine,
+  extractVoutFromParams,
   prepareSizing,
   processReply,
   pyTyped,
@@ -22,6 +25,8 @@ import {
   type SizingOutcome,
 } from './sizing.logic';
 import { sizingSystemPrompt } from './sizing.prompts';
+import { hasOpenLoopTrim, trimOpenLoopOutput } from './open-loop-trim';
+import { ComputeService } from '../compute/compute.service';
 import { decksSha256 } from './decks-hash';
 import { branchCircuit } from '../../schematic/library/stored-circuit';
 import {
@@ -64,7 +69,9 @@ export interface DesignRunInput {
 /** Core `LLM_MAX_TOKENS` / `LLM_TEMPERATURE` defaults for the sizing call. */
 const MAX_TOKENS = 8192;
 const TEMPERATURE = 0.1;
-const TIMEOUT_MS = 5 * 60_000;
+// The sizing replies of the LLC / forward prompts run past 5 min under load
+// ("Request cancelled" at exactly 300 s); the Bedrock client allows 10 min.
+const TIMEOUT_MS = 10 * 60_000;
 
 const UNITS: Record<string, string> = {
   voltage: 'V',
@@ -120,6 +127,8 @@ export class DesignSizingService {
     private readonly topologies: TopologiesService,
     private readonly ai: AiStepRunner,
     private readonly access: ProjectAccessService,
+    private readonly compute: ComputeService,
+    private readonly config: ConfigService<AppConfiguration, true>,
   ) {}
 
   /** 402 / 503 before a run is queued, when the AI cannot be paid for. */
@@ -321,6 +330,35 @@ export class DesignSizingService {
         prepared.params,
       );
       sizing = 'ai';
+    }
+    if (hasOpenLoopTrim(input.topologyId)) {
+      const target = extractVoutFromParams(params);
+      const { ngspicePath, timeoutSeconds } = this.config.get('simulation', {
+        infer: true,
+      });
+      const trimmed = await trimOpenLoopOutput(
+        input.topologyId,
+        outcome,
+        params,
+        target,
+        async (deck) =>
+          (
+            await this.compute.run('rerun', {
+              input: {
+                topologyId: input.topologyId,
+                yamlData: template,
+                analysisCirs: { transient: sanitizePreparedDeck(deck) },
+                componentModels: {},
+                junctionTemperature: null,
+              },
+              ngspice: { executable: ngspicePath, timeoutSeconds },
+            })
+          ).results,
+      );
+      outcome = {
+        ...trimmed.outcome,
+        reasoning: `${outcome.reasoning ?? ''}${trimmed.note}`,
+      };
     }
     const changes = Object.keys(outcome.updates).length
       ? buildChangeList(template, outcome.updates, params)

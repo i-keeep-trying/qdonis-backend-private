@@ -75,7 +75,7 @@ export async function loadDeviceLibrary(root: string): Promise<DeviceLibrary> {
         part: stem,
         type,
         kind: type === 'Diode' ? 'diode' : 'switch',
-        family: partFamily(stem, type),
+        family: partFamily(stem, type, metadata.technology),
         v_rating: voltageFromPart(stem) || toNumber(metadata.voltage_rating_V),
         i_rating: iRating,
         i_lut: iLut || iRating,
