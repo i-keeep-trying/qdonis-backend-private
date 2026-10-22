@@ -6276,6 +6276,20 @@
    {
     "inside": null,
     "params": {
+     "amplitude": 0.8417,
+     "delay": 0,
+     "frequency": 480,
+     "node_type": "voltage_source",
+     "offset": 0,
+     "source": "sine"
+    },
+    "ref": "V_VFF3_A",
+    "role": "third_harmonic_injection",
+    "type": "node"
+   },
+   {
+    "inside": null,
+    "params": {
      "amplitude": 5.05,
      "delay": 0,
      "frequency": 160,
@@ -6290,6 +6304,20 @@
    {
     "inside": null,
     "params": {
+     "amplitude": 0.8417,
+     "delay": 0,
+     "frequency": 480,
+     "node_type": "voltage_source",
+     "offset": 0,
+     "source": "sine"
+    },
+    "ref": "V_VFF3_B",
+    "role": "third_harmonic_injection",
+    "type": "node"
+   },
+   {
+    "inside": null,
+    "params": {
      "amplitude": 5.05,
      "delay": 0,
      "frequency": 160,
@@ -6299,6 +6327,20 @@
     },
     "ref": "V_VFF_C",
     "role": "feedforward_source",
+    "type": "node"
+   },
+   {
+    "inside": null,
+    "params": {
+     "amplitude": 0.8417,
+     "delay": 0,
+     "frequency": 480,
+     "node_type": "voltage_source",
+     "offset": 0,
+     "source": "sine"
+    },
+    "ref": "V_VFF3_C",
+    "role": "third_harmonic_injection",
     "type": "node"
    },
    {
@@ -6952,8 +6994,8 @@
    }
   ],
   "id": "dcac_t_type",
-  "input_voltage": 800.0,
-  "load_resistance": 1.0,
+  "input_voltage": 800,
+  "load_resistance": 1,
   "magnetics": [
    {
     "coupling": null,
@@ -6993,10 +7035,10 @@
     "kind": "dc",
     "ref": "VIN",
     "role": "input_source",
-    "value": 800.0
+    "value": 800
    }
   ],
-  "switching_frequency": 16000.0
+  "switching_frequency": 16000
  },
  "dcac_three_phase_voltage_source_inverter": {
   "components": [
@@ -9156,7 +9198,7 @@
    {
     "inside": null,
     "params": {
-     "expression": "in1-in2+0.5*(1-tanh((in1-in2)/0.002))",
+     "expression": "in1-in2",
      "inputs": 2
     },
     "ref": "SEC_RAMP",
@@ -9244,7 +9286,7 @@
    {
     "inside": null,
     "params": {
-     "expression": "15 * (0.5*(1-tanh((V(sec_ramp)-0.48)/0.002)))"
+     "expression": "15 * (0.5*(1+tanh(V(sec_ramp)/0.002))) * (0.5*(1-tanh((V(sec_ramp)-0.48)/0.002)))"
     },
     "ref": "B_S5",
     "role": null,
@@ -9263,7 +9305,7 @@
    {
     "inside": null,
     "params": {
-     "expression": "15 * (0.5*(1+tanh((V(sec_ramp)-0.50)/0.002))) * (0.5*(1-tanh((V(sec_ramp)-0.98)/0.002)))"
+     "expression": "15 * ((0.5*(1+tanh((V(sec_ramp)-0.50)/0.002))) * (0.5*(1-tanh((V(sec_ramp)-0.98)/0.002))) + (0.5*(1-tanh((V(sec_ramp)+0.02)/0.002))))"
     },
     "ref": "B_S6",
     "role": null,
@@ -9282,7 +9324,7 @@
    {
     "inside": null,
     "params": {
-     "expression": "15 * (0.5*(1+tanh((V(sec_ramp)-0.50)/0.002))) * (0.5*(1-tanh((V(sec_ramp)-0.98)/0.002)))"
+     "expression": "15 * ((0.5*(1+tanh((V(sec_ramp)-0.50)/0.002))) * (0.5*(1-tanh((V(sec_ramp)-0.98)/0.002))) + (0.5*(1-tanh((V(sec_ramp)+0.02)/0.002))))"
     },
     "ref": "B_S7",
     "role": null,
@@ -9301,7 +9343,7 @@
    {
     "inside": null,
     "params": {
-     "expression": "15 * (0.5*(1-tanh((V(sec_ramp)-0.48)/0.002)))"
+     "expression": "15 * (0.5*(1+tanh(V(sec_ramp)/0.002))) * (0.5*(1-tanh((V(sec_ramp)-0.48)/0.002)))"
     },
     "ref": "B_S8",
     "role": null,

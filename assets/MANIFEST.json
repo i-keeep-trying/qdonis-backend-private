@@ -4669,8 +4669,8 @@
     },
     {
       "path": "topologies/primitives/dcac_t_type.yaml",
-      "bytes": 68231,
-      "sha256": "7c58c9ace306b20fb82e21ccac55d22ef926ad27ef0a86e3c1e190deababc1e3"
+      "bytes": 69760,
+      "sha256": "3690636c31ded9a67a2c46d9e79b1e6850d3f6be7eb880b8ec9a8005dad37b30"
     },
     {
       "path": "topologies/primitives/dcac_three_phase_voltage_source_inverter.yaml",
@@ -4709,8 +4709,8 @@
     },
     {
       "path": "topologies/primitives/dcdc_dual_active_bridge.yaml",
-      "bytes": 37938,
-      "sha256": "640482061f9d1ffa4525dbfb9eb0aa708c26627e376f4192393c6d6cb24ab646"
+      "bytes": 38403,
+      "sha256": "03d538310c6807e1db789bab196d75811d1c0c86db687213c9a4db3be114628b"
     },
     {
       "path": "topologies/primitives/dcdc_flyback.yaml",

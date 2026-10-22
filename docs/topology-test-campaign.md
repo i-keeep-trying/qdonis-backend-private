@@ -27,22 +27,59 @@ Pass criterion used in the workbook: output within ±3 % of the target (±5 % "m
 ## Status (2026-10-22)
 
 - Baseline (before the fixes): all 108 cases run; 44 within ±3 % of the target.
-- After the fixes: 55 cases re-run so far (the full re-run was stopped twice by low memory on the laptop):
-  54 within ±3 %, 1 marginal (diode bridge 24 V -> 21 V, +3.8 %). Not re-run yet: C025-C057 (interleaved
-  buck, flyback, ACF, forward, push-pull, FB-CT, PSFB, LLCs, half bridge, CLLC, DAB 800 / 400 V) and C089-C111
-  (flyback PFC 120 / 230 V, inverters, NPC, T-type, single-switch forward); the fixes that cover them were
-  verified on individual cases (VSI 600 -> 380 V: 334 -> 381.5 V; H-bridge 380 -> 120 V: 0 -> 119 V).
-- Every library drawing matches its netlist (connectivity check of all sheets).
-- Open: **O1 DAB loss / magnetics at high power.** Output is right, but the ideal tank keeps a start-up DC bias
-  (150-465 A in Lk at 1000 V / 50 kW) and the sawtooth gate logic glitches the opposite switch of each leg at
-  every ramp reset, so the loss numbers are not reliable. A series DC-blocking capacitor (~87 uF) removes the
+- After the fixes (both rounds, see the change log): all 108 cases re-run, **all 108 within ±3 %** of the target
+  (largest error 2.1 %, Vienna C073). The full re-run showed 9 cases still off after the first round (half bridge, CLLC,
+  DAB 400 V, T-type 380 V, diode bridge 21 V); the second round fixed them. Second-round cases were re-run with
+  the model replies recorded in the first run (same sizing input, no new Bedrock call).
+- Every library drawing matches its netlist (connectivity check of all sheets, all 35 topologies, after the
+  DAB and T-type template changes).
+- Open: **O1 DAB loss / magnetics at high power.** Output is right (all three DAB cases within 1.2 %), but the
+  ideal tank keeps a start-up DC bias (about 100 A in Lk at 1000 V / 50 kW) and the primary ramp reset still
+  glitches the opposite switch of each leg, so the loss numbers are not reliable. A series DC-blocking capacitor (~87 uF) removes the
   primary DC (tested by hand); gates from a continuous phase (sin(2 pi f t), sin(2 pi (f t - ctrl)) with a dead
   band) remove the reset glitch; with blocking caps on both sides the currents become symmetric but the tank RMS
   still has to be checked before changing the template.
-- To finish: re-run the not-yet-run cases (harness at concurrency 2-3 with nothing else running), then
-  rebuild the workbook.
 
 ## Change log
+
+### 2026-10-22 (later) — fixes from the full after-fix re-run
+
+The first round's fixes were committed (0d8b248); the full re-run of the remaining cases then showed these:
+
+- **Half-bridge output trim never ran — `sizing/open-loop-trim.ts`.** The trim simulated only the requirement
+  that states `target_vout`; the half bridge states it only on its line / load steps, which measure deviations,
+  so no output was found and the trim stopped silently (C052-C054 at -4 to -10 %). When that requirement does
+  not measure the output, the first one that does (`vout_avg*`, `vout_steady*`, ...) is used; every other
+  topology keeps its requirement.
+- **CLLC added to the open-loop trim — `open-loop-trim.ts`.** It was missing (the LLCs had it): 400 / 800 V
+  cases came out 5 % low.
+- **Resonant tank repair by Q — `sizing.logic.ts` (`adaptResonantTank`).** The first fix kept the model's L
+  and recomputed C. For the 800 V / 50 kW CLLC the model's L*C was 66x off, and keeping L gave a Q = 3.3 tank
+  (527 V instead of 800 V). The tank is now moved to fsw by keeping L, keeping C or keeping sqrt(L / C),
+  whichever leaves Q (sqrt(L / C) over the reflected AC load 8 R / (pi^2 n^2), per side of T1) closest to 0.4;
+  the reasoning says which was kept.
+- **DAB secondary gates — DAB YAML.** The smoothed (tanh) wrap of `sec_ramp` (first round, needed at 50 kW)
+  swept through mid values once per cycle and turned the secondary switches on in the wrong state: tank DC
+  72 A, 370 V for 400 V at 10 kW (C059 -0.3 % -> -7.5 %). `sec_ramp` is now the unwrapped ramp - ctrl and S5..S8
+  use windows on it (0..0.48; 0.50..0.98 plus the part below -0.02): C058 / C059 / C060 within 1.2 %.
+- **T-type third-harmonic injection — T-type YAML, `adaptTType`.** 600 V DC -> 380 V line-to-line needs
+  0.633 Vdc, above the 0.612 Vdc of sine modulation (feed-forward capped: 362.9 V, -4.5 %). A 1/6 third harmonic
+  in series with each phase's feed-forward (new V_VFF3_A/B/C, one per control sheet, same phase for all three)
+  drives no current into the floating load star and lifts the range to 0.707 Vdc; the feed-forward cap is
+  raised to 9.5 * 2 / sqrt(3).
+- **Diode bridge drop — `adaptDiodeBridge`.** The capacitor solve assumed 1.6 V for the two conducting diodes;
+  the template diode drops ~0.4 V each at these currents, so 24 V -> 21 V came out +3.8 %. The drop now comes
+  from the template diode's Shockley + Rs model at the mean conduction current (pi / 2 I_dc).
+- **Fixtures:** DAB and T-type schematic / schematic-apply re-captured with the core scripts on a
+  `feature/synced-schematic` worktree (method re-validated: the committed YAML reproduced the committed fixtures
+  byte for byte); netlist (DAB, T-type) from the TS generator; sizing vectors of the DAB, T-type, diode bridge,
+  CLLC and LLC cases (only those case blocks re-written); studio `_inventory` (DAB, T-type); `MANIFEST.json`.
+  The full jest run also showed that round 1 had not re-captured the schematic-apply fixtures of the Zeta and
+  Cuk (their solver options changed); both re-captured the same way (validated on the pre-campaign YAML). The
+  T-type layout keys are in the DEV-LAYOUT writer's order (`layout-yaml.spec`).
+- **Test note:** `dev-layout.service.spec` rewrites `dcdc_buck.yaml` and `MANIFEST.json` while it runs (and
+  restores them); in a parallel jest run `schematic.service.spec` can read the buck mid-rewrite and fail on
+  `tuned`. Pre-existing; both pass alone and with `--runInBand`.
 
 ### 2026-10-22 — fixes from the campaign
 

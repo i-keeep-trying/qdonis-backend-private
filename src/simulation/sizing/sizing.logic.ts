@@ -1377,9 +1377,6 @@ function addBridgeOutputCap(yaml: Dict, params: Dict): Dict {
 }
 
 /** `_adapt_single_phase_diode_bridge`; returns the reasoning markdown. */
-/** Two conducting bridge diodes at load current. */
-const BRIDGE_DROP_V = 1.6;
-
 /**
  * Steady-state average output of a single-phase capacitor-input bridge
  * (|Vpk sin| - 2 Vf through R_LINE into C || R_LOAD), by time stepping.
@@ -1480,8 +1477,11 @@ export function adaptDiodeBridge(
   // A capacitor-input bridge settles near the peak (~1.41 Vrms); an average
   // target below that (e.g. the unfiltered 0.9 Vrms) is only met with a
   // smaller capacitor. The bridge cannot regulate, so size C for the average.
+  // Two conducting diodes of the template at the mean conduction current
+  // (~pi/2 I_dc); a fixed 1.6 V put the 24 V -> 21 V output 3.8 % high.
+  const bridgeDrop = 2 * diodeDrop(yaml, 'D1', (Math.PI / 2) * iDc);
   const avgAt = (c: number) =>
-    bridgeAverage(vpk, BRIDGE_DROP_V, rLine, rLoad, c, fLine);
+    bridgeAverage(vpk, bridgeDrop, rLine, rLoad, c, fLine);
   let filterNote = `target ripple ${fx(ripple * 100, 1)}%`;
   if (vout > 0 && avgAt(cout) > 1.02 * vout) {
     let lo = Math.log(1e-9);
@@ -2069,7 +2069,11 @@ export function adaptTType(
   const phi = (180.0 / Math.PI) * Math.atan2(xl, r);
   const iPk = (vPhRms * Math.sqrt(2.0)) / z;
   const vAcPk = iPk * z;
-  const vFf = Math.min((vAcPk * 10.0) / half, 9.5);
+  // A 1/6 third harmonic in series with each feed-forward (V_VFF3_*) lowers
+  // the peak of the sum to sqrt(3)/2 of the fundamental.
+  const thirdHarmonic = hasComp(yaml, 'V_VFF3_A');
+  const vFfMax = thirdHarmonic ? (9.5 * 2.0) / Math.sqrt(3.0) : 9.5;
+  const vFf = Math.min((vAcPk * 10.0) / half, vFfMax);
   slot(updates, 'VIN').voltage = vdc;
   for (const ref of ['R15', 'R16', 'R17'])
     slot(updates, ref).resistance = pyRound(r, 4);
@@ -2090,6 +2094,12 @@ export function adaptTType(
       frequency: fOut,
       phase: pyRound(shift + phi, 3),
     });
+    if (thirdHarmonic)
+      Object.assign(slot(updates, `V_VFF3_${ph}`), {
+        amplitude: pyRound(vFf / 6.0, 4),
+        frequency: 3 * fOut,
+        phase: pyRound((((3 * (shift + phi)) % 360) + 360) % 360, 3),
+      });
   }
   // Split DC-link capacitors sized for power and midpoint stability
   const cDc = power >= 40000 ? '2200u' : power >= 15000 ? '1000u' : '470u';
@@ -2110,9 +2120,14 @@ export function adaptTType(
     `- Load per phase $R = V_{ph,rms}^2/(P/3) = ${g(r, 4)}\\,\\Omega$, $L = ${g(lLoad * 1e3, 4)}\\,mH$, $|Z| = ${g(z, 4)}\\,\\Omega$, $\\phi = ${g(phi, 3)}^\\circ$`,
     `- $I_{pk} = \\sqrt{2} V_{ph,rms} / |Z| = ${g(iPk, 4)}\\,A$`,
     `- Feed-forward $V_{FF} = V_{ac,pk} \\cdot 10 / (V_{dc}/2) = ${g(vFf, 4)}\\,V$` +
-      ((vAcPk * 10.0) / half > 9.5
-        ? ' (capped at 9.5: the bus is too low for this output)'
+      ((vAcPk * 10.0) / half > vFfMax
+        ? ` (capped at ${g(vFfMax, 4)}: the bus is too low for this output)`
         : ''),
+    ...(thirdHarmonic
+      ? [
+          `- Third-harmonic injection $V_{FF}/6 = ${g(vFf / 6.0, 4)}\\,V$ at $3 f_{out} = ${g(3 * fOut, 4)}\\,Hz$ (the load star floats, so it drives no current; linear up to $V_{LL} = 0.707\\,V_{dc}$)`,
+        ]
+      : []),
     `- DC-link capacitors $C_1 = C_2 = ${cDc}$ with midpoint bias $V(N008) = ${g(half, 4)}\\,V$`,
     '- Snubbers scaled to $C_{{snub}} = 100\\,nF$, $R_{{snub}} = 10\\,\\Omega$ for dv/dt damping and numerical stability',
   ].join('\n');
@@ -2508,37 +2523,79 @@ export interface SizingOutcome {
   yaml: Dict;
 }
 
-const RESONANT_TANKS: Record<string, Array<[string, string]>> = {
+/** L, C and the side of T1 each tank is on (sets the load it sees). */
+const RESONANT_TANKS: Record<
+  string,
+  Array<[string, string, 'primary' | 'secondary']>
+> = {
   dcdc_cllc_resonant: [
-    ['Lr', 'Cr_P'],
-    ['Ls', 'Cr_S'],
+    ['Lr', 'Cr_P', 'primary'],
+    ['Ls', 'Cr_S', 'secondary'],
   ],
-  dcdc_half_bridge_llc_resonant: [['Lr', 'Cr']],
-  dcdc_full_bridge_llc_resonant: [['Lr', 'Cr']],
+  dcdc_half_bridge_llc_resonant: [['Lr', 'Cr', 'primary']],
+  dcdc_full_bridge_llc_resonant: [['Lr', 'Cr', 'primary']],
 };
+
+/** Q a resonant tank is moved towards when its L-C product is repaired. */
+const TANK_Q = 0.4;
+
+/** Resistance of the template's `role: load` resistor. */
+function loadResistance(yaml: Dict, updates: Updates): number | null {
+  for (const [comp] of allComponents(yaml.components ?? [])) {
+    if (lowerStr(comp.type) !== 'resistor' || lowerStr(comp.role) !== 'load')
+      continue;
+    const ref = pyStr(or(comp.ref, comp.id));
+    const r = parseEngToNum(compParam(yaml, updates, ref, 'resistance'));
+    return r && r > 0 ? r : null;
+  }
+  return null;
+}
 
 /**
  * Resonant tank check on the model's reply: each L-C tank must resonate at the
  * switching frequency (the model's arithmetic was off by 10x in L*C for the
  * 400 -> 800 V CLLC: fr = 317 kHz at fsw = 100 kHz, output 84 V instead of
- * 800 V). Keeps the chosen inductance and recomputes the capacitor when fr is
- * more than 15 % away from fsw.
+ * 800 V). When fr is more than 15 % away from fsw, the tank is moved to fsw by
+ * keeping L, keeping C or keeping sqrt(L / C), whichever leaves its Q
+ * (sqrt(L / C) over the reflected AC load 8 R / (pi^2 n^2)) closest to 0.4:
+ * which part the model got wrong differs (keeping L turned an 800 V / 50 kW
+ * tank into Q = 3.3, 527 V instead of 800 V; keeping sqrt(L / C) turned
+ * another reply into a 0.5 uH tank). Without a load or turns ratio, L is kept.
  */
 function adaptResonantTank(yaml: Dict, updates: Updates): string {
   const tanks = RESONANT_TANKS[lowerStr(yaml.id ?? '')] ?? [];
   const fsw = parseEngToNum(compParam(yaml, updates, 'PWM1', 'frequency'));
   if (!fsw || fsw <= 0) return '';
+  const w = 2 * Math.PI * fsw;
+  const rLoad = loadResistance(yaml, updates);
+  const n = parseEngToNum(compParam(yaml, updates, 'T1', 'turns_ratio'));
   const notes: string[] = [];
-  for (const [lRef, cRef] of tanks) {
+  for (const [lRef, cRef, side] of tanks) {
     const l = parseEngToNum(compParam(yaml, updates, lRef, 'inductance'));
     const c = parseEngToNum(compParam(yaml, updates, cRef, 'capacitance'));
     if (!l || !c || l <= 0 || c <= 0) continue;
     const fr = 1 / (2 * Math.PI * Math.sqrt(l * c));
     if (Math.abs(fr / fsw - 1) <= 0.15) continue;
-    const cNew = 1 / ((2 * Math.PI * fsw) ** 2 * l);
-    slot(updates, cRef).capacitance = gNum(cNew, 4);
+    const rac =
+      rLoad && n && n > 0
+        ? (8 / Math.PI ** 2) * (side === 'primary' ? rLoad / n ** 2 : rLoad)
+        : null;
+    const options: Array<[string, number]> = [
+      [`kept ${lRef}`, w * l],
+      [`kept ${cRef}`, 1 / (w * c)],
+      ['kept $Z_0 = \\sqrt{L/C}$', Math.sqrt(l / c)],
+    ];
+    const miss = (z0: number) =>
+      rac ? Math.abs(Math.log(z0 / rac / TANK_Q)) : 0;
+    const [how, z0] = options.reduce((best, o) =>
+      miss(o[1]) < miss(best[1]) ? o : best,
+    );
+    const lNew = gNum(z0 / w, 4);
+    const cNew = gNum(1 / (w * z0), 4);
+    if (lNew !== l) slot(updates, lRef).inductance = lNew;
+    if (cNew !== c) slot(updates, cRef).capacitance = cNew;
     notes.push(
-      `- ${lRef}-${cRef} resonated at ${g(fr / 1e3, 4)} kHz, not at $f_{sw} = ${g(fsw / 1e3, 4)}\\,kHz$: ${cRef} set to $1/((2\\pi f_{sw})^2 L) = ${g(cNew * 1e9, 4)}\\,nF$`,
+      `- ${lRef}-${cRef} resonated at ${g(fr / 1e3, 4)} kHz, not at $f_{sw} = ${g(fsw / 1e3, 4)}\\,kHz$: ${how}${rac ? ` (Q = ${g(z0 / rac, 3)} against the reflected load ${g(rac, 4)} Ω)` : ''}; ${lRef} = ${g(lNew * 1e6, 4)} µH, ${cRef} = ${g(cNew * 1e9, 4)} nF`,
     );
   }
   return notes.length ? ['## Resonant tank check', ...notes].join('\n') : '';

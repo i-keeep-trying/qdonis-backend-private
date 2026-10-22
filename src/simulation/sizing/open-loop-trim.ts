@@ -116,6 +116,7 @@ const KNOBS: Record<string, Knob> = {
     param: 'turns_ratio',
     law: 'linear',
   },
+  dcdc_cllc_resonant: { ref: 'T1', param: 'turns_ratio', law: 'linear' },
   // DCM flyback PFC (constant on-time, open loop): the power, and so
   // Vout = sqrt(P R), scales with the duty; kept below 0.5 to stay in DCM.
   acdc_flyback_pfc_dcm: {
@@ -152,6 +153,15 @@ const MAX_TRIMS = 2;
 export const hasOpenLoopTrim = (topologyId: string): boolean =>
   topologyId in KNOBS;
 
+/** Names of the output measurement, most specific first. */
+function outputPatterns(output: Output): RegExp[] {
+  return output === 'line_rms'
+    ? [/^vout_ll_rms/i, /(ll|line).*rms/i]
+    : output === 'rms'
+      ? [/^vout_rms/i, /^v_?(out|load).*rms/i]
+      : [/^vout_avg/i, /^v_?out.*avg/i, /vout.*(steady|final|mean)/i];
+}
+
 /**
  * Output of the transient results: the DC average, or (inverters) the
  * line-to-line RMS.
@@ -162,13 +172,7 @@ export function measuredVout(
 ): number | null {
   const transient = (results as Dict | null)?.transient;
   if (!transient || typeof transient !== 'object') return null;
-  const patterns =
-    output === 'line_rms'
-      ? [/^vout_ll_rms/i, /(ll|line).*rms/i]
-      : output === 'rms'
-        ? [/^vout_rms/i, /^v_?(out|load).*rms/i]
-        : [/^vout_avg/i, /^v_?out.*avg/i, /vout.*(steady|final|mean)/i];
-  for (const pattern of patterns) {
+  for (const pattern of outputPatterns(output)) {
     for (const req of Object.values(transient as Dict)) {
       const outputs = (req as Dict | null)?.outputs;
       if (!outputs || typeof outputs !== 'object') continue;
@@ -221,22 +225,40 @@ const round6 = (v: number) => Number(v.toPrecision(6));
 /**
  * The design with only the transient requirement that sets the output target
  * (the trim does not need the dynamic / efficiency / stress runs: a buck's four
- * requirements made each check ~4x slower).
+ * requirements made each check ~4x slower). When that requirement does not
+ * measure the output (the half bridge states the target only on its line / load
+ * steps, which measure deviations), the first one that does is kept instead.
  */
-function outputOnly(yaml: Dict): Dict {
+function outputOnly(yaml: Dict, output: Output): Dict {
   const transient = (yaml.analysis as Dict | undefined)?.transient as
     Dict | undefined;
   const reqs: unknown = transient?.requirements;
   if (!Array.isArray(reqs) || reqs.length < 2) return yaml;
+  const patterns = outputPatterns(output);
+  const measures = (r: unknown, pattern: RegExp): boolean => {
+    const outs = (r as Dict | null)?.outputs;
+    return (
+      Array.isArray(outs) &&
+      outs.some((o) => pattern.test(pyStr((o as Dict | null)?.var ?? '')))
+    );
+  };
+  const list = reqs as unknown[];
+  const targeted = list.find((r) => {
+    const c = (r as Dict | null)?.criteria;
+    return (
+      !!c &&
+      typeof c === 'object' &&
+      ('target_vout' in c || 'target_vout_rms' in c)
+    );
+  });
   const keep: unknown =
-    reqs.find((r) => {
-      const c = (r as Dict | null)?.criteria;
-      return (
-        !!c &&
-        typeof c === 'object' &&
-        ('target_vout' in c || 'target_vout_rms' in c)
-      );
-    }) ?? reqs[0];
+    targeted !== undefined && patterns.some((p) => measures(targeted, p))
+      ? targeted
+      : (patterns
+          .map((p) => list.find((r) => measures(r, p)))
+          .find((r) => r !== undefined) ??
+        targeted ??
+        list[0]);
   const copy = structuredClone(yaml);
   ((copy.analysis as Dict).transient as Dict).requirements = [keep];
   return copy;
@@ -273,8 +295,10 @@ export async function trimOpenLoopOutput(
   let yaml = outcome.yaml;
   const updates: Updates = outcome.updates;
   for (let pass = 0; pass <= MAX_TRIMS; pass += 1) {
-    const deck = generateAnalysisCirs(outputOnly(yaml), 'transient')
-      .analysis_cirs.transient;
+    const deck = generateAnalysisCirs(
+      outputOnly(yaml, knob.output ?? 'dc'),
+      'transient',
+    ).analysis_cirs.transient;
     if (!deck) break;
     let vout: number | null;
     try {

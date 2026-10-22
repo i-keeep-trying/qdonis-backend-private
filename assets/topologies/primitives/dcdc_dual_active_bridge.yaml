@@ -541,6 +541,9 @@ components:
   # 2026-10-22: the gate logic and the secondary-ramp wrap use narrow tanh steps (width 0.002 of the 0..1 ramp,
   # ~30 ns) instead of hard comparisons: at 1000 V / 50 kW the steps aborted ngspice ("timestep too small" on a
   # floating gate source at 3.5 ms, output 0 V); smoothed, the run finishes (796 V for 800 V).
+  # 2026-10-22 (later): sec_ramp is the unwrapped ramp - ctrl (-0.25..1) and S5..S8 use windows on it (S5 / S8:
+  # 0..0.48; S6 / S7: 0.50..0.98 plus the wrapped part below -0.02). A smoothed wrap (ramp - ctrl + step) swept
+  # through mid values every cycle and glitched the secondary gates: tank DC 72 A, 370 V for 400 V at 10 kW.
   - ref: LPF_REF
     type: lowpass
     role: reference_soft_start
@@ -582,7 +585,7 @@ components:
     type: function
     role: secondary_ramp
     params:
-      expression: "in1-in2+0.5*(1-tanh((in1-in2)/0.002))"
+      expression: "in1-in2"
       inputs: 2
 
   - ref: GATE_S2
@@ -639,7 +642,7 @@ components:
   - ref: B_S5
     type: b_source
     params:
-      expression: "15 * (0.5*(1-tanh((V(sec_ramp)-0.48)/0.002)))"
+      expression: "15 * (0.5*(1+tanh(V(sec_ramp)/0.002))) * (0.5*(1-tanh((V(sec_ramp)-0.48)/0.002)))"
 
   - ref: RPWM5_drive
     type: resistor
@@ -650,7 +653,7 @@ components:
   - ref: B_S6
     type: b_source
     params:
-      expression: "15 * (0.5*(1+tanh((V(sec_ramp)-0.50)/0.002))) * (0.5*(1-tanh((V(sec_ramp)-0.98)/0.002)))"
+      expression: "15 * ((0.5*(1+tanh((V(sec_ramp)-0.50)/0.002))) * (0.5*(1-tanh((V(sec_ramp)-0.98)/0.002))) + (0.5*(1-tanh((V(sec_ramp)+0.02)/0.002))))"
 
   - ref: RPWM6_drive
     type: resistor
@@ -661,7 +664,7 @@ components:
   - ref: B_S7
     type: b_source
     params:
-      expression: "15 * (0.5*(1+tanh((V(sec_ramp)-0.50)/0.002))) * (0.5*(1-tanh((V(sec_ramp)-0.98)/0.002)))"
+      expression: "15 * ((0.5*(1+tanh((V(sec_ramp)-0.50)/0.002))) * (0.5*(1-tanh((V(sec_ramp)-0.98)/0.002))) + (0.5*(1-tanh((V(sec_ramp)+0.02)/0.002))))"
 
   - ref: RPWM7_drive
     type: resistor
@@ -672,7 +675,7 @@ components:
   - ref: B_S8
     type: b_source
     params:
-      expression: "15 * (0.5*(1-tanh((V(sec_ramp)-0.48)/0.002)))"
+      expression: "15 * (0.5*(1+tanh(V(sec_ramp)/0.002))) * (0.5*(1-tanh((V(sec_ramp)-0.48)/0.002)))"
 
   - ref: RPWM8_drive
     type: resistor

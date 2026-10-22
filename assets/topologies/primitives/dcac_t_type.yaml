@@ -682,6 +682,22 @@ components:
     damping: 0
     phase: 84.3
     series_resistance: 0
+# Third-harmonic injection (2026-10-22): in series with each feed-forward source, 1/6 of it at three times the
+# output frequency (the same for all phases: 3 x 120 deg). The load star floats (R_STAR 1 Meg), so it adds no
+# current but lifts the linear range by 15 % (V_LL up to 0.707 Vdc instead of 0.612 Vdc: 380 V from 600 V).
+- ref: V_VFF3_A
+  type: node
+  role: third_harmonic_injection
+  params:
+    node_type: voltage_source
+    source: sine
+    offset: 0
+    amplitude: 0.8417
+    frequency: 480
+    delay: 0
+    damping: 0
+    phase: 252.9
+    series_resistance: 0
 - ref: V_VFF_B
   type: node
   role: feedforward_source
@@ -695,6 +711,19 @@ components:
     damping: 0
     phase: -35.7
     series_resistance: 0
+- ref: V_VFF3_B
+  type: node
+  role: third_harmonic_injection
+  params:
+    node_type: voltage_source
+    source: sine
+    offset: 0
+    amplitude: 0.8417
+    frequency: 480
+    delay: 0
+    damping: 0
+    phase: 252.9
+    series_resistance: 0
 - ref: V_VFF_C
   type: node
   role: feedforward_source
@@ -707,6 +736,19 @@ components:
     delay: 0
     damping: 0
     phase: -155.7
+    series_resistance: 0
+- ref: V_VFF3_C
+  type: node
+  role: third_harmonic_injection
+  params:
+    node_type: voltage_source
+    source: sine
+    offset: 0
+    amplitude: 0.8417
+    frequency: 480
+    delay: 0
+    damping: 0
+    phase: 252.9
     series_resistance: 0
 - ref: E_S1A
   type: e_source
@@ -1114,11 +1156,11 @@ nets:
     - '-'
   - - V_IREF_C
     - '-'
-  - - V_VFF_A
+  - - V_VFF3_A
     - '-'
-  - - V_VFF_B
+  - - V_VFF3_B
     - '-'
-  - - V_VFF_C
+  - - V_VFF3_C
     - '-'
   - - E_S1A
     - ctrl-
@@ -1232,6 +1274,18 @@ nets:
     - +
   - - SUM_CC
     - in1
+- - - V_VFF_A
+    - '-'
+  - - V_VFF3_A
+    - +
+- - - V_VFF_B
+    - '-'
+  - - V_VFF3_B
+    - +
+- - - V_VFF_C
+    - '-'
+  - - V_VFF3_C
+    - +
 - - - CTRL_A
     - pin
   - - LPF_A
@@ -2367,6 +2421,9 @@ schematic:
     V_IREF_A: {x: 60, y: 240, rotation: 0}
     V_IREF_B: {x: 60, y: 240, rotation: 0}
     V_IREF_C: {x: 60, y: 240, rotation: 0}
+    V_VFF3_A: {x: 500, y: 460, rotation: 0}
+    V_VFF3_B: {x: 500, y: 460, rotation: 0}
+    V_VFF3_C: {x: 500, y: 460, rotation: 0}
     V_VFF_A: {x: 500, y: 320, rotation: 0}
     V_VFF_B: {x: 500, y: 320, rotation: 0}
     V_VFF_C: {x: 500, y: 320, rotation: 0}
@@ -2451,9 +2508,9 @@ schematic:
     "~GND@V_IREF_A.B": {x: 20, y: 420, rotation: 0}
     "~GND@V_IREF_B.B": {x: 20, y: 420, rotation: 0}
     "~GND@V_IREF_C.B": {x: 20, y: 420, rotation: 0}
-    "~GND@V_VFF_A.B": {x: 500, y: 440, rotation: 0}
-    "~GND@V_VFF_B.B": {x: 500, y: 440, rotation: 0}
-    "~GND@V_VFF_C.B": {x: 500, y: 440, rotation: 0}
+    "~GND@V_VFF3_A.B": {x: 500, y: 580, rotation: 0}
+    "~GND@V_VFF3_B.B": {x: 500, y: 580, rotation: 0}
+    "~GND@V_VFF3_C.B": {x: 500, y: 580, rotation: 0}
     "~N1@M_S1A.S": {x: 500, y: 200, rotation: 90}
     "~N1@Rp1A.B": {x: 1860, y: 2740, rotation: 0}
     "~N1@VSENSE_A.A": {x: 2260, y: 200, rotation: 180}
@@ -2616,11 +2673,11 @@ schematic:
   - {id: W139, from: C_SNUB_C.A, to: N_SNUB_C.pin.P}
   groups:
     carrier: {label: "Carriers", members: [V1, CHI_SHIFT, CLO_SHIFT]}
-    phase_a_control: {label: "Phase A current control", members: [V_IREF_A, V_VFF_A, I_SENSE_A, SUM_IA, KP_IA, SUM_CA, LPF_A, LIM_A]}
+    phase_a_control: {label: "Phase A current control", members: [V_IREF_A, V_VFF_A, V_VFF3_A, I_SENSE_A, SUM_IA, KP_IA, SUM_CA, LPF_A, LIM_A]}
     phase_a_pwm: {label: "Phase A PWM and gate drive", members: [CMP_S1A, CMP_S2A, CMP_S3A, CMP_S4A, DRV_S4A, E_S1A, E_S2A, E_S3A, R_S1A, R_S2A, R_S3A, R_S4A]}
-    phase_b_control: {label: "Phase B current control", members: [V_IREF_B, V_VFF_B, I_SENSE_B, SUM_IB, KP_IB, SUM_CB, LPF_B, LIM_B]}
+    phase_b_control: {label: "Phase B current control", members: [V_IREF_B, V_VFF_B, V_VFF3_B, I_SENSE_B, SUM_IB, KP_IB, SUM_CB, LPF_B, LIM_B]}
     phase_b_pwm: {label: "Phase B PWM and gate drive", members: [CMP_S1B, CMP_S2B, CMP_S3B, CMP_S4B, DRV_S4B, E_S1B, E_S2B, E_S3B, R_S1B, R_S2B, R_S3B, R_S4B]}
-    phase_c_control: {label: "Phase C current control", members: [V_IREF_C, V_VFF_C, I_SENSE_C, SUM_IC, KP_IC, SUM_CC, LPF_C, LIM_C]}
+    phase_c_control: {label: "Phase C current control", members: [V_IREF_C, V_VFF_C, V_VFF3_C, I_SENSE_C, SUM_IC, KP_IC, SUM_CC, LPF_C, LIM_C]}
     phase_c_pwm: {label: "Phase C PWM and gate drive", members: [CMP_S1C, CMP_S2C, CMP_S3C, CMP_S4C, DRV_S4C, E_S1C, E_S2C, E_S3C, R_S1C, R_S2C, R_S3C, R_S4C]}
   sheets:
     carrier:
@@ -2634,7 +2691,8 @@ schematic:
     phase_a_control:
       wires:
       - {id: W1, from: V_IREF_A.B, to: "~GND@V_IREF_A.B.P"}
-      - {id: W2, from: V_VFF_A.B, to: "~GND@V_VFF_A.B.P"}
+      - {id: W2, from: V_VFF_A.B, to: V_VFF3_A.A}
+      - {id: W18, from: V_VFF3_A.B, to: "~GND@V_VFF3_A.B.P"}
       - {id: W3, from: LIM_A.in, to: LPF_A.out}
       - {id: W4, from: CTRL_A.P, to: LIM_A.in}
       - {id: W5, from: LPF_A.in, to: SUM_CA.out}
@@ -2692,7 +2750,8 @@ schematic:
     phase_b_control:
       wires:
       - {id: W1, from: V_IREF_B.B, to: "~GND@V_IREF_B.B.P"}
-      - {id: W2, from: V_VFF_B.B, to: "~GND@V_VFF_B.B.P"}
+      - {id: W2, from: V_VFF_B.B, to: V_VFF3_B.A}
+      - {id: W18, from: V_VFF3_B.B, to: "~GND@V_VFF3_B.B.P"}
       - {id: W3, from: LIM_B.in, to: LPF_B.out}
       - {id: W4, from: CTRL_B.P, to: LIM_B.in}
       - {id: W5, from: LPF_B.in, to: SUM_CB.out}
@@ -2748,7 +2807,8 @@ schematic:
     phase_c_control:
       wires:
       - {id: W1, from: V_IREF_C.B, to: "~GND@V_IREF_C.B.P"}
-      - {id: W2, from: V_VFF_C.B, to: "~GND@V_VFF_C.B.P"}
+      - {id: W2, from: V_VFF_C.B, to: V_VFF3_C.A}
+      - {id: W18, from: V_VFF3_C.B, to: "~GND@V_VFF3_C.B.P"}
       - {id: W3, from: LIM_C.in, to: LPF_C.out}
       - {id: W4, from: CTRL_C.P, to: LIM_C.in}
       - {id: W5, from: LPF_C.in, to: SUM_CC.out}
