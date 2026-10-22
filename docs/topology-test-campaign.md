@@ -42,6 +42,27 @@ Pass criterion used in the workbook: output within ±3 % of the target (±5 % "m
 
 ## Change log
 
+### 2026-10-23 — simulation runs killed as "interrupted" (run queue, not a topology)
+
+- **Pool time zone — `src/prisma/prisma.service.ts`.** The Prisma pg adapter sends DateTime values without an
+  offset; the local Postgres session is `Asia/Calcutta`, so every timestamp the app wrote landed 5 h 30 min in the
+  past (`created_at` 15:35Z next to `started_at` = `NOW()` 21:05Z for the same run). Run leases were therefore
+  expired the moment they were written: with `SIMULATION_CONCURRENCY=2` the poller (every 5 s) re-claimed the
+  running run into the free slot (a duplicate ngspice), and the next re-claim (attempts > 2) failed it with "The
+  simulation was interrupted before it finished". Short runs got away with it; minute-long ones (DAB, 2-5 min) did
+  not — run `73c518ce` (DAB 500 V -> 800 V, 20 kW) failed after 95 s with 4 attempts. The pool now sets
+  `-c TimeZone=UTC`. Timestamps already in the database stay shifted.
+- The campaign harness calls the simulation pipeline directly, not through the run queue, so it never hit this.
+- **Stuck chat tool card — `qdonis-web/src/features/studio/hooks/use-chat-stream.ts`.** The backend restart
+  reset the chat stream (`ERR_CONNECTION_RESET`); the backend stored the reply as `stopped` ("Running ngspice:
+  Stopped"), but the web hook only set an error banner and never refetched, so the card kept spinning
+  ("working...") until a reload. A stream that drops after the turn was accepted is now followed like a turn
+  picked up after a reload (the same poller, now shared as `follow`): it polls `chat/runs/active` every 2 s,
+  tolerating up to 15 failed checks (~30 s, a backend restart), refreshes the conversation and workspace, and
+  shows the stored reply when the turn ends. If the server stays unreachable, the reply is marked stopped
+  locally and the "could not be reached" banner shows. Typecheck, lint and studio tests pass; the drop itself
+  was not reproduced in the browser.
+
 ### 2026-10-22 (later) — fixes from the full after-fix re-run
 
 The first round's fixes were committed (0d8b248); the full re-run of the remaining cases then showed these:

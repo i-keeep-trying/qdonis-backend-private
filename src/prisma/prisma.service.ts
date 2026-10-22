@@ -41,6 +41,10 @@ export class PrismaService
         // Identifies this app in pg_stat_activity, which makes connection
         // leaks far easier to attribute.
         application_name: 'qdonis-backend',
+        // The adapter sends DateTime values without an offset, and Postgres
+        // reads them in the session time zone: on a non-UTC server every
+        // written timestamp (run leases included) was shifted by that offset.
+        options: '-c TimeZone=UTC',
       },
       {
         onPoolError: (error) =>
